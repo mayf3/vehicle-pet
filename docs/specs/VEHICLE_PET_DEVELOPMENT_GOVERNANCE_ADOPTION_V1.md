@@ -1,6 +1,6 @@
 ---
 spec_id: VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V1
-status: proposed
+status: accepted
 spec_kind: invariant
 authority_level: governing_spec
 implementation_authority: none
@@ -22,14 +22,14 @@ owners:
 
 ## 1. Goal
 
-Propose an exact, reviewable pilot of the shared Development Grammar and Spec-governance distribution for `mayf3/vehicle-pet`, while preserving all product, architecture, Spec, implementation, and acceptance authority locally.
+Adopt an exact, reviewed pilot of the shared Development Grammar and Spec-governance distribution for `mayf3/vehicle-pet` as an accepted candidate awaiting merge, while preserving all product, architecture, Spec, implementation, and acceptance authority locally. This feature-branch candidate is not active repository authority unless and until its exact accepted Head is merged into `mayf3/vehicle-pet:main`.
 
 ## 2. Scope and non-goals
 
 In scope:
 
 - exact vendoring of 17 distributed files and their lock;
-- a truthful `proposed` adoption state;
+- a truthful originally `proposed` snapshot followed by an authorized `accepted` candidate state;
 - local authority, actor, evidence-persistence, update, and rollback rules;
 - forward-only governance for future non-mechanical work;
 - truthful documentation of current manual enforcement.
@@ -38,7 +38,7 @@ Out of scope:
 
 - product direction, architecture, product implementation, code, or assets;
 - declaring this draft distribution an upstream stable release;
-- accepting this proposal during preparation;
+- claiming acceptance during original preparation, before exact-coordinate independent audit and Owner authorization;
 - bulk history rewriting or retroactive migration;
 - branch protection, required-check, ruleset, workflow, or other GitHub-setting changes;
 - treating any external prototype as repository authority.
@@ -70,6 +70,16 @@ Local authority is currently uninitialized: Product Direction is `NONE_YET`, Arc
 - Observed at: `2026-08-21T12:55:14Z`
 - Projection: local and remote `main` equal the parentless empty-tree seed; no Product Direction, Architecture, product implementation, or governing Product Spec exists; enforcement is manual
 - Basis: `OBS-ADOPT-004` and direct Git/GitHub observations
+
+### STATE-ADOPT-002 — Accepted candidate exists but is not active until merge
+
+- Subject: exact accepted Governance Adoption candidate derived from reviewed Head `0850a3605d647516cd3cb1775bc96340846937d7`
+- Environment: local feature branch `agent/accept-development-governance-v0-r1`
+- Accepted at: `2026-08-21T15:35:25Z`
+- Projection: lifecycle metadata and this Spec are `accepted`, but the candidate is not active repository authority on the designated authority branch
+- Activation condition: the exact accepted candidate Head is merged into `mayf3/vehicle-pet:main`
+- Implementation authority: `none`
+- Basis: `OBS-ADOPT-005` and `EVD-ADOPT-004`
 
 ## 5. Observations
 
@@ -112,6 +122,19 @@ Local authority is currently uninitialized: Product Direction is `NONE_YET`, Arc
 - Method: inspect the seed tree and read-only repository, branch, workflow, protection, and rule APIs
 - Result: private repository; default branch `main`; `main` is not protected; no required checks or enforced PR/review requirement; 0 Actions workflows; 1 branch; 1 commit; ruleset APIs return HTTP 403 because the feature is unavailable on the current plan, so no active ruleset is claimed
 - Provenance: Git/GitHub query output and `.agents/local/README.md`
+
+### OBS-ADOPT-005 — Independent audit ACCEPT and Owner acceptance authorize the exact transition
+
+- Subject: Governance Adoption lifecycle transition for PR `mayf3/vehicle-pet#1`
+- Reviewed coordinates: Base `3f09c07d69c804851283edd3404b57e6bf0d8d90`; proposed Head `0850a3605d647516cd3cb1775bc96340846937d7`
+- Independent audit role: independent local governance audit Agent, distinct from this acceptance-transition executor
+- Audit publication account: GitHub user `mayf3`; publishing account identity is not asserted to be the independent Agent identity
+- Audit record: comment `5371644271`, <https://github.com/mayf3/vehicle-pet/pull/1#issuecomment-5371644271>
+- Audit result: `ACCEPT`; blockers `0`; ready for Owner acceptance decision `YES`; the comment itself recorded Owner acceptance `NO`
+- Owner decision: `mayf3` explicitly authorized acceptance of those exact coordinates and authorized actual execution-time `accepted_at`; push, ready transition, and merge remain unauthorized
+- Transition result: lock and Spec changed from truthful `proposed` state to `accepted` candidate at `2026-08-21T15:35:25Z`
+- Activation result: not active on `main`; activation requires merge of the exact accepted candidate Head
+- Provenance: persisted audit comment, Owner authorization supplied to this execution, lock metadata, and local acceptance diff
 
 ## 6. Claims and assumptions
 
@@ -167,6 +190,16 @@ Local authority is currently uninitialized: Product Direction is `NONE_YET`, Arc
 - Strength/sufficiency: sufficient to distinguish current manual policy from unimplemented automated enforcement
 - Limitations: ruleset detail is plan-unavailable and no ruleset is claimed active
 - Provenance: read-only GitHub API output
+
+### EVD-ADOPT-004 — Exact audit and Owner authorization satisfy the lifecycle transition
+
+- Source observations: `OBS-ADOPT-003`, `OBS-ADOPT-005`
+- Target: `CTR-ADOPT-002`, `ACC-ADOPT-002`, `STATE-ADOPT-002`
+- Relation: SATISFIES
+- Bound coordinates: Base `3f09c07d69c804851283edd3404b57e6bf0d8d90`, reviewed proposed Head `0850a3605d647516cd3cb1775bc96340846937d7`, audit comment `5371644271`
+- Strength/sufficiency: sufficient for the authorized `proposed` to `accepted` candidate lifecycle transition and no broader semantic change
+- Limitations: does not authorize push, Draft-to-ready transition, merge, product direction, architecture, Product Specs, or implementation; accepted candidate remains inactive until exact-Head merge into `main`
+- Provenance: independent audit record, Owner authorization, acceptance lock metadata, and this Spec
 
 ## 8. Decisions
 
@@ -254,11 +287,11 @@ Acceptance readiness MUST be reviewed against the exact Base and exact Head by a
 ### ACC-ADOPT-002 — Truthful lifecycle state
 
 - Contracts: `CTR-ADOPT-002`
-- Method: inspect Spec frontmatter and lock adoption metadata
-- Environment: proposed adoption commit
-- Required evidence: Spec, lock, and authorized acceptance record if a later transition occurs
-- Expected result: both states are `proposed` and acceptance metadata is null
-- Failure condition: preparation claims acceptance or includes fabricated acceptance metadata
+- Method: inspect the reviewed proposed snapshot, Spec frontmatter, lock adoption metadata, exact-coordinate independent audit, Owner authorization, and acceptance diff
+- Environment: reviewed proposed Head followed by the local accepted-candidate Head
+- Required evidence: proposed Spec and lock at `0850a3605d647516cd3cb1775bc96340846937d7`, `OBS-ADOPT-005`, `EVD-ADOPT-004`, audit comment `5371644271`, accepted Spec and lock, and exact parent relation
+- Expected result: the reviewed snapshot truthfully remains `proposed` with null acceptance metadata; after authorization, both candidate states are `accepted`, `accepted_by = mayf3`, `accepted_at` is the actual execution time, implementation authority remains `none`, and authority remains inactive until exact-Head merge into `main`
+- Failure condition: preparation claims acceptance, acceptance metadata is fabricated, coordinates drift, or the local accepted candidate is described as active before merge
 
 ### ACC-ADOPT-003 — Draft and local authority boundary
 
@@ -303,7 +336,7 @@ Acceptance readiness MUST be reviewed against the exact Base and exact Head by a
 - Environment: implementation base commit
 - Required evidence: accepted local governance plus an accepted implementation-authorizing Spec
 - Expected result: product work does not start while either authority is absent
-- Failure condition: product implementation begins from this proposed, non-authorizing Spec
+- Failure condition: product implementation begins from this non-authorizing accepted candidate or before both required active authorities exist
 
 ### ACC-ADOPT-008 — Evidence persistence exists
 
@@ -369,7 +402,7 @@ OPEN_OWNER_DECISIONS = NONE
 NORMATIVE_TBD = NONE
 UNRESOLVED_AUTHORITY_CONFLICT = NONE
 PARTIAL_SUPERSESSION = NONE
-READY_TO_MARK_ACCEPTED = NO
+READY_TO_MARK_ACCEPTED = YES
 ```
 
-Independent review and a later authorized acceptance transition are process steps, not unresolved normative decisions. This proposed Spec grants no product implementation authority.
+Independent review and the authorized acceptance transition are complete process facts, not unresolved normative decisions. This accepted candidate grants no product implementation authority and is not active repository authority until its exact Head is merged into `mayf3/vehicle-pet:main`.

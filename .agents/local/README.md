@@ -10,10 +10,13 @@ DESIGNATED_AUTHORITY_BRANCH = mayf3/vehicle-pet:main
 GOVERNANCE_ADOPTION_CLASS = PILOT_OF_DRAFT_DISTRIBUTION
 CLAIM_UPSTREAM_STABLE_RELEASE = NO
 LOCAL_ADOPTION_MAY_BECOME_ACCEPTED = YES
+LOCAL_ADOPTION_STATE = accepted candidate
+ACTIVE_ON_DESIGNATED_AUTHORITY_BRANCH = NO
+ACTIVATION_CONDITION = the exact accepted candidate is merged into mayf3/vehicle-pet:main
 GOVERNANCE_LOCK = .agents/governance.lock.json
 ```
 
-The vendored distribution is a draft pilot. Its current lock state is `proposed`; that state is not active local authority and does not claim upstream stability.
+The vendored distribution is a draft pilot. Its current lock state is `accepted`, but this feature-branch state is only an accepted candidate: it is not active local authority unless and until the exact accepted candidate Head is merged into `mayf3/vehicle-pet:main`. It does not claim upstream stability.
 
 ## Authority precedence
 
