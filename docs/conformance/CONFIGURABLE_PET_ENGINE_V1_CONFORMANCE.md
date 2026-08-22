@@ -8,8 +8,9 @@ GOVERNING_SPEC = CONFIGURABLE_PET_ENGINE_V1
 GOVERNING_SPEC_ACCEPTED_HEAD = 6b28e0b4a243384dd84198d74cce9c5f9e2b1dba
 CORE_AND_FLEET_COMMIT = b8d8e5b5e2ccb3a16128a135718eec91fc5ba0d6
 SEEDLING_CONFORMANCE_COMMIT = ed96e1ec7a77e7a54f797dd02b70057faf678d34
+AMENDMENT_R1 = 868bd0a414f4f15410924dc091ba9d2c8c613ee5
 ENVIRONMENT = macOS arm64, Node.js 22, pnpm 10.28.1, local Chrome
-EVALUATED_AT = 2026-08-22T07:00:00Z
+EVALUATED_AT = 2026-08-22T07:44:52Z
 IMPLEMENTATION_STATE = COMPLETE
 VERIFICATION_STATE = SUFFICIENT (author-run local evidence)
 CONFORMANCE = VERIFIED (author evaluation; not an independent audit)
@@ -21,11 +22,11 @@ CONTRACTS_DRIFTED = 0
 CONTRACTS_UNKNOWN = 0
 CONTRACTS_NOT_APPLICABLE = 0
 AUTHOR_CONFORMANCE_EVIDENCE = PASS
-INDEPENDENT_ENGINE_AUDIT = NOT_RUN
-INDEPENDENT_EXPERIENCE_AUDIT = NOT_RUN
+INDEPENDENT_ENGINE_AUDIT = REQUEST_CHANGES (R1 reviewed 2512398cfcb47ea450354a8675473620fdac8318)
+INDEPENDENT_EXPERIENCE_AUDIT = REVISE (R1 reviewed 2512398cfcb47ea450354a8675473620fdac8318)
 ```
 
-This record evaluates the product code at `ed96e1ec7a77e7a54f797dd02b70057faf678d34`. The documentation commit containing this record does not alter evaluated product behavior. `VERIFIED` below means the author linked an executed local Observation to the pinned Contract; it does **not** claim independent review.
+This record evaluates the amended product code at `868bd0a414f4f15410924dc091ba9d2c8c613ee5`. The documentation commit containing this record does not alter evaluated product behavior. `VERIFIED` below means the author linked an executed local Observation to the pinned Contract; it does **not** claim independent review.
 
 ## Executed observations
 
@@ -33,12 +34,12 @@ This record evaluates the product code at `ed96e1ec7a77e7a54f797dd02b70057faf678
 |---|---|---|---|
 | `OBS-IMP-001` | `pnpm typecheck` | PASS | TypeScript production, tests, and tool configs; local environment only. |
 | `OBS-IMP-002` | `pnpm lint` | PASS, 0 warnings/errors | `src`, `tests`, `scripts`; static lint is not runtime proof. |
-| `OBS-IMP-003` | `pnpm test` | PASS, 13 files / 124 tests | Unit/integration with fake IndexedDB; simulated same-origin concurrency. |
-| `OBS-IMP-004` | `pnpm test:e2e` | PASS, 8 browser scenarios | Local Chrome, local Vite resources only; author-run. |
+| `OBS-IMP-003` | `pnpm test` | PASS, 24 files / 152 tests | Unit/DOM integration with fake IndexedDB; simulated same-origin concurrency and mounted renderer measurements. |
+| `OBS-IMP-004` | `pnpm test:e2e` | PASS, 12 browser scenarios | Local Chrome, local Vite resources only; includes clean product route, Fleet L1–L4 visual distinction, and live locale/lang synchronization. |
 | `OBS-IMP-005` | `pnpm build` | PASS | Vite production build including both Packs. |
 | `OBS-IMP-006` | `pnpm check:contracts` | PASS, 14 checks | Mechanical dependency, vocabulary, and forbidden-capability checks. |
-| `OBS-IMP-007` | `pnpm assets:check` | PASS, 46 assets | Re-generated 28 fleet and 18 seedling assets and compared bytes/pixels/metadata. |
-| `OBS-IMP-008` | `verify_governance.py --require-accepted` | PASS | Vendored governance accepted and byte-matched lock at the implementation base. |
+| `OBS-IMP-007` | `pnpm assets:check` | PASS, 54 assets | Re-generated 36 fleet and 18 seedling assets and compared bytes/pixels/metadata. |
+| `OBS-IMP-008` | `verify_governance.py --target . --require-accepted` | PASS | Vendored governance accepted and byte-matched lock at the implementation base. |
 | `OBS-IMP-009` | changed-path diff for Commit 2 | PASS, `src/engine/**` and `src/react/**` changes = 0 | Proves the second Pack was added without Engine/React/schema edits. |
 | `OBS-IMP-010` | browser showcase capture | PASS | Author-generated visual board; not an independent experience audit. |
 
@@ -95,12 +96,42 @@ This record evaluates the product code at `ed96e1ec7a77e7a54f797dd02b70057faf678
 
 ## Visual evidence
 
-[`CONFIGURABLE_PET_ENGINE_V1_SHOWCASE.webp`](CONFIGURABLE_PET_ENGINE_V1_SHOWCASE.webp) contains the required ten states:
+[`CONFIGURABLE_PET_ENGINE_V1_SHOWCASE.webp`](CONFIGURABLE_PET_ENGINE_V1_SHOWCASE.webp) contains twelve states:
 
-- autonomous-fleet: L1, L4, L7, L10, L11, L12;
+- autonomous-fleet: L1, L2, L3, L4, L7, L10, L11, L12, including the four frozen road-test states side-by-side;
 - seedling-fixture: seed, sprout, tree, forest.
 
 The image is an author-generated observation (`OBS-IMP-010`), not an independent experience audit.
+
+## Amendment R1 — independent audit blocker closure
+
+```text
+AMENDMENT_R1 = 868bd0a414f4f15410924dc091ba9d2c8c613ee5
+BLOCKERS_ADDRESSED = E01,E02,E03,E04,E05,E06,E07,E08,E09,E10,X01,X02,X03
+NEW_TESTS = 32
+PNPM_VERIFY = PASS (152 unit/DOM tests; 12 E2E scenarios; 14 contract checks; 54 deterministic assets)
+GOVERNANCE_REQUIRE_ACCEPTED = PASS
+GIT_DIFF_CHECK = PASS
+SPEC_DRIFT = NO
+```
+
+| Blocker | Corrective implementation | Independent, fail-capable regression evidence | R1 result |
+|---|---|---|---|
+| `E01` | Flat renderer nodes and final mounted-DOM budgeting; explicit per-population metadata. | `e01-renderer-dom-budget.test.tsx` mounts Fleet L8–L12 and seedling forest, counts root plus descendants and every real population group. | CLOSED: every scene ≤64 elements; every population ≤32 representatives. |
+| `E02` | Storage adapters atomically claim the complete deterministic receipt batch. | `engine-r1-regressions.test.ts` races two simulated tabs for an exact L3→L8 batch. | CLOSED: one batch winner and at most one merged ceremony. |
+| `E03` | Reduced scene and ceremony paths suppress animation, transform, translate, scale, transitions, pseudo-particles, and camera movement. | `e03-reduced-motion.test.tsx` inspects mounted renderer and actual `UpgradeCeremony` computed styles. | CLOSED. |
+| `E04` | Greeting attempt key is `(sourceId, subjectId, localDay)`; visibility and every interaction remain eligible recheck events. | `greeting-lifecycle.test.tsx` covers midnight-before-interaction, same-day subject reset, visibility regain, and shared-storage tabs. | CLOSED. |
+| `E05` | Registry deep-copies and recursively freezes manifests and registered wrappers. | `pack-registry-immutability.test.ts` mutates both caller input and exposed registered values. | CLOSED. |
+| `E06` | Renderer consumes camera, subject scale, placement, scene transition, upgrade transition/reveal/celebration, and reduced-motion presets. | `e06-renderer-preset-semantics.test.tsx`, `render-plan-subject-swap.test.ts`, and preset unit corpus. | CLOSED; no dead whitelisted preset path. |
+| `E07` | Invalid default Pack gates startup before any persisted alternate can be selected. | `engine-r1-regressions.test.ts` persists a valid alternate while corrupting the default, then checks terminal state, retained progress, and zero receipts. | CLOSED: explicit `pack-unavailable`. |
+| `E08` | `boundSourceId` is session-wide, independent of subject lookup. | `engine-r1-regressions.test.ts` changes source and subject simultaneously. | CLOSED: whole snapshot rejected with no progress/receipt change. |
+| `E09` | Subject reset increments the presentation epoch and clears the old pending domain. | Deferred batch race in `engine-r1-regressions.test.ts`. | CLOSED: old subject ceremony cannot reach the new subject UI. |
+| `E10` | Pack switch/version identity isolates pending and in-flight presentation state. | Deferred switch race and version-domain baseline tests in `engine-r1-regressions.test.ts`. | CLOSED: zero old-Pack ceremony leakage. |
+| `X01` | `/` is the product Pet surface; developer controls/diagnostics require `?dev=1`; showcase requires `?showcase=1`. | `experience-blockers.spec.ts` asserts the default route omits prototype, source, fault, raw diagnostic, storage, and debug copy. | CLOSED. |
+| `X02` | Frozen L1–L5 `sceneId=road-test` remains unchanged; explicit Pack assets are selected by the existing `subject-swap` plus keepsake asset seam. | `fleet-frozen-states.test.ts`, subject-swap tests, and screenshot-pixel distinction for L1–L4 in `experience-blockers.spec.ts`. | CLOSED without Engine domain branches or Spec drift. |
+| `X03` | Product title/greeting/Host feedback colors meet AA mechanics; provider synchronizes `<html lang>` immediately. | Actual component contrast tests plus `x03-locale-lang.spec.ts` zh-CN↔en browser assertions. | CLOSED. |
+
+These are author-run amendment observations addressing the reported independent-audit failures. They prepare a new exact Head for independent re-audit; they do not convert the prior `REQUEST_CHANGES` / `REVISE` decisions into independent acceptance.
 
 ## Explicit negative capability result
 
@@ -119,8 +150,8 @@ RUNTIME_PACK_INSTALLER = NO
 
 ```text
 AUTHOR_CONFORMANCE_EVIDENCE = PASS
-INDEPENDENT_ENGINE_AUDIT = NOT_RUN
-INDEPENDENT_EXPERIENCE_AUDIT = NOT_RUN
+INDEPENDENT_ENGINE_AUDIT = REQUEST_CHANGES (R1 reviewed 2512398cfcb47ea450354a8675473620fdac8318)
+INDEPENDENT_EXPERIENCE_AUDIT = REVISE (R1 reviewed 2512398cfcb47ea450354a8675473620fdac8318)
 READY_FOR_INDEPENDENT_ENGINE_AUDIT = YES
 READY_FOR_INDEPENDENT_EXPERIENCE_AUDIT = YES
 ```
