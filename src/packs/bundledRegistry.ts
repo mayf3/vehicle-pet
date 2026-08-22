@@ -6,7 +6,8 @@
 
 import type { PackBundleInput } from '../engine'
 import { autonomousFleetBundle } from './autonomous-fleet'
+import { seedlingFixtureBundle } from './seedling-fixture'
 
-export const bundledPackBundles: PackBundleInput[] = [autonomousFleetBundle]
+export const bundledPackBundles: PackBundleInput[] = [autonomousFleetBundle, seedlingFixtureBundle]
 
 export const defaultPackId = 'autonomous-fleet'

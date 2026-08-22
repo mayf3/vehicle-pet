@@ -1,0 +1,492 @@
+{
+  "schemaVersion": 1,
+  "packId": "seedling-fixture",
+  "packVersion": "1.0.0",
+  "name": {
+    "zh-CN": "种子伙伴",
+    "en": "Seedling Companion"
+  },
+  "levels": [
+    {
+      "levelId": "seed",
+      "threshold": 0,
+      "stageName": {
+        "zh-CN": "种子",
+        "en": "Seed"
+      },
+      "summary": {
+        "zh-CN": "一颗安静积蓄力量的种子。",
+        "en": "A seed quietly gathering strength."
+      },
+      "milestone": {
+        "zh-CN": "旅程从土壤里开始。",
+        "en": "The journey begins in the soil."
+      },
+      "sceneId": "s-seed",
+      "presentation": {
+        "scale": "individual",
+        "camera": "close",
+        "milestone": "inline"
+      }
+    },
+    {
+      "levelId": "sprout",
+      "threshold": 10000,
+      "stageName": {
+        "zh-CN": "嫩芽",
+        "en": "Sprout"
+      },
+      "summary": {
+        "zh-CN": "第一片嫩叶迎向晨光。",
+        "en": "The first leaves reach for morning light."
+      },
+      "milestone": {
+        "zh-CN": "解锁嫩芽纪念。",
+        "en": "Sprout keepsake unlocked."
+      },
+      "sceneId": "s-sprout",
+      "presentation": {
+        "scale": "individual",
+        "camera": "close",
+        "milestone": "inline"
+      },
+      "upgrade": {
+        "transition": "crossfade",
+        "reveal": "subject-swap",
+        "celebration": "glow-pulse"
+      },
+      "keepsakeId": "ks-sprout"
+    },
+    {
+      "levelId": "tree",
+      "threshold": 60000,
+      "stageName": {
+        "zh-CN": "小树",
+        "en": "Tree"
+      },
+      "summary": {
+        "zh-CN": "枝叶展开，形成清晰的树冠。",
+        "en": "Branches unfold into a clear canopy."
+      },
+      "milestone": {
+        "zh-CN": "解锁小树纪念。",
+        "en": "Tree keepsake unlocked."
+      },
+      "sceneId": "s-tree",
+      "presentation": {
+        "scale": "group",
+        "camera": "city",
+        "milestone": "inline"
+      },
+      "upgrade": {
+        "transition": "layer-build",
+        "reveal": "scene-expand",
+        "celebration": "spark-burst"
+      },
+      "keepsakeId": "ks-tree"
+    },
+    {
+      "levelId": "forest",
+      "threshold": 300000,
+      "stageName": {
+        "zh-CN": "森林",
+        "en": "Forest"
+      },
+      "summary": {
+        "zh-CN": "一千棵树连成稳定而辽阔的森林。",
+        "en": "One thousand trees form a steady, expansive forest."
+      },
+      "milestone": {
+        "zh-CN": "解锁森林纪念，当前成长封顶。",
+        "en": "Forest keepsake unlocked; current growth cap reached."
+      },
+      "sceneId": "s-forest",
+      "presentation": {
+        "scale": "cluster",
+        "camera": "metro",
+        "milestone": "banner"
+      },
+      "upgrade": {
+        "transition": "camera-step-out",
+        "reveal": "collection-add",
+        "celebration": "ambient-highlight"
+      },
+      "keepsakeId": "ks-forest"
+    }
+  ],
+  "scenes": [
+    {
+      "sceneId": "s-seed",
+      "backgroundAssetId": "bg-s-seed-webp",
+      "layers": [
+        {
+          "layerId": "seed-subject",
+          "kind": "subject",
+          "assetId": "sprite-subject-seed-webp",
+          "placement": "center",
+          "zOrder": 10
+        }
+      ],
+      "transition": "instant",
+      "sceneLabel": {
+        "zh-CN": "土壤中央的一颗种子",
+        "en": "A seed at the center of the soil"
+      }
+    },
+    {
+      "sceneId": "s-sprout",
+      "backgroundAssetId": "bg-s-sprout-webp",
+      "layers": [
+        {
+          "layerId": "sprout-subject",
+          "kind": "subject",
+          "assetId": "sprite-subject-sprout-webp",
+          "placement": "center",
+          "zOrder": 10
+        }
+      ],
+      "transition": "crossfade",
+      "sceneLabel": {
+        "zh-CN": "晨光中的一株嫩芽",
+        "en": "A sprout in morning light"
+      }
+    },
+    {
+      "sceneId": "s-tree",
+      "backgroundAssetId": "bg-s-tree-webp",
+      "layers": [
+        {
+          "layerId": "tree-subject",
+          "kind": "subject",
+          "assetId": "sprite-subject-tree-webp",
+          "placement": "center",
+          "zOrder": 10
+        }
+      ],
+      "transition": "zoom-out",
+      "sceneLabel": {
+        "zh-CN": "草地中央的一棵小树",
+        "en": "A young tree at the center of a meadow"
+      }
+    },
+    {
+      "sceneId": "s-forest",
+      "backgroundAssetId": "bg-s-forest-webp",
+      "layers": [
+        {
+          "layerId": "forest-roots",
+          "kind": "overlay",
+          "assetId": "overlay-root-network-webp",
+          "placement": "center",
+          "zOrder": 4
+        },
+        {
+          "layerId": "forest-subject",
+          "kind": "subject",
+          "assetId": "sprite-subject-tree-webp",
+          "placement": "center",
+          "zOrder": 10
+        },
+        {
+          "layerId": "forest-population",
+          "kind": "decoration",
+          "population": {
+            "populationId": "trees",
+            "logicalCount": 1000,
+            "assetId": "sprite-unit-tree-webp",
+            "density": "network",
+            "placement": "grid-even",
+            "aggregateLabel": {
+              "zh-CN": "棵树",
+              "en": "trees"
+            }
+          },
+          "placement": "grid-even",
+          "zOrder": 12
+        }
+      ],
+      "transition": "layer-build",
+      "sceneLabel": {
+        "zh-CN": "根系相连的一片森林",
+        "en": "A forest joined by a root network"
+      }
+    }
+  ],
+  "assets": [
+    {
+      "assetId": "bg-s-seed-webp",
+      "path": "assets/seedling-fixture/bg-s-seed.webp",
+      "format": "webp",
+      "role": "background",
+      "width": 1600,
+      "height": 900,
+      "byteSizeCompressed": 7562,
+      "altText": {
+        "zh-CN": "温暖的土壤",
+        "en": "Warm soil"
+      }
+    },
+    {
+      "assetId": "bg-s-seed-png",
+      "path": "assets/seedling-fixture/bg-s-seed.png",
+      "format": "png",
+      "role": "background",
+      "width": 1600,
+      "height": 900,
+      "byteSizeCompressed": 19642,
+      "altText": {
+        "zh-CN": "温暖的土壤 PNG 后备",
+        "en": "Warm soil PNG fallback"
+      }
+    },
+    {
+      "assetId": "bg-s-sprout-webp",
+      "path": "assets/seedling-fixture/bg-s-sprout.webp",
+      "format": "webp",
+      "role": "background",
+      "width": 1600,
+      "height": 900,
+      "byteSizeCompressed": 12288,
+      "altText": {
+        "zh-CN": "晨光草地",
+        "en": "Morning meadow"
+      }
+    },
+    {
+      "assetId": "bg-s-sprout-png",
+      "path": "assets/seedling-fixture/bg-s-sprout.png",
+      "format": "png",
+      "role": "background",
+      "width": 1600,
+      "height": 900,
+      "byteSizeCompressed": 26506,
+      "altText": {
+        "zh-CN": "晨光草地 PNG 后备",
+        "en": "Morning meadow PNG fallback"
+      }
+    },
+    {
+      "assetId": "bg-s-tree-webp",
+      "path": "assets/seedling-fixture/bg-s-tree.webp",
+      "format": "webp",
+      "role": "background",
+      "width": 1600,
+      "height": 900,
+      "byteSizeCompressed": 4794,
+      "altText": {
+        "zh-CN": "开阔草地",
+        "en": "Open meadow"
+      }
+    },
+    {
+      "assetId": "bg-s-tree-png",
+      "path": "assets/seedling-fixture/bg-s-tree.png",
+      "format": "png",
+      "role": "background",
+      "width": 1600,
+      "height": 900,
+      "byteSizeCompressed": 13416,
+      "altText": {
+        "zh-CN": "开阔草地 PNG 后备",
+        "en": "Open meadow PNG fallback"
+      }
+    },
+    {
+      "assetId": "bg-s-forest-webp",
+      "path": "assets/seedling-fixture/bg-s-forest.webp",
+      "format": "webp",
+      "role": "background",
+      "width": 1600,
+      "height": 900,
+      "byteSizeCompressed": 5590,
+      "altText": {
+        "zh-CN": "层叠森林",
+        "en": "Layered forest"
+      }
+    },
+    {
+      "assetId": "bg-s-forest-png",
+      "path": "assets/seedling-fixture/bg-s-forest.png",
+      "format": "png",
+      "role": "background",
+      "width": 1600,
+      "height": 900,
+      "byteSizeCompressed": 17097,
+      "altText": {
+        "zh-CN": "层叠森林 PNG 后备",
+        "en": "Layered forest PNG fallback"
+      }
+    },
+    {
+      "assetId": "sprite-subject-seed-webp",
+      "path": "assets/seedling-fixture/sprite-subject-seed.webp",
+      "format": "webp",
+      "role": "sprite",
+      "width": 320,
+      "height": 320,
+      "byteSizeCompressed": 4242,
+      "altText": {
+        "zh-CN": "微笑的种子伙伴",
+        "en": "Smiling seed companion"
+      }
+    },
+    {
+      "assetId": "sprite-subject-seed-png",
+      "path": "assets/seedling-fixture/sprite-subject-seed.png",
+      "format": "png",
+      "role": "sprite",
+      "width": 320,
+      "height": 320,
+      "byteSizeCompressed": 6919,
+      "altText": {
+        "zh-CN": "微笑的种子伙伴 PNG 后备",
+        "en": "Smiling seed companion PNG fallback"
+      }
+    },
+    {
+      "assetId": "sprite-subject-sprout-webp",
+      "path": "assets/seedling-fixture/sprite-subject-sprout.webp",
+      "format": "webp",
+      "role": "sprite",
+      "width": 320,
+      "height": 320,
+      "byteSizeCompressed": 5320,
+      "altText": {
+        "zh-CN": "展开两片叶子的嫩芽伙伴",
+        "en": "Sprout companion with two leaves"
+      }
+    },
+    {
+      "assetId": "sprite-subject-sprout-png",
+      "path": "assets/seedling-fixture/sprite-subject-sprout.png",
+      "format": "png",
+      "role": "sprite",
+      "width": 320,
+      "height": 320,
+      "byteSizeCompressed": 7773,
+      "altText": {
+        "zh-CN": "嫩芽伙伴 PNG 后备",
+        "en": "Sprout companion PNG fallback"
+      }
+    },
+    {
+      "assetId": "sprite-subject-tree-webp",
+      "path": "assets/seedling-fixture/sprite-subject-tree.webp",
+      "format": "webp",
+      "role": "sprite",
+      "width": 320,
+      "height": 320,
+      "byteSizeCompressed": 4968,
+      "altText": {
+        "zh-CN": "枝叶茂盛的小树伙伴",
+        "en": "Leafy young tree companion"
+      }
+    },
+    {
+      "assetId": "sprite-subject-tree-png",
+      "path": "assets/seedling-fixture/sprite-subject-tree.png",
+      "format": "png",
+      "role": "sprite",
+      "width": 320,
+      "height": 320,
+      "byteSizeCompressed": 7555,
+      "altText": {
+        "zh-CN": "小树伙伴 PNG 后备",
+        "en": "Young tree companion PNG fallback"
+      }
+    },
+    {
+      "assetId": "sprite-unit-tree-webp",
+      "path": "assets/seedling-fixture/sprite-unit-tree.webp",
+      "format": "webp",
+      "role": "sprite",
+      "width": 240,
+      "height": 240,
+      "byteSizeCompressed": 1760,
+      "altText": {
+        "zh-CN": "森林代表树",
+        "en": "Representative forest tree"
+      }
+    },
+    {
+      "assetId": "sprite-unit-tree-png",
+      "path": "assets/seedling-fixture/sprite-unit-tree.png",
+      "format": "png",
+      "role": "sprite",
+      "width": 240,
+      "height": 240,
+      "byteSizeCompressed": 3128,
+      "altText": {
+        "zh-CN": "森林代表树 PNG 后备",
+        "en": "Representative forest tree PNG fallback"
+      }
+    },
+    {
+      "assetId": "overlay-root-network-webp",
+      "path": "assets/seedling-fixture/overlay-root-network.webp",
+      "format": "webp",
+      "role": "overlay",
+      "width": 1600,
+      "height": 900,
+      "byteSizeCompressed": 7678,
+      "altText": {
+        "zh-CN": "相连的根系网络",
+        "en": "Connected root network"
+      }
+    },
+    {
+      "assetId": "overlay-root-network-png",
+      "path": "assets/seedling-fixture/overlay-root-network.png",
+      "format": "png",
+      "role": "overlay",
+      "width": 1600,
+      "height": 900,
+      "byteSizeCompressed": 39644,
+      "altText": {
+        "zh-CN": "根系网络 PNG 后备",
+        "en": "Root network PNG fallback"
+      }
+    }
+  ],
+  "keepsakes": [
+    {
+      "keepsakeId": "ks-sprout",
+      "levelId": "sprout",
+      "title": {
+        "zh-CN": "第一片嫩叶",
+        "en": "First Leaves"
+      },
+      "accessDescription": {
+        "zh-CN": "纪念种子第一次发芽。",
+        "en": "Marks the seed's first sprout."
+      },
+      "assetId": "sprite-subject-sprout-webp"
+    },
+    {
+      "keepsakeId": "ks-tree",
+      "levelId": "tree",
+      "title": {
+        "zh-CN": "展开的树冠",
+        "en": "Open Canopy"
+      },
+      "accessDescription": {
+        "zh-CN": "纪念小树形成完整树冠。",
+        "en": "Marks the young tree forming a canopy."
+      },
+      "assetId": "sprite-subject-tree-webp"
+    },
+    {
+      "keepsakeId": "ks-forest",
+      "levelId": "forest",
+      "title": {
+        "zh-CN": "森林根网",
+        "en": "Forest Root Web"
+      },
+      "accessDescription": {
+        "zh-CN": "纪念一千棵树连接成森林。",
+        "en": "Marks one thousand trees joining as a forest."
+      },
+      "assetId": "overlay-root-network-webp"
+    }
+  ]
+}

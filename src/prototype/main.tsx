@@ -1,9 +1,7 @@
 /**
  * Prototype shell entrypoint. URL parameters:
  *   ?showcase=1                       static multi-state showcase
- *   ?pack=<bundled packId>            ignored by the engine (activePackId is a
- *                                     persisted device preference) but selects
- *                                     the initial mock progress scale
+ *   ?pack=<bundled packId>            selects the initial persisted active Pack
  *   ?points=<safe integer>            initial MockProgressSource points
  *   ?reducedMotion=1                  start with reduced motion on
  */
@@ -23,6 +21,10 @@ async function bootstrap() {
   const initialPoints = Number.parseInt(params.get('points') ?? '0', 10)
   const source = new MockProgressSource(Number.isSafeInteger(initialPoints) && initialPoints > 0 ? initialPoints : 0)
   const storage = await IndexedDbPetStorage.create()
+  const requestedPack = params.get('pack')
+  if (requestedPack === 'autonomous-fleet' || requestedPack === 'seedling-fixture') {
+    await storage.setActivePackId(requestedPack)
+  }
 
   const container = document.getElementById('root')
   if (container === null) throw new Error('#root not found')
