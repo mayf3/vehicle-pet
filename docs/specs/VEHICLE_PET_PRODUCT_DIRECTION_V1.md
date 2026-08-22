@@ -95,22 +95,19 @@ CROSS_DEVICE_SYNC = OUT_OF_SCOPE_V1
 HUNGER_OR_DECAY = NO
 STREAK_OR_ABSENCE_PENALTY = NO
 SHOP_CURRENCY_GACHA_TASK_SYSTEM = NO
-ENGINE_CAP_PER_POPULATION = 32
-ENGINE_CAP_PER_PET = 64
 ```
 
-Upgrade and daily-experience Owner decisions:
+Upgrade and daily-experience Owner decisions (qualitative; concrete numeric
+limits, DOM caps, and journal mechanics are owned solely by
+`CONFIGURABLE_PET_ENGINE_V1` under `CTR-DIR-011`):
 
 ```text
-UPGRADE_RECEIPT_OWNER = Pet Engine
-PRESENTATION_JOURNAL_OWNER = Pet Engine storage adapter
+UPGRADE_PRESENTATION_OWNER = Pet Engine
 PRESENTATION_CONSISTENCY_SCOPE = local device only
-UPGRADE_DELIVERY_PRIORITY = at-most-once; never duplicate
-JOURNAL_POLICY = consume-before-play
-KNOWN_TRADEOFF = a crash after consume may skip a celebration, but must not repeat it
-MULTI_LEVEL_UPGRADE_POLICY = render final level immediately, then present one merged ceremony
-MAX_UPGRADE_BEATS = 3
-MAX_UPGRADE_PRESENTATION_SECONDS = 3
+UPGRADE_DELIVERY_INVARIANT = a celebration is never repeated
+MULTI_LEVEL_UPGRADE_FORM = final level renders immediately; one short merged ceremony, never per-level sequences
+CEREMONY_CHARACTER = short, non-coercive, skippable, degradable
+RENDERING_BOUNDEDNESS = required
 DAILY_TIMEZONE = device local timezone
 DAILY_VARIANT_CHANGE = on next mount, visibility regain, or interaction after local day changes
 MIDNIGHT_FORCED_TRANSITION = NO
@@ -338,12 +335,12 @@ AUDIO_IN_V1 = NO
 - Reason: bounded formats and engine-owned icons keep Packs data-only.
 - Owner input remaining: NONE
 
-### DEC-DIR-009 — Upgrade and daily experience are engine-owned and at-most-once
+### DEC-DIR-009 — Upgrade and daily experience are engine-owned and never repeat
 
 - Decision owner: `mayf3`
-- Decision: the Engine owns Upgrade Receipts and the Presentation Journal (local device only); delivery is at-most-once with consume-before-play (a crash after consume may skip a celebration but never repeats it); multi-level upgrades render the final level immediately and present one merged ceremony within 3 beats and 3 seconds; the daily variant uses the device-local timezone and changes on the next mount, visibility regain, or interaction after the local day changes, with no midnight forced transition; reduced motion is required; no audio in V1.
-- Rejected alternative: Host-owned ceremony state or replayable celebrations.
-- Reason: engine ownership with at-most-once delivery prevents duplicate celebrations without introducing cross-device claims.
+- Decision: the Engine owns upgrade presentation consistency locally on the device; a celebration is never repeated; multi-level upgrades render the final level immediately with one short merged ceremony, never per-level sequences; ceremonies are short, non-coercive, skippable, and degradable; the daily variant uses the device-local timezone and changes only on the next mount, visibility regain, or interaction after the local day changes, with no midnight forced transition; reduced motion is required; no audio in V1. Concrete numeric limits, DOM caps, and journal mechanics are owned solely by `CONFIGURABLE_PET_ENGINE_V1` (`CTR-DIR-011`).
+- Rejected alternative: Host-owned ceremony state, replayable celebrations, or this Spec carrying implementation values.
+- Reason: engine ownership prevents duplicate celebrations without cross-device claims; single-sourcing implementation parameters avoids parent/child drift.
 - Owner input remaining: NONE
 
 ### DEC-DIR-010 — Product implementation remains blocked until authority completes
@@ -352,6 +349,14 @@ AUDIO_IN_V1 = NO
 - Decision: product implementation stays `NOT_STARTED` until this Spec and `CONFIGURABLE_PET_ENGINE_V1` are both accepted and present on `main`.
 - Rejected alternative: starting implementation from this proposal.
 - Reason: governance requires accepted, merged authority before non-mechanical implementation.
+- Owner input remaining: NONE
+
+### DEC-DIR-011 — Implementation parameters have a single normative owner
+
+- Decision owner: `mayf3`
+- Decision: concrete implementation parameters — DOM node caps, presentation journal policy mechanics, and ceremony numeric limits — are normative only in `CONFIGURABLE_PET_ENGINE_V1`. This Spec states them only qualitatively (bounded rendering, never-repeated celebrations, short and degradable ceremonies).
+- Rejected alternative: duplicating the child Spec's values here for convenience.
+- Reason: duplicated values drift; the child Spec is the single reviewable source for implementation limits.
 - Owner input remaining: NONE
 
 ## 9. Contracts
@@ -395,6 +400,10 @@ Real Token statistics, DeepSeek Harness adapters, and cross-device sync MUST NOT
 ### CTR-DIR-010 — No implementation authority
 
 This Spec has `implementation_authority: none`. Product implementation MUST remain `NOT_STARTED` while this Spec is `proposed`, and acceptance of this Spec alone MUST NOT authorize code.
+
+### CTR-DIR-011 — No duplication of child-owned implementation parameters
+
+This Spec MUST NOT state concrete implementation parameters owned by `CONFIGURABLE_PET_ENGINE_V1`: DOM node caps, presentation journal policy mechanics, and ceremony numeric limits (beat counts and duration seconds). Product-level requirements in this Spec MUST remain qualitative: rendering is bounded, a celebration is never repeated, and ceremonies are short, non-coercive, skippable, and degradable.
 
 ## 10. Acceptance
 
@@ -488,6 +497,15 @@ This Spec has `implementation_authority: none`. Product implementation MUST rema
 - Expected result: no product implementation exists
 - Failure condition: product code, assets, dependencies, or build files appear before acceptance and merge of both Specs
 
+### ACC-DIR-011 — Parent/child parameter consistency
+
+- Contracts: `CTR-DIR-011`
+- Method: mechanical text search of this Spec for child-owned concrete parameters: DOM cap numbers, journal policy mechanic names, and ceremony numeric limits (beat counts, presentation duration seconds), as enumerated in `CONFIGURABLE_PET_ENGINE_V1`
+- Environment: this Spec at the amended candidate Head
+- Required evidence: search transcript with match counts
+- Expected result: zero matches for every child-owned parameter; only qualitative statements remain
+- Failure condition: any concrete DOM cap, journal mechanic, or ceremony numeric limit appears in this Spec
+
 ### Contract coverage
 
 | Contract | Acceptance | Covered |
@@ -502,6 +520,7 @@ This Spec has `implementation_authority: none`. Product implementation MUST rema
 | `CTR-DIR-008` | `ACC-DIR-008` | YES |
 | `CTR-DIR-009` | `ACC-DIR-009` | YES |
 | `CTR-DIR-010` | `ACC-DIR-010` | YES |
+| `CTR-DIR-011` | `ACC-DIR-011` | YES |
 
 Every Contract maps to one Acceptance item, and every Acceptance item maps back to one Contract.
 
