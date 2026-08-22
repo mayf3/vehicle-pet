@@ -14,6 +14,11 @@ export type ClaimResult = 'won' | 'lost'
 export interface PetStorageAdapter {
   /** Atomic once-per-receiptId claim; visible across same-device same-origin tabs. */
   claimReceipt(sourceId: string, subjectId: string, receiptId: string): Promise<ClaimResult>
+  /**
+   * Atomic all-or-nothing claim for one deterministic presentation batch.
+   * The winner consumes every id; if any id was already consumed, the caller loses.
+   */
+  claimReceiptBatch(sourceId: string, subjectId: string, receiptIds: string[]): Promise<ClaimResult>
   listConsumedReceipts(sourceId: string, subjectId: string): Promise<string[]>
 
   /** Atomic once-per-localDay greeting claim using the same semantics. */

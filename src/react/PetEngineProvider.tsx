@@ -98,11 +98,26 @@ export function PetEngineProvider(props: PetEngineProviderProps) {
 
   const subscribe = useCallback((listener: () => void) => engine.subscribe(listener), [engine])
   const snapshot = useSyncExternalStore(subscribe, () => engine.getSnapshot())
+  const originalDocumentLangRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return
+    originalDocumentLangRef.current = document.documentElement.lang
+    return () => {
+      if (originalDocumentLangRef.current !== null) document.documentElement.lang = originalDocumentLangRef.current
+    }
+  }, [])
+
+  useEffect(() => {
+    if (typeof document !== 'undefined') document.documentElement.lang = snapshot.locale
+  }, [snapshot.locale])
 
   const [greeting, setGreeting] = useState<GreetingState | null>(null)
   const [ceremony, setCeremony] = useState<CeremonyState | null>(null)
   const claimingRef = useRef(false)
-  const greetedDayRef = useRef<string | null>(null)
+  // This is an attempted presentation key, not a day-only UI cache. The
+  // durable storage claim remains the cross-mount/cross-tab source of truth.
+  const greetedKeyRef = useRef<string | null>(null)
 
   // Engine bootstrap + Progress Source subscription.
   useEffect(() => {
@@ -134,31 +149,48 @@ export function PetEngineProvider(props: PetEngineProviderProps) {
     engine.completeCeremony()
   }, [engine])
 
-  // Daily greeting: claimed on mount, visibility regain, or first interaction
-  // after the local day changed; one claim per (sourceId, subjectId, localDay).
+  // Daily greeting: re-evaluated on mount, every visibility regain, and every
+  // interaction. Midnight itself never forces UI; the next allowed event sees
+  // the new (sourceId, subjectId, localDay) key and atomically claims it.
   const tryGreeting = useCallback(() => {
-    if (!snapshot.initialized || snapshot.viewModel === null) return
+    const viewModel = snapshot.viewModel
+    if (!snapshot.initialized || viewModel === null) return
     const localDay = computeLocalDay(props.now ? props.now() : new Date())
-    if (greetedDayRef.current === localDay) return
-    greetedDayRef.current = localDay
+    const greetingKey = `${viewModel.sourceId}|${viewModel.subjectId}|${localDay}`
+    if (greetedKeyRef.current === greetingKey) return
+    greetedKeyRef.current = greetingKey
     void engine.claimDailyGreeting().then((claimed) => {
-      if (claimed !== null) {
+      // Ignore a claim that completed after the active subject/day changed.
+      if (claimed !== null && greetedKeyRef.current === greetingKey) {
         setGreeting({
           localDay: claimed.localDay,
-          variantIndex: stableVariantIndex(`${snapshot.viewModel!.subjectId}|${claimed.localDay}`, 3),
+          variantIndex: stableVariantIndex(greetingKey, 3),
         })
       }
     })
   }, [engine, props.now, snapshot.initialized, snapshot.viewModel])
 
+  const greetingSubjectKey = snapshot.viewModel === null
+    ? null
+    : `${snapshot.viewModel.sourceId}|${snapshot.viewModel.subjectId}`
+
+  useEffect(() => {
+    // Clear only when the source/subject identity changes. Engine notifications
+    // rebuild the view model object and must not erase an already won greeting.
+    setGreeting(null)
+  }, [greetingSubjectKey])
+
   useEffect(() => {
     tryGreeting()
+  }, [tryGreeting])
+
+  useEffect(() => {
     const onVisibility = () => {
       if (typeof document !== 'undefined' && document.visibilityState === 'visible') tryGreeting()
     }
     const onPointer = () => tryGreeting()
     document.addEventListener('visibilitychange', onVisibility)
-    document.addEventListener('pointerdown', onPointer, { once: true })
+    document.addEventListener('pointerdown', onPointer)
     return () => {
       document.removeEventListener('visibilitychange', onVisibility)
       document.removeEventListener('pointerdown', onPointer)

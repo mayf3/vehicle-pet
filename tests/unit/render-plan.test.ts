@@ -110,7 +110,7 @@ describe('accessibility semantics (§10.2, CTR-PET-030)', () => {
   it('carries an accessible name on the subject node via the milestone/alt rules', () => {
     const plan = planFor(0)
     const subject = plan.nodes.find((n) => n.kind === 'subject')
-    expect(subject?.altText).toBe('你的 Pet：无人车座舱')
+    expect(subject?.altText).toBe('你的 Pet：主驾有人、副驾空座，后方保护车随行')
     expect(subject?.ariaHidden).toBe(false)
     const milestone = plan.nodes.find((n) => n.kind === 'milestone')
     expect(milestone?.altText).toBe(milestone?.text)

@@ -89,7 +89,7 @@ describe('snapshot ingestion and ordering (CTR-PET-002, CTR-PET-026, ACC-PET-002
     }
   })
 
-  it('issues receipts only on forward threshold crossings', () => {
+  it('issues receipts only on forward threshold crossings', async () => {
     engine.ingestSnapshot(snapshot(0, 0))
     expect(engine.getSnapshot().pendingReceipts).toEqual([])
     engine.ingestSnapshot(snapshot(10_000, 1))
@@ -97,6 +97,7 @@ describe('snapshot ingestion and ordering (CTR-PET-002, CTR-PET-026, ACC-PET-002
     expect(receipts).toHaveLength(1)
     expect(receipts[0]!.receiptId).toBe('mock-progress|subject-1|autonomous-fleet|1.0.0|l2')
 
+    expect(await engine.claimPendingCeremony()).not.toBeNull()
     engine.completeCeremony()
     engine.ingestSnapshot(snapshot(10_500, 2)) // growth inside the level: no new receipt
     expect(engine.getSnapshot().pendingReceipts).toHaveLength(0)

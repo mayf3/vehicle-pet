@@ -9,7 +9,7 @@ test.beforeEach(async ({ page }) => {
 })
 
 test('normal autonomous-fleet growth and one merged ceremony', async ({ page }) => {
-  await page.goto('/?pack=autonomous-fleet&points=0')
+  await page.goto('/?dev=1&pack=autonomous-fleet&points=0')
   await expect(page.locator('[data-pet-subject="true"]')).toBeVisible()
   await page.locator('#exact-points').fill('1200000')
   await page.getByRole('button', { name: '应用' }).click()
@@ -23,7 +23,7 @@ test('normal autonomous-fleet growth and one merged ceremony', async ({ page }) 
 })
 
 test('seedling grows through the same page and renderer', async ({ page }) => {
-  await page.goto('/?pack=seedling-fixture&points=60000')
+  await page.goto('/?dev=1&pack=seedling-fixture&points=60000')
   await expect(page.locator('[data-pet-pack-option="seedling-fixture"]')).toHaveAttribute('aria-pressed', 'true')
   await expect(page.getByText('3. 小树')).toBeVisible()
   await expect(page.locator('[data-pet-subject="true"]')).toHaveAccessibleName(/小树伙伴/)
@@ -34,7 +34,7 @@ test('seedling grows through the same page and renderer', async ({ page }) => {
 })
 
 test('pack switch is silent and preserves progress', async ({ page }) => {
-  await page.goto('/?pack=autonomous-fleet&points=60000')
+  await page.goto('/?dev=1&pack=autonomous-fleet&points=60000')
   await expect(page.getByText(/4\./)).toBeVisible()
   await page.locator('[data-pet-pack-option="seedling-fixture"]').click()
   await expect(page.getByText('3. 小树')).toBeVisible()
@@ -45,7 +45,7 @@ test('pack switch is silent and preserves progress', async ({ page }) => {
 })
 
 test('reduced motion retains final structure and static ceremony', async ({ page }) => {
-  await page.goto('/?pack=autonomous-fleet&points=1800000&reducedMotion=1')
+  await page.goto('/?dev=1&pack=autonomous-fleet&points=1800000&reducedMotion=1')
   await expect(page.locator('[data-reduced-motion="on"]')).toHaveAttribute('aria-pressed', 'true')
   await page.locator('#exact-points').fill('2500000')
   await page.getByRole('button', { name: '应用' }).click()
@@ -54,7 +54,7 @@ test('reduced motion retains final structure and static ceremony', async ({ page
 })
 
 test('Host completed failed and cancelled feedback are distinct', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('/?dev=1')
   for (const [selector, status] of [
     ['[data-host-completed="true"]', 'completed'],
     ['[data-host-failed="true"]', 'failed'],
@@ -66,7 +66,7 @@ test('Host completed failed and cancelled feedback are distinct', async ({ page 
 })
 
 test('asset fallback keeps progress milestone and accessible subject', async ({ page }) => {
-  await page.goto('/?pack=autonomous-fleet&points=300000')
+  await page.goto('/?dev=1&pack=autonomous-fleet&points=300000')
   await page.locator('[data-fail-asset="true"]').click()
   await expect(page.locator('[data-pet-subject="true"]')).toBeVisible()
   await expect(page.getByText(/7\./)).toBeVisible()
@@ -75,7 +75,7 @@ test('asset fallback keeps progress milestone and accessible subject', async ({ 
 })
 
 test('max level has capped state and no fabricated next target', async ({ page }) => {
-  await page.goto('/?pack=autonomous-fleet&points=9007199254740991')
+  await page.goto('/?dev=1&pack=autonomous-fleet&points=9007199254740991')
   await expect(page.locator('[data-pet-capped="true"]')).toBeVisible()
   await expect(page.getByText(/12\./)).toBeVisible()
 })
@@ -83,7 +83,7 @@ test('max level has capped state and no fabricated next target', async ({ page }
 test('showcase contains required fleet and seedling states', async ({ page }) => {
   await page.goto('/?showcase=1')
   await expect(page.locator('[data-pet-showcase="true"]')).toBeVisible()
-  await expect(page.locator('figure')).toHaveCount(10)
+  await expect(page.locator('figure')).toHaveCount(12)
   await expect(page.getByText(/autonomous-fleet · 12\/12/)).toBeVisible()
   await expect(page.getByText(/seedling-fixture · 4\/4/)).toBeVisible()
 })
