@@ -26,20 +26,30 @@ Before non-mechanical implementation, governance adoption must be accepted, the 
 
 [Vehicle Pet Development Governance Adoption V1](VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V1.md) has lifecycle status `accepted`. Its active-authority status is derived from designated-branch or implementation-base membership under the rule above, and it grants no implementation authority.
 
+[Vehicle Pet Product Direction V1](VEHICLE_PET_PRODUCT_DIRECTION_V1.md) and [Configurable Pet Engine V1](CONFIGURABLE_PET_ENGINE_V1.md) are `proposed` candidates on `agent/propose-vehicle-pet-product-and-engine-v1`, co-reviewed as a parent/child pair. Neither is active authority and neither authorizes implementation until both are accepted and merged into `main`.
+
 Current repository state:
 
 ```text
-PRODUCT_DIRECTION = NONE_YET
+PRODUCT_DIRECTION = PROPOSED (VEHICLE_PET_PRODUCT_DIRECTION_V1, not yet accepted)
 ARCHITECTURE = NONE_YET
 PRODUCT_IMPLEMENTATION = NONE
 ACCEPTED_GOVERNING_PRODUCT_SPECS = NONE
 NEXT_PRODUCT_AUTHORITY = VEHICLE_PET_PRODUCT_DIRECTION_V1
+PRODUCT_IMPLEMENTATION_AUTHORIZED = NO
 ```
 
-The future first product authority is reserved for `docs/specs/VEHICLE_PET_PRODUCT_DIRECTION_V1.md`; it does not exist and is not active yet.
+`PRODUCT_IMPLEMENTATION_AUTHORIZED = NO` because the two new Specs have not yet
+completed independent review, Owner acceptance, and merge into `main`.
+
+The first product authority is reserved for `docs/specs/VEHICLE_PET_PRODUCT_DIRECTION_V1.md`; the proposed candidate exists but is not active yet.
 
 ## Repository Spec index
 
 | Spec ID | Status | Active authority | Kind | Implementation authority | Scope | Supersedes |
 |---|---|---|---|---|---|---|
 | `VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V1` | accepted | derived from designated-branch/base membership | invariant | none | `mayf3/vehicle-pet` | none |
+| `VEHICLE_PET_PRODUCT_DIRECTION_V1` | proposed | none (candidate branch only) | invariant | none | `mayf3/vehicle-pet` | none |
+| `CONFIGURABLE_PET_ENGINE_V1` | proposed | none (candidate branch only) | implementation | contracts | `pet-engine`, `bundled-pet-packs`, `prototype-shell` | none |
+
+`CONFIGURABLE_PET_ENGINE_V1` is governed by `VEHICLE_PET_PRODUCT_DIRECTION_V1`.
