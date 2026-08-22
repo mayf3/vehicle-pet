@@ -26,20 +26,31 @@ Before non-mechanical implementation, governance adoption must be accepted, the 
 
 [Vehicle Pet Development Governance Adoption V1](VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V1.md) has lifecycle status `accepted`. Its active-authority status is derived from designated-branch or implementation-base membership under the rule above, and it grants no implementation authority.
 
+[Vehicle Pet Product Direction V1](VEHICLE_PET_PRODUCT_DIRECTION_V1.md) and [Configurable Pet Engine V1](CONFIGURABLE_PET_ENGINE_V1.md) were co-reviewed as a parent/child pair on `agent/propose-vehicle-pet-product-and-engine-v1` and are `accepted` candidates at an exact accepted Head on that branch. They were accepted atomically in the same commit; neither is active repository authority and neither authorizes implementation until that exact accepted Head is merged into `main`.
+
 Current repository state:
 
 ```text
-PRODUCT_DIRECTION = NONE_YET
-ARCHITECTURE = NONE_YET
+PRODUCT_DIRECTION = ACCEPTED_CANDIDATE (VEHICLE_PET_PRODUCT_DIRECTION_V1 accepted at exact reviewed Head a4b4d2452e1933d3d753f8715f76e94fb3e4d639 + acceptance commit, not yet merged into main)
+ARCHITECTURE = ACCEPTED_CANDIDATE (CONFIGURABLE_PET_ENGINE_V1 accepted at the same exact Head, not yet merged into main)
 PRODUCT_IMPLEMENTATION = NONE
-ACCEPTED_GOVERNING_PRODUCT_SPECS = NONE
-NEXT_PRODUCT_AUTHORITY = VEHICLE_PET_PRODUCT_DIRECTION_V1
+ACCEPTED_GOVERNING_PRODUCT_SPECS = 2 accepted candidates not yet on main
+NEXT_PRODUCT_AUTHORITY = merge the exact accepted Head into main (separate Owner decision)
+PRODUCT_IMPLEMENTATION_AUTHORIZED = NO
 ```
 
-The future first product authority is reserved for `docs/specs/VEHICLE_PET_PRODUCT_DIRECTION_V1.md`; it does not exist and is not active yet.
+`PRODUCT_IMPLEMENTATION_AUTHORIZED = NO` because the two Specs, while accepted,
+are not yet present on `main`: product implementation stays blocked until the
+exact accepted Head of both Specs is merged into `main`.
+
+The first product authority is reserved for `docs/specs/VEHICLE_PET_PRODUCT_DIRECTION_V1.md`; the accepted candidate exists but is not active authority until merged.
 
 ## Repository Spec index
 
 | Spec ID | Status | Active authority | Kind | Implementation authority | Scope | Supersedes |
 |---|---|---|---|---|---|---|
 | `VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V1` | accepted | derived from designated-branch/base membership | invariant | none | `mayf3/vehicle-pet` | none |
+| `VEHICLE_PET_PRODUCT_DIRECTION_V1` | accepted | none (accepted candidate on PR branch, exact Head not yet merged into main) | invariant | none | `mayf3/vehicle-pet` | none |
+| `CONFIGURABLE_PET_ENGINE_V1` | accepted | none (accepted candidate on PR branch, exact Head not yet merged into main) | implementation | contracts | `pet-engine`, `bundled-pet-packs`, `prototype-shell` | none |
+
+`CONFIGURABLE_PET_ENGINE_V1` is governed by `VEHICLE_PET_PRODUCT_DIRECTION_V1`.
