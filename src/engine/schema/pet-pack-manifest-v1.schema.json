@@ -1,0 +1,275 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://pet-engine.local/schemas/pet-pack-manifest-v1.schema.json",
+  "title": "PetPackManifestV1",
+  "description": "Strict declarative Pet Pack manifest frozen by CONFIGURABLE_PET_ENGINE_V1 section 9. additionalProperties is false at every nesting level.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "packId", "packVersion", "name", "levels", "scenes", "assets"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "packId": { "$ref": "#/definitions/ID" },
+    "packVersion": { "$ref": "#/definitions/VERSION" },
+    "name": { "$ref": "#/definitions/LocalizedTextV1" },
+    "levels": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 64,
+      "items": { "$ref": "#/definitions/LevelDefinition" }
+    },
+    "scenes": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "items": { "$ref": "#/definitions/SceneDefinition" }
+    },
+    "assets": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 256,
+      "items": { "$ref": "#/definitions/AssetDescriptor" }
+    },
+    "keepsakes": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 63,
+      "items": { "$ref": "#/definitions/KeepsakeDefinition" }
+    },
+    "displayConversion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unitLabel", "pointsPerUnit"],
+      "properties": {
+        "unitLabel": { "$ref": "#/definitions/LocalizedTextV1" },
+        "pointsPerUnit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        }
+      }
+    }
+  },
+  "definitions": {
+    "ID": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,63}$"
+    },
+    "VERSION": {
+      "type": "string",
+      "pattern": "^([0-9]|[1-9][0-9]+)\\.([0-9]|[1-9][0-9]+)\\.([0-9]|[1-9][0-9]+)$"
+    },
+    "SAFE_INT": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "LocalizedTextV1": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["zh-CN"],
+      "properties": {
+        "zh-CN": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "en": { "type": "string", "minLength": 1, "maxLength": 200 }
+      }
+    },
+    "StagePresentation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scale", "camera", "milestone"],
+      "properties": {
+        "scale": {
+          "type": "string",
+          "enum": ["individual", "group", "cluster", "field", "region", "horizon"]
+        },
+        "camera": {
+          "type": "string",
+          "enum": ["close", "district", "city", "metro", "regional", "continental", "terminal"]
+        },
+        "milestone": {
+          "type": "string",
+          "enum": ["inline", "banner", "centered-card", "terminal"]
+        }
+      }
+    },
+    "UpgradePresentation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["transition", "reveal", "celebration"],
+      "properties": {
+        "transition": {
+          "type": "string",
+          "enum": ["instant", "crossfade", "layer-build", "camera-step-out"]
+        },
+        "reveal": {
+          "type": "string",
+          "enum": ["subject-swap", "scene-expand", "milestone-card", "collection-add"]
+        },
+        "celebration": {
+          "type": "string",
+          "enum": ["glow-pulse", "spark-burst", "confetti-lite", "ambient-highlight"]
+        }
+      }
+    },
+    "LevelDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "levelId",
+        "threshold",
+        "stageName",
+        "summary",
+        "milestone",
+        "sceneId",
+        "presentation"
+      ],
+      "properties": {
+        "levelId": { "$ref": "#/definitions/ID" },
+        "threshold": { "$ref": "#/definitions/SAFE_INT" },
+        "stageName": { "$ref": "#/definitions/LocalizedTextV1" },
+        "summary": { "$ref": "#/definitions/LocalizedTextV1" },
+        "milestone": { "$ref": "#/definitions/LocalizedTextV1" },
+        "sceneId": { "$ref": "#/definitions/ID" },
+        "presentation": { "$ref": "#/definitions/StagePresentation" },
+        "upgrade": { "$ref": "#/definitions/UpgradePresentation" },
+        "keepsakeId": { "$ref": "#/definitions/ID" }
+      }
+    },
+    "SceneDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sceneId", "backgroundAssetId", "layers", "transition", "sceneLabel"],
+      "properties": {
+        "sceneId": { "$ref": "#/definitions/ID" },
+        "backgroundAssetId": { "$ref": "#/definitions/ID" },
+        "layers": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "$ref": "#/definitions/LayerDefinition" }
+        },
+        "transition": {
+          "type": "string",
+          "enum": ["instant", "crossfade", "zoom-out", "layer-build"]
+        },
+        "sceneLabel": { "$ref": "#/definitions/LocalizedTextV1" }
+      }
+    },
+    "LayerDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["layerId", "kind", "placement", "zOrder"],
+      "properties": {
+        "layerId": { "$ref": "#/definitions/ID" },
+        "kind": {
+          "type": "string",
+          "enum": ["subject", "decoration", "overlay", "terminal-overlay"]
+        },
+        "assetId": { "$ref": "#/definitions/ID" },
+        "population": { "$ref": "#/definitions/PopulationDefinition" },
+        "placement": {
+          "type": "string",
+          "enum": [
+            "center",
+            "edge-left",
+            "edge-right",
+            "top-strip",
+            "bottom-strip",
+            "grid-even",
+            "ring",
+            "horizon-band"
+          ]
+        },
+        "zOrder": { "type": "integer", "minimum": 0, "maximum": 63 }
+      }
+    },
+    "PopulationDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "populationId",
+        "logicalCount",
+        "assetId",
+        "density",
+        "placement",
+        "aggregateLabel"
+      ],
+      "properties": {
+        "populationId": { "$ref": "#/definitions/ID" },
+        "logicalCount": { "$ref": "#/definitions/SAFE_INT" },
+        "assetId": { "$ref": "#/definitions/ID" },
+        "density": {
+          "type": "string",
+          "enum": ["sparse", "moderate", "dense", "network", "luminous"]
+        },
+        "placement": {
+          "type": "string",
+          "enum": [
+            "center",
+            "edge-left",
+            "edge-right",
+            "top-strip",
+            "bottom-strip",
+            "grid-even",
+            "ring",
+            "horizon-band"
+          ]
+        },
+        "aggregateLabel": { "$ref": "#/definitions/LocalizedTextV1" }
+      }
+    },
+    "AssetDescriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "assetId",
+        "path",
+        "format",
+        "role",
+        "width",
+        "height",
+        "byteSizeCompressed",
+        "altText"
+      ],
+      "properties": {
+        "assetId": { "$ref": "#/definitions/ID" },
+        "path": {
+          "type": "string",
+          "pattern": "^assets/[a-z0-9-]+/[a-z0-9-]+\\.(webp|png)$"
+        },
+        "format": { "type": "string", "enum": ["webp", "png"] },
+        "role": { "type": "string", "enum": ["background", "overlay", "sprite"] },
+        "width": { "type": "integer", "minimum": 1, "maximum": 2048 },
+        "height": { "type": "integer", "minimum": 1, "maximum": 2048 },
+        "byteSizeCompressed": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2097152
+        },
+        "altText": { "$ref": "#/definitions/LocalizedTextV1" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "role": { "const": "background" } } },
+          "then": {
+            "properties": {
+              "width": { "type": "integer", "minimum": 1, "maximum": 2560 },
+              "height": { "type": "integer", "minimum": 1, "maximum": 1440 }
+            }
+          }
+        }
+      ]
+    },
+    "KeepsakeDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["keepsakeId", "levelId", "title", "accessDescription"],
+      "properties": {
+        "keepsakeId": { "$ref": "#/definitions/ID" },
+        "levelId": { "$ref": "#/definitions/ID" },
+        "title": { "$ref": "#/definitions/LocalizedTextV1" },
+        "accessDescription": { "$ref": "#/definitions/LocalizedTextV1" },
+        "assetId": { "$ref": "#/definitions/ID" }
+      }
+    }
+  }
+}
