@@ -15,16 +15,16 @@ proposed -> accepted -> superseded
 ```
 
 - `proposed` is reviewable candidate material, not active authority and not implementation authorization.
-- `accepted` means the authorized local acceptance actor accepted the Spec at an exact commit; an accepted feature-branch candidate becomes active repository authority only when that exact accepted Head is merged into the designated authority branch.
+- `accepted` means the authorized local acceptance actor accepted the Spec at an exact commit. It is active repository authority when that accepted revision is present through the designated authority branch or an implementation base derived from it; otherwise it remains an accepted candidate.
 - `superseded` means a later accepted Spec fully replaced it through explicit metadata; partial supersession is not allowed.
 
-Implementation progress, verification coverage, runtime state, and conformance are separate from lifecycle.
+Implementation progress, verification coverage, runtime state, and conformance are separate from lifecycle. Lifecycle status `accepted` does not by itself mean `implementation_authority: contracts`.
 
 Before non-mechanical implementation, governance adoption must be accepted, the governing implementation base must contain an accepted Spec with `implementation_authority: contracts`, and the requested work must be within an active Contract's scope.
 
 ## Current authority inventory
 
-The only current governing Spec candidate is the accepted candidate [Vehicle Pet Development Governance Adoption V1](VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V1.md). Its active authority is `NO, until merged into main`, and it grants no implementation authority.
+[Vehicle Pet Development Governance Adoption V1](VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V1.md) has lifecycle status `accepted`. Its active-authority status is derived from designated-branch or implementation-base membership under the rule above, and it grants no implementation authority.
 
 Current repository state:
 
@@ -42,4 +42,4 @@ The future first product authority is reserved for `docs/specs/VEHICLE_PET_PRODU
 
 | Spec ID | Status | Active authority | Kind | Implementation authority | Scope | Supersedes |
 |---|---|---|---|---|---|---|
-| `VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V1` | accepted candidate | NO, until merged into main | invariant | none | `mayf3/vehicle-pet` | none |
+| `VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V1` | accepted | derived from designated-branch/base membership | invariant | none | `mayf3/vehicle-pet` | none |

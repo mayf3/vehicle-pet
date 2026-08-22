@@ -10,13 +10,13 @@ DESIGNATED_AUTHORITY_BRANCH = mayf3/vehicle-pet:main
 GOVERNANCE_ADOPTION_CLASS = PILOT_OF_DRAFT_DISTRIBUTION
 CLAIM_UPSTREAM_STABLE_RELEASE = NO
 LOCAL_ADOPTION_MAY_BECOME_ACCEPTED = YES
-LOCAL_ADOPTION_STATE = accepted candidate
-ACTIVE_ON_DESIGNATED_AUTHORITY_BRANCH = NO
-ACTIVATION_CONDITION = the exact accepted candidate is merged into mayf3/vehicle-pet:main
+LOCAL_ADOPTION_LIFECYCLE = accepted
+AUTHORITY_ACTIVATION_RULE = the accepted governance is active only when its accepted revision is reachable from mayf3/vehicle-pet:main or from an implementation base derived from that designated authority branch
+ACTIVATION_STATUS_SOURCE = derived from Git branch and base coordinates; not hard-coded in this file
 GOVERNANCE_LOCK = .agents/governance.lock.json
 ```
 
-The vendored distribution is a draft pilot. Its current lock state is `accepted`, but this feature-branch state is only an accepted candidate: it is not active local authority unless and until the exact accepted candidate Head is merged into `mayf3/vehicle-pet:main`. It does not claim upstream stability.
+The vendored distribution is a draft pilot, and its lock state is `accepted`. On a feature branch before the accepted revision enters `mayf3/vehicle-pet:main`, it remains an accepted candidate. After that revision enters `main`, it is active local authority there, and an implementation base derived from a `main` revision containing that active authority is also governed by it. This file therefore does not hard-code an activation `YES` or `NO` that changes at merge time. The distribution does not claim upstream stability.
 
 ## Authority precedence
 
