@@ -1,6 +1,6 @@
 ---
 spec_id: CONFIGURABLE_PET_ENGINE_V1
-status: proposed
+status: accepted
 spec_kind: implementation
 authority_level: governing_spec
 implementation_authority: contracts
@@ -1315,10 +1315,57 @@ OPEN_OWNER_DECISIONS = NONE
 NORMATIVE_TBD = NONE
 UNRESOLVED_AUTHORITY_CONFLICT = NONE
 PARTIAL_SUPERSESSION = NONE
-READY_TO_MARK_ACCEPTED = NO
+READY_TO_MARK_ACCEPTED = YES
 ```
 
-`READY_TO_MARK_ACCEPTED = NO` for exactly one reason: the amended exact Head
-still awaits a new independent audit and Owner acceptance. Implementation-stage
-choices such as specific library selections or internal function names are
-deliberately not elevated into Contracts and are not open normative decisions.
+`READY_TO_MARK_ACCEPTED = YES`: the amended exact Head passed a new independent
+re-audit (`ACCEPT`, zero blockers) and Owner `mayf3` explicitly authorized
+acceptance of those exact coordinates with actual execution-time `accepted_at`.
+Independent review, Owner acceptance, and the authorized acceptance transition
+are complete process facts, not unresolved normative decisions.
+Implementation-stage choices such as specific library selections or internal
+function names are deliberately not elevated into Contracts and are not open
+normative decisions. See §17 for the acceptance record.
+
+## 17. Acceptance record
+
+```text
+SPEC_LIFECYCLE = proposed → accepted candidate
+SPEC_ACCEPTANCE_RECORD_V1 = YES
+ACCEPTED_BY = mayf3
+ACCEPTANCE_ACTOR = mayf3
+ACCEPTED_AT = 2026-08-22T05:14:21Z
+OWNER_ACCEPTANCE_DECISION = ACCEPT
+INDEPENDENT_REAUDIT_RESULT = ACCEPT
+REVIEWED_BASE_COMMIT = 58adc4b930f0236fc194a524bb8547d552369471
+REVIEWED_PROPOSED_HEAD = a4b4d2452e1933d3d753f8715f76e94fb3e4d639
+ACCEPTANCE_COMMIT_PARENT = a4b4d2452e1933d3d753f8715f76e94fb3e4d639
+SEMANTIC_DELTA_AFTER_REVIEW = NONE (lifecycle transition only: proposed → accepted candidate)
+PARENT_CHILD_ACCEPTED_ATOMICALLY = YES (VEHICLE_PET_PRODUCT_DIRECTION_V1 and CONFIGURABLE_PET_ENGINE_V1 accepted together in the same commit and the same Head)
+B01_CLOSED = YES
+B02_CLOSED = YES
+B03_CLOSED = YES
+B04_CLOSED = YES
+B05_CLOSED = YES
+B06_CLOSED = YES
+B07_CLOSED = YES
+B08_CLOSED = YES
+B09_CLOSED = YES
+B10_CLOSED = YES
+B11_CLOSED = YES
+B12_CLOSED = YES
+B13_CLOSED = YES
+BLOCKERS_CLOSED = 13
+BLOCKERS_REMAINING = 0
+OPEN_OWNER_DECISIONS = NONE
+NORMATIVE_TBD = NONE
+```
+
+Binding facts:
+
+- The independent re-audit bound the reviewed Base `58adc4b930f0236fc194a524bb8547d552369471` and the reviewed proposed Head `a4b4d2452e1933d3d753f8715f76e94fb3e4d639` and returned `ACCEPT` with zero blockers; review blockers B01–B13 are all closed at the reviewed Head, including Owner decisions B04 (`DEC-PET-012`, entire-snapshot rejection, OPTION_A) and B10 (`DEC-PET-013`, silent Pack switch and version change, OPTION_A).
+- This acceptance commit's parent is exactly `a4b4d2452e1933d3d753f8715f76e94fb3e4d639`; the only semantic change from the reviewed Head is the lifecycle transition `proposed → accepted candidate` recorded here and in the matching sections of `VEHICLE_PET_PRODUCT_DIRECTION_V1` and `docs/specs/README.md`.
+- Goal, Scope, Decisions, Contracts `CTR-PET-001`–`CTR-PET-030`, Acceptance items, the frozen data model of §9, the preset whitelist and observable semantics of §10, the Pack content freezes of §11, thresholds, DOM caps, ceremony limits, and failure semantics are unchanged.
+- This Spec is now an `accepted candidate`: `status: accepted` with `implementation_authority: contracts` unchanged. It is not yet active repository authority because this exact accepted Head is not yet merged into `mayf3/vehicle-pet:main`.
+- Product implementation remains unauthorized and MUST NOT begin until this Spec and `VEHICLE_PET_PRODUCT_DIRECTION_V1` are both accepted and their accepted content is present on `mayf3/vehicle-pet:main` (§3, `CTR-PET-021` deferrals unchanged).
+- Merge authorization is a separate Owner decision; no merge has occurred at `ACCEPTED_AT`.
