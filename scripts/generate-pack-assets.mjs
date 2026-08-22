@@ -254,6 +254,33 @@ const RECIPES = {
         </g>
         <rect x="0" y="640" width="${W}" height="${H - 640}" fill="#05070f"/>`),
     },
+    'sprite-cabin-driver': {
+      width: 480,
+      height: 480,
+      svg: svgWrap(480, 480, `<defs><linearGradient id="driverBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#b9dff5"/></linearGradient></defs>
+        <ellipse cx="240" cy="420" rx="160" ry="24" fill="#0d1220" opacity="0.3"/>
+        <path d="M72,330 L96,178 Q108,132 160,120 H320 Q372,132 384,178 L408,330 Q410,370 370,378 H110 Q70,370 72,330 Z" fill="url(#driverBody)" stroke="#4b7896" stroke-width="7"/>
+        <path d="M120,190 Q240,126 360,190 L344,260 H136 Z" fill="#bce9ff" stroke="#5aa5ca" stroke-width="6"/>
+        <path d="M240,158 V270" stroke="#5aa5ca" stroke-width="6"/>
+        <circle cx="183" cy="208" r="27" fill="#2563a6"/><path d="M145,267 Q183,228 221,267 V292 H145 Z" fill="#2563a6"/>
+        <circle cx="297" cy="210" r="25" fill="none" stroke="#8ba5b5" stroke-width="6" stroke-dasharray="8 7"/>
+        <path d="M267,269 Q297,239 327,269" fill="none" stroke="#8ba5b5" stroke-width="6" stroke-dasharray="8 7"/>
+        <rect x="128" y="315" width="224" height="42" rx="21" fill="#2563a6"/><circle cx="155" cy="336" r="9" fill="#d9f2ff"/><circle cx="325" cy="336" r="9" fill="#d9f2ff"/>`),
+    },
+    'sprite-cabin-safety': {
+      width: 480,
+      height: 480,
+      svg: svgWrap(480, 480, `<defs><linearGradient id="safetyBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#d8e4f5"/></linearGradient></defs>
+        <ellipse cx="240" cy="420" rx="160" ry="24" fill="#0d1220" opacity="0.3"/>
+        <path d="M72,330 L96,178 Q108,132 160,120 H320 Q372,132 384,178 L408,330 Q410,370 370,378 H110 Q70,370 72,330 Z" fill="url(#safetyBody)" stroke="#6269a8" stroke-width="7"/>
+        <path d="M120,190 Q240,126 360,190 L344,260 H136 Z" fill="#d8dcff" stroke="#777fc5" stroke-width="6"/>
+        <path d="M240,158 V270" stroke="#777fc5" stroke-width="6"/>
+        <circle cx="183" cy="210" r="25" fill="none" stroke="#8ba5b5" stroke-width="6" stroke-dasharray="8 7"/>
+        <path d="M153,269 Q183,239 213,269" fill="none" stroke="#8ba5b5" stroke-width="6" stroke-dasharray="8 7"/>
+        <circle cx="297" cy="208" r="27" fill="#7c3fb2"/><path d="M259,267 Q297,228 335,267 V292 H259 Z" fill="#7c3fb2"/>
+        <path d="M272,235 L297,260 L322,235" fill="none" stroke="#f4dd69" stroke-width="8"/>
+        <rect x="128" y="315" width="224" height="42" rx="21" fill="#6269a8"/><circle cx="155" cy="336" r="9" fill="#f1efff"/><circle cx="325" cy="336" r="9" fill="#f1efff"/>`),
+    },
     'sprite-subject-pod': {
       width: 480,
       height: 480,
@@ -445,6 +472,24 @@ const RECIPES = {
     },
   },
 }
+
+// Pack-owned subject sprites used by the frozen road-test scene and the
+// subject-swap keepsake seam. The protection vehicle is composited into the
+// subject art so each declared level state stays visually explicit.
+const fleetRecipes = RECIPES['autonomous-fleet']
+const protectionBadge = `<g transform="translate(318 292) scale(.56)">
+  <path d="M36,142 Q42,100 80,90 H160 Q198,100 204,142 V170 H36 Z" fill="#f59e42" stroke="#b85f18" stroke-width="7"/>
+  <rect x="102" y="72" width="36" height="17" rx="8" fill="#ffd84d" stroke="#a75b15" stroke-width="4"/>
+  <path d="M120,60 V44 M94,67 L82,52 M146,67 L159,52" stroke="#ffd84d" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="76" cy="176" r="18" fill="#26314a"/><circle cx="164" cy="176" r="18" fill="#26314a"/>
+</g>`
+function withProtectionVehicle(recipe) {
+  return { ...recipe, svg: recipe.svg.replace('</svg>', `${protectionBadge}</svg>`) }
+}
+fleetRecipes['sprite-subject-pod--l1'] = withProtectionVehicle(fleetRecipes['sprite-cabin-driver'])
+fleetRecipes['sprite-subject-pod--l2'] = fleetRecipes['sprite-cabin-driver']
+fleetRecipes['sprite-subject-pod--l3'] = withProtectionVehicle(fleetRecipes['sprite-cabin-safety'])
+fleetRecipes['sprite-subject-pod--l4'] = fleetRecipes['sprite-cabin-safety']
 
 // ---------------------------------------------------------------------------
 // Rendering and sync

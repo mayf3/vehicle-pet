@@ -54,7 +54,7 @@ export function UpgradeCeremony() {
   return (
     <div className="vp-ceremony" data-pet-ceremony="true" data-beats={beats.length} data-total-ms={ceremony.plan.totalMs}>
       <div
-        className="vp-ceremony-inner"
+        className={`vp-ceremony-inner${reduced ? ' vp-ceremony-inner-reduced' : ''}`}
         ref={regionRef}
         role="status"
         aria-live="polite"

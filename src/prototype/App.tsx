@@ -26,6 +26,7 @@ export interface AppProps {
   source: MockProgressSource
   storage: PetStorageAdapter
   initialReducedMotion?: boolean
+  dev?: boolean
   showcase?: boolean
 }
 
@@ -45,12 +46,12 @@ export function App(props: AppProps) {
       source={source}
       reducedMotion={props.initialReducedMotion}
     >
-      <Shell source={source} storage={storage} />
+      <Shell source={source} storage={storage} dev={props.dev === true} />
     </PetEngineProvider>
   )
 }
 
-function Shell({ source, storage }: { source: MockProgressSource; storage: PetStorageAdapter }) {
+function Shell({ source, storage, dev }: { source: MockProgressSource; storage: PetStorageAdapter; dev: boolean }) {
   const { snapshot, dispatchHostActivity, setReducedMotion } = usePetEngine()
   const [exactPoints, setExactPoints] = useState('0')
   const [failSubjectAsset, setFailSubjectAsset] = useState(false)
@@ -83,17 +84,17 @@ function Shell({ source, storage }: { source: MockProgressSource; storage: PetSt
 
   return (
     <div style={{ maxWidth: 1080, margin: '0 auto', padding: '20px 16px 80px', display: 'grid', gap: 16 }}>
-      <header style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-        <h1 style={{ fontSize: 20, margin: 0, color: '#e8eefb' }}>Vehicle Pet — Engine V1 Prototype</h1>
-        <span style={{ fontSize: 12, color: '#7d93b8' }}>MockProgressSource only · 本地运行 · 无网络</span>
+      <header className="vp-product-header" style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        <h1 className="vp-product-title" style={{ fontSize: 20, margin: 0 }}>Vehicle Pet</h1>
+        <span className="vp-product-tagline" style={{ fontSize: 12 }}>陪你一起成长的旅程伙伴</span>
       </header>
 
       <DailyGreeting />
 
       {snapshot.state === 'pack-unavailable' ? (
         <section className="vp-panel" data-pet-state="pack-unavailable">
-          <h3>pack-unavailable</h3>
-          <p>没有可用的 Pet Pack：默认 Pack 无效，引擎进入显式 pack-unavailable 状态，不会崩溃、不会回退循环、进度不变。</p>
+          <h3>伙伴正在休息</h3>
+          <p>当前旅程暂时无法载入，请稍后再试。</p>
         </section>
       ) : null}
 
@@ -109,8 +110,9 @@ function Shell({ source, storage }: { source: MockProgressSource; storage: PetSt
 
       <PetKeepsakeCollection />
 
+      {dev ? (
       <section className="vp-panel" data-prototype-controls="true">
-        <h3>原型控制（仅 MockProgressSource）</h3>
+        <h3>开发控制台</h3>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
           <button type="button" onClick={() => source.addPoints(100)}>+100</button>
           <button type="button" onClick={() => source.addPoints(10000)}>+10,000</button>
@@ -173,6 +175,7 @@ function Shell({ source, storage }: { source: MockProgressSource; storage: PetSt
           </pre>
         ) : null}
       </section>
+      ) : null}
 
       <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
         <PackSelector />
@@ -189,6 +192,7 @@ function Shell({ source, storage }: { source: MockProgressSource; storage: PetSt
         </section>
       </div>
 
+      {dev ? (
       <section className="vp-panel">
         <h3>引擎诊断（最近 {snapshot.diagnostics.length} 条）</h3>
         <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: '#9fb4d8' }} data-diagnostics="true">
@@ -200,6 +204,7 @@ function Shell({ source, storage }: { source: MockProgressSource; storage: PetSt
           {snapshot.diagnostics.length === 0 ? <li>（无诊断）</li> : null}
         </ul>
       </section>
+      ) : null}
     </div>
   )
 }

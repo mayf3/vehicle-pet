@@ -30,9 +30,15 @@ export class MemoryPetStorageAdapter implements PetStorageAdapter {
   }
 
   async claimReceipt(sourceId: string, subjectId: string, receiptId: string): Promise<ClaimResult> {
+    return this.claimReceiptBatch(sourceId, subjectId, [receiptId])
+  }
+
+  async claimReceiptBatch(sourceId: string, subjectId: string, receiptIds: string[]): Promise<ClaimResult> {
+    const ids = [...new Set(receiptIds)].sort()
+    if (ids.length === 0) return 'lost'
     const record = this.journal(sourceId, subjectId)
-    if (record.consumedReceiptIds.includes(receiptId)) return 'lost'
-    record.consumedReceiptIds.push(receiptId)
+    if (ids.some((id) => record.consumedReceiptIds.includes(id))) return 'lost'
+    record.consumedReceiptIds.push(...ids)
     return 'won'
   }
 

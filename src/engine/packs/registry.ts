@@ -26,6 +26,17 @@ export interface CreateRegistryResult {
   diagnostics: EngineDiagnostic[]
 }
 
+function immutableManifest(manifest: PetPackManifestV1): PetPackManifestV1 {
+  const clone = JSON.parse(JSON.stringify(manifest)) as PetPackManifestV1
+  const freeze = (value: unknown): void => {
+    if (typeof value !== 'object' || value === null || Object.isFrozen(value)) return
+    for (const child of Object.values(value)) freeze(child)
+    Object.freeze(value)
+  }
+  freeze(clone)
+  return clone
+}
+
 export class PackRegistry {
   private readonly packs = new Map<string, RegisteredPack>()
 
@@ -47,7 +58,7 @@ export class PackRegistry {
         })
         continue
       }
-      const manifest = result.manifest
+      const manifest = immutableManifest(result.manifest)
       if (registry.packs.has(manifest.packId)) {
         diagnostics.push({
           code: 'pack-invalid',
@@ -56,10 +67,10 @@ export class PackRegistry {
         })
         continue
       }
-      registry.packs.set(manifest.packId, {
+      registry.packs.set(manifest.packId, Object.freeze({
         manifest,
         resolveAssetUrl: bundle.resolveAssetUrl,
-      })
+      }))
     }
     return { registry, diagnostics }
   }

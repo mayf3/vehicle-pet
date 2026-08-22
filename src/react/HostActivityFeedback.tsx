@@ -40,7 +40,7 @@ export function HostActivityFeedback() {
     >
       <span aria-hidden="true">{icon}</span>
       <span>
-        {text} <span style={{ opacity: 0.65, fontSize: 12 }}>({feedback.activityId})</span>
+        {text} <span style={{ fontSize: 12 }}>({feedback.activityId})</span>
       </span>
     </div>
   )

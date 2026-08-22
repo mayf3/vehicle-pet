@@ -143,6 +143,11 @@ export class FailingClaimsStorage extends MemoryPetStorageAdapter {
     if (this.failClaims) throw new Error('simulated storage failure')
     return super.claimReceipt(sourceId, subjectId, receiptId)
   }
+
+  override async claimReceiptBatch(sourceId: string, subjectId: string, receiptIds: string[]): Promise<'won' | 'lost'> {
+    if (this.failClaims) throw new Error('simulated storage failure')
+    return super.claimReceiptBatch(sourceId, subjectId, receiptIds)
+  }
 }
 
 export function snapshot(points: number, revision: number, subjectId = 'subject-1', sourceId = 'mock-progress') {

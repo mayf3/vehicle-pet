@@ -45,15 +45,21 @@ export class IndexedDbPetStorage implements PetStorageAdapter {
   }
 
   async claimReceipt(sourceId: string, subjectId: string, receiptId: string): Promise<ClaimResult> {
+    return this.claimReceiptBatch(sourceId, subjectId, [receiptId])
+  }
+
+  async claimReceiptBatch(sourceId: string, subjectId: string, receiptIds: string[]): Promise<ClaimResult> {
+    const ids = [...new Set(receiptIds)].sort()
+    if (ids.length === 0) return 'lost'
     const key = journalRecordKey(sourceId, subjectId)
     const tx = this.db.transaction('journals', 'readwrite')
     const store = tx.objectStore('journals')
     const record = (await store.get(key)) ?? { consumedReceiptIds: [], greetedLocalDays: [] }
-    if (record.consumedReceiptIds.includes(receiptId)) {
+    if (ids.some((id) => record.consumedReceiptIds.includes(id))) {
       await tx.done
       return 'lost'
     }
-    record.consumedReceiptIds.push(receiptId)
+    record.consumedReceiptIds.push(...ids)
     await store.put(record, key)
     await tx.done
     return 'won'

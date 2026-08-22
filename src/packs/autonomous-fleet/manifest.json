@@ -360,7 +360,7 @@
         {
           "layerId": "pod",
           "kind": "subject",
-          "assetId": "sprite-subject-pod",
+          "assetId": "sprite-subject-pod--l1",
           "placement": "center",
           "zOrder": 20
         }
@@ -862,6 +862,110 @@
       }
     },
     {
+      "assetId": "sprite-subject-pod--l1",
+      "path": "assets/autonomous-fleet/sprite-subject-pod--l1.webp",
+      "format": "webp",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 13978,
+      "altText": {
+        "zh-CN": "你的 Pet：主驾有人、副驾空座，后方保护车随行",
+        "en": "Your pet: driver aboard, empty co-pilot seat, protection vehicle behind"
+      }
+    },
+    {
+      "assetId": "sprite-subject-pod--l1-png",
+      "path": "assets/autonomous-fleet/sprite-subject-pod--l1.png",
+      "format": "png",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 21507,
+      "altText": {
+        "zh-CN": "你的 Pet：主驾有人、副驾空座，后方保护车随行",
+        "en": "Your pet: driver aboard, empty co-pilot seat, protection vehicle behind"
+      }
+    },
+    {
+      "assetId": "sprite-subject-pod--l2",
+      "path": "assets/autonomous-fleet/sprite-subject-pod--l2.webp",
+      "format": "webp",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 11864,
+      "altText": {
+        "zh-CN": "你的 Pet：主驾有人、副驾空座，无后方保护车",
+        "en": "Your pet: driver aboard, empty co-pilot seat, no protection vehicle"
+      }
+    },
+    {
+      "assetId": "sprite-subject-pod--l2-png",
+      "path": "assets/autonomous-fleet/sprite-subject-pod--l2.png",
+      "format": "png",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 19464,
+      "altText": {
+        "zh-CN": "你的 Pet：主驾有人、副驾空座，无后方保护车",
+        "en": "Your pet: driver aboard, empty co-pilot seat, no protection vehicle"
+      }
+    },
+    {
+      "assetId": "sprite-subject-pod--l3",
+      "path": "assets/autonomous-fleet/sprite-subject-pod--l3.webp",
+      "format": "webp",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 13788,
+      "altText": {
+        "zh-CN": "你的 Pet：主驾空座、副驾安全员随行，后方保护车随行",
+        "en": "Your pet: empty driver seat, safety officer aboard, protection vehicle behind"
+      }
+    },
+    {
+      "assetId": "sprite-subject-pod--l3-png",
+      "path": "assets/autonomous-fleet/sprite-subject-pod--l3.png",
+      "format": "png",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 21571,
+      "altText": {
+        "zh-CN": "你的 Pet：主驾空座、副驾安全员随行，后方保护车随行",
+        "en": "Your pet: empty driver seat, safety officer aboard, protection vehicle behind"
+      }
+    },
+    {
+      "assetId": "sprite-subject-pod--l4",
+      "path": "assets/autonomous-fleet/sprite-subject-pod--l4.webp",
+      "format": "webp",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 11672,
+      "altText": {
+        "zh-CN": "你的 Pet：主驾空座、副驾安全员随行，无后方保护车",
+        "en": "Your pet: empty driver seat, safety officer aboard, no protection vehicle"
+      }
+    },
+    {
+      "assetId": "sprite-subject-pod--l4-png",
+      "path": "assets/autonomous-fleet/sprite-subject-pod--l4.png",
+      "format": "png",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 19514,
+      "altText": {
+        "zh-CN": "你的 Pet：主驾空座、副驾安全员随行，无后方保护车",
+        "en": "Your pet: empty driver seat, safety officer aboard, no protection vehicle"
+      }
+    },
+    {
       "assetId": "sprite-subject-pod",
       "path": "assets/autonomous-fleet/sprite-subject-pod.webp",
       "format": "webp",
@@ -1030,7 +1134,7 @@
         "zh-CN": "纪念第一次没有保护车的独立行驶。",
         "en": "Marks the first solo run without a protection car."
       },
-      "assetId": "sprite-unit-car"
+      "assetId": "sprite-subject-pod--l2"
     },
     {
       "keepsakeId": "ks-l3",
@@ -1043,7 +1147,7 @@
         "zh-CN": "纪念主驾第一次空出的时刻。",
         "en": "Marks the moment the main seat first went empty."
       },
-      "assetId": "sprite-unit-car"
+      "assetId": "sprite-subject-pod--l3"
     },
     {
       "keepsakeId": "ks-l4",
@@ -1056,7 +1160,7 @@
         "zh-CN": "纪念保护车撤除后的全车无人。",
         "en": "Marks full driverless operation without a protection car."
       },
-      "assetId": "sprite-unit-car"
+      "assetId": "sprite-subject-pod--l4"
     },
     {
       "keepsakeId": "ks-l5",

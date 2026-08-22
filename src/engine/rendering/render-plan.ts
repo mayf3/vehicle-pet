@@ -63,15 +63,21 @@ export function buildSceneRenderPlan({ manifest, level, locale }: BuildRenderPla
   for (const layer of scene.layers) {
     if (layer.population !== undefined) {
       populations.push({ layerId: layer.layerId, population: layer.population })
-      continue
+      // A subject layer remains the Pet's accessible visual focus even when it
+      // also owns a logical population. Decoration populations need no extra
+      // non-population wrapper node.
+      if (layer.kind !== 'subject') continue
     }
+    const resolvedAssetId = layer.assetId === undefined
+      ? null
+      : resolveLayerAsset(manifest, level, layer.kind, layer.assetId, assetsById)
     nodes.push({
       nodeId: `${scene.sceneId}:${layer.layerId}`,
       kind: layer.kind,
-      assetId: layer.assetId ?? null,
+      assetId: resolvedAssetId,
       altText:
-        layer.kind === 'subject' && layer.assetId !== undefined
-          ? resolveLocalizedText(assetsById.get(layer.assetId)!.altText, locale)
+        layer.kind === 'subject' && resolvedAssetId !== null
+          ? resolveLocalizedText(assetsById.get(resolvedAssetId)!.altText, locale)
           : null,
       ariaHidden: layer.kind === 'decoration',
       text: null,
@@ -151,6 +157,26 @@ export function buildSceneRenderPlan({ manifest, level, locale }: BuildRenderPla
     subjectScalePermille: SCALE_SUBJECT_PERMILLE[level.presentation.scale],
     nodes,
   }
+}
+
+/**
+ * `subject-swap` has one schema-defined per-level asset seam: the current
+ * level's keepsake. Other layers and reveal modes keep the scene asset.
+ */
+function resolveLayerAsset(
+  manifest: PetPackManifestV1,
+  level: LevelDefinition,
+  layerKind: import('../types/manifest').LayerDefinition['kind'],
+  sceneAssetId: string,
+  assetsById: Map<string, PetPackManifestV1['assets'][number]>,
+): string {
+  if (layerKind !== 'subject' || level.upgrade?.reveal !== 'subject-swap' || level.keepsakeId === undefined) {
+    return sceneAssetId
+  }
+  const keepsake = manifest.keepsakes?.find((candidate) => candidate.keepsakeId === level.keepsakeId)
+  return keepsake?.assetId !== undefined && assetsById.has(keepsake.assetId)
+    ? keepsake.assetId
+    : sceneAssetId
 }
 
 function populationZOrder(scene: SceneDefinition, layerId: string): number {

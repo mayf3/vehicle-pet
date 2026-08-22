@@ -8,7 +8,7 @@ import { buildSceneRenderPlan, validatePack, type Locale, type PetPackManifestV1
 import type { PackBundleInput } from '../engine'
 
 function showcaseLevelIndices(manifest: PetPackManifestV1): number[] {
-  if (manifest.levels.length >= 12) return [0, 3, 6, 9, 10, 11]
+  if (manifest.levels.length >= 12) return [0, 1, 2, 3, 6, 9, 10, 11]
   return manifest.levels.map((_, i) => i)
 }
 
@@ -19,7 +19,7 @@ function ShowcaseCell(props: { bundle: PackBundleInput; manifest: PetPackManifes
   const plan = buildSceneRenderPlan({ manifest, level, locale })
   const zoom = plan.cameraZoomPermille / 1000
   return (
-    <figure style={{ margin: 0 }}>
+    <figure style={{ margin: 0 }} data-showcase-pack={manifest.packId} data-showcase-level={level.levelId} data-showcase-scene={plan.sceneId}>
       <div style={{ position: 'relative', width: '100%', aspectRatio: '16 / 9', overflow: 'hidden', borderRadius: 10, background: '#0d1220' }}>
         <div style={{ position: 'absolute', inset: 0, transform: `scale(${zoom.toFixed(3)})`, transformOrigin: 'center' }}>
           {plan.nodes.map((node) => {

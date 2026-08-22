@@ -96,6 +96,8 @@ export class PetEngine {
   private localeValue: Locale
   private reducedMotionValue: boolean
   private lastValidSnapshot: ProgressSnapshotV1 | null = null
+  private boundSourceId: string | null = null
+  private presentationEpoch = 0
   private pendingReceipts: UpgradeReceipt[] = []
   private unlockedKeepsakes: UnlockedKeepsakeKey[] = []
   private hostFeedback: HostFeedbackPresentation | null = null
@@ -122,15 +124,16 @@ export class PetEngine {
 
   async initialize(): Promise<void> {
     const persisted = await this.storage.getActivePackId().catch(() => null)
+    const defaultPack = this.registry.get(this.defaultPackId)
     let candidateId = persisted ?? this.defaultPackId
-    let pack = this.registry.get(candidateId)
-    if (pack === undefined) {
+    let pack = defaultPack === undefined ? undefined : this.registry.get(candidateId)
+    if (defaultPack !== undefined && pack === undefined) {
       this.pushDiagnostic(
         'pack-startup-invalid',
         `startup pack ${candidateId} is invalid or missing; falling back to ${this.defaultPackId}`,
       )
       candidateId = this.defaultPackId
-      pack = this.registry.get(candidateId)
+      pack = defaultPack
     }
     if (pack !== undefined) {
       this.activePack = pack
@@ -189,10 +192,10 @@ export class PetEngine {
     const snapshot = validation.snapshot
     const applied = this.appliedBySubject.get(snapshot.subjectId)
 
-    if (applied !== undefined && applied.sourceId !== snapshot.sourceId) {
+    if (this.boundSourceId !== null && this.boundSourceId !== snapshot.sourceId) {
       this.pushDiagnostic(
         'source-mismatch',
-        `sourceId changed mid-session from ${applied.sourceId} to ${snapshot.sourceId}; configuration error, snapshot rejected`,
+        `sourceId changed mid-session from ${this.boundSourceId} to ${snapshot.sourceId}; configuration error, snapshot rejected`,
       )
       this.notify()
       return
@@ -219,6 +222,9 @@ export class PetEngine {
     }
 
     const isFirstForSubject = applied === undefined
+    const isSubjectReset = this.lastValidSnapshot !== null && this.lastValidSnapshot.subjectId !== snapshot.subjectId
+    if (this.boundSourceId === null) this.boundSourceId = snapshot.sourceId
+    if (isSubjectReset) this.invalidatePendingPresentation()
     this.appliedBySubject.set(snapshot.subjectId, {
       sourceId: snapshot.sourceId,
       subjectId: snapshot.subjectId,
@@ -334,9 +340,14 @@ export class PetEngine {
       this.notify()
       return false
     }
-    if (this.activePack !== null && this.activePack.manifest.packId === pack.manifest.packId) {
+    if (
+      this.activePack !== null &&
+      this.activePack.manifest.packId === pack.manifest.packId &&
+      this.activePack.manifest.packVersion === pack.manifest.packVersion
+    ) {
       return true
     }
+    this.invalidatePendingPresentation()
     this.activePack = pack
     if (this.state === 'pack-unavailable') {
       this.state = this.lastValidSnapshot !== null ? 'ready' : 'waiting-for-valid-progress'
@@ -356,34 +367,54 @@ export class PetEngine {
 
   // --- presentation claims ------------------------------------------------------
 
-  /** Consume-before-play: claims every pending receipt key before any ceremony. */
+  /** Consume-before-play: atomically claims the deterministic receipt batch before any ceremony. */
   async claimPendingCeremony(): Promise<{ receipts: UpgradeReceipt[]; plan: CeremonyPlan } | null> {
-    const receipts = this.pendingReceipts
-    if (receipts.length === 0 || this.activePack === null) {
+    const receipts = [...this.pendingReceipts]
+    const pack = this.activePack
+    if (receipts.length === 0 || pack === null) {
       this.pendingReceipts = []
       return null
     }
-    const won: UpgradeReceipt[] = []
-    for (const receipt of receipts) {
-      try {
-        const result = await this.storage.claimReceipt(receipt.sourceId, receipt.subjectId, receipt.receiptId)
-        if (result === 'won') won.push(receipt)
-      } catch {
-        // Storage failure may skip this celebration but must never duplicate it.
-        this.pushDiagnostic('storage-error', `claim failed for ${receipt.receiptId}; skipping its ceremony`)
-      }
-    }
-    const plan = won.length > 0 ? buildMergedCeremony(won, this.activePack.manifest, this.localeValue) : null
-    if (won.length === 0 || plan === null) {
-      this.pendingReceipts = []
+    const snapshot = this.lastValidSnapshot
+    const outsideActiveDomain =
+      snapshot === null ||
+      receipts.some(
+        (receipt) =>
+          receipt.sourceId !== snapshot.sourceId ||
+          receipt.subjectId !== snapshot.subjectId ||
+          receipt.packId !== pack.manifest.packId ||
+          receipt.packVersion !== pack.manifest.packVersion,
+      )
+    if (outsideActiveDomain) {
+      this.invalidatePendingPresentation()
       this.notify()
       return null
     }
-    return { receipts: won, plan }
+
+    const epoch = this.presentationEpoch
+    this.pendingReceipts = []
+    this.notify()
+    const first = receipts[0]!
+    try {
+      const result = await this.storage.claimReceiptBatch(
+        first.sourceId,
+        first.subjectId,
+        receipts.map((receipt) => receipt.receiptId),
+      )
+      if (result === 'lost' || epoch !== this.presentationEpoch) return null
+    } catch {
+      // Storage failure may skip this celebration but must never duplicate it.
+      this.pushDiagnostic('storage-error', `batch claim failed for ${receipts.length} receipt(s); skipping ceremony`)
+      return null
+    }
+
+    const plan = buildMergedCeremony(receipts, pack.manifest, this.localeValue)
+    return plan === null ? null : { receipts, plan }
   }
 
   completeCeremony(): void {
-    this.pendingReceipts = []
+    // The claimed batch was removed before its atomic claim; do not erase receipts
+    // that may have arrived while that ceremony was playing.
     this.notify()
   }
 
@@ -494,6 +525,11 @@ export class PetEngine {
     } catch {
       this.pushDiagnostic('storage-error', 'failed to list unlocked keepsakes')
     }
+  }
+
+  private invalidatePendingPresentation(): void {
+    this.presentationEpoch++
+    this.pendingReceipts = []
   }
 
   private track(op: Promise<unknown>): void {
