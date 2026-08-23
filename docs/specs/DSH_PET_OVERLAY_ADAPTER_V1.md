@@ -1,6 +1,6 @@
 ---
 spec_id: DSH_PET_OVERLAY_ADAPTER_V1
-status: proposed
+status: accepted
 spec_kind: implementation
 authority_level: governing_spec
 implementation_authority: contracts
@@ -796,7 +796,7 @@ PNPM_DEV_REQUIRED_FOR_PRODUCTION = NO
 SPEC_GOVERNANCE_MODE = AUTHOR
 SPEC_ID = DSH_PET_OVERLAY_ADAPTER_V1
 SPEC_KIND = implementation
-STATUS = proposed
+STATUS = accepted
 AUTHORITY_LEVEL = governing_spec
 IMPLEMENTATION_AUTHORITY = contracts
 PRIMARY_PARENT_AUTHORITY = VEHICLE_PET_PRODUCT_DIRECTION_V1
@@ -807,9 +807,83 @@ UNRESOLVED_AUTHORITY_CONFLICT = NONE
 PARTIAL_SUPERSESSION = NONE
 CONTRACT_COUNT = 13
 CONTRACTS_WITH_ACCEPTANCE = 13
+ACCEPTANCE_COUNT = 18
 REAL_TOKEN_INTEGRATION_AUTHORIZED = NO
+DSH_TOKEN_TO_PROGRESS_AUTHORIZED = NO
 DEEPSEEK_HARNESS_CORE_CHANGE_AUTHORIZED = NO
+REMOTE_PACK_AUTHORIZED = NO
+AUDIO_AUTHORIZED = NO
+MULTI_PET_AUTHORIZED = NO
 AUTHORING_READY_FOR_REVIEW = YES
-READY_TO_MARK_ACCEPTED = NO
-READY_TO_MARK_ACCEPTED_REASON = exact proposed Head 待独立审计和 Owner acceptance
+READY_TO_MARK_ACCEPTED = YES
+READY_TO_MARK_ACCEPTED_REASON = exact proposed Head passed the independent review (ACCEPT, zero blockers) and Owner mayf3 accepted those exact coordinates with execution-time ACCEPTED_AT
 ```
+
+`READY_TO_MARK_ACCEPTED = YES`: the exact proposed Head
+`bdd9c8a32bcb3309d7e44a359cce9a9e48c82d1c` passed the independent review (`ACCEPT`,
+zero blockers) and `mayf3` explicitly authorized acceptance of those exact
+coordinates with actual execution-time `ACCEPTED_AT`. Independent review, Owner
+acceptance, and the authorized acceptance transition are complete process facts,
+not unresolved normative decisions. See §14 for the acceptance record.
+
+## 14. Acceptance record
+
+```text
+SPEC_LIFECYCLE = proposed → accepted candidate
+DSH_OVERLAY_ADAPTER_SPEC_ACCEPTANCE_RECORD_V1 = YES
+ACCEPTED_BY = mayf3
+ACCEPTANCE_ACTOR = mayf3
+ACCEPTED_AT = 2026-08-23T14:04:21Z
+OWNER_ACCEPTANCE_DECISION = ACCEPT
+INDEPENDENT_REVIEW_RESULT = ACCEPT
+REVIEWED_BASE_COMMIT = 25b56b3b8540031e9d6e320d22872d86a136c7ad
+REVIEWED_PROPOSED_HEAD = bdd9c8a32bcb3309d7e44a359cce9a9e48c82d1c
+ACCEPTANCE_COMMIT_PARENT = bdd9c8a32bcb3309d7e44a359cce9a9e48c82d1c
+SEMANTIC_DELTA_AFTER_REVIEW = NONE (lifecycle transition only: proposed → accepted candidate)
+BLOCKERS = 0
+CONTRACT_COUNT = 13
+CONTRACTS_WITH_ACCEPTANCE = 13
+ACCEPTANCE_COUNT = 18
+OPEN_OWNER_DECISIONS = NONE
+NORMATIVE_TBD = NONE
+MERGE_AUTHORIZED = NO
+OVERLAY_IMPLEMENTATION_AUTHORIZED_BEFORE_MERGE = NO
+REAL_TOKEN_INTEGRATION_AUTHORIZED = NO
+DSH_TOKEN_TO_PROGRESS_AUTHORIZED = NO
+DEEPSEEK_HARNESS_CORE_CHANGE_AUTHORIZED = NO
+REMOTE_PACK_AUTHORIZED = NO
+AUDIO_AUTHORIZED = NO
+MULTI_PET_AUTHORIZED = NO
+```
+
+Binding facts:
+
+- The independent review bound the reviewed Base
+  `25b56b3b8540031e9d6e320d22872d86a136c7ad` and the reviewed proposed Head
+  `bdd9c8a32bcb3309d7e44a359cce9a9e48c82d1c` and returned `ACCEPT` with zero
+  blockers.
+- This acceptance commit's parent is exactly
+  `bdd9c8a32bcb3309d7e44a359cce9a9e48c82d1c`; the only semantic change from the
+  reviewed Head is the lifecycle transition `proposed → accepted candidate`
+  recorded here and in the matching section of `docs/specs/README.md`.
+- Goal, Scope, Current State, Observations, Claims/evidence, Decisions
+  `DEC-OVERLAY-001`–`DEC-OVERLAY-005`, Contracts `CTR-OVERLAY-001`–`CTR-OVERLAY-013`,
+  Acceptance items `ACC-OVERLAY-001`–`ACC-OVERLAY-018` and both coverage tables,
+  the frozen model of §8 including the exact DSH pin
+  `f77b5a2fcebc2d9138f6608a60636f2294868d42`, the overlay state machine and sizes,
+  the structured session mapping, local preferences semantics, the React
+  singleton boundary, install/update/uninstall rules, onboarding suppression, the
+  real-token deferral, Alternatives §11, and Migration/rollback §12 are unchanged.
+- This Spec is now an `accepted candidate`: `status: accepted` with
+  `implementation_authority: contracts` unchanged. On this branch it is an
+  accepted candidate, not yet active repository authority.
+- Activation is a reachability rule, not a recorded value: this Spec becomes
+  active repository authority only when the exact accepted revision is reachable
+  from `mayf3/vehicle-pet:main` or an implementation base derived from it. This
+  record deliberately hardcodes no `ACTIVE_ON_MAIN` value that would go stale
+  after merge.
+- DSH overlay implementation MUST NOT begin until the exact accepted revision of
+  this Spec is reachable from `mayf3/vehicle-pet:main` or an implementation base
+  derived from it.
+- Merge authorization is a separate Owner decision; PR #4 remains open, draft,
+  and unmerged at `ACCEPTED_AT`. No merge has occurred.

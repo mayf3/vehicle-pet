@@ -26,7 +26,7 @@ Before non-mechanical implementation, governance adoption must be accepted, the 
 
 [Vehicle Pet Development Governance Adoption V1](VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V1.md), [Vehicle Pet Product Direction V1](VEHICLE_PET_PRODUCT_DIRECTION_V1.md), and [Configurable Pet Engine V1](CONFIGURABLE_PET_ENGINE_V1.md) have lifecycle status `accepted` and are present on the designated authority branch at base `25b56b3b8540031e9d6e320d22872d86a136c7ad`. The Configurable Pet Engine V1 implementation and conformance record are also present on that base.
 
-[DSH Pet Overlay Adapter V1](DSH_PET_OVERLAY_ADAPTER_V1.md) is a docs-only `proposed` implementation Spec. It is reviewable candidate material, grants no current implementation permission, and awaits independent audit of its exact proposed Head followed by Owner acceptance.
+[DSH Pet Overlay Adapter V1](DSH_PET_OVERLAY_ADAPTER_V1.md) is an `accepted` docs-only implementation Spec with `implementation_authority: contracts`. `mayf3` accepted it at the exact reviewed coordinates after the independent review of its exact proposed Head returned `ACCEPT` with zero blockers. It is an accepted candidate on its acceptance branch; it becomes active repository authority only when the exact accepted revision is reachable from `mayf3/vehicle-pet:main` or an implementation base derived from it.
 
 Current repository state:
 
@@ -34,12 +34,14 @@ Current repository state:
 PRODUCT_DIRECTION = ACCEPTED_ACTIVE
 ENGINE_ARCHITECTURE = ACCEPTED_ACTIVE
 CONFIGURABLE_PET_ENGINE_V1_IMPLEMENTATION = PRESENT_AT_25b56b3b8540031e9d6e320d22872d86a136c7ad
-DSH_PET_OVERLAY_ADAPTER_V1 = PROPOSED
-DSH_OVERLAY_IMPLEMENTATION_AUTHORIZED = NO
-NEXT_AUTHORITY_ACTION = independent 接入 audit of exact proposed Head, then Owner acceptance
+DSH_PET_OVERLAY_ADAPTER_V1 = ACCEPTED_CANDIDATE
+DSH_PET_OVERLAY_ADAPTER_V1_IMPLEMENTATION_AUTHORITY = contracts
+DSH_OVERLAY_ADAPTER_ACTIVATION_RULE = active only when the exact accepted revision is reachable from mayf3/vehicle-pet:main or an implementation base derived from it
+DSH_OVERLAY_IMPLEMENTATION_AUTHORIZED = NO_UNTIL_EXACT_ACCEPTED_HEAD_ENTERS_MAIN
+NEXT_AUTHORITY_ACTION = Owner merge decision for the exact accepted overlay revision
 ```
 
-`DSH_OVERLAY_IMPLEMENTATION_AUTHORIZED = NO` because a proposed Spec is not active authority. No DSH adapter implementation may begin until the exact reviewed revision of `DSH_PET_OVERLAY_ADAPTER_V1` is accepted by the authorized Owner and present on an implementation base derived from `main`.
+`DSH_OVERLAY_IMPLEMENTATION_AUTHORIZED = NO_UNTIL_EXACT_ACCEPTED_HEAD_ENTERS_MAIN` because an accepted revision on an unmerged PR branch is an accepted candidate, not yet active authority. No DSH adapter implementation may begin until the exact accepted revision of `DSH_PET_OVERLAY_ADAPTER_V1` is reachable from `mayf3/vehicle-pet:main` or an implementation base derived from it. The PR is not merged and merge remains a separate Owner decision; this index does not claim otherwise.
 
 ## Repository Spec index
 
@@ -48,6 +50,6 @@ NEXT_AUTHORITY_ACTION = independent 接入 audit of exact proposed Head, then Ow
 | `VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V1` | accepted | yes on designated branch/base | invariant | none | `mayf3/vehicle-pet` | none |
 | `VEHICLE_PET_PRODUCT_DIRECTION_V1` | accepted | yes on designated branch/base | invariant | none | `mayf3/vehicle-pet` | none |
 | `CONFIGURABLE_PET_ENGINE_V1` | accepted | yes on designated branch/base | implementation | contracts | `pet-engine`, `bundled-pet-packs`, `prototype-shell` | none |
-| `DSH_PET_OVERLAY_ADAPTER_V1` | proposed | no; awaits exact-Head independent audit and Owner acceptance | implementation | contracts | `dsh-bundle-plugin`, `shell-overlay`, `compact-pet-surface`, `session-visual-reactions` | none |
+| `DSH_PET_OVERLAY_ADAPTER_V1` | accepted | not yet; accepted candidate until the exact accepted revision is reachable from `mayf3/vehicle-pet:main` or a main-derived implementation base | implementation | contracts | `dsh-bundle-plugin`, `shell-overlay`, `compact-pet-surface`, `session-visual-reactions` | none |
 
 `CONFIGURABLE_PET_ENGINE_V1` and `DSH_PET_OVERLAY_ADAPTER_V1` are governed by `VEHICLE_PET_PRODUCT_DIRECTION_V1`; the adapter Spec is additionally governed by the accepted Engine Spec and Governance Adoption Spec.
