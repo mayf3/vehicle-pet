@@ -24,33 +24,32 @@ Before non-mechanical implementation, governance adoption must be accepted, the 
 
 ## Current authority inventory
 
-[Vehicle Pet Development Governance Adoption V1](VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V1.md) has lifecycle status `accepted`. Its active-authority status is derived from designated-branch or implementation-base membership under the rule above, and it grants no implementation authority.
+[Vehicle Pet Development Governance Adoption V1](VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V1.md), [Vehicle Pet Product Direction V1](VEHICLE_PET_PRODUCT_DIRECTION_V1.md), and [Configurable Pet Engine V1](CONFIGURABLE_PET_ENGINE_V1.md) have lifecycle status `accepted` and are present on the designated authority branch at base `25b56b3b8540031e9d6e320d22872d86a136c7ad`. The Configurable Pet Engine V1 implementation and conformance record are also present on that base.
 
-[Vehicle Pet Product Direction V1](VEHICLE_PET_PRODUCT_DIRECTION_V1.md) and [Configurable Pet Engine V1](CONFIGURABLE_PET_ENGINE_V1.md) were co-reviewed as a parent/child pair on `agent/propose-vehicle-pet-product-and-engine-v1` and are `accepted` candidates at an exact accepted Head on that branch. They were accepted atomically in the same commit; neither is active repository authority and neither authorizes implementation until that exact accepted Head is merged into `main`.
+[DSH Pet Overlay Adapter V1](DSH_PET_OVERLAY_ADAPTER_V1.md) is an `accepted` docs-only implementation Spec with `implementation_authority: contracts`. `mayf3` accepted it at the exact reviewed coordinates after the independent review of its exact proposed Head returned `ACCEPT` with zero blockers. It is an accepted candidate on its acceptance branch; it becomes active repository authority only when the exact accepted revision is reachable from `mayf3/vehicle-pet:main` or an implementation base derived from it.
 
 Current repository state:
 
 ```text
-PRODUCT_DIRECTION = ACCEPTED_CANDIDATE (VEHICLE_PET_PRODUCT_DIRECTION_V1 accepted at exact reviewed Head a4b4d2452e1933d3d753f8715f76e94fb3e4d639 + acceptance commit, not yet merged into main)
-ARCHITECTURE = ACCEPTED_CANDIDATE (CONFIGURABLE_PET_ENGINE_V1 accepted at the same exact Head, not yet merged into main)
-PRODUCT_IMPLEMENTATION = NONE
-ACCEPTED_GOVERNING_PRODUCT_SPECS = 2 accepted candidates not yet on main
-NEXT_PRODUCT_AUTHORITY = merge the exact accepted Head into main (separate Owner decision)
-PRODUCT_IMPLEMENTATION_AUTHORIZED = NO
+PRODUCT_DIRECTION = ACCEPTED_ACTIVE
+ENGINE_ARCHITECTURE = ACCEPTED_ACTIVE
+CONFIGURABLE_PET_ENGINE_V1_IMPLEMENTATION = PRESENT_AT_25b56b3b8540031e9d6e320d22872d86a136c7ad
+DSH_PET_OVERLAY_ADAPTER_V1 = ACCEPTED_CANDIDATE
+DSH_PET_OVERLAY_ADAPTER_V1_IMPLEMENTATION_AUTHORITY = contracts
+DSH_OVERLAY_ADAPTER_ACTIVATION_RULE = active only when the exact accepted revision is reachable from mayf3/vehicle-pet:main or an implementation base derived from it
+DSH_OVERLAY_IMPLEMENTATION_AUTHORIZED = NO_UNTIL_EXACT_ACCEPTED_HEAD_ENTERS_MAIN
+NEXT_AUTHORITY_ACTION = Owner merge decision for the exact accepted overlay revision
 ```
 
-`PRODUCT_IMPLEMENTATION_AUTHORIZED = NO` because the two Specs, while accepted,
-are not yet present on `main`: product implementation stays blocked until the
-exact accepted Head of both Specs is merged into `main`.
-
-The first product authority is reserved for `docs/specs/VEHICLE_PET_PRODUCT_DIRECTION_V1.md`; the accepted candidate exists but is not active authority until merged.
+`DSH_OVERLAY_IMPLEMENTATION_AUTHORIZED = NO_UNTIL_EXACT_ACCEPTED_HEAD_ENTERS_MAIN` because an accepted revision on an unmerged PR branch is an accepted candidate, not yet active authority. No DSH adapter implementation may begin until the exact accepted revision of `DSH_PET_OVERLAY_ADAPTER_V1` is reachable from `mayf3/vehicle-pet:main` or an implementation base derived from it. The PR is not merged and merge remains a separate Owner decision; this index does not claim otherwise.
 
 ## Repository Spec index
 
 | Spec ID | Status | Active authority | Kind | Implementation authority | Scope | Supersedes |
 |---|---|---|---|---|---|---|
-| `VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V1` | accepted | derived from designated-branch/base membership | invariant | none | `mayf3/vehicle-pet` | none |
-| `VEHICLE_PET_PRODUCT_DIRECTION_V1` | accepted | none (accepted candidate on PR branch, exact Head not yet merged into main) | invariant | none | `mayf3/vehicle-pet` | none |
-| `CONFIGURABLE_PET_ENGINE_V1` | accepted | none (accepted candidate on PR branch, exact Head not yet merged into main) | implementation | contracts | `pet-engine`, `bundled-pet-packs`, `prototype-shell` | none |
+| `VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V1` | accepted | yes on designated branch/base | invariant | none | `mayf3/vehicle-pet` | none |
+| `VEHICLE_PET_PRODUCT_DIRECTION_V1` | accepted | yes on designated branch/base | invariant | none | `mayf3/vehicle-pet` | none |
+| `CONFIGURABLE_PET_ENGINE_V1` | accepted | yes on designated branch/base | implementation | contracts | `pet-engine`, `bundled-pet-packs`, `prototype-shell` | none |
+| `DSH_PET_OVERLAY_ADAPTER_V1` | accepted | not yet; accepted candidate until the exact accepted revision is reachable from `mayf3/vehicle-pet:main` or a main-derived implementation base | implementation | contracts | `dsh-bundle-plugin`, `shell-overlay`, `compact-pet-surface`, `session-visual-reactions` | none |
 
-`CONFIGURABLE_PET_ENGINE_V1` is governed by `VEHICLE_PET_PRODUCT_DIRECTION_V1`.
+`CONFIGURABLE_PET_ENGINE_V1` and `DSH_PET_OVERLAY_ADAPTER_V1` are governed by `VEHICLE_PET_PRODUCT_DIRECTION_V1`; the adapter Spec is additionally governed by the accepted Engine Spec and Governance Adoption Spec.
