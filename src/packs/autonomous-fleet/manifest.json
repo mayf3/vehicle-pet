@@ -1,0 +1,1270 @@
+{
+  "schemaVersion": 1,
+  "packId": "autonomous-fleet",
+  "packVersion": "1.0.0",
+  "name": {
+    "zh-CN": "无人车队",
+    "en": "Autonomous Fleet"
+  },
+  "displayConversion": {
+    "unitLabel": {
+      "zh-CN": "公里",
+      "en": "km"
+    },
+    "pointsPerUnit": 100
+  },
+  "levels": [
+    {
+      "levelId": "l1",
+      "threshold": 0,
+      "stageName": {
+        "zh-CN": "首航路测",
+        "en": "First Road Test"
+      },
+      "summary": {
+        "zh-CN": "主驾有人，副驾无人，有后方保护车，1 辆车。",
+        "en": "A driver in the main seat, empty co-pilot seat, a protection car behind: 1 vehicle."
+      },
+      "milestone": {
+        "zh-CN": "第一次上路，路测正式开始。",
+        "en": "First run on the road; road testing begins."
+      },
+      "sceneId": "road-test",
+      "presentation": {
+        "scale": "individual",
+        "camera": "close",
+        "milestone": "inline"
+      }
+    },
+    {
+      "levelId": "l2",
+      "threshold": 10000,
+      "stageName": {
+        "zh-CN": "独立巡航",
+        "en": "Solo Cruise"
+      },
+      "summary": {
+        "zh-CN": "主驾有人，副驾无人，无后方保护车，1 辆车。",
+        "en": "A driver in the main seat, empty co-pilot seat, no protection car: 1 vehicle."
+      },
+      "milestone": {
+        "zh-CN": "后方保护车撤下了，你开始独立行驶。",
+        "en": "The protection car dropped back; you drive on your own now."
+      },
+      "sceneId": "road-test",
+      "presentation": {
+        "scale": "individual",
+        "camera": "close",
+        "milestone": "inline"
+      },
+      "upgrade": {
+        "transition": "crossfade",
+        "reveal": "subject-swap",
+        "celebration": "glow-pulse"
+      },
+      "keepsakeId": "ks-l2"
+    },
+    {
+      "levelId": "l3",
+      "threshold": 30000,
+      "stageName": {
+        "zh-CN": "安全员随行",
+        "en": "Safety Officer Aboard"
+      },
+      "summary": {
+        "zh-CN": "主驾无人，副驾有安全员，有后方保护车，1 辆车。",
+        "en": "Empty main seat, a safety officer in the co-pilot seat, protection car behind: 1 vehicle."
+      },
+      "milestone": {
+        "zh-CN": "主驾第一次空了出来。",
+        "en": "The main seat is empty for the first time."
+      },
+      "sceneId": "road-test",
+      "presentation": {
+        "scale": "individual",
+        "camera": "close",
+        "milestone": "inline"
+      },
+      "upgrade": {
+        "transition": "crossfade",
+        "reveal": "subject-swap",
+        "celebration": "spark-burst"
+      },
+      "keepsakeId": "ks-l3"
+    },
+    {
+      "levelId": "l4",
+      "threshold": 60000,
+      "stageName": {
+        "zh-CN": "双座无人",
+        "en": "Empty Seats"
+      },
+      "summary": {
+        "zh-CN": "主驾无人，副驾有安全员，无后方保护车，1 辆车。",
+        "en": "Empty main seat, a safety officer in the co-pilot seat, no protection car: 1 vehicle."
+      },
+      "milestone": {
+        "zh-CN": "主驾与保护车都空了，只留一位安全员。",
+        "en": "Main seat and protection car both gone; one safety officer remains."
+      },
+      "sceneId": "road-test",
+      "presentation": {
+        "scale": "individual",
+        "camera": "close",
+        "milestone": "inline"
+      },
+      "upgrade": {
+        "transition": "crossfade",
+        "reveal": "subject-swap",
+        "celebration": "confetti-lite"
+      },
+      "keepsakeId": "ks-l4"
+    },
+    {
+      "levelId": "l5",
+      "threshold": 100000,
+      "stageName": {
+        "zh-CN": "远程监管",
+        "en": "Remote Supervision"
+      },
+      "summary": {
+        "zh-CN": "主驾、副驾均无人，无保护车，1 名远程人员监管 1 辆车。",
+        "en": "Nobody aboard, no protection car: 1 remote supervisor watches 1 vehicle."
+      },
+      "milestone": {
+        "zh-CN": "车内空了，远方有人守护。",
+        "en": "The cabin is empty; someone far away is watching over it."
+      },
+      "sceneId": "road-test",
+      "presentation": {
+        "scale": "individual",
+        "camera": "close",
+        "milestone": "inline"
+      },
+      "upgrade": {
+        "transition": "crossfade",
+        "reveal": "subject-swap",
+        "celebration": "ambient-highlight"
+      },
+      "keepsakeId": "ks-l5"
+    },
+    {
+      "levelId": "l6",
+      "threshold": 180000,
+      "stageName": {
+        "zh-CN": "一拖三",
+        "en": "One Oversees Three"
+      },
+      "summary": {
+        "zh-CN": "1 名远程人员监管 3 辆无人车。",
+        "en": "1 remote supervisor watches 3 unmanned vehicles."
+      },
+      "milestone": {
+        "zh-CN": "一名远程人员，看顾三辆无人车。",
+        "en": "One remote person, three unmanned vehicles in care."
+      },
+      "sceneId": "convoy",
+      "presentation": {
+        "scale": "individual",
+        "camera": "close",
+        "milestone": "inline"
+      },
+      "upgrade": {
+        "transition": "layer-build",
+        "reveal": "scene-expand",
+        "celebration": "glow-pulse"
+      },
+      "keepsakeId": "ks-l6"
+    },
+    {
+      "levelId": "l7",
+      "threshold": 300000,
+      "stageName": {
+        "zh-CN": "区队成型",
+        "en": "District Convoy"
+      },
+      "summary": {
+        "zh-CN": "1 名远程人员监管 10 辆无人车。",
+        "en": "1 remote supervisor watches 10 unmanned vehicles."
+      },
+      "milestone": {
+        "zh-CN": "十辆车的区队上路了。",
+        "en": "A ten-vehicle district convoy is on the road."
+      },
+      "sceneId": "district-fleet",
+      "presentation": {
+        "scale": "individual",
+        "camera": "district",
+        "milestone": "inline"
+      },
+      "upgrade": {
+        "transition": "camera-step-out",
+        "reveal": "scene-expand",
+        "celebration": "spark-burst"
+      },
+      "keepsakeId": "ks-l7"
+    },
+    {
+      "levelId": "l8",
+      "threshold": 500000,
+      "stageName": {
+        "zh-CN": "城市车群",
+        "en": "City Swarm"
+      },
+      "summary": {
+        "zh-CN": "1 名远程人员监管 100 辆无人车。",
+        "en": "1 remote supervisor watches 100 unmanned vehicles."
+      },
+      "milestone": {
+        "zh-CN": "一百辆车汇成城市车群。",
+        "en": "A hundred vehicles merge into a city swarm."
+      },
+      "sceneId": "city-fleet",
+      "presentation": {
+        "scale": "group",
+        "camera": "city",
+        "milestone": "inline"
+      },
+      "upgrade": {
+        "transition": "camera-step-out",
+        "reveal": "scene-expand",
+        "celebration": "confetti-lite"
+      },
+      "keepsakeId": "ks-l8"
+    },
+    {
+      "levelId": "l9",
+      "threshold": 800000,
+      "stageName": {
+        "zh-CN": "都市网络",
+        "en": "Metro Network"
+      },
+      "summary": {
+        "zh-CN": "1 名远程人员监管 1,000 辆无人车。",
+        "en": "1 remote supervisor watches 1,000 unmanned vehicles."
+      },
+      "milestone": {
+        "zh-CN": "一千辆车织成都市网络。",
+        "en": "A thousand vehicles weave a metro network."
+      },
+      "sceneId": "metro-network",
+      "presentation": {
+        "scale": "cluster",
+        "camera": "metro",
+        "milestone": "inline"
+      },
+      "upgrade": {
+        "transition": "layer-build",
+        "reveal": "scene-expand",
+        "celebration": "glow-pulse"
+      },
+      "keepsakeId": "ks-l9"
+    },
+    {
+      "levelId": "l10",
+      "threshold": 1200000,
+      "stageName": {
+        "zh-CN": "区域路网",
+        "en": "Regional Field"
+      },
+      "summary": {
+        "zh-CN": "1 名远程人员监管 10,000 辆无人车。",
+        "en": "1 remote supervisor watches 10,000 unmanned vehicles."
+      },
+      "milestone": {
+        "zh-CN": "万辆车铺开区域路网。",
+        "en": "Ten thousand vehicles spread a regional route field."
+      },
+      "sceneId": "regional-field",
+      "presentation": {
+        "scale": "field",
+        "camera": "regional",
+        "milestone": "inline"
+      },
+      "upgrade": {
+        "transition": "camera-step-out",
+        "reveal": "scene-expand",
+        "celebration": "spark-burst"
+      },
+      "keepsakeId": "ks-l10"
+    },
+    {
+      "levelId": "l11",
+      "threshold": 1800000,
+      "stageName": {
+        "zh-CN": "大陆网络",
+        "en": "Continental Web"
+      },
+      "summary": {
+        "zh-CN": "1 名远程人员监管 100,000 辆无人车。",
+        "en": "1 remote supervisor watches 100,000 unmanned vehicles."
+      },
+      "milestone": {
+        "zh-CN": "十万辆车连成大陆网络。",
+        "en": "A hundred thousand vehicles link into a continental web."
+      },
+      "sceneId": "continental-web",
+      "presentation": {
+        "scale": "region",
+        "camera": "continental",
+        "milestone": "inline"
+      },
+      "upgrade": {
+        "transition": "camera-step-out",
+        "reveal": "scene-expand",
+        "celebration": "ambient-highlight"
+      },
+      "keepsakeId": "ks-l11"
+    },
+    {
+      "levelId": "l12",
+      "threshold": 2500000,
+      "stageName": {
+        "zh-CN": "百万地平线",
+        "en": "Million Horizon"
+      },
+      "summary": {
+        "zh-CN": "1 名远程人员监管 1,000,000 辆无人车；V1 当前封顶。",
+        "en": "1 remote supervisor watches 1,000,000 unmanned vehicles; the V1 cap."
+      },
+      "milestone": {
+        "zh-CN": "百万车队抵达地平线，V1 在此封顶。",
+        "en": "A million-strong convoy reaches the horizon; V1 caps here."
+      },
+      "sceneId": "terminal-horizon",
+      "presentation": {
+        "scale": "horizon",
+        "camera": "terminal",
+        "milestone": "terminal"
+      },
+      "upgrade": {
+        "transition": "camera-step-out",
+        "reveal": "milestone-card",
+        "celebration": "ambient-highlight"
+      },
+      "keepsakeId": "ks-l12"
+    }
+  ],
+  "scenes": [
+    {
+      "sceneId": "road-test",
+      "backgroundAssetId": "bg-road-test",
+      "layers": [
+        {
+          "layerId": "lane-lines",
+          "kind": "decoration",
+          "assetId": "overlay-lane-lines",
+          "placement": "center",
+          "zOrder": 5
+        },
+        {
+          "layerId": "pod",
+          "kind": "subject",
+          "assetId": "sprite-subject-pod--l1",
+          "placement": "center",
+          "zOrder": 20
+        }
+      ],
+      "transition": "crossfade",
+      "sceneLabel": {
+        "zh-CN": "路测道路",
+        "en": "Road test course"
+      }
+    },
+    {
+      "sceneId": "convoy",
+      "backgroundAssetId": "bg-convoy",
+      "layers": [
+        {
+          "layerId": "convoy-units",
+          "kind": "decoration",
+          "population": {
+            "populationId": "vehicles",
+            "logicalCount": 3,
+            "assetId": "sprite-unit-car",
+            "density": "moderate",
+            "placement": "ring",
+            "aggregateLabel": {
+              "zh-CN": "辆无人车",
+              "en": "unmanned vehicles"
+            }
+          },
+          "placement": "center",
+          "zOrder": 15
+        },
+        {
+          "layerId": "pod",
+          "kind": "subject",
+          "assetId": "sprite-subject-pod",
+          "placement": "center",
+          "zOrder": 20
+        }
+      ],
+      "transition": "crossfade",
+      "sceneLabel": {
+        "zh-CN": "三车编队",
+        "en": "Three-vehicle convoy"
+      }
+    },
+    {
+      "sceneId": "district-fleet",
+      "backgroundAssetId": "bg-district-fleet",
+      "layers": [
+        {
+          "layerId": "district-units",
+          "kind": "decoration",
+          "population": {
+            "populationId": "vehicles",
+            "logicalCount": 10,
+            "assetId": "sprite-unit-car",
+            "density": "moderate",
+            "placement": "grid-even",
+            "aggregateLabel": {
+              "zh-CN": "辆无人车",
+              "en": "unmanned vehicles"
+            }
+          },
+          "placement": "center",
+          "zOrder": 15
+        },
+        {
+          "layerId": "pod",
+          "kind": "subject",
+          "assetId": "sprite-subject-pod",
+          "placement": "center",
+          "zOrder": 20
+        }
+      ],
+      "transition": "zoom-out",
+      "sceneLabel": {
+        "zh-CN": "街区车场",
+        "en": "District yard"
+      }
+    },
+    {
+      "sceneId": "city-fleet",
+      "backgroundAssetId": "bg-city-fleet",
+      "layers": [
+        {
+          "layerId": "city-units",
+          "kind": "decoration",
+          "population": {
+            "populationId": "vehicles",
+            "logicalCount": 100,
+            "assetId": "sprite-unit-car",
+            "density": "dense",
+            "placement": "grid-even",
+            "aggregateLabel": {
+              "zh-CN": "辆无人车",
+              "en": "unmanned vehicles"
+            }
+          },
+          "placement": "center",
+          "zOrder": 15
+        },
+        {
+          "layerId": "pod",
+          "kind": "subject",
+          "assetId": "sprite-subject-pod",
+          "placement": "center",
+          "zOrder": 20
+        }
+      ],
+      "transition": "zoom-out",
+      "sceneLabel": {
+        "zh-CN": "城市街道",
+        "en": "City streets"
+      }
+    },
+    {
+      "sceneId": "metro-network",
+      "backgroundAssetId": "bg-metro-network",
+      "layers": [
+        {
+          "layerId": "metro-routes",
+          "kind": "overlay",
+          "assetId": "overlay-route-network",
+          "placement": "center",
+          "zOrder": 8
+        },
+        {
+          "layerId": "metro-units",
+          "kind": "decoration",
+          "population": {
+            "populationId": "vehicles",
+            "logicalCount": 1000,
+            "assetId": "sprite-unit-car",
+            "density": "network",
+            "placement": "horizon-band",
+            "aggregateLabel": {
+              "zh-CN": "辆无人车",
+              "en": "unmanned vehicles"
+            }
+          },
+          "placement": "center",
+          "zOrder": 15
+        },
+        {
+          "layerId": "pod",
+          "kind": "subject",
+          "assetId": "sprite-subject-pod",
+          "placement": "center",
+          "zOrder": 20
+        }
+      ],
+      "transition": "layer-build",
+      "sceneLabel": {
+        "zh-CN": "都市路网",
+        "en": "Metro route web"
+      }
+    },
+    {
+      "sceneId": "regional-field",
+      "backgroundAssetId": "bg-regional-field",
+      "layers": [
+        {
+          "layerId": "regional-routes",
+          "kind": "overlay",
+          "assetId": "overlay-route-network",
+          "placement": "center",
+          "zOrder": 8
+        },
+        {
+          "layerId": "regional-units",
+          "kind": "decoration",
+          "population": {
+            "populationId": "vehicles",
+            "logicalCount": 10000,
+            "assetId": "sprite-unit-car",
+            "density": "network",
+            "placement": "horizon-band",
+            "aggregateLabel": {
+              "zh-CN": "辆无人车",
+              "en": "unmanned vehicles"
+            }
+          },
+          "placement": "center",
+          "zOrder": 15
+        },
+        {
+          "layerId": "pod",
+          "kind": "subject",
+          "assetId": "sprite-subject-pod",
+          "placement": "center",
+          "zOrder": 20
+        }
+      ],
+      "transition": "layer-build",
+      "sceneLabel": {
+        "zh-CN": "区域地图",
+        "en": "Regional map"
+      }
+    },
+    {
+      "sceneId": "continental-web",
+      "backgroundAssetId": "bg-continental-web",
+      "layers": [
+        {
+          "layerId": "continental-glow",
+          "kind": "overlay",
+          "assetId": "overlay-glow-veil",
+          "placement": "center",
+          "zOrder": 9
+        },
+        {
+          "layerId": "continental-units",
+          "kind": "decoration",
+          "population": {
+            "populationId": "vehicles",
+            "logicalCount": 100000,
+            "assetId": "sprite-unit-car",
+            "density": "luminous",
+            "placement": "horizon-band",
+            "aggregateLabel": {
+              "zh-CN": "辆无人车",
+              "en": "unmanned vehicles"
+            }
+          },
+          "placement": "center",
+          "zOrder": 15
+        },
+        {
+          "layerId": "pod",
+          "kind": "subject",
+          "assetId": "sprite-subject-pod",
+          "placement": "center",
+          "zOrder": 20
+        }
+      ],
+      "transition": "crossfade",
+      "sceneLabel": {
+        "zh-CN": "大陆光网",
+        "en": "Continental light web"
+      }
+    },
+    {
+      "sceneId": "terminal-horizon",
+      "backgroundAssetId": "bg-terminal-horizon",
+      "layers": [
+        {
+          "layerId": "terminal-glow",
+          "kind": "overlay",
+          "assetId": "overlay-glow-veil",
+          "placement": "center",
+          "zOrder": 9
+        },
+        {
+          "layerId": "terminal-units",
+          "kind": "decoration",
+          "population": {
+            "populationId": "vehicles",
+            "logicalCount": 1000000,
+            "assetId": "sprite-unit-car",
+            "density": "luminous",
+            "placement": "horizon-band",
+            "aggregateLabel": {
+              "zh-CN": "辆无人车",
+              "en": "unmanned vehicles"
+            }
+          },
+          "placement": "center",
+          "zOrder": 15
+        },
+        {
+          "layerId": "pod",
+          "kind": "subject",
+          "assetId": "sprite-subject-pod",
+          "placement": "center",
+          "zOrder": 20
+        },
+        {
+          "layerId": "terminal-frame",
+          "kind": "terminal-overlay",
+          "assetId": "overlay-terminal-frame",
+          "placement": "center",
+          "zOrder": 30
+        }
+      ],
+      "transition": "instant",
+      "sceneLabel": {
+        "zh-CN": "终局地平线",
+        "en": "Terminal horizon"
+      }
+    }
+  ],
+  "assets": [
+    {
+      "assetId": "bg-road-test",
+      "path": "assets/autonomous-fleet/bg-road-test.webp",
+      "format": "webp",
+      "role": "background",
+      "width": 1600,
+      "height": 900,
+      "byteSizeCompressed": 11892,
+      "altText": {
+        "zh-CN": "路测道路背景",
+        "en": "Road test course background"
+      }
+    },
+    {
+      "assetId": "bg-road-test-png",
+      "path": "assets/autonomous-fleet/bg-road-test.png",
+      "format": "png",
+      "role": "background",
+      "width": 1600,
+      "height": 900,
+      "byteSizeCompressed": 29965,
+      "altText": {
+        "zh-CN": "路测道路背景",
+        "en": "Road test course background"
+      }
+    },
+    {
+      "assetId": "bg-convoy",
+      "path": "assets/autonomous-fleet/bg-convoy.webp",
+      "format": "webp",
+      "role": "background",
+      "width": 1600,
+      "height": 900,
+      "byteSizeCompressed": 10978,
+      "altText": {
+        "zh-CN": "编队公路背景",
+        "en": "Convoy road background"
+      }
+    },
+    {
+      "assetId": "bg-convoy-png",
+      "path": "assets/autonomous-fleet/bg-convoy.png",
+      "format": "png",
+      "role": "background",
+      "width": 1600,
+      "height": 900,
+      "byteSizeCompressed": 26746,
+      "altText": {
+        "zh-CN": "编队公路背景",
+        "en": "Convoy road background"
+      }
+    },
+    {
+      "assetId": "bg-district-fleet",
+      "path": "assets/autonomous-fleet/bg-district-fleet.webp",
+      "format": "webp",
+      "role": "background",
+      "width": 1600,
+      "height": 900,
+      "byteSizeCompressed": 2210,
+      "altText": {
+        "zh-CN": "街区车场背景",
+        "en": "District yard background"
+      }
+    },
+    {
+      "assetId": "bg-district-fleet-png",
+      "path": "assets/autonomous-fleet/bg-district-fleet.png",
+      "format": "png",
+      "role": "background",
+      "width": 1600,
+      "height": 900,
+      "byteSizeCompressed": 13492,
+      "altText": {
+        "zh-CN": "街区车场背景",
+        "en": "District yard background"
+      }
+    },
+    {
+      "assetId": "bg-city-fleet",
+      "path": "assets/autonomous-fleet/bg-city-fleet.webp",
+      "format": "webp",
+      "role": "background",
+      "width": 1600,
+      "height": 900,
+      "byteSizeCompressed": 2698,
+      "altText": {
+        "zh-CN": "城市街道背景",
+        "en": "City streets background"
+      }
+    },
+    {
+      "assetId": "bg-city-fleet-png",
+      "path": "assets/autonomous-fleet/bg-city-fleet.png",
+      "format": "png",
+      "role": "background",
+      "width": 1600,
+      "height": 900,
+      "byteSizeCompressed": 10655,
+      "altText": {
+        "zh-CN": "城市街道背景",
+        "en": "City streets background"
+      }
+    },
+    {
+      "assetId": "bg-metro-network",
+      "path": "assets/autonomous-fleet/bg-metro-network.webp",
+      "format": "webp",
+      "role": "background",
+      "width": 1600,
+      "height": 900,
+      "byteSizeCompressed": 118498,
+      "altText": {
+        "zh-CN": "都市路网背景",
+        "en": "Metro route web background"
+      }
+    },
+    {
+      "assetId": "bg-metro-network-png",
+      "path": "assets/autonomous-fleet/bg-metro-network.png",
+      "format": "png",
+      "role": "background",
+      "width": 1600,
+      "height": 900,
+      "byteSizeCompressed": 200041,
+      "altText": {
+        "zh-CN": "都市路网背景",
+        "en": "Metro route web background"
+      }
+    },
+    {
+      "assetId": "bg-regional-field",
+      "path": "assets/autonomous-fleet/bg-regional-field.webp",
+      "format": "webp",
+      "role": "background",
+      "width": 1600,
+      "height": 900,
+      "byteSizeCompressed": 8998,
+      "altText": {
+        "zh-CN": "区域地图背景",
+        "en": "Regional map background"
+      }
+    },
+    {
+      "assetId": "bg-regional-field-png",
+      "path": "assets/autonomous-fleet/bg-regional-field.png",
+      "format": "png",
+      "role": "background",
+      "width": 1600,
+      "height": 900,
+      "byteSizeCompressed": 24568,
+      "altText": {
+        "zh-CN": "区域地图背景",
+        "en": "Regional map background"
+      }
+    },
+    {
+      "assetId": "bg-continental-web",
+      "path": "assets/autonomous-fleet/bg-continental-web.webp",
+      "format": "webp",
+      "role": "background",
+      "width": 1600,
+      "height": 900,
+      "byteSizeCompressed": 116264,
+      "altText": {
+        "zh-CN": "大陆光网背景",
+        "en": "Continental light web background"
+      }
+    },
+    {
+      "assetId": "bg-continental-web-png",
+      "path": "assets/autonomous-fleet/bg-continental-web.png",
+      "format": "png",
+      "role": "background",
+      "width": 1600,
+      "height": 900,
+      "byteSizeCompressed": 186925,
+      "altText": {
+        "zh-CN": "大陆光网背景",
+        "en": "Continental light web background"
+      }
+    },
+    {
+      "assetId": "bg-terminal-horizon",
+      "path": "assets/autonomous-fleet/bg-terminal-horizon.webp",
+      "format": "webp",
+      "role": "background",
+      "width": 1600,
+      "height": 900,
+      "byteSizeCompressed": 6920,
+      "altText": {
+        "zh-CN": "终局地平线背景",
+        "en": "Terminal horizon background"
+      }
+    },
+    {
+      "assetId": "bg-terminal-horizon-png",
+      "path": "assets/autonomous-fleet/bg-terminal-horizon.png",
+      "format": "png",
+      "role": "background",
+      "width": 1600,
+      "height": 900,
+      "byteSizeCompressed": 27298,
+      "altText": {
+        "zh-CN": "终局地平线背景",
+        "en": "Terminal horizon background"
+      }
+    },
+    {
+      "assetId": "sprite-subject-pod--l1",
+      "path": "assets/autonomous-fleet/sprite-subject-pod--l1.webp",
+      "format": "webp",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 13978,
+      "altText": {
+        "zh-CN": "你的 Pet：主驾有人、副驾空座，后方保护车随行",
+        "en": "Your pet: driver aboard, empty co-pilot seat, protection vehicle behind"
+      }
+    },
+    {
+      "assetId": "sprite-subject-pod--l1-png",
+      "path": "assets/autonomous-fleet/sprite-subject-pod--l1.png",
+      "format": "png",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 21507,
+      "altText": {
+        "zh-CN": "你的 Pet：主驾有人、副驾空座，后方保护车随行",
+        "en": "Your pet: driver aboard, empty co-pilot seat, protection vehicle behind"
+      }
+    },
+    {
+      "assetId": "sprite-subject-pod--l2",
+      "path": "assets/autonomous-fleet/sprite-subject-pod--l2.webp",
+      "format": "webp",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 11864,
+      "altText": {
+        "zh-CN": "你的 Pet：主驾有人、副驾空座，无后方保护车",
+        "en": "Your pet: driver aboard, empty co-pilot seat, no protection vehicle"
+      }
+    },
+    {
+      "assetId": "sprite-subject-pod--l2-png",
+      "path": "assets/autonomous-fleet/sprite-subject-pod--l2.png",
+      "format": "png",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 19464,
+      "altText": {
+        "zh-CN": "你的 Pet：主驾有人、副驾空座，无后方保护车",
+        "en": "Your pet: driver aboard, empty co-pilot seat, no protection vehicle"
+      }
+    },
+    {
+      "assetId": "sprite-subject-pod--l3",
+      "path": "assets/autonomous-fleet/sprite-subject-pod--l3.webp",
+      "format": "webp",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 13788,
+      "altText": {
+        "zh-CN": "你的 Pet：主驾空座、副驾安全员随行，后方保护车随行",
+        "en": "Your pet: empty driver seat, safety officer aboard, protection vehicle behind"
+      }
+    },
+    {
+      "assetId": "sprite-subject-pod--l3-png",
+      "path": "assets/autonomous-fleet/sprite-subject-pod--l3.png",
+      "format": "png",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 21571,
+      "altText": {
+        "zh-CN": "你的 Pet：主驾空座、副驾安全员随行，后方保护车随行",
+        "en": "Your pet: empty driver seat, safety officer aboard, protection vehicle behind"
+      }
+    },
+    {
+      "assetId": "sprite-subject-pod--l4",
+      "path": "assets/autonomous-fleet/sprite-subject-pod--l4.webp",
+      "format": "webp",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 11672,
+      "altText": {
+        "zh-CN": "你的 Pet：主驾空座、副驾安全员随行，无后方保护车",
+        "en": "Your pet: empty driver seat, safety officer aboard, no protection vehicle"
+      }
+    },
+    {
+      "assetId": "sprite-subject-pod--l4-png",
+      "path": "assets/autonomous-fleet/sprite-subject-pod--l4.png",
+      "format": "png",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 19514,
+      "altText": {
+        "zh-CN": "你的 Pet：主驾空座、副驾安全员随行，无后方保护车",
+        "en": "Your pet: empty driver seat, safety officer aboard, no protection vehicle"
+      }
+    },
+    {
+      "assetId": "sprite-subject-pod",
+      "path": "assets/autonomous-fleet/sprite-subject-pod.webp",
+      "format": "webp",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 9618,
+      "altText": {
+        "zh-CN": "你的 Pet：无人车座舱",
+        "en": "Your pet: the autonomous cabin pod"
+      }
+    },
+    {
+      "assetId": "sprite-subject-pod-png",
+      "path": "assets/autonomous-fleet/sprite-subject-pod.png",
+      "format": "png",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 15223,
+      "altText": {
+        "zh-CN": "你的 Pet：无人车座舱",
+        "en": "Your pet: the autonomous cabin pod"
+      }
+    },
+    {
+      "assetId": "sprite-unit-car",
+      "path": "assets/autonomous-fleet/sprite-unit-car.webp",
+      "format": "webp",
+      "role": "sprite",
+      "width": 240,
+      "height": 240,
+      "byteSizeCompressed": 2960,
+      "altText": {
+        "zh-CN": "无人车",
+        "en": "unmanned vehicle"
+      }
+    },
+    {
+      "assetId": "sprite-unit-car-png",
+      "path": "assets/autonomous-fleet/sprite-unit-car.png",
+      "format": "png",
+      "role": "sprite",
+      "width": 240,
+      "height": 240,
+      "byteSizeCompressed": 4432,
+      "altText": {
+        "zh-CN": "无人车",
+        "en": "unmanned vehicle"
+      }
+    },
+    {
+      "assetId": "overlay-lane-lines",
+      "path": "assets/autonomous-fleet/overlay-lane-lines.webp",
+      "format": "webp",
+      "role": "overlay",
+      "width": 1600,
+      "height": 900,
+      "byteSizeCompressed": 162,
+      "altText": {
+        "zh-CN": "车道线",
+        "en": "Lane markings"
+      }
+    },
+    {
+      "assetId": "overlay-lane-lines-png",
+      "path": "assets/autonomous-fleet/overlay-lane-lines.png",
+      "format": "png",
+      "role": "overlay",
+      "width": 1600,
+      "height": 900,
+      "byteSizeCompressed": 6511,
+      "altText": {
+        "zh-CN": "车道线",
+        "en": "Lane markings"
+      }
+    },
+    {
+      "assetId": "overlay-route-network",
+      "path": "assets/autonomous-fleet/overlay-route-network.webp",
+      "format": "webp",
+      "role": "overlay",
+      "width": 1600,
+      "height": 900,
+      "byteSizeCompressed": 38038,
+      "altText": {
+        "zh-CN": "路线网络",
+        "en": "Route network lines"
+      }
+    },
+    {
+      "assetId": "overlay-route-network-png",
+      "path": "assets/autonomous-fleet/overlay-route-network.png",
+      "format": "png",
+      "role": "overlay",
+      "width": 1600,
+      "height": 900,
+      "byteSizeCompressed": 84109,
+      "altText": {
+        "zh-CN": "路线网络",
+        "en": "Route network lines"
+      }
+    },
+    {
+      "assetId": "overlay-glow-veil",
+      "path": "assets/autonomous-fleet/overlay-glow-veil.webp",
+      "format": "webp",
+      "role": "overlay",
+      "width": 1600,
+      "height": 900,
+      "byteSizeCompressed": 59136,
+      "altText": {
+        "zh-CN": "光晕",
+        "en": "Glow veil"
+      }
+    },
+    {
+      "assetId": "overlay-glow-veil-png",
+      "path": "assets/autonomous-fleet/overlay-glow-veil.png",
+      "format": "png",
+      "role": "overlay",
+      "width": 1600,
+      "height": 900,
+      "byteSizeCompressed": 101962,
+      "altText": {
+        "zh-CN": "光晕",
+        "en": "Glow veil"
+      }
+    },
+    {
+      "assetId": "overlay-terminal-frame",
+      "path": "assets/autonomous-fleet/overlay-terminal-frame.webp",
+      "format": "webp",
+      "role": "overlay",
+      "width": 1600,
+      "height": 900,
+      "byteSizeCompressed": 432,
+      "altText": {
+        "zh-CN": "终局边框",
+        "en": "Terminal frame"
+      }
+    },
+    {
+      "assetId": "overlay-terminal-frame-png",
+      "path": "assets/autonomous-fleet/overlay-terminal-frame.png",
+      "format": "png",
+      "role": "overlay",
+      "width": 1600,
+      "height": 900,
+      "byteSizeCompressed": 8410,
+      "altText": {
+        "zh-CN": "终局边框",
+        "en": "Terminal frame"
+      }
+    }
+  ],
+  "keepsakes": [
+    {
+      "keepsakeId": "ks-l2",
+      "levelId": "l2",
+      "title": {
+        "zh-CN": "独立巡航徽",
+        "en": "Solo Cruise Badge"
+      },
+      "accessDescription": {
+        "zh-CN": "纪念第一次没有保护车的独立行驶。",
+        "en": "Marks the first solo run without a protection car."
+      },
+      "assetId": "sprite-subject-pod--l2"
+    },
+    {
+      "keepsakeId": "ks-l3",
+      "levelId": "l3",
+      "title": {
+        "zh-CN": "安全员肩章",
+        "en": "Safety Officer Patch"
+      },
+      "accessDescription": {
+        "zh-CN": "纪念主驾第一次空出的时刻。",
+        "en": "Marks the moment the main seat first went empty."
+      },
+      "assetId": "sprite-subject-pod--l3"
+    },
+    {
+      "keepsakeId": "ks-l4",
+      "levelId": "l4",
+      "title": {
+        "zh-CN": "双座无人证",
+        "en": "Empty Cabin Certificate"
+      },
+      "accessDescription": {
+        "zh-CN": "纪念保护车撤除后的全车无人。",
+        "en": "Marks full driverless operation without a protection car."
+      },
+      "assetId": "sprite-subject-pod--l4"
+    },
+    {
+      "keepsakeId": "ks-l5",
+      "levelId": "l5",
+      "title": {
+        "zh-CN": "远程监管印章",
+        "en": "Remote Supervision Seal"
+      },
+      "accessDescription": {
+        "zh-CN": "纪念车内空无一人、远方守护的第一天。",
+        "en": "Marks the first day of an empty cabin watched from afar."
+      },
+      "assetId": "sprite-subject-pod"
+    },
+    {
+      "keepsakeId": "ks-l6",
+      "levelId": "l6",
+      "title": {
+        "zh-CN": "三车编队旗",
+        "en": "Three-Vehicle Pennant"
+      },
+      "accessDescription": {
+        "zh-CN": "纪念一人看顾三辆车的编队起步。",
+        "en": "Marks the convoy start of one person overseeing three vehicles."
+      },
+      "assetId": "sprite-unit-car"
+    },
+    {
+      "keepsakeId": "ks-l7",
+      "levelId": "l7",
+      "title": {
+        "zh-CN": "区队钥匙",
+        "en": "District Convoy Key"
+      },
+      "accessDescription": {
+        "zh-CN": "纪念十车区队的成立。",
+        "en": "Marks the forming of the ten-vehicle district convoy."
+      },
+      "assetId": "sprite-unit-car"
+    },
+    {
+      "keepsakeId": "ks-l8",
+      "levelId": "l8",
+      "title": {
+        "zh-CN": "城市车群徽",
+        "en": "City Swarm Crest"
+      },
+      "accessDescription": {
+        "zh-CN": "纪念一百辆车汇成的城市车群。",
+        "en": "Marks the hundred-vehicle city swarm."
+      },
+      "assetId": "sprite-unit-car"
+    },
+    {
+      "keepsakeId": "ks-l9",
+      "levelId": "l9",
+      "title": {
+        "zh-CN": "都市枢纽章",
+        "en": "Metro Hub Medal"
+      },
+      "accessDescription": {
+        "zh-CN": "纪念一千辆车织成的都市网络。",
+        "en": "Marks the thousand-vehicle metro network."
+      },
+      "assetId": "sprite-unit-car"
+    },
+    {
+      "keepsakeId": "ks-l10",
+      "levelId": "l10",
+      "title": {
+        "zh-CN": "区域路网证书",
+        "en": "Regional Field Diploma"
+      },
+      "accessDescription": {
+        "zh-CN": "纪念万辆车铺开的区域路网。",
+        "en": "Marks the ten-thousand-vehicle regional field."
+      },
+      "assetId": "sprite-unit-car"
+    },
+    {
+      "keepsakeId": "ks-l11",
+      "levelId": "l11",
+      "title": {
+        "zh-CN": "大陆网络星章",
+        "en": "Continental Star"
+      },
+      "accessDescription": {
+        "zh-CN": "纪念十万辆车连成的大陆网络。",
+        "en": "Marks the hundred-thousand-vehicle continental web."
+      },
+      "assetId": "sprite-unit-car"
+    },
+    {
+      "keepsakeId": "ks-l12",
+      "levelId": "l12",
+      "title": {
+        "zh-CN": "百万地平线纪念",
+        "en": "Million Horizon Memento"
+      },
+      "accessDescription": {
+        "zh-CN": "纪念百万车队抵达地平线的 V1 终局。",
+        "en": "Marks the V1 finale of a million vehicles reaching the horizon."
+      },
+      "assetId": "sprite-subject-pod"
+    }
+  ]
+}
