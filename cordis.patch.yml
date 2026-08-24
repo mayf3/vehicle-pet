@@ -1,0 +1,6 @@
+# vehicle-pet bundle patch: one additive Loader row for the external
+# @mayf3/vehicle-pet plugin (id is the row key; name is the npm package
+# specifier resolved through the profile's node_modules).
+- insert:
+    - id: vehicle-pet
+      name: '@mayf3/vehicle-pet'

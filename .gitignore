@@ -5,3 +5,5 @@ playwright-report/
 .assets-check-tmp/
 *.log
 .DS_Store
+test-results-dsh/
+tests/dsh/e2e/.artifacts/
