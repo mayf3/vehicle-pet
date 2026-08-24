@@ -103,3 +103,79 @@ PORT_5199_LISTENING = NO
 ## Remaining independent work
 
 Independent overlay code/contract audit and independent experience audit are intentionally not claimed. Owner merge readiness remains `NO` until those separate audits pass and the Owner decides to merge.
+
+## Independent Overlay Audit R1 amendment record
+
+```text
+INDEPENDENT_OVERLAY_AUDIT_R1_RESULT =
+REQUEST_CHANGES
+
+INDEPENDENT_OVERLAY_AUDIT_R1_HEAD =
+751d9927065300e45775bcfc521cf24108380888
+
+INDEPENDENT_OVERLAY_AUDIT_R1_BLOCKERS =
+4
+
+R1_AMENDMENT_IMPLEMENTATION_HEAD =
+ea6b95a0fd722ed7a79b66d0f6e9d0def04a77fd
+
+R1_B1_SECOND_SESSION_LIFECYCLE_CLOSED =
+YES
+
+R1_B2_INDEXEDDB_DISPOSAL_CLOSED =
+YES
+
+R1_B3_HMR_RESOURCE_INVENTORY_CLOSED =
+YES
+
+R1_B4_ONBOARDING_MATRIX_CLOSED =
+YES
+
+BLOCKERS_CLAIMED_CLOSED =
+4
+
+INDEXEDDB_OPEN_CONNECTIONS_AFTER_DISPOSE =
+0
+
+CLIENT_HMR_GENERATION_TEST =
+PASS
+
+RESOURCE_DISPOSED =
+RESOURCE_BASELINE
+
+TARGETED_SECOND_SESSION_REPEAT =
+5/5 PASS
+
+PINNED_DSH_E2E =
+16/16 PASS
+
+PNPM_VERIFY =
+PASS
+
+PNPM_VERIFY_DSH =
+PASS
+
+DISPOSABLE_DSH_HOME =
+/tmp/vehicle-pet-overlay-dsh-home-amend-r1
+
+PINNED_DSH_COMMIT =
+f77b5a2fcebc2d9138f6608a60636f2294868d42
+
+INDEPENDENT_OVERLAY_AUDIT_AFTER_AMENDMENT =
+NOT_RUN
+
+READY_FOR_OVERLAY_REAUDIT =
+YES
+
+READY_TO_MERGE =
+NO
+```
+
+| R1 blocker | Fix path | Regression evidence | Contract / Acceptance | Executed result |
+|---|---|---|---|---|
+| B1 — second Session lifecycle | `tests/dsh/e2e/overlay.spec.ts`, `tests/dsh/e2e/global-setup.ts`, `tests/dsh/e2e/mock-supervisor.mjs`, structured binding handshake in `src/dsh/client/session-state-adapter.ts` and `VehiclePetOverlay.tsx` | `structured session lifecycle drives the pet --repeat-each=5`; typed list/current, editable composer, adapter generation rebind, running, completed, new recorder, and no old terminal replay | `CTR-OVERLAY-007`, `CTR-OVERLAY-013`; `ACC-OVERLAY-007`, `ACC-OVERLAY-008`, `ACC-OVERLAY-015` | PASS, 5/5 against disposable pinned Harness |
+| B2 — IndexedDB disposal | owned asynchronous acquisition/disposal in `src/dsh/client/VehiclePetOverlay.tsx` | `tests/dsh/unit/owned-storage-lifecycle.test.ts`: resolve before/after cleanup, repeated mount/unmount, HMR replacement, initialization failure, external fallback ownership | `CTR-OVERLAY-010`, `CTR-OVERLAY-012`; `ACC-OVERLAY-014`, `ACC-OVERLAY-015` | PASS, 6/6; open connections after dispose = 0 |
+| B3 — HMR and resource inventory | build generation marker plus actual pinned client-watcher replacement; complete fake-fiber inventory | `tests/dsh/e2e/overlay.spec.ts` case 27 and `tests/dsh/dom/hmr-resource-lifecycle.test.tsx` | `CTR-OVERLAY-002`, `CTR-OVERLAY-012`; `ACC-OVERLAY-002`, `ACC-OVERLAY-014`, `ACC-OVERLAY-015` | PASS; at most one slot entry; generation 1 disposed before generation 2; final inventory equals baseline |
+| B4 — onboarding matrix | typed `SessionListState` remains the sole suppression input | `tests/dsh/dom/overlay.test.tsx`: VISIBLE, PANEL_OPEN, COLLAPSED, COLLAPSED reload, ordinary conversation/settings/workspace/non-ready no-current, and DOM/copy/class/path invariance | `CTR-OVERLAY-011`; `ACC-OVERLAY-012` | PASS, complete matrix |
+
+The R1 amendment evidence is author-executed blocker-closure evidence bound to implementation commit `ea6b95a0fd722ed7a79b66d0f6e9d0def04a77fd`. It does not convert the independent audit result to PASS or ACCEPT; an independent R2 re-audit on the final amendment Head remains required.
