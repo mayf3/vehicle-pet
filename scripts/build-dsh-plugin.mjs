@@ -22,6 +22,7 @@ import { fileURLToPath } from 'node:url'
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const PACKAGE_ID = '@mayf3/vehicle-pet'
+const CLIENT_GENERATION = process.env.VEHICLE_PET_CLIENT_GENERATION ?? 'production'
 
 await rm(path.join(repoRoot, 'lib'), { recursive: true, force: true })
 await mkdir(path.join(repoRoot, 'lib'), { recursive: true })
@@ -57,6 +58,7 @@ await build({
   footer: { js: 'return module.exports; } });' },
   define: {
     'process.env.NODE_ENV': JSON.stringify('production'),
+    '__VEHICLE_PET_CLIENT_GENERATION__': JSON.stringify(CLIENT_GENERATION),
   },
 })
 

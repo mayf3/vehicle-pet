@@ -53,27 +53,19 @@ export default async function globalSetup(): Promise<() => Promise<void>> {
   //   #4 invalid_request — turn 2 ends failed immediately (not retryable,
   //       unlike server_error which the llm-retry plugin would re-consume)
   //   #5 stall         — turn 3: running until Stop (cancelled)
-  //   #6+ success      — later turns (repeat-last)
+  //   #6+ slow_success — later turns remain observable (repeat-last)
   const mockLog = createWriteStream('/tmp/vehicle-pet-dsh-mock.log', { flags: 'w' })
+  // The supervisor wraps the pinned mock server and exposes a test-only reset
+  // endpoint on 8902. beforeEach resets the request cursor, so repeat-each and
+  // the full suite receive the same deterministic lifecycle budget.
   const mock = spawn('node', [
     '--import', 'tsx/esm',
-    'packages/test-support/llm-mock-server/src/bin.ts',
-    '--sequence', 'slow_success,slow_success,tool_call_success,invalid_request,stall,success',
-    '--repeat-last',
-    '--chunk-delay-ms', '400',
-    '--port', MOCK_LLM_PORT,
-    // Turn 2's scripted tool call is ask_user_question: the pending
-    // question is the structured needs-input state; answering it lets the
-    // turn continue into the scripted server_error (failed reaction).
-    '--tool-name', 'ask_user_question',
-    '--tool-arguments', JSON.stringify({
-      questions: [{
-        id: 'e2e-continue',
-        question: 'Continue the e2e flow?',
-        options: [{ label: 'Yes, continue' }, { label: 'Stop here' }],
-      }],
-    }),
-  ], { cwd: DSH_ROOT, stdio: ['ignore', 'pipe', 'pipe'] })
+    path.join(PLUGIN_ROOT, 'tests/dsh/e2e/mock-supervisor.mjs'),
+  ], {
+    cwd: DSH_ROOT,
+    env: { ...process.env, DSH_REFERENCE_WORKTREE: DSH_ROOT, VEHICLE_PET_MOCK_LLM_PORT: MOCK_LLM_PORT },
+    stdio: ['ignore', 'pipe', 'pipe'],
+  })
   mock.stdout!.pipe(mockLog)
   mock.stderr!.pipe(mockLog)
   await new Promise<void>((resolve, reject) => {

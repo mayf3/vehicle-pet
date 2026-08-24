@@ -66,6 +66,11 @@ export interface VehiclePetSessionsSource {
     readonly list: OverlayObservable<SessionListLike>;
     binding(id: string): SessionBindingLike | undefined;
 }
+export interface VehiclePetBindingInfo {
+    readonly currentId: string | undefined;
+    readonly generation: number;
+    readonly ready: boolean;
+}
 export interface VehiclePetSessionAdapterOptions {
     /** How long a terminal reaction stays presented. */
     readonly terminalDurationMs?: number;
@@ -78,6 +83,8 @@ export declare class VehiclePetSessionAdapter implements OverlayObservable<Vehic
     #private;
     constructor(sessions: VehiclePetSessionsSource, options?: VehiclePetSessionAdapterOptions);
     getSnapshot: () => VehiclePetSessionView;
+    /** Testable structured handshake used by the runtime E2E; no DOM inference. */
+    getBindingInfo: () => VehiclePetBindingInfo;
     subscribe: (listener: () => void) => (() => void);
     dispose(): void;
 }

@@ -12,6 +12,7 @@ import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
 import type {} from '@deepseek-ai/dsh-client-ui-layout/client'
 // Type-only: declares `ctx.locale` (LocaleRuntime service) on Context.
 import type {} from '@deepseek-ai/dsh-client-locale/client'
+import { vehiclePetClientGeneration } from './build-generation'
 import { NS, en, zh } from './locales'
 import { VehiclePetSessionAdapter, type VehiclePetSessionsSource } from './session-state-adapter'
 import { adoptStyles } from './styles'
@@ -42,6 +43,8 @@ export function apply(ctx: ClientContext): void {
         sessionView: adapter,
         locale: ctx.locale,
       },
+      sessionBinding: adapter.getBindingInfo,
+      clientGeneration: vehiclePetClientGeneration,
     }),
   }, VehiclePetOverlay))
 }

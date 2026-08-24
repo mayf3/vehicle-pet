@@ -22,6 +22,7 @@ import {
 import { dshPackBundles, dshDefaultPackId } from './engine-bundles'
 import type { VehiclePetLocaleKey } from './locales'
 import { createOverlayProgressSource } from './OverlayProgressSource'
+import type { VehiclePetBindingInfo } from './session-state-adapter'
 import { adoptStorageEvent, loadOverlayPreferences, saveOverlayPreferences, subscribeStorageEvents } from './preferences'
 import type {
   VehiclePetInteractionState, VehiclePetOverlayPreferences, VehiclePetSessionView,
@@ -36,6 +37,9 @@ export interface VehiclePetInjected {
     sessionView: HostObservable<VehiclePetSessionView>
     locale: HostObservable<{ active: string; revision: number }>
   }
+  /** Structured adapter-binding handshake; exposed as inert data attributes. */
+  sessionBinding?: () => VehiclePetBindingInfo
+  clientGeneration?: string
 }
 
 export type VehiclePetOverlayProps = PropsRuntime<'shell.overlay'>
@@ -66,14 +70,18 @@ export function useOverlayCommitPreferences(): OverlayChrome['commitPreferences'
 }
 
 export function VehiclePetOverlay(props: VehiclePetOverlayProps): ReactElement | null {
-  const { useSessionView, useLocale, useSessions, t } = props
+  const { useSessionView, useLocale, useSessions, t, sessionBinding, clientGeneration } = props
 
   const sessionView = useSessionView(view => view)
   const activeLocale = useLocale(snapshot => snapshot.active)
   const engineLocale: Locale = activeLocale === 'en' ? 'en' : 'zh-CN'
+  const sessionListCurrent = useSessions(state => state.current)
+  const sessionListContainsCurrent = useSessions(state =>
+    state.current !== undefined && state.byId[state.current] !== undefined)
   const onboarding = useSessions(state =>
     state.phase === 'ready'
     && (state.current === undefined || state.byId[state.current]?.blank === true))
+  const bindingInfo = sessionBinding?.()
 
   const [preferences, setPreferences] = useState<VehiclePetOverlayPreferences>(() => loadOverlayPreferences())
   const preferencesRef = useRef(preferences)
@@ -127,9 +135,58 @@ export function VehiclePetOverlay(props: VehiclePetOverlayProps): ReactElement |
         engineLocale={engineLocale}
         interaction={interaction}
         onInteractionChange={setInteraction}
+        sessionListCurrent={sessionListCurrent}
+        sessionListContainsCurrent={sessionListContainsCurrent}
+        bindingInfo={bindingInfo}
+        clientGeneration={clientGeneration}
       />
     </OverlayChromeContext.Provider>
   )
+}
+
+/** An adapter created by this Overlay and therefore closed by its lifecycle. */
+export type OwnedOverlayStorage = PetStorageAdapter & { close(): void }
+
+export interface OwnedOverlayStorageLifecycleOptions {
+  readonly create: () => Promise<OwnedOverlayStorage>
+  readonly onReady: (storage: PetStorageAdapter) => void
+  readonly fallback: PetStorageAdapter
+}
+
+/**
+ * Own one asynchronous storage acquisition across mount, stop, and HMR.
+ * The returned disposer is idempotent. A connection resolving after disposal
+ * is closed immediately and is never published into the unmounted tree.
+ */
+export function acquireOwnedOverlayStorage({
+  create,
+  onReady,
+  fallback,
+}: OwnedOverlayStorageLifecycleOptions): () => void {
+  let disposed = false
+  let createdAdapter: OwnedOverlayStorage | undefined
+
+  void create()
+    .then(created => {
+      if (disposed) {
+        created.close()
+        return
+      }
+      createdAdapter = created
+      onReady(created)
+    })
+    .catch(() => {
+      // Storage unavailable: keep the pet alive with memory-only engine
+      // storage. The fallback is externally owned and is never closed here.
+      if (!disposed) onReady(fallback)
+    })
+
+  return () => {
+    if (disposed) return
+    disposed = true
+    createdAdapter?.close()
+    createdAdapter = undefined
+  }
 }
 
 /** Creates the one Engine storage adapter (IndexedDB, memory fallback) and mounts the provider. */
@@ -139,29 +196,27 @@ function OverlayEngineGate({
   engineLocale,
   interaction,
   onInteractionChange,
+  sessionListCurrent,
+  sessionListContainsCurrent,
+  bindingInfo,
+  clientGeneration,
 }: {
   preferences: VehiclePetOverlayPreferences
   sessionView: VehiclePetSessionView
   engineLocale: Locale
   interaction: VehiclePetInteractionState
   onInteractionChange: (next: VehiclePetInteractionState) => void
+  sessionListCurrent: string | undefined
+  sessionListContainsCurrent: boolean
+  bindingInfo: VehiclePetBindingInfo | undefined
+  clientGeneration: string | undefined
 }): ReactElement | null {
   const [storage, setStorage] = useState<PetStorageAdapter | null>(null)
-  useEffect(() => {
-    let cancelled = false
-    IndexedDbPetStorage.create()
-      .then(created => {
-        if (!cancelled) setStorage(created)
-      })
-      .catch(() => {
-        // Storage unavailable: keep the pet alive with memory-only engine
-        // storage instead of blocking (CTR-OVERLAY-010 tolerance spirit).
-        if (!cancelled) setStorage(MemoryStorageFallback)
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [])
+  useEffect(() => acquireOwnedOverlayStorage({
+    create: () => IndexedDbPetStorage.create(),
+    onReady: setStorage,
+    fallback: MemoryStorageFallback,
+  }), [])
 
   const reducedMotion = preferences.reducedMotion ?? systemPrefersReducedMotion()
   if (storage === null) return null
@@ -179,6 +234,10 @@ function OverlayEngineGate({
         sessionView={sessionView}
         interaction={interaction}
         onInteractionChange={onInteractionChange}
+        sessionListCurrent={sessionListCurrent}
+        sessionListContainsCurrent={sessionListContainsCurrent}
+        bindingInfo={bindingInfo}
+        clientGeneration={clientGeneration}
       />
     </PetEngineProvider>
   )
@@ -201,11 +260,19 @@ function OverlaySurface({
   sessionView,
   interaction,
   onInteractionChange,
+  sessionListCurrent,
+  sessionListContainsCurrent,
+  bindingInfo,
+  clientGeneration,
 }: {
   preferences: VehiclePetOverlayPreferences
   sessionView: VehiclePetSessionView
   interaction: VehiclePetInteractionState
   onInteractionChange: (next: VehiclePetInteractionState) => void
+  sessionListCurrent: string | undefined
+  sessionListContainsCurrent: boolean
+  bindingInfo: VehiclePetBindingInfo | undefined
+  clientGeneration: string | undefined
 }): ReactElement {
   const setInteraction = onInteractionChange
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -254,7 +321,17 @@ function OverlaySurface({
     : `state.${sessionView.live}`
 
   return (
-    <div className="vpo-root" ref={drag.rootRef} data-vehicle-pet={collapsed ? 'collapsed' : interaction}>
+    <div
+      className="vpo-root"
+      ref={drag.rootRef}
+      data-vehicle-pet={collapsed ? 'collapsed' : interaction}
+      data-session-list-current={sessionListCurrent}
+      data-session-list-contains-current={sessionListContainsCurrent ? 'true' : 'false'}
+      data-adapter-session={bindingInfo?.currentId}
+      data-adapter-binding-ready={bindingInfo?.ready ? 'true' : 'false'}
+      data-adapter-generation={bindingInfo?.generation}
+      data-client-generation={clientGeneration}
+    >
       <div className="vpo-shell" style={drag.shellStyle} data-dragging={drag.isDragging}>
         {collapsed ? (
           <button
