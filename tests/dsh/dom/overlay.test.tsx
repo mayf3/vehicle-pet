@@ -297,4 +297,3 @@ describe('VehiclePetOverlay movement and multi-tab sync', () => {
     setItem.mockRestore()
   })
 })
-
