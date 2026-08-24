@@ -27,6 +27,21 @@ export default defineConfig({
           include: ['tests/contracts/**/*.test.ts'],
         },
       },
+      {
+        test: {
+          name: 'dsh-unit',
+          environment: 'node',
+          include: ['tests/dsh/unit/**/*.test.ts'],
+        },
+      },
+      {
+        test: {
+          name: 'dsh-dom',
+          environment: 'jsdom',
+          include: ['tests/dsh/dom/**/*.test.tsx'],
+          setupFiles: ['tests/dsh/dom/setup.ts'],
+        },
+      },
     ],
   },
 })

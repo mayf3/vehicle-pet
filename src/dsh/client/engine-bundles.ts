@@ -1,0 +1,29 @@
+/**
+ * Engine/Pack assembly for the DSH overlay (CTR-OVERLAY-006): the SAME two
+ * bundled Pack manifests and the SAME asset files as the standalone prototype,
+ * with `resolveAssetUrl` backed by the generated DSH build-time asset map
+ * instead of the Vite dev-server `import.meta.glob`. One engine instance, one
+ * storage adapter, one active Pack authority, one progress source.
+ */
+
+import type { PackBundleInput } from '../../engine'
+import autonomousFleetManifest from '../../packs/autonomous-fleet/manifest.json'
+import seedlingFixtureManifest from '../../packs/seedling-fixture/manifest.json'
+import { dshAssetUrls } from './asset-bundles.generated'
+
+function resolveDshAssetUrl(packId: string, assetPath: string): string | undefined {
+  return dshAssetUrls[`${packId}/${assetPath}`]
+}
+
+export const dshPackBundles: PackBundleInput[] = [
+  {
+    manifestCandidate: autonomousFleetManifest,
+    resolveAssetUrl: (assetPath: string) => resolveDshAssetUrl('autonomous-fleet', assetPath),
+  },
+  {
+    manifestCandidate: seedlingFixtureManifest,
+    resolveAssetUrl: (assetPath: string) => resolveDshAssetUrl('seedling-fixture', assetPath),
+  },
+]
+
+export const dshDefaultPackId = 'autonomous-fleet'

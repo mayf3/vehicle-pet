@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../src/dsh/index.ts"],
+  "sourcesContent": ["/**\n * Host entry (`main`/root export): the thinnest possible DSH bundle Host\n * lifecycle. Loading this entry makes the package's declared browser half\n * discoverable to the Harness client-module registry; the Host half itself is\n * intentionally inert (CTR-OVERLAY-001 \u2014 external bundle plugin, no Core\n * patch, no Host business logic).\n */\n\nimport type { Context } from '@deepseek-ai/cordis'\n\n/** Stable Cordis plugin name matching the `cordis.patch.yml` row id. */\nexport const name = 'vehicle-pet'\n\nexport function apply(_ctx: Context): void {\n  // Inert by design: all overlay behavior lives in the browser half.\n}\n"],
+  "mappings": ";AAWO,IAAM,OAAO;AAEb,SAAS,MAAM,MAAqB;AAE3C;",
+  "names": []
+}

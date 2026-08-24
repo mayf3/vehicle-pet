@@ -169,10 +169,14 @@ describe('no network, model, transport, or runtime pack installation anywhere in
   })
 
   it('contains no model SDK, DeepSeek Harness adapter, or token accounting', () => {
+    // DSH_PET_OVERLAY_ADAPTER_V1 (accepted) authorizes DeepSeek Harness
+    // coupling inside `src/dsh/**` only; everywhere else the original V1 ban
+    // holds unchanged.
     const BANNED = /deepseek|openai|anthropic|llm|chatgpt|token[-_ ]?(usage|accounting|billing|consumption)|model[-_ ]?(sdk|client|call)/gi
     const hits: string[] = []
     for (const file of srcFiles.filter((f) => /\.(ts|tsx)$/.test(f))) {
       const rel = toPosix(file)
+      if (rel.startsWith('src/dsh/')) continue
       const text = readFileSync(file, 'utf8')
       for (const match of text.matchAll(BANNED)) {
         hits.push(`${rel}: ${match[0]}`)
@@ -199,10 +203,18 @@ describe('no network, model, transport, or runtime pack installation anywhere in
     expect(existsSync(mockSourcePath)).toBe(true)
     const engineSources = srcFiles.filter((f) => toPosix(f).startsWith('src/engine/')).map(toPosix)
     expect(engineSources.some((rel) => rel.includes('MockProgressSource'))).toBe(false)
+    // DSH_PET_OVERLAY_ADAPTER_V1 additionally authorizes one zero-progress
+    // overlay placeholder that must REUSE the prototype implementation
+    // (import it), never fork a second progress semantics.
     const progressSourceImplementations = walk(SRC)
       .filter((f) => f.endsWith('.ts'))
       .map(toPosix)
       .filter((rel) => /ProgressSource\.(ts|tsx)$/.test(rel) && rel !== 'engine/types/core.ts')
-    expect(progressSourceImplementations).toEqual(['src/prototype/MockProgressSource.ts'])
+    expect(progressSourceImplementations).toEqual([
+      'src/dsh/client/OverlayProgressSource.ts',
+      'src/prototype/MockProgressSource.ts',
+    ])
+    const overlaySource = readFileSync(path.join(SRC, 'dsh/client/OverlayProgressSource.ts'), 'utf8')
+    expect(overlaySource).toContain("from '../../prototype/MockProgressSource'")
   })
 })

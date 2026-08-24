@@ -24,6 +24,10 @@ const RENDERER_DESCENDANT_BUDGET = 63
 export interface PetSceneRendererProps {
   /** Prototype-only fault injection: asset ids forced to render their fallback. */
   simulateFailAssetIds?: readonly string[]
+  /** Compact hosts can own the activation control and render the subject non-interactively. */
+  subjectInteractive?: boolean
+  /** Host-owned interaction count used for the same click-feedback presentation. */
+  interactionCount?: number
   'aria-label'?: string
 }
 
@@ -72,7 +76,8 @@ export function PetSceneRenderer(props: PetSceneRendererProps) {
           subjectScalePermille={plan.subjectScalePermille}
           reducedMotion={reduced}
           upgradeReveal={upgradeReveal}
-          clickCount={node.kind === 'subject' ? clickCount : 0}
+          clickCount={node.kind === 'subject' ? (props.interactionCount ?? clickCount) : 0}
+          subjectInteractive={props.subjectInteractive !== false}
           onClickSubject={() => setClickCount((n) => n + 1)}
           simulateFailAssetIds={props.simulateFailAssetIds}
         />
@@ -108,6 +113,7 @@ interface PlanNodeViewProps {
   reducedMotion: boolean
   upgradeReveal: 'subject-swap' | 'scene-expand' | 'milestone-card' | 'collection-add'
   clickCount: number
+  subjectInteractive: boolean
   onClickSubject: () => void
   simulateFailAssetIds?: readonly string[]
 }
@@ -150,6 +156,7 @@ function PlanNodeView(props: PlanNodeViewProps) {
         reducedMotion={reducedMotion}
         upgradeReveal={props.upgradeReveal}
         clickCount={props.clickCount}
+        interactive={props.subjectInteractive}
         onClick={props.onClickSubject}
         simulateFailAssetIds={props.simulateFailAssetIds}
       />
@@ -172,6 +179,7 @@ function SubjectButton(props: {
   reducedMotion: boolean
   upgradeReveal: 'subject-swap' | 'scene-expand' | 'milestone-card' | 'collection-add'
   clickCount: number
+  interactive: boolean
   onClick: () => void
   simulateFailAssetIds?: readonly string[]
 }) {
@@ -199,20 +207,19 @@ function SubjectButton(props: {
       ? `vp-subject-swap 300ms ease-out both, ${subjectMotion}`
       : subjectMotion
 
-  return (
-    <button
-      type="button"
-      className="vp-node vp-subject-btn vp-kind-subject"
-      style={{ ...props.style, animation }}
-      aria-label={node.altText || snapshot.viewModel?.derivedLevelId || 'Pet'}
-      onClick={onClick}
-      data-pet-subject="true"
-      data-feedback-visible={showFeedback ? 'true' : 'false'}
-      data-feedback={reducedMotion ? copy.clickFeedback : '✦'}
-    >
-      <SceneAsset node={node} className="vp-node-img" simulateFailAssetIds={props.simulateFailAssetIds} />
-    </button>
-  )
+  const common = {
+    className: 'vp-node vp-subject-btn vp-kind-subject',
+    style: { ...props.style, animation },
+    'aria-label': node.altText || snapshot.viewModel?.derivedLevelId || 'Pet',
+    'data-pet-subject': 'true',
+    'data-feedback-visible': showFeedback ? 'true' : 'false',
+    'data-feedback': reducedMotion ? copy.clickFeedback : '✦',
+  } as const
+  const asset = <SceneAsset node={node} className="vp-node-img" simulateFailAssetIds={props.simulateFailAssetIds} />
+  if (!props.interactive) {
+    return <span {...common} role="img">{asset}</span>
+  }
+  return <button {...common} type="button" onClick={onClick}>{asset}</button>
 }
 
 /** Asset node with the webp → png → text degradation chain (CTR-PET-017). */
