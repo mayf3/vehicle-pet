@@ -113,6 +113,6 @@ The Engine does not import React, the prototype, or a concrete Pack. The bundled
 
 ## Conformance
 
-See [`docs/conformance/CONFIGURABLE_PET_ENGINE_V1_CONFORMANCE.md`](docs/conformance/CONFIGURABLE_PET_ENGINE_V1_CONFORMANCE.md) and [`docs/conformance/CONFIGURABLE_PET_ENGINE_V1_SHOWCASE.webp`](docs/conformance/CONFIGURABLE_PET_ENGINE_V1_SHOWCASE.webp).
+See the Engine record [`CONFIGURABLE_PET_ENGINE_V1_CONFORMANCE.md`](docs/conformance/CONFIGURABLE_PET_ENGINE_V1_CONFORMANCE.md) and the DSH adapter record [`DSH_PET_OVERLAY_ADAPTER_V1_CONFORMANCE.md`](docs/conformance/DSH_PET_OVERLAY_ADAPTER_V1_CONFORMANCE.md), with their linked visual evidence.
 
-Author conformance evidence is complete. Independent engine and experience audits have not yet run.
+DSH overlay author conformance evidence is complete. Independent overlay code/contract and experience audits have not yet run; the Draft PR is not ready to merge.
