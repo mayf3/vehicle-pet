@@ -132,7 +132,10 @@ try {
       js: `window.__ModuleLoader__.load({ id: ${JSON.stringify(PACKAGE_ID)}, factory: (require) => { var module = { exports: {} }; var exports = module.exports;`,
     },
     footer: { js: 'return module.exports; } });' },
-    define: { 'process.env.NODE_ENV': JSON.stringify('production') },
+    define: {
+      'process.env.NODE_ENV': JSON.stringify('production'),
+      '__VEHICLE_PET_CLIENT_GENERATION__': JSON.stringify('production'),
+    },
   })
   const hostResult = await build({
     entryPoints: [path.join(repoRoot, 'src/dsh/index.ts')],

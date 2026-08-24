@@ -9,6 +9,7 @@
  * repository's own `pnpm verify` (Playwright against the Vite app).
  */
 
+import { execFileSync } from 'node:child_process'
 import { mkdirSync } from 'node:fs'
 import { expect, test, type Page, type Request } from '@playwright/test'
 
@@ -34,6 +35,8 @@ test.beforeAll(async ({ browser }) => {
 let trackedContext: import('@playwright/test').BrowserContext | null = null
 
 test.beforeEach(async ({ context, page }) => {
+  const reset = await fetch('http://127.0.0.1:8902/reset', { method: 'POST' })
+  if (!reset.ok) throw new Error(`mock supervisor reset failed: ${reset.status}`)
   context.on('request', request => {
     seenRequests.push(request)
   })
@@ -76,28 +79,41 @@ async function connectWorkspace(page: Page): Promise<void> {
   const workspace = '/tmp/vehicle-pet-overlay-e2e-workspace'
   mkdirSync(workspace, { recursive: true })
   await dismissStartupDialogs(page)
-  await page.getByRole('textbox', { name: /Choose workspace|选择工作区/ }).click()
-  const dialog = page.getByRole('dialog', { name: /Select Workspace Directory|选择工作区目录/ })
-  await dialog.waitFor({ timeout: 15_000 })
-  await dialog.getByRole('button', { name: /Edit path|编辑路径/ }).click()
-  const pathInput = dialog.getByRole('textbox', { name: /Edit path|编辑路径/ })
-  await pathInput.fill(workspace)
-  await pathInput.press('Enter')
-  await dialog.getByRole('button', { name: /^(Open|打开)$/ }).click()
-  await page.locator('textarea:enabled').first().waitFor({ timeout: 20_000 })
+  const picker = page.getByRole('textbox', { name: /Choose workspace|选择工作区/ })
+  if (await picker.isVisible({ timeout: 5_000 }).catch(() => false)) {
+    await picker.click()
+    const dialog = page.getByRole('dialog', { name: /Select Workspace Directory|选择工作区目录/ })
+    await dialog.waitFor({ timeout: 15_000 })
+    await dialog.getByRole('button', { name: /Edit path|编辑路径/ }).click()
+    const pathInput = dialog.getByRole('textbox', { name: /Edit path|编辑路径/ })
+    await pathInput.fill(workspace)
+    await pathInput.press('Enter')
+    await dialog.getByRole('button', { name: /^(Open|打开)$/ }).click()
+  } else {
+    // repeat-each reuses the disposable host, so later repetitions start in
+    // the prior Session. Establish a fresh blank Session before turn 1.
+    const newSession = page.getByRole('button', { name: /New Session|新建会话|New chat|新会话/i }).first()
+    await newSession.waitFor({ timeout: 20_000 })
+    await newSession.click()
+  }
+  const composer = page.locator('textarea:enabled').last()
+  await composer.waitFor({ timeout: 20_000 })
+  await expect(composer).toBeEditable()
 }
 
 async function sendPrompt(page: Page, text: string): Promise<void> {
   const composer = page.locator('textarea:enabled').last()
+  await composer.waitFor({ state: 'visible', timeout: 20_000 })
+  await expect(composer).toBeEditable()
   await composer.fill(text)
-  // Submit through the send button: Enter is not reliable right after a
-  // reload (draft state can swallow the keypress without submitting).
+  await expect(composer).toHaveValue(text)
+  // A submit is accepted only after the current Session's composer handshake
+  // completes. Falling back to Enter here can target the previous Session
+  // during a session-switch render and was the R1 second-session race.
   const send = page.getByRole('button', { name: /发送消息|Send message/ }).first()
-  if (await send.isEnabled().catch(() => false)) {
-    await send.click()
-    return
-  }
-  await composer.press('Enter')
+  await expect(send).toBeEnabled({ timeout: 20_000 })
+  await send.click()
+  await expect(composer).toHaveValue('', { timeout: 20_000 })
 }
 
 async function petBox(page: Page) {
@@ -109,10 +125,15 @@ async function petBox(page: Page) {
  * so assertions must not race the visible window). Returns the recorder's
  * snapshot reader.
  */
-async function installPillRecorder(page: Page): Promise<() => Promise<string[]>> {
-  await page.evaluate(() => {
-    const record = (window as unknown as { __vpPills?: string[] }).__vpPills ?? []
-    ;(window as unknown as { __vpPills: string[] }).__vpPills = record
+interface PillRecorder {
+  readonly id: string
+  read(): Promise<string[]>
+}
+
+async function installPillRecorder(page: Page): Promise<PillRecorder> {
+  const id = `recorder-${Date.now()}-${Math.random().toString(36).slice(2)}`
+  await page.evaluate(recorderId => {
+    const record: string[] = []
     const capture = () => {
       const pill = document.querySelector('[data-pet-host-feedback]')
       const terminal = document.querySelector('[data-vehicle-pet-pet]')
@@ -122,15 +143,28 @@ async function installPillRecorder(page: Page): Promise<() => Promise<string[]>>
         record.push(status)
       }
     }
-    new MutationObserver(capture).observe(document.body, {
+    const observer = new MutationObserver(capture)
+    observer.observe(document.body, {
       childList: true,
       subtree: true,
       attributes: true,
       attributeFilter: ['data-pet-host-feedback', 'data-terminal'],
     })
+    ;(window as unknown as {
+      __vpRecorder: { id: string; record: string[]; observer: MutationObserver }
+    }).__vpRecorder = { id: recorderId, record, observer }
     capture()
-  })
-  return () => page.evaluate(() => (window as unknown as { __vpPills: string[] }).__vpPills ?? [])
+  }, id)
+  return {
+    id,
+    read: () => page.evaluate(expectedId => {
+      const recorder = (window as unknown as {
+        __vpRecorder?: { id: string; record: string[] }
+      }).__vpRecorder
+      if (recorder?.id !== expectedId) return []
+      return recorder.record
+    }, id),
+  }
 }
 
 /** Fresh page bootstrap: load the app and wait for the mounted pet. */
@@ -172,23 +206,24 @@ test('24 + 16 + 18 + 21 + 17 + 19 + 20 + 22. structured session lifecycle drives
   const pillsBeforeReload = await installPillRecorder(page)
   await expect
     .poll(async () => (await page.locator(PET).getAttribute('data-live')) === 'running'
-      || (await pillsBeforeReload()).includes('completed'), { timeout: 60_000 })
+      || (await pillsBeforeReload.read()).includes('completed'), { timeout: 60_000 })
     .toBe(true)
   const sawRunning = await page.locator(PET).getAttribute('data-live') === 'running'
   if (sawRunning) await page.screenshot({ path: `${ARTIFACTS}/working.png` })
 
   // Turn 1 completes with one short completed pill (mock: slow_success).
-  await expect.poll(async () => (await pillsBeforeReload()).includes('completed'), { timeout: 90_000 }).toBe(true)
-  await expect.poll(async () => (await pillsBeforeReload()).length, { timeout: 15_000 }).toBe(1)
+  await expect.poll(async () => (await pillsBeforeReload.read()).includes('completed'), { timeout: 90_000 }).toBe(true)
+  await expect.poll(async () => (await pillsBeforeReload.read()).length, { timeout: 15_000 }).toBe(1)
   await expect.poll(async () => (await page.locator(PILL).count()), { timeout: 15_000 }).toBe(0)
 
   // Reload cannot replay the completed terminal (edge dedupe).
   await page.reload()
   await expect.poll(() => page.locator(PET).count(), { timeout: 30_000 }).toBe(1)
   const pillsAfterReload = await installPillRecorder(page)
+  expect(pillsAfterReload.id).not.toBe(pillsBeforeReload.id)
   await page.waitForTimeout(4200)
   expect(await page.locator(PILL).count()).toBe(0)
-  expect(await pillsAfterReload()).toEqual([])
+  expect(await pillsAfterReload.read()).toEqual([])
   await expect.poll(() => page.locator(PET).getAttribute('data-live'), { timeout: 15_000 }).toBe('idle')
   // From here the reload-time recorder owns the remaining phases.
   const pills = pillsAfterReload
@@ -205,7 +240,7 @@ test('24 + 16 + 18 + 21 + 17 + 19 + 20 + 22. structured session lifecycle drives
   await question.getByRole('textbox').press('Enter')
 
   // The post-tool follow-up hits invalid_request: the failed reaction.
-  await expect.poll(async () => (await pills()).includes('failed'), { timeout: 90_000 }).toBe(true)
+  await expect.poll(async () => (await pills.read()).includes('failed'), { timeout: 90_000 }).toBe(true)
   await expect.poll(async () => (await page.locator(PILL).count()), { timeout: 30_000 }).toBe(0)
 
   // Turn 3 stalls; Stop cancels it: the cancelled reaction.
@@ -214,7 +249,7 @@ test('24 + 16 + 18 + 21 + 17 + 19 + 20 + 22. structured session lifecycle drives
   const stop = page.getByRole('button', { name: 'Stop generating' })
   await stop.waitFor({ timeout: 30_000 })
   await stop.click()
-  await expect.poll(async () => (await pills()).includes('cancelled'), { timeout: 60_000 }).toBe(true)
+  await expect.poll(async () => (await pills.read()).includes('cancelled'), { timeout: 60_000 }).toBe(true)
   await expect.poll(async () => (await page.locator(PILL).count()), { timeout: 30_000 }).toBe(0)
 
   // A second session: no stale reaction leaks across the switch. Reload
@@ -222,18 +257,54 @@ test('24 + 16 + 18 + 21 + 17 + 19 + 20 + 22. structured session lifecycle drives
   await page.reload()
   await expect.poll(() => page.locator(PET).count(), { timeout: 30_000 }).toBe(1)
   const pillsAfterSecondReload = await installPillRecorder(page)
+  expect(pillsAfterSecondReload.id).not.toBe(pillsAfterReload.id)
   await page.waitForTimeout(4200)
   expect(await page.locator(PILL).count()).toBe(0)
-  expect(await pillsAfterSecondReload()).toEqual([])
+  expect(await pillsAfterSecondReload.read()).toEqual([])
+  const root = page.locator('.vpo-root')
+  const previousSessionId = await root.getAttribute('data-session-list-current')
+  const previousGeneration = Number(await root.getAttribute('data-adapter-generation'))
+  expect(previousSessionId).toBeTruthy()
+  expect(Number.isSafeInteger(previousGeneration)).toBe(true)
+
   const newSession = page.getByRole('button', { name: /New Session|新建会话|New chat|新会话/i }).first()
   await newSession.waitFor({ timeout: 20_000 })
   await newSession.click()
+
+  // A fresh blank Session is a typed onboarding state, so the product surface
+  // is intentionally absent while its composer is already ready. Submit only
+  // after that explicit composer handshake; the accepted prompt then makes the
+  // typed Session non-blank and exposes the adapter rebind facts.
   await expect.poll(() => page.locator(PILL).count(), { timeout: 20_000 }).toBe(0)
-  await expect.poll(() => page.locator(PET).count()).toBe(1)
+  const secondComposer = page.locator('textarea:enabled').last()
+  await secondComposer.waitFor({ state: 'visible', timeout: 20_000 })
+  await expect(secondComposer).toBeEditable()
+  await expect(secondComposer).toHaveValue('')
   await sendPrompt(page, 'e2e-session-2: complete')
+
+  await expect.poll(async () => {
+    if (await root.count() !== 1) return false
+    const listCurrent = await root.getAttribute('data-session-list-current')
+    const adapterCurrent = await root.getAttribute('data-adapter-session')
+    const generation = Number(await root.getAttribute('data-adapter-generation'))
+    return listCurrent !== null
+      && listCurrent !== previousSessionId
+      && await root.getAttribute('data-session-list-contains-current') === 'true'
+      && adapterCurrent === listCurrent
+      && await root.getAttribute('data-adapter-binding-ready') === 'true'
+      && generation > previousGeneration
+  }, { timeout: 30_000 }).toBe(true)
+  const secondSessionId = await root.getAttribute('data-session-list-current')
+  const secondGeneration = await root.getAttribute('data-adapter-generation')
+
+  // Submission stays bound to the new generation, reaches running, then emits
+  // exactly the new completed terminal. The pre-switch terminal was not replayed.
+  await expect(root).toHaveAttribute('data-adapter-session', secondSessionId ?? '')
+  await expect(root).toHaveAttribute('data-adapter-generation', secondGeneration ?? '')
+  await expect.poll(() => page.locator(PET).getAttribute('data-live'), { timeout: 60_000 }).toBe('running')
   await expect.poll(async () =>
-    (await page.locator(PET).getAttribute('data-live')) === 'running'
-      || (await pillsAfterSecondReload()).includes('completed'), { timeout: 60_000 }).toBe(true)
+    (await pillsAfterSecondReload.read()).includes('completed'), { timeout: 90_000 }).toBe(true)
+  expect((await pillsAfterSecondReload.read()).filter(status => status === 'completed')).toHaveLength(1)
   await expect.poll(async () => (await page.locator(PILL).count()), { timeout: 30_000 }).toBe(0)
 })
 
@@ -427,12 +498,67 @@ test('26. multi-tab preference sync through storage events', async ({ context, p
   await second.close()
 })
 
-test('27. reload and repeated navigation never double-mount the overlay', async ({ page }) => {
+test('27. reload and real client-watcher HMR never double-mount or replay terminals', async ({ page }) => {
   await openOverlay(page)
   for (let index = 0; index < 3; index += 1) {
     await page.reload()
     await expect.poll(() => page.locator(PET).count(), { timeout: 30_000 }).toBe(1)
     expect(await page.locator('.vpo-root').count()).toBe(1)
+  }
+
+  const root = page.locator('.vpo-root')
+  await expect(root).toHaveAttribute('data-client-generation', 'production')
+  await expect.poll(() => page.locator(PET).getAttribute('data-live'), { timeout: 90_000 }).toBe('idle')
+  await expect.poll(() => page.locator(PILL).count(), { timeout: 30_000 }).toBe(0)
+  const recorder = await installPillRecorder(page)
+  await page.waitForTimeout(4200)
+  expect(await recorder.read()).toEqual([])
+  await page.evaluate(() => {
+    const trace: { maxEntries: number; generations: string[]; observer?: MutationObserver } = {
+      maxEntries: 0,
+      generations: [],
+    }
+    const capture = () => {
+      trace.maxEntries = Math.max(trace.maxEntries, document.querySelectorAll('[data-vehicle-pet]').length)
+      const generation = document.querySelector('[data-vehicle-pet]')?.getAttribute('data-client-generation')
+      if (generation !== null && generation !== undefined && trace.generations.at(-1) !== generation) {
+        trace.generations.push(generation)
+      }
+    }
+    const observer = new MutationObserver(capture)
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true })
+    trace.observer = observer
+    ;(window as unknown as { __vpHmrTrace: typeof trace }).__vpHmrTrace = trace
+    capture()
+  })
+
+  try {
+    execFileSync('pnpm', ['build:dsh'], {
+      cwd: process.cwd(),
+      env: { ...process.env, VEHICLE_PET_CLIENT_GENERATION: 'hmr-r1-generation-2' },
+      stdio: 'pipe',
+    })
+    await expect(root).toHaveAttribute('data-client-generation', 'hmr-r1-generation-2', { timeout: 60_000 })
+    expect(await page.locator('.vpo-root').count()).toBe(1)
+    expect(await recorder.read()).toEqual([])
+
+    // The pre-HMR terminal stays seeded and does not replay while the new
+    // generation binds the same current Session.
+    await page.waitForTimeout(4200)
+    expect(await recorder.read()).toEqual([])
+
+    const trace = await page.evaluate(() => {
+      const value = (window as unknown as {
+        __vpHmrTrace: { maxEntries: number; generations: string[] }
+      }).__vpHmrTrace
+      return { maxEntries: value.maxEntries, generations: value.generations }
+    })
+    expect(trace.maxEntries).toBe(1)
+    expect(trace.generations).toContain('production')
+    expect(trace.generations).toContain('hmr-r1-generation-2')
+  } finally {
+    execFileSync('pnpm', ['build:dsh'], { cwd: process.cwd(), stdio: 'pipe' })
+    await expect(root).toHaveAttribute('data-client-generation', 'production', { timeout: 60_000 })
   }
 })
 

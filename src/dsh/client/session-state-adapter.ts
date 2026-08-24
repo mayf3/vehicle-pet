@@ -65,6 +65,12 @@ export interface VehiclePetSessionsSource {
   binding(id: string): SessionBindingLike | undefined
 }
 
+export interface VehiclePetBindingInfo {
+  readonly currentId: string | undefined
+  readonly generation: number
+  readonly ready: boolean
+}
+
 export interface VehiclePetSessionAdapterOptions {
   /** How long a terminal reaction stays presented. */
   readonly terminalDurationMs?: number
@@ -102,6 +108,7 @@ export class VehiclePetSessionAdapter implements OverlayObservable<VehiclePetSes
   #sessionUnsubscribe: (() => void) | undefined
   #sessionSource: OverlayObservable<ConversationLike> | undefined
   #currentId: string | undefined
+  #bindingGeneration = 0
   /** True until the first recompute for the current binding has seeded its terminals. */
   #seeded = false
   /** Highest reacted/seeded turn per session; monotonic and bounded by session count. */
@@ -122,6 +129,13 @@ export class VehiclePetSessionAdapter implements OverlayObservable<VehiclePetSes
   }
 
   getSnapshot = (): VehiclePetSessionView => this.#view
+
+  /** Testable structured handshake used by the runtime E2E; no DOM inference. */
+  getBindingInfo = (): VehiclePetBindingInfo => ({
+    currentId: this.#currentId,
+    generation: this.#bindingGeneration,
+    ready: this.#sessionSource !== undefined,
+  })
 
   subscribe = (listener: () => void): (() => void) => {
     this.#listeners.add(listener)
@@ -152,6 +166,7 @@ export class VehiclePetSessionAdapter implements OverlayObservable<VehiclePetSes
   #bindCurrent(current: string | undefined): void {
     this.#unbindSession()
     this.#currentId = current
+    this.#bindingGeneration += 1
     this.#seeded = false
     if (current !== undefined) {
       this.#sessionSource = this.#sessions.binding(current)?.session

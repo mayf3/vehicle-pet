@@ -10,6 +10,8 @@
  */
 import { type ReactElement } from 'react';
 import type { HostObservable, InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots';
+import { type PetStorageAdapter } from '../../engine';
+import type { VehiclePetBindingInfo } from './session-state-adapter';
 import type { VehiclePetOverlayPreferences, VehiclePetSessionView } from './types';
 /** The injected hooks share the renderer binds from the `hooks` compartment. */
 export interface VehiclePetInjected {
@@ -20,6 +22,9 @@ export interface VehiclePetInjected {
             revision: number;
         }>;
     };
+    /** Structured adapter-binding handshake; exposed as inert data attributes. */
+    sessionBinding?: () => VehiclePetBindingInfo;
+    clientGeneration?: string;
 }
 export type VehiclePetOverlayProps = PropsRuntime<'shell.overlay'> & InjectFace<VehiclePetInjected> & PropsLocale<'vehicle-pet'>;
 /** Overlay chrome shared with the panel/dialog: translate + pref commit. */
@@ -32,5 +37,20 @@ export declare function useOverlayChrome(): OverlayChrome;
 export declare function useOverlayT(): PropsLocale<'vehicle-pet'>['t'];
 export declare function useOverlayCommitPreferences(): OverlayChrome['commitPreferences'];
 export declare function VehiclePetOverlay(props: VehiclePetOverlayProps): ReactElement | null;
+/** An adapter created by this Overlay and therefore closed by its lifecycle. */
+export type OwnedOverlayStorage = PetStorageAdapter & {
+    close(): void;
+};
+export interface OwnedOverlayStorageLifecycleOptions {
+    readonly create: () => Promise<OwnedOverlayStorage>;
+    readonly onReady: (storage: PetStorageAdapter) => void;
+    readonly fallback: PetStorageAdapter;
+}
+/**
+ * Own one asynchronous storage acquisition across mount, stop, and HMR.
+ * The returned disposer is idempotent. A connection resolving after disposal
+ * is closed immediately and is never published into the unmounted tree.
+ */
+export declare function acquireOwnedOverlayStorage({ create, onReady, fallback, }: OwnedOverlayStorageLifecycleOptions): () => void;
 export {};
 //# sourceMappingURL=VehiclePetOverlay.d.ts.map

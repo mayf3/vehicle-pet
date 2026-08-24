@@ -235,26 +235,113 @@ describe('VehiclePetOverlay full journey dialog', () => {
   })
 })
 
-describe('VehiclePetOverlay onboarding suppression', () => {
-  it('renders no surface during onboarding and restores the exact state after', async () => {
+describe('VehiclePetOverlay onboarding suppression matrix', () => {
+  function expectSuppressed(): void {
+    expect(document.querySelector('[data-vehicle-pet]')).toBeNull()
+    expect(document.querySelector('[data-vehicle-pet-pet]')).toBeNull()
+    expect(document.querySelector('[data-vehicle-pet-launcher]')).toBeNull()
+    expect(document.querySelector('[data-vehicle-pet-panel]')).toBeNull()
+    expect(document.querySelector('[data-vehicle-pet-dialog]')).toBeNull()
+    expect(document.querySelector('[data-vehicle-pet-dialog-backdrop]')).toBeNull()
+    expect(document.querySelector('[data-vehicle-pet] button, [data-vehicle-pet] [tabindex]')).toBeNull()
+  }
+
+  it('restores VISIBLE after same-mount onboarding suppression', async () => {
+    const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
+    const view = await renderOverlay(source)
+    expect(document.querySelector('[data-vehicle-pet="VISIBLE"]')).not.toBeNull()
+
+    view.rerender(<VehiclePetOverlay {...stubProps({ ...source, sessions: SESSIONS_ONBOARDING })} />)
+    await waitFor(expectSuppressed)
+    view.rerender(<VehiclePetOverlay {...stubProps(source)} />)
+    await screen.findByRole('button', { name: t('overlay.label', { state: t('state.idle') }) })
+    expect(document.querySelector('[data-vehicle-pet="VISIBLE"]')).not.toBeNull()
+  })
+
+  it('removes pet, panel, dialog, and focus targets then restores PANEL_OPEN', async () => {
     const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
     const view = await renderOverlay(source)
     fireEvent.click(screen.getByRole('button', { name: t('overlay.label', { state: t('state.idle') }) }))
-    expect(screen.queryByRole('group', { name: t('panel.title') })).not.toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: t('panel.viewJourney') }))
+    expect(screen.queryByRole('dialog', { name: t('dialog.title') })).not.toBeNull()
 
     view.rerender(<VehiclePetOverlay {...stubProps({ ...source, sessions: SESSIONS_ONBOARDING })} />)
-    await waitFor(() => {
-      expect(document.querySelector('.vpo-root')).toBeNull()
-      expect(document.querySelector('[data-vehicle-pet-pet]')).toBeNull()
-      expect(document.querySelector('[data-vehicle-pet-launcher]')).toBeNull()
-    })
-
+    await waitFor(expectSuppressed)
     view.rerender(<VehiclePetOverlay {...stubProps(source)} />)
     await waitFor(() => {
-      // Exact restoration: the panel that was open before suppression returns.
       expect(screen.queryByRole('group', { name: t('panel.title') })).not.toBeNull()
+      expect(screen.queryByRole('dialog')).toBeNull()
     })
-    view.unmount()
+    expect(document.querySelector('[data-vehicle-pet="PANEL_OPEN"]')).not.toBeNull()
+  })
+
+  it('removes the launcher and focus target then restores COLLAPSED', async () => {
+    const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
+    const view = await renderOverlay(source)
+    fireEvent.click(screen.getByRole('button', { name: t('overlay.label', { state: t('state.idle') }) }))
+    fireEvent.click(screen.getByRole('button', { name: t('panel.collapse') }))
+    await screen.findByRole('button', { name: t('launcher.restore') })
+
+    view.rerender(<VehiclePetOverlay {...stubProps({ ...source, sessions: SESSIONS_ONBOARDING })} />)
+    await waitFor(expectSuppressed)
+    view.rerender(<VehiclePetOverlay {...stubProps(source)} />)
+    await screen.findByRole('button', { name: t('launcher.restore') })
+    expect(document.querySelector('[data-vehicle-pet="collapsed"]')).not.toBeNull()
+  })
+
+  it('restores persisted COLLAPSED after a reload that starts in onboarding', async () => {
+    window.localStorage.setItem(OVERLAY_PREFERENCES_KEY, JSON.stringify({
+      schemaVersion: 1,
+      position: { xRatio: 0.7, yRatio: 0.8 },
+      collapsed: true,
+    }))
+    const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ONBOARDING, locale: 'zh' }
+    const view = render(<VehiclePetOverlay {...stubProps(source)} />)
+    expectSuppressed()
+
+    source.sessions = SESSIONS_ON
+    view.rerender(<VehiclePetOverlay {...stubProps(source)} />)
+    await screen.findByRole('button', { name: t('launcher.restore') })
+    expect(document.querySelector('[data-vehicle-pet="collapsed"]')).not.toBeNull()
+  })
+
+  it('stays available on ordinary typed conversation/settings/workspace and non-ready no-current states', async () => {
+    const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
+    const view = await renderOverlay(source)
+    const ordinaryStates: SessionListFixture[] = [
+      { phase: 'ready', current: 'conversation', byId: { conversation: { blank: false } } },
+      { phase: 'ready', current: 'settings', byId: { settings: { blank: false } } },
+      { phase: 'ready', current: 'workspace', byId: { workspace: { blank: false } } },
+      { phase: 'loading', byId: {} },
+    ]
+    for (const sessions of ordinaryStates) {
+      source.sessions = sessions
+      view.rerender(<VehiclePetOverlay {...stubProps(source)} />)
+      await waitFor(() => expect(document.querySelector('[data-vehicle-pet-pet]')).not.toBeNull())
+    }
+  })
+
+  it('is invariant to unrelated copy, CSS classes, DOM structure, and pathname', async () => {
+    const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ONBOARDING, locale: 'zh' }
+    const view = render(<VehiclePetOverlay {...stubProps(source)} />)
+    expectSuppressed()
+
+    document.documentElement.className = 'unrelated-onboarding-looking-class'
+    document.title = 'New Session Settings Workspace onboarding'
+    window.history.pushState({}, '', '/settings/onboarding-looking-path')
+    const unrelated = document.createElement('aside')
+    unrelated.className = 'session blank current'
+    unrelated.textContent = 'Choose workspace New Session'
+    document.body.append(unrelated)
+    view.rerender(<VehiclePetOverlay {...stubProps(source)} />)
+    expectSuppressed()
+
+    source.sessions = SESSIONS_ON
+    view.rerender(<VehiclePetOverlay {...stubProps(source)} />)
+    await waitFor(() => expect(document.querySelector('[data-vehicle-pet-pet]')).not.toBeNull())
+    unrelated.remove()
+    document.documentElement.className = ''
+    window.history.pushState({}, '', '/')
   })
 })
 
