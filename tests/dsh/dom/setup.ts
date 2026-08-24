@@ -39,4 +39,3 @@ Object.defineProperty(globalThis, 'localStorage', { value: storage, configurable
 if (typeof window !== 'undefined') {
   Object.defineProperty(window, 'localStorage', { value: storage, configurable: true, writable: true })
 }
-
