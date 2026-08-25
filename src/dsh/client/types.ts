@@ -24,6 +24,8 @@ export interface VehiclePetSessionView {
 export interface VehiclePetOverlayPreferences {
   readonly schemaVersion: 1
   readonly position: { readonly xRatio: number; readonly yRatio: number }
+  /** False until the first pointer drag or keyboard move. */
+  readonly positionCustomized: boolean
   readonly collapsed: boolean
   /** Explicit reduced-motion choice; absent means "follow the system". */
   readonly reducedMotion: boolean | undefined
@@ -38,4 +40,6 @@ export const OVERLAY_GEOMETRY = {
   collapsedLauncherSizePx: 36,
   compactPanelWidthPx: 320,
   viewportMarginPx: 16,
+  /** Deterministic composer-safe default; customized ratios do not use it. */
+  defaultBottomSafeInsetPx: 176,
 } as const

@@ -14,6 +14,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useLayoutEffect,
   useSyncExternalStore,
   type ReactNode,
 } from 'react'
@@ -40,6 +41,8 @@ export interface PetEngineProviderProps {
   source: ProgressSource
   locale?: Locale
   reducedMotion?: boolean
+  /** Standalone hosts may mirror locale to <html>; embedded hosts own it. */
+  syncDocumentLanguage?: boolean
   now?: () => Date
   children: ReactNode
 }
@@ -100,17 +103,30 @@ export function PetEngineProvider(props: PetEngineProviderProps) {
   const snapshot = useSyncExternalStore(subscribe, () => engine.getSnapshot())
   const originalDocumentLangRef = useRef<string | null>(null)
 
+  // The provider owns one Engine for its whole mount, but locale and motion are
+  // live host inputs. Synchronize them into that same Engine instead of relying
+  // on constructor-only values (or remounting and losing progress).
+  useLayoutEffect(() => {
+    if (props.locale !== undefined) engine.setLocale(props.locale)
+  }, [engine, props.locale])
+
   useEffect(() => {
-    if (typeof document === 'undefined') return
+    if (props.reducedMotion !== undefined) engine.setReducedMotion(props.reducedMotion)
+  }, [engine, props.reducedMotion])
+
+  useEffect(() => {
+    if (props.syncDocumentLanguage === false || typeof document === 'undefined') return
     originalDocumentLangRef.current = document.documentElement.lang
     return () => {
       if (originalDocumentLangRef.current !== null) document.documentElement.lang = originalDocumentLangRef.current
     }
-  }, [])
+  }, [props.syncDocumentLanguage])
 
   useEffect(() => {
-    if (typeof document !== 'undefined') document.documentElement.lang = snapshot.locale
-  }, [snapshot.locale])
+    if (props.syncDocumentLanguage !== false && typeof document !== 'undefined') {
+      document.documentElement.lang = snapshot.locale
+    }
+  }, [props.syncDocumentLanguage, snapshot.locale])
 
   const [greeting, setGreeting] = useState<GreetingState | null>(null)
   const [ceremony, setCeremony] = useState<CeremonyState | null>(null)

@@ -11,7 +11,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { VehiclePetOverlay } from '../../../src/dsh/client/VehiclePetOverlay'
 import type { VehiclePetOverlayProps } from '../../../src/dsh/client/VehiclePetOverlay'
-import { zh, type VehiclePetLocaleKey } from '../../../src/dsh/client/locales'
+import { en, zh, type VehiclePetLocaleKey } from '../../../src/dsh/client/locales'
 import { OVERLAY_PREFERENCES_KEY } from '../../../src/dsh/client/preferences'
 import type { VehiclePetSessionView } from '../../../src/dsh/client/types'
 
@@ -44,7 +44,11 @@ function stubProps(source: Source): VehiclePetOverlayProps {
     useSessionView: selector => selector(source.view),
     useLocale: selector => selector({ active: source.locale, revision: 1 }),
     useSessions: selector => selector(source.sessions as never),
-    t: (key: VehiclePetLocaleKey, params?: Record<string, string>) => t(key, params),
+    t: (key: VehiclePetLocaleKey, params?: Record<string, string>) => {
+      let text = (source.locale === 'en' ? en : zh)[key]
+      for (const [name, value] of Object.entries(params ?? {})) text = text.replace(`{${name}}`, value)
+      return text
+    },
   } as VehiclePetOverlayProps
 }
 
@@ -232,6 +236,39 @@ describe('VehiclePetOverlay full journey dialog', () => {
       expect(screen.queryByRole('dialog')).toBeNull()
     })
     expect(document.activeElement).toBe(trigger)
+  })
+})
+
+describe('VehiclePetOverlay live Harness locale', () => {
+  it('HARNESS_LOCALE_LIVE_SYNC_TEST updates chrome, Pack, stage, next target, keepsake, and journey zh-CN → en → zh-CN without remounting', async () => {
+    const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh-CN' }
+    const view = await renderOverlay(source)
+    fireEvent.click(screen.getByRole('button', { name: t('overlay.label', { state: t('state.idle') }) }))
+    fireEvent.click(screen.getByRole('button', { name: zh['panel.viewJourney'] }))
+
+    const assertLocale = async (locale: 'zh-CN' | 'en') => {
+      const english = locale === 'en'
+      await waitFor(() => {
+        const panel = document.querySelector<HTMLElement>('[data-vehicle-pet-panel]')!
+        const dialog = document.querySelector<HTMLElement>('[data-vehicle-pet-dialog]')!
+        expect(panel.getAttribute('aria-label')).toBe(english ? en['panel.title'] : zh['panel.title'])
+        expect(panel.querySelector('[data-vehicle-pet-pack-name]')?.textContent).toBe(english ? 'Autonomous Fleet' : '无人车队')
+        expect(panel.querySelector('[data-vehicle-pet-stage]')?.textContent).toContain(english ? 'First Road Test' : '首航路测')
+        expect(panel.querySelector('[data-vehicle-pet-next-threshold]')?.textContent).toContain(english ? 'Next milestone' : '下一目标')
+        expect(panel.querySelector('[data-vehicle-pet-keepsake]')?.textContent).toBe(english ? 'No keepsakes yet' : '还没有纪念品')
+        expect(dialog.getAttribute('aria-label')).toBe(english ? en['dialog.title'] : zh['dialog.title'])
+        expect(dialog.textContent).toContain(english ? 'First run on the road; road testing begins.' : '第一次上路，路测正式开始。')
+      })
+    }
+
+    await assertLocale('zh-CN')
+    source.locale = 'en'
+    view.rerender(<VehiclePetOverlay {...stubProps(source)} />)
+    await assertLocale('en')
+    source.locale = 'zh-CN'
+    view.rerender(<VehiclePetOverlay {...stubProps(source)} />)
+    await assertLocale('zh-CN')
+    expect(document.querySelectorAll('[data-vehicle-pet]')).toHaveLength(1)
   })
 })
 

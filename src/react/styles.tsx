@@ -107,8 +107,6 @@ export function EngineStyles() {
 .vp-scene[data-reduced-motion="true"] *::after {
   animation: none !important;
   transition: none !important;
-  transform: none !important;
-  translate: none !important;
 }
 .vp-scene[data-reduced-motion="true"]::before,
 .vp-scene[data-reduced-motion="true"]::after,

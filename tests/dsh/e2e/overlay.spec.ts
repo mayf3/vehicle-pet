@@ -120,6 +120,20 @@ async function petBox(page: Page) {
   return page.locator(PET).boundingBox()
 }
 
+function overlapArea(a: { x: number; y: number; width: number; height: number }, b: { x: number; y: number; width: number; height: number }): number {
+  const width = Math.max(0, Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x))
+  const height = Math.max(0, Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y))
+  return width * height
+}
+
+async function composerBounds(page: Page) {
+  const composer = page.locator('[data-composer-card]').last()
+  await composer.waitFor({ state: 'visible', timeout: 20_000 })
+  const box = await composer.boundingBox()
+  if (box === null) throw new Error('composer card has no bounding box')
+  return box
+}
+
 /**
  * Record every host-feedback pill as it appears (they auto-clear after ~3.2s,
  * so assertions must not race the visible window). Returns the recorder's
@@ -317,8 +331,59 @@ test('2 + 3. default bottom-right placement and 112px visible size', async ({ pa
   expect(box!.x).toBeGreaterThan(VIEWPORT.width / 2)
   expect(box!.y).toBeGreaterThan(VIEWPORT.height / 2)
   expect(VIEWPORT.width - (box!.x + box!.width)).toBeLessThanOrEqual(40)
-  expect(VIEWPORT.height - (box!.y + box!.height)).toBeLessThanOrEqual(40)
+  const bottomGap = VIEWPORT.height - (box!.y + box!.height)
+  expect(bottomGap).toBeGreaterThanOrEqual(160)
+  expect(bottomGap).toBeLessThanOrEqual(220)
   await page.screenshot({ path: `${ARTIFACTS}/visible.png` })
+})
+
+test('DEFAULT_COMPOSER_OVERLAP_TEST. safe bottom-right avoids composer and send button', async ({ page }) => {
+  await openOverlay(page)
+  const pet = await petBox(page)
+  const composer = await composerBounds(page)
+  const send = await page.getByRole('button', { name: /发送消息|Send message/ }).first().boundingBox()
+  expect(pet).not.toBeNull()
+  expect(send).not.toBeNull()
+  expect(overlapArea(pet!, composer)).toBe(0)
+  expect(overlapArea(pet!, send!)).toBe(0)
+})
+
+test('MOBILE_COMPOSER_OVERLAP_TEST. 390px viewport keeps the pet on-screen and clear of composer', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await openOverlay(page)
+  const pet = await petBox(page)
+  const composer = await composerBounds(page)
+  expect(pet).not.toBeNull()
+  expect(overlapArea(pet!, composer)).toBe(0)
+  expect(pet!.x).toBeGreaterThanOrEqual(0)
+  expect(pet!.y).toBeGreaterThanOrEqual(0)
+  expect(pet!.x + pet!.width).toBeLessThanOrEqual(390)
+  expect(pet!.y + pet!.height).toBeLessThanOrEqual(844)
+  await page.screenshot({ path: `${ARTIFACTS}/mobile-safe-visible.png` })
+})
+
+test('SCENE_COMPACT_GEOMETRY_TEST. Fleet and Seedling subjects remain centred and visible in 112px', async ({ page }) => {
+  await openOverlay(page)
+  const assertSubject = async () => {
+    const scene = await page.locator(`${PET} .vp-scene`).boundingBox()
+    const subject = await page.locator(`${PET} [data-pet-subject="true"]`).boundingBox()
+    expect(scene).not.toBeNull()
+    expect(subject).not.toBeNull()
+    const ratio = overlapArea(subject!, scene!) / (subject!.width * subject!.height)
+    expect(ratio).toBeGreaterThanOrEqual(0.85)
+    expect(subject!.x + subject!.width / 2).toBeGreaterThanOrEqual(scene!.x)
+    expect(subject!.x + subject!.width / 2).toBeLessThanOrEqual(scene!.x + scene!.width)
+    expect(subject!.y + subject!.height / 2).toBeGreaterThanOrEqual(scene!.y)
+    expect(subject!.y + subject!.height / 2).toBeLessThanOrEqual(scene!.y + scene!.height)
+  }
+  await assertSubject()
+  await page.screenshot({ path: `${ARTIFACTS}/fleet-visible-r2.png` })
+  await page.locator(PET).click()
+  await page.locator('[data-vehicle-pet-pack-option="seedling-fixture"]').click()
+  await expect(page.locator('[data-vehicle-pet-pack-name]')).not.toHaveText('无人车队')
+  await page.locator(PET).click()
+  await assertSubject()
+  await page.screenshot({ path: `${ARTIFACTS}/seedling-visible-r2.png` })
 })
 
 test('4 + 5 + 6. click toggles the 320px panel whose content is exactly the authorized items', async ({ page }) => {
@@ -361,7 +426,7 @@ test('7. drag moves the pet and does not toggle the panel', async ({ page }) => 
   expect(page.locator(PANEL)).toHaveCount(0)
 })
 
-test('8. the dragged position survives reload as normalized ratios', async ({ page }) => {
+test('USER_CUSTOM_POSITION_PRESERVATION_TEST. dragged ratios survive refresh without safe-default override', async ({ page }) => {
   await openOverlay(page)
   const pet = page.locator(PET)
   const origin = await petBox(page)
@@ -371,7 +436,8 @@ test('8. the dragged position survives reload as normalized ratios', async ({ pa
   await page.mouse.up()
   const before = await petBox(page)
   const stored = await page.evaluate(() => localStorage.getItem('vehicle-pet/overlay-preferences/v1'))
-  const record = JSON.parse(stored ?? '{}') as { position: { xRatio: number; yRatio: number } }
+  const record = JSON.parse(stored ?? '{}') as { position: { xRatio: number; yRatio: number }; positionCustomized: boolean }
+  expect(record.positionCustomized).toBe(true)
   expect(Number.isFinite(record.position.xRatio)).toBe(true)
   expect(record.position.xRatio).toBeLessThan(0.95)
   await page.reload()
@@ -416,6 +482,7 @@ test('11 + 12. collapse to the 36px launcher and restore', async ({ page }) => {
   await expect.poll(async () => (await launcher.boundingBox())?.width).toBe(36)
   const box = await launcher.boundingBox()
   expect(box!.height).toBe(36)
+  expect(overlapArea(box!, await composerBounds(page))).toBe(0)
   expect(await page.locator(PET).count()).toBe(0)
   await page.screenshot({ path: `${ARTIFACTS}/collapsed.png` })
   await launcher.click()
@@ -440,26 +507,57 @@ test('13. pack switching works both ways and keeps progress points identical', a
   expect(await progressText()).toBe(before)
 })
 
-test('14 + 15. full journey dialog is accessible and restores focus on close', async ({ page }) => {
+test('SCENE_FULL_JOURNEY_GEOMETRY_TEST. Fleet and Seedling journey layers stay in scene bounds', async ({ page }) => {
   await openOverlay(page)
   await page.locator(PET).click()
   await page.locator(PANEL).waitFor()
   const trigger = page.locator('[data-vehicle-pet-open-journey]')
-  await trigger.click()
   const dialog = page.locator('[data-vehicle-pet-dialog]')
-  await dialog.waitFor()
-  await expect(dialog).toHaveAttribute('role', 'dialog')
-  await expect(dialog).toHaveAttribute('aria-modal', 'true')
-  await expect(dialog.locator('.vp-scene')).toHaveCount(1)
-  await expect(dialog.locator('.vp-keepsake-list')).toHaveCount(1)
-  await page.screenshot({ path: `${ARTIFACTS}/journey-dialog.png` })
-  const focused = await dialog.evaluate(node => node.contains(document.activeElement))
-  expect(focused).toBe(true)
-  await page.keyboard.press('Escape')
-  await expect.poll(() => page.locator('[data-vehicle-pet-dialog]').count()).toBe(0)
-  const focusRestored = await trigger.evaluate(node => document.activeElement === node)
-  expect(focusRestored).toBe(true)
+
+  const assertJourney = async (screenshot: string) => {
+    await trigger.click()
+    await dialog.waitFor()
+    await expect(dialog).toHaveAttribute('role', 'dialog')
+    await expect(dialog).toHaveAttribute('aria-modal', 'true')
+    await expect(dialog.locator('.vp-keepsake-list')).toHaveCount(1)
+    const scene = await dialog.locator('.vp-scene').boundingBox()
+    const subject = await dialog.locator('[data-pet-subject="true"]').boundingBox()
+    const background = await dialog.locator('[data-node-kind="background"]').boundingBox()
+    expect(scene).not.toBeNull()
+    expect(subject).not.toBeNull()
+    expect(background).not.toBeNull()
+    expect(overlapArea(subject!, scene!) / (subject!.width * subject!.height)).toBeGreaterThanOrEqual(0.85)
+    expect(overlapArea(background!, scene!) / (background!.width * background!.height)).toBeGreaterThanOrEqual(0.85)
+    await page.screenshot({ path: `${ARTIFACTS}/${screenshot}` })
+    expect(await dialog.evaluate(node => node.contains(document.activeElement))).toBe(true)
+    await page.keyboard.press('Escape')
+    await expect.poll(() => page.locator('[data-vehicle-pet-dialog]').count()).toBe(0)
+    expect(await trigger.evaluate(node => document.activeElement === node)).toBe(true)
+  }
+
+  await assertJourney('fleet-journey-r2.png')
+  await page.locator('[data-vehicle-pet-pack-option="seedling-fixture"]').click()
+  await expect(page.locator('[data-vehicle-pet-pack-name]')).toHaveText(/种子伙伴|Seedling/)
+  await assertJourney('seedling-journey-r2.png')
   await page.locator(PET).click({ position: { x: 4, y: 4 } })
+})
+
+test('REDUCED_MOTION_STATIC_GEOMETRY_TEST. reduced motion preserves compact subject bounds', async ({ page }) => {
+  await openOverlay(page)
+  const subject = page.locator(`${PET} [data-pet-subject="true"]`)
+  const before = await subject.boundingBox()
+  await page.locator(PET).click()
+  await page.locator('[data-vehicle-pet-reduced-motion-option="on"]').click()
+  await page.locator(PET).click()
+  await expect(page.locator(`${PET} .vp-scene`)).toHaveAttribute('data-reduced-motion', 'true')
+  const after = await subject.boundingBox()
+  expect(before).not.toBeNull()
+  expect(after).not.toBeNull()
+  expect(Math.abs(after!.x - before!.x)).toBeLessThan(1)
+  expect(Math.abs(after!.y - before!.y)).toBeLessThan(1)
+  expect(Math.abs(after!.width - before!.width)).toBeLessThan(1)
+  expect(Math.abs(after!.height - before!.height)).toBeLessThan(1)
+  await page.screenshot({ path: `${ARTIFACTS}/reduced-motion-visible-r2.png` })
 })
 
 test('25. ordinary conversation and settings surfaces keep the pet available', async ({ page }) => {
@@ -470,10 +568,54 @@ test('25. ordinary conversation and settings surfaces keep the pet available', a
   await settings.waitFor({ timeout: 20_000 })
   await settings.click()
   await expect.poll(() => page.locator(PET).count(), { timeout: 20_000 }).toBe(1)
+  const settingsPet = await petBox(page)
+  expect(settingsPet).not.toBeNull()
+  expect(settingsPet!.x).toBeGreaterThan(VIEWPORT.width / 2)
+  expect(settingsPet!.y).toBeGreaterThan(VIEWPORT.height / 2)
   await page.keyboard.press('Escape')
 
   await page.goto('/')
   await expect.poll(() => page.locator(PET).count(), { timeout: 30_000 }).toBe(1)
+})
+
+test('HARNESS_LOCALE_LIVE_SYNC_TEST. zh-CN → en → zh-CN updates Pack, stage, target, keepsake, and journey live', async ({ page }) => {
+  await openOverlay(page)
+  const ensurePanel = async () => {
+    if (await page.locator(PANEL).count() === 0) await page.locator(PET).click()
+    await page.locator(PANEL).waitFor()
+  }
+  const switchHarnessLocale = async (option: 'English' | '中文') => {
+    const settings = page.getByRole('button', { name: /Settings|设置/i }).first()
+    await settings.click()
+    const selector = page.getByRole('button', { name: /^(中文|English)$/ }).last()
+    await selector.waitFor({ timeout: 20_000 })
+    await selector.click()
+    await page.getByRole('menuitem', { name: option, exact: true }).click()
+    await expect.poll(() => page.evaluate(() => document.documentElement.lang)).toBe(option === 'English' ? 'en' : 'zh-CN')
+    await page.keyboard.press('Escape')
+    await ensurePanel()
+  }
+  const assertCopy = async (english: boolean) => {
+    await expect(page.locator('[data-vehicle-pet-pack-name]')).toHaveText(english ? 'Autonomous Fleet' : '无人车队')
+    await expect(page.locator('[data-vehicle-pet-stage]')).toContainText(english ? 'First Road Test' : '首航路测')
+    await expect(page.locator('[data-vehicle-pet-next-threshold]')).toContainText(english ? 'Next milestone' : '下一目标')
+    await expect(page.locator('[data-vehicle-pet-keepsake]')).toHaveText(english ? 'No keepsakes yet' : '还没有纪念品')
+    const trigger = page.locator('[data-vehicle-pet-open-journey]')
+    await trigger.click()
+    const dialog = page.locator('[data-vehicle-pet-dialog]')
+    await expect(dialog).toHaveAttribute('aria-label', english ? 'Growth Journey' : '成长旅程')
+    await expect(dialog).toContainText(english ? 'First run on the road; road testing begins.' : '第一次上路，路测正式开始。')
+    await page.keyboard.press('Escape')
+  }
+
+  await ensurePanel()
+  await switchHarnessLocale('中文')
+  await assertCopy(false)
+  await switchHarnessLocale('English')
+  await assertCopy(true)
+  await switchHarnessLocale('中文')
+  await assertCopy(false)
+  await expect(page.locator('.vpo-root')).toHaveCount(1)
 })
 
 test('26. multi-tab preference sync through storage events', async ({ context, page }) => {

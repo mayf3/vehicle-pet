@@ -62,7 +62,7 @@ function activeSurfaceSize(collapsed: boolean): number {
   return collapsed ? OVERLAY_GEOMETRY.collapsedLauncherSizePx : OVERLAY_GEOMETRY.visibleSizePx
 }
 
-function pointFromRatios(
+export function pointFromRatios(
   preferences: VehiclePetOverlayPreferences,
   bounds: OverlayBounds,
   size: number,
@@ -70,9 +70,19 @@ function pointFromRatios(
   const margin = OVERLAY_GEOMETRY.viewportMarginPx
   const availableX = Math.max(0, bounds.width - size - margin * 2)
   const availableY = Math.max(0, bounds.height - size - margin * 2)
-  return {
+  const ratioPoint = {
     x: margin + availableX * preferences.position.xRatio,
     y: margin + availableY * preferences.position.yRatio,
+  }
+  if (preferences.positionCustomized) return ratioPoint
+
+  // Pinned Harness exposes panel actions but no typed composer/safe-area
+  // geometry. Keep the uncustomized default in the right/lower region while
+  // reserving a deterministic bottom work-entry inset. No Harness DOM, route,
+  // copy, or CSS-class inspection participates in production placement.
+  return {
+    x: ratioPoint.x,
+    y: Math.max(margin, ratioPoint.y - OVERLAY_GEOMETRY.defaultBottomSafeInsetPx),
   }
 }
 
@@ -139,7 +149,7 @@ export function useOverlayDrag({
     if (drag.moved) {
       ignoreClickRef.current = true
       const position = ratiosFromPoint(drag.current, bounds, size)
-      commitPreferences(current => ({ ...current, position }))
+      commitPreferences(current => ({ ...current, position, positionCustomized: true }))
       onDragEndRef.current?.()
     }
   }, [bounds, commitPreferences, size])
@@ -151,7 +161,7 @@ export function useOverlayDrag({
       y: clamp(persistedPoint.y + dy, margin, Math.max(margin, bounds.height - size - margin)),
     }
     const position = ratiosFromPoint(next, bounds, size)
-    commitPreferences(current => ({ ...current, position }))
+    commitPreferences(current => ({ ...current, position, positionCustomized: true }))
   }, [bounds, commitPreferences, persistedPoint, size])
 
   const onPointerDown = useCallback((event: ReactPointerEvent<HTMLElement>): void => {

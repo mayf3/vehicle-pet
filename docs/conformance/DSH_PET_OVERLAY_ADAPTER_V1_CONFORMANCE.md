@@ -179,3 +179,75 @@ NO
 | B4 — onboarding matrix | typed `SessionListState` remains the sole suppression input | `tests/dsh/dom/overlay.test.tsx`: VISIBLE, PANEL_OPEN, COLLAPSED, COLLAPSED reload, ordinary conversation/settings/workspace/non-ready no-current, and DOM/copy/class/path invariance | `CTR-OVERLAY-011`; `ACC-OVERLAY-012` | PASS, complete matrix |
 
 The R1 amendment evidence is author-executed blocker-closure evidence bound to implementation commit `ea6b95a0fd722ed7a79b66d0f6e9d0def04a77fd`. It does not convert the independent audit result to PASS or ACCEPT; an independent R2 re-audit on the final amendment Head remains required.
+
+## Independent Overlay Audit R2 and experience amendment record
+
+```text
+INDEPENDENT_OVERLAY_AUDIT_R2_RESULT =
+ACCEPT
+
+INDEPENDENT_OVERLAY_AUDIT_R2_HEAD =
+de974d4a8be3f742535e9177d67e84cf5fee8dc4
+
+INDEPENDENT_OVERLAY_EXPERIENCE_AUDIT_R2_RESULT =
+REVISE
+
+INDEPENDENT_OVERLAY_EXPERIENCE_AUDIT_R2_HEAD =
+de974d4a8be3f742535e9177d67e84cf5fee8dc4
+
+INDEPENDENT_OVERLAY_EXPERIENCE_AUDIT_R2_BLOCKERS =
+2
+
+R2_X1_SCENE_GEOMETRY_CLOSED =
+YES
+
+R2_X2_WORKSPACE_SAFE_DEFAULT_CLOSED =
+YES
+
+R2_P1_LOCALE_LIVE_SYNC_FIXED =
+YES
+
+EXPERIENCE_BLOCKERS_CLAIMED_CLOSED =
+2
+
+R2_TARGETED_SECOND_SESSION_REPEAT =
+5/5 PASS
+
+R2_PINNED_DSH_E2E =
+21/21 PASS
+
+R2_PNPM_VERIFY =
+PASS
+
+R2_PNPM_VERIFY_DSH =
+PASS
+
+R2_GOVERNANCE_VERIFY =
+PASS
+
+R2_DISPOSABLE_DSH_HOME =
+/tmp/vehicle-pet-overlay-amend-r2
+
+INDEPENDENT_OVERLAY_AUDIT_AFTER_AMENDMENT_R2 =
+NOT_RUN
+
+INDEPENDENT_OVERLAY_EXPERIENCE_AUDIT_AFTER_AMENDMENT_R2 =
+NOT_RUN
+
+READY_FOR_OVERLAY_REAUDIT_R3 =
+YES
+
+READY_FOR_OVERLAY_EXPERIENCE_REAUDIT_R3 =
+YES
+
+READY_TO_MERGE =
+NO
+```
+
+| R2 finding | Amendment | Mechanical / browser evidence | Claimed result |
+|---|---|---|---|
+| X1 — compact and Full Journey geometry | Static `translate(-50%, -50%)` is always retained; reduced motion removes animation but not layout; frame layers fill the scene; the generic compact viewport applies one Pack-neutral legibility floor. | `SCENE_COMPACT_GEOMETRY_TEST`, `SCENE_FULL_JOURNEY_GEOMETRY_TEST`, `REDUCED_MOTION_STATIC_GEOMETRY_TEST`; Fleet and Seedling pinned-Harness screenshots. | CLOSED |
+| X2 — default Composer overlap | Pinned `layout` service inspection found panel actions but no typed safe-area geometry. Uncustomized records use deterministic `SAFE_BOTTOM_RIGHT` with a 176px bottom work-entry inset; first drag/keyboard move sets `positionCustomized`; legacy non-corner ratios migrate as customized. Production reads no Harness DOM, copy, class, observer, or route. | `DEFAULT_COMPOSER_OVERLAP_TEST`, `MOBILE_COMPOSER_OVERLAP_TEST`, `USER_CUSTOM_POSITION_PRESERVATION_TEST`; desktop and 390px bounding-box overlap = 0. | CLOSED |
+| P1 — live locale propagation | Harness locale remains the only authority and synchronizes into the same mounted Engine through `setLocale`; the embedded provider does not write `<html lang>`. | `HARNESS_LOCALE_LIVE_SYNC_TEST` covers `zh-CN → en → zh-CN` across overlay chrome, Pack, stage, next target, keepsake, and Full Journey without remount or progress loss. | FIXED |
+
+The R2 amendment does not change the accepted Specs or the R1 B1–B4 semantics. Independent code and experience re-audits after this amendment remain separate work; this author record does not convert either post-amendment result from `NOT_RUN`.
