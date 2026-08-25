@@ -228,6 +228,7 @@ function OverlayEngineGate({
       source={overlayProgressSource}
       locale={engineLocale}
       reducedMotion={reducedMotion}
+      syncDocumentLanguage={false}
     >
       <OverlaySurface
         preferences={preferences}
@@ -366,7 +367,7 @@ function OverlaySurface({
             onPointerCancel={drag.onPointerCancel}
           >
             <span className="vpo-scene">
-              <PetSceneRenderer subjectInteractive={false} interactionCount={petInteractionCount} />
+              <PetSceneRenderer subjectInteractive={false} interactionCount={petInteractionCount} viewport="compact" />
             </span>
             {sessionView.live === 'needs-input' ? <span className="vpo-badge" aria-hidden="true" /> : null}
           </button>

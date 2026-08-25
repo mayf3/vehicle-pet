@@ -28,6 +28,8 @@ export interface PetSceneRendererProps {
   subjectInteractive?: boolean
   /** Host-owned interaction count used for the same click-feedback presentation. */
   interactionCount?: number
+  /** A 112px host keeps the generic subject legible without changing its plan. */
+  viewport?: 'scene' | 'compact'
   'aria-label'?: string
 }
 
@@ -78,6 +80,7 @@ export function PetSceneRenderer(props: PetSceneRendererProps) {
           upgradeReveal={upgradeReveal}
           clickCount={node.kind === 'subject' ? (props.interactionCount ?? clickCount) : 0}
           subjectInteractive={props.subjectInteractive !== false}
+          compactViewport={props.viewport === 'compact'}
           onClickSubject={() => setClickCount((n) => n + 1)}
           simulateFailAssetIds={props.simulateFailAssetIds}
         />
@@ -114,6 +117,7 @@ interface PlanNodeViewProps {
   upgradeReveal: 'subject-swap' | 'scene-expand' | 'milestone-card' | 'collection-add'
   clickCount: number
   subjectInteractive: boolean
+  compactViewport: boolean
   onClickSubject: () => void
   simulateFailAssetIds?: readonly string[]
 }
@@ -125,13 +129,20 @@ function PlanNodeView(props: PlanNodeViewProps) {
   const y = 50 + (node.placement.y / 100 - 50) * camera
   const baseWidth = NODE_BASE_WIDTH_PERCENT[node.kind] ?? 30
   const subjectScale = node.kind === 'subject' ? subjectScalePermille / 1000 : 1
-  const widthPercent = (baseWidth * node.placement.scalePermille * camera * subjectScale) / 1000
+  const sceneFrame = node.kind === 'background' || node.kind === 'overlay' || node.kind === 'terminal-overlay'
+  const plannedWidthPercent = (baseWidth * node.placement.scalePermille * (sceneFrame ? 1 : camera) * subjectScale) / 1000
+  const widthPercent = node.kind === 'subject' && props.compactViewport
+    ? Math.max(42, plannedWidthPercent)
+    : plannedWidthPercent
+  // Static geometry and motion are separate concerns. Every plan coordinate is
+  // the node centre, so this layout translation must survive reduced motion;
+  // reduced motion disables animation below, never the centring transform.
   const placementStyle: CSSProperties = {
     left: `${x}%`,
     top: `${y}%`,
     zIndex: node.zOrder,
     '--vp-node-index': nodeIndex,
-    ...(reducedMotion ? {} : { transform: 'translate(-50%, -50%)' }),
+    transform: 'translate(-50%, -50%)',
   } as CSSProperties
 
   if (node.kind === 'aggregate-label' || node.kind === 'milestone') {
@@ -147,7 +158,9 @@ function PlanNodeView(props: PlanNodeViewProps) {
     )
   }
 
-  const sizedStyle = { ...placementStyle, width: `${widthPercent}%`, aspectRatio: '1 / 1' }
+  const sizedStyle = sceneFrame
+    ? { ...placementStyle, width: '100%', height: '100%' }
+    : { ...placementStyle, width: `${widthPercent}%`, aspectRatio: '1 / 1' }
   if (node.kind === 'subject') {
     return (
       <SubjectButton

@@ -16,6 +16,8 @@ import {
   saveOverlayPreferences,
   subscribeStorageEvents,
 } from '../../../src/dsh/client/preferences'
+import { OVERLAY_GEOMETRY } from '../../../src/dsh/client/types'
+import { pointFromRatios } from '../../../src/dsh/client/useOverlayDrag'
 
 function memoryStorage(initial: Record<string, string> = {}) {
   const store = new Map(Object.entries(initial))
@@ -42,26 +44,54 @@ describe('normalizeOverlayPreferences', () => {
       collapsed: true,
     })
     expect(normalized.position).toEqual({ xRatio: 1, yRatio: 0 })
+    expect(normalized.positionCustomized).toBe(true)
     const nan = normalizeOverlayPreferences({
       schemaVersion: 1,
       position: { xRatio: Number.NaN, yRatio: Number.POSITIVE_INFINITY },
     })
     expect(nan.position).toEqual({ xRatio: 1, yRatio: 1 })
+    expect(nan.positionCustomized).toBe(false)
   })
 
   it('preserves collapsed and the explicit reduced-motion choice', () => {
     expect(normalizeOverlayPreferences({
       schemaVersion: 1,
       position: { xRatio: 0.25, yRatio: 0.5 },
+      positionCustomized: true,
       collapsed: true,
       reducedMotion: true,
     })).toEqual({
       schemaVersion: 1,
       position: { xRatio: 0.25, yRatio: 0.5 },
+      positionCustomized: true,
       collapsed: true,
       reducedMotion: true,
     })
     expect(normalizeOverlayPreferences({ schemaVersion: 1 }).reducedMotion).toBeUndefined()
+  })
+})
+
+describe('safe bottom-right placement', () => {
+  it('reserves the deterministic bottom inset only until the user customizes position', () => {
+    const bounds = { width: 1440, height: 900 }
+    const defaults = copyOverlayDefaults()
+    const safe = pointFromRatios(defaults, bounds, OVERLAY_GEOMETRY.visibleSizePx)
+    expect(safe.x).toBe(1440 - OVERLAY_GEOMETRY.visibleSizePx - OVERLAY_GEOMETRY.viewportMarginPx)
+    expect(safe.y).toBe(900 - OVERLAY_GEOMETRY.visibleSizePx - OVERLAY_GEOMETRY.viewportMarginPx - OVERLAY_GEOMETRY.defaultBottomSafeInsetPx)
+
+    const customized = { ...defaults, positionCustomized: true }
+    const restored = pointFromRatios(customized, bounds, OVERLAY_GEOMETRY.visibleSizePx)
+    expect(restored.y).toBe(900 - OVERLAY_GEOMETRY.visibleSizePx - OVERLAY_GEOMETRY.viewportMarginPx)
+  })
+
+  it('keeps the default visible and collapsed surfaces inside a 390px viewport', () => {
+    for (const size of [OVERLAY_GEOMETRY.visibleSizePx, OVERLAY_GEOMETRY.collapsedLauncherSizePx]) {
+      const point = pointFromRatios(copyOverlayDefaults(), { width: 390, height: 844 }, size)
+      expect(point.x).toBeGreaterThanOrEqual(0)
+      expect(point.y).toBeGreaterThanOrEqual(0)
+      expect(point.x + size).toBeLessThanOrEqual(390)
+      expect(point.y + size).toBeLessThanOrEqual(844)
+    }
   })
 })
 
@@ -104,12 +134,14 @@ describe('saveOverlayPreferences', () => {
     saveOverlayPreferences({
       schemaVersion: 1,
       position: { xRatio: 12, yRatio: Number.NaN },
+      positionCustomized: false,
       collapsed: false,
       reducedMotion: undefined,
     }, storage)
     expect(JSON.parse(store.get(OVERLAY_PREFERENCES_KEY) ?? '')).toEqual({
       schemaVersion: 1,
       position: { xRatio: 1, yRatio: 1 },
+      positionCustomized: false,
       collapsed: false,
       reducedMotion: undefined,
     })
@@ -141,7 +173,7 @@ describe('adoptStorageEvent', () => {
     const current = copyOverlayDefaults()
     const next = JSON.stringify({ schemaVersion: 1, position: { xRatio: 0.2, yRatio: 0.4 }, collapsed: true, reducedMotion: false })
     expect(adoptStorageEvent({ key: OVERLAY_PREFERENCES_KEY, newValue: next }, current))
-      .toEqual({ schemaVersion: 1, position: { xRatio: 0.2, yRatio: 0.4 }, collapsed: true, reducedMotion: false })
+      .toEqual({ schemaVersion: 1, position: { xRatio: 0.2, yRatio: 0.4 }, positionCustomized: true, collapsed: true, reducedMotion: false })
     const nonDefault = normalizeOverlayPreferences(JSON.parse(next))
     expect(adoptStorageEvent({ key: OVERLAY_PREFERENCES_KEY, newValue: null }, nonDefault))
       .toEqual(copyOverlayDefaults())

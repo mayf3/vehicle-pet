@@ -14,6 +14,7 @@ export const OVERLAY_PREFERENCES_KEY = 'vehicle-pet/overlay-preferences/v1'
 export const DEFAULT_OVERLAY_PREFERENCES: Readonly<VehiclePetOverlayPreferences> = Object.freeze({
   schemaVersion: 1,
   position: Object.freeze({ xRatio: 1, yRatio: 1 }),
+  positionCustomized: false,
   collapsed: false,
   reducedMotion: undefined,
 })
@@ -31,12 +32,20 @@ export function normalizeOverlayPreferences(value: unknown): VehiclePetOverlayPr
   const position = typeof candidate.position === 'object' && candidate.position !== null
     ? (candidate.position as { xRatio?: unknown; yRatio?: unknown })
     : {}
+  const normalizedPosition = {
+    xRatio: finiteRatio(position.xRatio, DEFAULT_OVERLAY_PREFERENCES.position.xRatio),
+    yRatio: finiteRatio(position.yRatio, DEFAULT_OVERLAY_PREFERENCES.position.yRatio),
+  }
+  // Deterministic v1 migration: an old non-corner ratio is treated as an
+  // intentional user position; the old (1,1) default adopts the new safe
+  // anchor. New records carry the explicit bit.
+  const positionCustomized = typeof candidate.positionCustomized === 'boolean'
+    ? candidate.positionCustomized
+    : normalizedPosition.xRatio !== 1 || normalizedPosition.yRatio !== 1
   return {
     schemaVersion: 1,
-    position: {
-      xRatio: finiteRatio(position.xRatio, DEFAULT_OVERLAY_PREFERENCES.position.xRatio),
-      yRatio: finiteRatio(position.yRatio, DEFAULT_OVERLAY_PREFERENCES.position.yRatio),
-    },
+    position: normalizedPosition,
+    positionCustomized,
     collapsed: typeof candidate.collapsed === 'boolean' ? candidate.collapsed : false,
     reducedMotion: typeof candidate.reducedMotion === 'boolean' ? candidate.reducedMotion : undefined,
   }
@@ -97,6 +106,7 @@ export function adoptStorageEvent(
       : normalizeOverlayPreferences(JSON.parse(event.newValue) as unknown)
     if (next.position.xRatio !== current.position.xRatio
       || next.position.yRatio !== current.position.yRatio
+      || next.positionCustomized !== current.positionCustomized
       || next.collapsed !== current.collapsed
       || next.reducedMotion !== current.reducedMotion) {
       return next

@@ -35,6 +35,7 @@ export interface OverlayDragController {
     readonly onPointerUp: (event: ReactPointerEvent<HTMLElement>) => void;
     readonly onPointerCancel: (event: ReactPointerEvent<HTMLElement>) => void;
 }
+export declare function pointFromRatios(preferences: VehiclePetOverlayPreferences, bounds: OverlayBounds, size: number): OverlayPoint;
 export declare function useOverlayDrag({ preferences, commitPreferences, onDragEnd, }: UseOverlayDragOptions): OverlayDragController;
 export declare const OVERLAY_KEYBOARD_STEPS: {
     readonly normal: 8;

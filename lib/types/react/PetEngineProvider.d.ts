@@ -15,6 +15,8 @@ export interface PetEngineProviderProps {
     source: ProgressSource;
     locale?: Locale;
     reducedMotion?: boolean;
+    /** Standalone hosts may mirror locale to <html>; embedded hosts own it. */
+    syncDocumentLanguage?: boolean;
     now?: () => Date;
     children: ReactNode;
 }
