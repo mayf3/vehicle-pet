@@ -10,8 +10,16 @@
  */
 
 import { execFileSync } from 'node:child_process'
-import { mkdirSync } from 'node:fs'
-import { expect, test, type Page, type Request } from '@playwright/test'
+import { mkdirSync, readFileSync } from 'node:fs'
+import { expect, test, type BrowserContext, type Page, type Request } from '@playwright/test'
+import sharp from 'sharp'
+
+interface MatrixManifest {
+  readonly levels: readonly { levelId: string; threshold: number }[]
+}
+
+const fleetManifest = JSON.parse(readFileSync(new URL('../../../src/packs/autonomous-fleet/manifest.json', import.meta.url), 'utf8')) as MatrixManifest
+const seedlingManifest = JSON.parse(readFileSync(new URL('../../../src/packs/seedling-fixture/manifest.json', import.meta.url), 'utf8')) as MatrixManifest
 
 const ARTIFACTS = 'tests/dsh/e2e/.artifacts'
 const PET = '[data-vehicle-pet-pet="true"]'
@@ -34,7 +42,144 @@ test.beforeAll(async ({ browser }) => {
 
 let trackedContext: import('@playwright/test').BrowserContext | null = null
 
+interface ResourceSnapshot {
+  readonly pluginResources: Record<string, number>
+  readonly overlayDom: number
+  readonly dialogDom: number
+  readonly injectedStyle: number
+  readonly resizeObservers: number
+  readonly mutationObservers: number
+  readonly storageListeners: number
+  readonly resizeListeners: number
+  readonly keyboardListeners: number
+  readonly mediaListeners: number
+  readonly pointerListeners: number
+  readonly pointerCaptures: number
+  readonly indexedDbConnections: number
+}
+
+async function installResourceInstrumentation(context: BrowserContext): Promise<void> {
+  await context.addInitScript(() => {
+    type ListenerRecord = { target: EventTarget; type: string; listener: EventListenerOrEventListenerObject | null }
+    const records: ListenerRecord[] = []
+    const nativeAdd = EventTarget.prototype.addEventListener
+    const nativeRemove = EventTarget.prototype.removeEventListener
+    EventTarget.prototype.addEventListener = function (type, listener, options) {
+      records.push({ target: this, type, listener })
+      return nativeAdd.call(this, type, listener, options)
+    }
+    EventTarget.prototype.removeEventListener = function (type, listener, options) {
+      const index = records.findIndex(record => record.target === this && record.type === type && record.listener === listener)
+      if (index >= 0) records.splice(index, 1)
+      return nativeRemove.call(this, type, listener, options)
+    }
+
+    let resizeObservers = 0
+    const activeResizeObservers = new WeakSet<object>()
+    const NativeResizeObserver = globalThis.ResizeObserver
+    if (NativeResizeObserver !== undefined) {
+      globalThis.ResizeObserver = class extends NativeResizeObserver {
+        override observe(target: Element, options?: ResizeObserverOptions): void {
+          if (!activeResizeObservers.has(this) && (target.matches('[data-vehicle-pet]') || target.closest('[data-vehicle-pet]') !== null)) {
+            activeResizeObservers.add(this)
+            resizeObservers += 1
+          }
+          super.observe(target, options)
+        }
+        override disconnect(): void {
+          if (activeResizeObservers.has(this)) {
+            activeResizeObservers.delete(this)
+            resizeObservers -= 1
+          }
+          super.disconnect()
+        }
+      }
+    }
+
+    let mutationObservers = 0
+    const activeMutationObservers = new WeakSet<object>()
+    const NativeMutationObserver = globalThis.MutationObserver
+    globalThis.MutationObserver = class extends NativeMutationObserver {
+      override observe(target: Node, options?: MutationObserverInit): void {
+        const element = target instanceof Element ? target : target.parentElement
+        if (!activeMutationObservers.has(this) && element !== null && (element.matches('[data-vehicle-pet]') || element.closest('[data-vehicle-pet]') !== null)) {
+          activeMutationObservers.add(this)
+          mutationObservers += 1
+        }
+        super.observe(target, options)
+      }
+      override disconnect(): void {
+        if (activeMutationObservers.has(this)) {
+          activeMutationObservers.delete(this)
+          mutationObservers -= 1
+        }
+        super.disconnect()
+      }
+    }
+
+    let pointerCaptures = 0
+    const nativeSetPointerCapture = Element.prototype.setPointerCapture
+    const nativeReleasePointerCapture = Element.prototype.releasePointerCapture
+    Element.prototype.setPointerCapture = function (pointerId) {
+      pointerCaptures += 1
+      return nativeSetPointerCapture.call(this, pointerId)
+    }
+    Element.prototype.releasePointerCapture = function (pointerId) {
+      pointerCaptures = Math.max(0, pointerCaptures - 1)
+      return nativeReleasePointerCapture.call(this, pointerId)
+    }
+
+    const openDatabases = new Set<IDBDatabase>()
+    const nativeOpen = IDBFactory.prototype.open
+    IDBFactory.prototype.open = function (...args: [string, number?]) {
+      const request = nativeOpen.apply(this, args)
+      request.addEventListener('success', () => {
+        if (request.result.name === 'pet-engine-v1') openDatabases.add(request.result)
+      })
+      return request
+    }
+    const nativeClose = IDBDatabase.prototype.close
+    IDBDatabase.prototype.close = function () {
+      openDatabases.delete(this)
+      return nativeClose.call(this)
+    }
+
+    const root = (globalThis as unknown as { __vehiclePetE2E?: Record<string, unknown> }).__vehiclePetE2E ?? {}
+    ;(globalThis as unknown as { __vehiclePetE2E: Record<string, unknown> }).__vehiclePetE2E = root
+    root.snapshotResources = (): ResourceSnapshot => {
+      const plugin = root.pluginResources as { resources?: Record<string, number> } | undefined
+      const count = (type: string, target?: EventTarget) => records.filter(record => record.type === type && (target === undefined || record.target === target)).length
+      return {
+        pluginResources: { ...plugin?.resources },
+        overlayDom: document.querySelectorAll('[data-vehicle-pet]').length,
+        dialogDom: document.querySelectorAll('[data-vehicle-pet-dialog]').length,
+        injectedStyle: document.querySelectorAll('style[data-plugin-css="vehicle-pet/overlay-styles"]').length,
+        resizeObservers,
+        mutationObservers,
+        storageListeners: count('storage', globalThis),
+        resizeListeners: count('resize', globalThis),
+        keyboardListeners: count('keydown'),
+        mediaListeners: records.filter(record => record.type === 'change' && typeof MediaQueryList !== 'undefined' && record.target instanceof MediaQueryList).length,
+        pointerListeners: count('pointerdown') + count('pointermove') + count('pointerup') + count('pointercancel'),
+        pointerCaptures,
+        indexedDbConnections: openDatabases.size,
+      }
+    }
+    root.deletePetDatabase = () => new Promise<{ blocked: boolean; success: boolean }>((resolve, reject) => {
+      let blocked = false
+      const request = indexedDB.deleteDatabase('pet-engine-v1')
+      request.addEventListener('blocked', () => {
+        blocked = true
+        setTimeout(() => resolve({ blocked: true, success: false }), 1000)
+      })
+      request.addEventListener('error', () => reject(request.error))
+      request.addEventListener('success', () => resolve({ blocked, success: true }))
+    })
+  })
+}
+
 test.beforeEach(async ({ context, page }) => {
+  await installResourceInstrumentation(context)
   const reset = await fetch('http://127.0.0.1:8902/reset', { method: 'POST' })
   if (!reset.ok) throw new Error(`mock supervisor reset failed: ${reset.status}`)
   context.on('request', request => {
@@ -134,6 +279,31 @@ async function composerBounds(page: Page) {
   return box
 }
 
+function buildClientGeneration(generation: string): void {
+  execFileSync(process.execPath, ['scripts/test-dsh-build-plugin.mjs', generation], {
+    cwd: process.cwd(),
+    stdio: 'pipe',
+  })
+}
+
+async function resourceSnapshot(page: Page): Promise<ResourceSnapshot> {
+  return page.evaluate(() => {
+    const root = (window as unknown as {
+      __vehiclePetE2E: { snapshotResources: () => ResourceSnapshot }
+    }).__vehiclePetE2E
+    return root.snapshotResources()
+  })
+}
+
+async function deletePetDatabase(page: Page): Promise<{ blocked: boolean; success: boolean }> {
+  return page.evaluate(() => {
+    const root = (window as unknown as {
+      __vehiclePetE2E: { deletePetDatabase: () => Promise<{ blocked: boolean; success: boolean }> }
+    }).__vehiclePetE2E
+    return root.deletePetDatabase()
+  })
+}
+
 /**
  * Record every host-feedback pill as it appears (they auto-clear after ~3.2s,
  * so assertions must not race the visible window). Returns the recorder's
@@ -187,11 +357,9 @@ async function openOverlay(page: Page): Promise<void> {
   await dismissStartupDialogs(page)
   if (await page.locator(PET).count() === 0) {
     const workspacePicker = page.getByRole('textbox', { name: /Choose workspace|选择工作区/ })
-    if (await workspacePicker.isVisible().catch(() => false)) {
-      await connectWorkspace(page)
-    } else {
-      await page.locator('textarea:enabled').last().waitFor({ timeout: 20_000 })
-    }
+    await expect.poll(async () => Number(await workspacePicker.isVisible().catch(() => false)) + await page.locator('textarea:enabled').count(), { timeout: 30_000 }).toBeGreaterThan(0)
+    if (await workspacePicker.isVisible().catch(() => false)) await connectWorkspace(page)
+    else await page.locator('textarea:enabled').last().waitFor({ timeout: 20_000 })
     await sendPrompt(page, `e2e-bootstrap-${Date.now()}`)
   }
   await expect.poll(() => page.locator(PET).count(), { timeout: 30_000 }).toBe(1)
@@ -560,22 +728,42 @@ test('REDUCED_MOTION_STATIC_GEOMETRY_TEST. reduced motion preserves compact subj
   await page.screenshot({ path: `${ARTIFACTS}/reduced-motion-visible-r2.png` })
 })
 
-test('25. ordinary conversation and settings surfaces keep the pet available', async ({ page }) => {
+test('SETTINGS_PRIMARY_ACTION_OVERLAP_TEST measures Pet and open Panel against real Settings actions', async ({ page }) => {
   await openOverlay(page)
-  await expect.poll(() => page.locator(PET).count()).toBe(1)
-
+  await page.locator(PET).click()
+  await expect(page.locator(PANEL)).toHaveCount(1)
   const settings = page.getByRole('button', { name: /Settings|设置/i }).first()
-  await settings.waitFor({ timeout: 20_000 })
   await settings.click()
-  await expect.poll(() => page.locator(PET).count(), { timeout: 20_000 }).toBe(1)
-  const settingsPet = await petBox(page)
-  expect(settingsPet).not.toBeNull()
-  expect(settingsPet!.x).toBeGreaterThan(VIEWPORT.width / 2)
-  expect(settingsPet!.y).toBeGreaterThan(VIEWPORT.height / 2)
-  await page.keyboard.press('Escape')
+  const dialog = page.getByRole('dialog').filter({ has: page.getByRole('button', { name: /^(Close|关闭)$/ }) })
+  await dialog.waitFor({ state: 'visible' })
+  const actions = dialog.getByRole('button')
+  const actionBoxes = (await Promise.all(Array.from({ length: await actions.count() }, async (_, index) => actions.nth(index).boundingBox()))).filter(box => box !== null)
+  expect(actionBoxes.length).toBeGreaterThan(0)
+  const pet = await petBox(page)
+  expect(pet).not.toBeNull()
+  for (const action of actionBoxes) expect(overlapArea(pet!, action!)).toBe(0)
 
-  await page.goto('/')
-  await expect.poll(() => page.locator(PET).count(), { timeout: 30_000 }).toBe(1)
+  const panel = await page.locator(PANEL).boundingBox()
+  expect(panel).not.toBeNull()
+  for (const action of actionBoxes) expect(overlapArea(panel!, action!)).toBe(0)
+  await page.screenshot({ path: `${ARTIFACTS}/r3-settings-overlap.png` })
+  await page.keyboard.press('Escape')
+})
+
+test('WORKSPACE_PRIMARY_ACTION_OVERLAP_TEST measures Pet and open Panel against real Workspace controls', async ({ page }) => {
+  await openOverlay(page)
+  const actions = page.getByRole('button', { name: /Add workspace|添加工作区|Board|看板|Add group|添加分组/ })
+  await expect(actions.first()).toBeVisible()
+  const actionBoxes = (await Promise.all(Array.from({ length: await actions.count() }, async (_, index) => actions.nth(index).boundingBox()))).filter(box => box !== null)
+  expect(actionBoxes.length).toBeGreaterThan(0)
+  const pet = await petBox(page)
+  expect(pet).not.toBeNull()
+  for (const action of actionBoxes) expect(overlapArea(pet!, action!)).toBe(0)
+  await page.locator(PET).click()
+  const panel = await page.locator(PANEL).boundingBox()
+  expect(panel).not.toBeNull()
+  for (const action of actionBoxes) expect(overlapArea(panel!, action!)).toBe(0)
+  await page.screenshot({ path: `${ARTIFACTS}/r3-workspace-overlap.png` })
 })
 
 test('HARNESS_LOCALE_LIVE_SYNC_TEST. zh-CN → en → zh-CN updates Pack, stage, target, keepsake, and journey live', async ({ page }) => {
@@ -640,67 +828,188 @@ test('26. multi-tab preference sync through storage events', async ({ context, p
   await second.close()
 })
 
-test('27. reload and real client-watcher HMR never double-mount or replay terminals', async ({ page }) => {
+test('COMPACT_ALL_LEVEL_PIXEL_MATRIX_TEST + COMPACT_MILESTONE_SUBJECT_OVERLAP_TEST + COMPACT_BLACK_VOID_TEST', async ({ page }) => {
   await openOverlay(page)
-  for (let index = 0; index < 3; index += 1) {
-    await page.reload()
-    await expect.poll(() => page.locator(PET).count(), { timeout: 30_000 }).toBe(1)
-    expect(await page.locator('.vpo-root').count()).toBe(1)
+  buildClientGeneration('e2e-r3-active-matrix')
+  await expect(page.locator('.vpo-root')).toHaveAttribute('data-client-generation', 'e2e-r3-active-matrix', { timeout: 60_000 })
+  await expect.poll(() => page.evaluate(() => Boolean((window as unknown as { __vehiclePetE2E?: { progress?: unknown } }).__vehiclePetE2E?.progress))).toBe(true)
+
+  const setPoints = async (points: number) => {
+    await page.evaluate(value => {
+      const control = (window as unknown as {
+        __vehiclePetE2E: { progress: { setPoints: (next: number) => void } }
+      }).__vehiclePetE2E.progress
+      control.setPoints(value)
+    }, points)
+  }
+  const setReduced = async (enabled: boolean) => {
+    await page.locator(PET).click()
+    await page.locator(`[data-vehicle-pet-reduced-motion-option="${enabled ? 'on' : 'off'}"]`).click()
+    await page.locator(PET).click()
+    await expect(page.locator(`${PET} .vp-scene`)).toHaveAttribute('data-reduced-motion', enabled ? 'true' : 'false')
+  }
+  const runLevels = async (packId: string, levels: readonly { levelId: string; threshold: number }[]) => {
+    for (const level of levels) {
+      await setPoints(level.threshold)
+      await expect(page.locator(PET)).toHaveAttribute('data-vehicle-pet-level', level.levelId)
+      await expect(page.locator(PET)).toHaveAttribute('data-vehicle-pet-pack', packId)
+      await page.waitForTimeout(500)
+      const scene = page.locator(`${PET} .vp-scene`)
+      const subject = scene.locator('[data-pet-subject="true"]')
+      const normalScene = await scene.boundingBox()
+      const normalSubject = await subject.boundingBox()
+      expect(normalScene).not.toBeNull()
+      expect(normalSubject).not.toBeNull()
+      expect(overlapArea(normalSubject!, normalScene!) / (normalSubject!.width * normalSubject!.height)).toBeGreaterThanOrEqual(0.9)
+      expect(normalSubject!.x + normalSubject!.width / 2).toBeGreaterThanOrEqual(normalScene!.x)
+      expect(normalSubject!.x + normalSubject!.width / 2).toBeLessThanOrEqual(normalScene!.x + normalScene!.width)
+      expect(normalSubject!.y + normalSubject!.height / 2).toBeGreaterThanOrEqual(normalScene!.y)
+      expect(normalSubject!.y + normalSubject!.height / 2).toBeLessThanOrEqual(normalScene!.y + normalScene!.height)
+      expect(await scene.locator('.vp-kind-milestone, .vp-kind-aggregate-label').count()).toBe(0)
+      expect(await subject.evaluate(node => getComputedStyle(node, '::after').display)).toBe('none')
+
+      const normalPng = await scene.screenshot({ path: `${ARTIFACTS}/r3-${packId}-${level.levelId}-normal.png` })
+      const pixels = await sharp(normalPng).removeAlpha().raw().toBuffer({ resolveWithObject: true })
+      let black = 0
+      for (let index = 0; index < pixels.data.length; index += pixels.info.channels) {
+        if (pixels.data[index]! < 24 && pixels.data[index + 1]! < 24 && pixels.data[index + 2]! < 24) black += 1
+      }
+      expect(black / (pixels.info.width * pixels.info.height)).toBeLessThan(0.05)
+
+      const freezeMotion = await page.addStyleTag({ content: '.vpo-scene .vp-node{animation:none!important;transition:none!important}' })
+      const staticNormalSubject = await subject.boundingBox()
+      await setReduced(true)
+      const reducedSubject = await subject.boundingBox()
+      expect(staticNormalSubject).not.toBeNull()
+      expect(reducedSubject).not.toBeNull()
+      expect(Math.abs(reducedSubject!.x - staticNormalSubject!.x)).toBeLessThanOrEqual(2)
+      expect(Math.abs(reducedSubject!.y - staticNormalSubject!.y)).toBeLessThanOrEqual(2)
+      expect(Math.abs(reducedSubject!.width - staticNormalSubject!.width)).toBeLessThanOrEqual(2)
+      expect(Math.abs(reducedSubject!.height - staticNormalSubject!.height)).toBeLessThanOrEqual(2)
+      await scene.screenshot({ path: `${ARTIFACTS}/r3-${packId}-${level.levelId}-reduced.png` })
+      await freezeMotion.evaluate(node => { (node as Element).remove() })
+      await setReduced(false)
+
+      await page.locator(PET).click()
+      await page.locator('[data-vehicle-pet-open-journey]').click()
+      const dialogScene = page.locator('[data-vehicle-pet-dialog] .vp-scene')
+      const dialogBounds = await dialogScene.boundingBox()
+      const dialogSubject = await dialogScene.locator('[data-pet-subject="true"]').boundingBox()
+      expect(dialogBounds).not.toBeNull()
+      expect(dialogSubject).not.toBeNull()
+      expect(overlapArea(dialogSubject!, dialogBounds!) / (dialogSubject!.width * dialogSubject!.height)).toBeGreaterThanOrEqual(0.85)
+      await dialogScene.screenshot({ path: `${ARTIFACTS}/r3-${packId}-${level.levelId}-journey.png` })
+      await page.keyboard.press('Escape')
+      await page.locator(PET).click()
+    }
   }
 
-  const root = page.locator('.vpo-root')
-  await expect(root).toHaveAttribute('data-client-generation', 'production')
+  try {
+    await runLevels('autonomous-fleet', fleetManifest.levels)
+    await page.evaluate(() => {
+      const control = (window as unknown as {
+        __vehiclePetE2E: { progress: { resetSubject: () => void } }
+      }).__vehiclePetE2E.progress
+      control.resetSubject()
+    })
+    await page.locator(PET).click()
+    await page.locator('[data-vehicle-pet-pack-option="seedling-fixture"]').click()
+    await page.locator(PET).click()
+    await runLevels('seedling-fixture', seedlingManifest.levels)
+  } finally {
+    buildClientGeneration('production')
+    await expect(page.locator('.vpo-root')).toHaveAttribute('data-client-generation', 'production', { timeout: 60_000 })
+  }
+})
+
+test('REAL_HARNESS_INDEXEDDB_DISPOSAL_TEST + REAL_HARNESS_HMR_RESOURCE_INVENTORY_TEST', async ({ page }) => {
+  await openOverlay(page)
   await expect.poll(() => page.locator(PET).getAttribute('data-live'), { timeout: 90_000 }).toBe('idle')
-  await expect.poll(() => page.locator(PILL).count(), { timeout: 30_000 }).toBe(0)
-  const recorder = await installPillRecorder(page)
+  await expect.poll(() => page.locator(PET).getAttribute('data-terminal'), { timeout: 15_000 }).toBeNull()
   await page.waitForTimeout(4200)
-  expect(await recorder.read()).toEqual([])
+  await expect(page.locator(PILL)).toHaveCount(0)
+  const recorder = await installPillRecorder(page)
   await page.evaluate(() => {
-    const trace: { maxEntries: number; generations: string[]; observer?: MutationObserver } = {
+    const trace: { maxEntries: number; generations: string[]; observer: MutationObserver } = {
       maxEntries: 0,
       generations: [],
+      observer: undefined as unknown as MutationObserver,
     }
     const capture = () => {
       trace.maxEntries = Math.max(trace.maxEntries, document.querySelectorAll('[data-vehicle-pet]').length)
       const generation = document.querySelector('[data-vehicle-pet]')?.getAttribute('data-client-generation')
-      if (generation !== null && generation !== undefined && trace.generations.at(-1) !== generation) {
-        trace.generations.push(generation)
-      }
+      if (generation !== null && generation !== undefined && trace.generations.at(-1) !== generation) trace.generations.push(generation)
     }
-    const observer = new MutationObserver(capture)
-    observer.observe(document.body, { childList: true, subtree: true, attributes: true })
-    trace.observer = observer
+    trace.observer = new MutationObserver(capture)
+    trace.observer.observe(document.body, { childList: true, subtree: true, attributes: true })
     ;(window as unknown as { __vpHmrTrace: typeof trace }).__vpHmrTrace = trace
     capture()
   })
 
-  try {
-    execFileSync('pnpm', ['build:dsh'], {
-      cwd: process.cwd(),
-      env: { ...process.env, VEHICLE_PET_CLIENT_GENERATION: 'hmr-r1-generation-2' },
-      stdio: 'pipe',
-    })
-    await expect(root).toHaveAttribute('data-client-generation', 'hmr-r1-generation-2', { timeout: 60_000 })
-    expect(await page.locator('.vpo-root').count()).toBe(1)
-    expect(await recorder.read()).toEqual([])
+  buildClientGeneration('e2e-r3-disabled-baseline')
+  await expect.poll(() => page.evaluate(() => {
+    const root = (window as unknown as { __vehiclePetE2E?: { pluginResources?: { generation: string } } }).__vehiclePetE2E
+    return root?.pluginResources?.generation
+  }), { timeout: 60_000 }).toBe('e2e-r3-disabled-baseline')
+  await expect(page.locator('.vpo-root')).toHaveCount(0)
+  const RESOURCE_BASELINE = await resourceSnapshot(page)
+  expect(RESOURCE_BASELINE.overlayDom).toBe(0)
+  expect(RESOURCE_BASELINE.injectedStyle).toBe(0)
+  expect(RESOURCE_BASELINE.indexedDbConnections).toBe(0)
+  expect(Object.values(RESOURCE_BASELINE.pluginResources).every(value => value === 0)).toBe(true)
+  expect(await deletePetDatabase(page)).toEqual({ blocked: false, success: true })
 
-    // The pre-HMR terminal stays seeded and does not replay while the new
-    // generation binds the same current Session.
-    await page.waitForTimeout(4200)
-    expect(await recorder.read()).toEqual([])
+  try {
+    for (let round = 1; round <= 5; round += 1) {
+      const activeGeneration = `e2e-r3-active-resource-${round}`
+      buildClientGeneration(activeGeneration)
+      await expect(page.locator('.vpo-root')).toHaveAttribute('data-client-generation', activeGeneration, { timeout: 60_000 })
+      await expect(page.locator(PET)).toHaveCount(1)
+      await expect.poll(async () => (await resourceSnapshot(page)).indexedDbConnections).toBe(1)
+
+      await page.locator(PET).click()
+      await page.locator('[data-vehicle-pet-open-journey]').click()
+      await expect(page.locator('[data-vehicle-pet-dialog]')).toHaveCount(1)
+      const RESOURCE_ACTIVE = await resourceSnapshot(page)
+      expect(RESOURCE_ACTIVE.overlayDom).toBe(1)
+      expect(RESOURCE_ACTIVE.dialogDom).toBe(1)
+      expect(RESOURCE_ACTIVE.injectedStyle).toBe(1)
+      expect(RESOURCE_ACTIVE.resizeObservers).toBeGreaterThan(RESOURCE_BASELINE.resizeObservers)
+      expect(RESOURCE_ACTIVE.storageListeners).toBeGreaterThan(RESOURCE_BASELINE.storageListeners)
+      expect(RESOURCE_ACTIVE.resizeListeners).toBeGreaterThan(RESOURCE_BASELINE.resizeListeners)
+      expect(RESOURCE_ACTIVE.indexedDbConnections).toBe(1)
+      expect(RESOURCE_ACTIVE.pluginResources['shell-overlay-slot']).toBe(1)
+      expect(RESOURCE_ACTIVE.pluginResources['session-list-subscription']).toBe(1)
+      expect(RESOURCE_ACTIVE.pluginResources['current-session-subscription']).toBe(1)
+      expect(RESOURCE_ACTIVE.pluginResources['terminal-event-subscription']).toBe(1)
+
+      const disabledGeneration = `e2e-r3-disabled-resource-${round}`
+      buildClientGeneration(disabledGeneration)
+      await expect.poll(() => page.evaluate(() => {
+        const root = (window as unknown as { __vehiclePetE2E?: { pluginResources?: { generation: string } } }).__vehiclePetE2E
+        return root?.pluginResources?.generation
+      }), { timeout: 60_000 }).toBe(disabledGeneration)
+      await expect(page.locator('.vpo-root')).toHaveCount(0)
+      await expect(page.locator('[data-vehicle-pet-dialog]')).toHaveCount(0)
+      const RESOURCE_DISPOSED = await resourceSnapshot(page)
+      expect(RESOURCE_DISPOSED).toEqual(RESOURCE_BASELINE)
+      expect(await deletePetDatabase(page)).toEqual({ blocked: false, success: true })
+      expect((await resourceSnapshot(page)).indexedDbConnections).toBe(0)
+      expect(await recorder.read()).toEqual([])
+    }
 
     const trace = await page.evaluate(() => {
       const value = (window as unknown as {
-        __vpHmrTrace: { maxEntries: number; generations: string[] }
+        __vpHmrTrace: { maxEntries: number; generations: string[]; observer: MutationObserver }
       }).__vpHmrTrace
+      value.observer.disconnect()
       return { maxEntries: value.maxEntries, generations: value.generations }
     })
     expect(trace.maxEntries).toBe(1)
-    expect(trace.generations).toContain('production')
-    expect(trace.generations).toContain('hmr-r1-generation-2')
+    expect(trace.generations.filter(generation => generation.startsWith('e2e-r3-active-resource-'))).toHaveLength(5)
   } finally {
-    execFileSync('pnpm', ['build:dsh'], { cwd: process.cwd(), stdio: 'pipe' })
-    await expect(root).toHaveAttribute('data-client-generation', 'production', { timeout: 60_000 })
+    buildClientGeneration('production')
+    await expect(page.locator('.vpo-root')).toHaveAttribute('data-client-generation', 'production', { timeout: 60_000 })
   }
 })
 

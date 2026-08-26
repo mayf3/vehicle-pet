@@ -28,13 +28,13 @@ export interface PetSceneRendererProps {
   subjectInteractive?: boolean
   /** Host-owned interaction count used for the same click-feedback presentation. */
   interactionCount?: number
-  /** A 112px host keeps the generic subject legible without changing its plan. */
-  viewport?: 'scene' | 'compact'
+  /** Host presentation only; the same RenderPlan remains authoritative. */
+  presentationMode?: 'standalone' | 'full-journey' | 'compact-overlay'
   'aria-label'?: string
 }
 
 export function PetSceneRenderer(props: PetSceneRendererProps) {
-  const { snapshot, copy } = usePetEngine()
+  const { snapshot, copy, resolveText } = usePetEngine()
   const [clickCount, setClickCount] = useState(0)
 
   if (!snapshot.initialized) return <div className="vp-scene" aria-busy="true" />
@@ -54,13 +54,15 @@ export function PetSceneRenderer(props: PetSceneRendererProps) {
   const upgradeTransition = level?.upgrade?.transition ?? 'instant'
   const upgradeReveal = level?.upgrade?.reveal ?? 'subject-swap'
   const celebration = level?.upgrade?.celebration ?? 'ambient-highlight'
-  const visibleNodes = fitNodesToDomBudget(plan.nodes)
+  const presentationMode = props.presentationMode ?? 'standalone'
+  const visibleNodes = fitNodesToDomBudget(plan.nodes, presentationMode)
 
   return (
     <div
       className={`vp-scene vp-scene-transition-${sceneTransition} vp-upgrade-transition-${upgradeTransition} vp-upgrade-reveal-${upgradeReveal} vp-celebration-${celebration}`}
+      data-presentation-mode={presentationMode}
       role="group"
-      aria-label={props['aria-label'] ?? 'Pet scene'}
+      aria-label={props['aria-label'] ?? (presentationMode === 'compact-overlay' && level !== undefined ? resolveText(level.stageName) : 'Pet scene')}
       data-reduced-motion={reduced ? 'true' : 'false'}
       data-scene-transition={sceneTransition}
       data-upgrade-transition={upgradeTransition}
@@ -80,7 +82,7 @@ export function PetSceneRenderer(props: PetSceneRendererProps) {
           upgradeReveal={upgradeReveal}
           clickCount={node.kind === 'subject' ? (props.interactionCount ?? clickCount) : 0}
           subjectInteractive={props.subjectInteractive !== false}
-          compactViewport={props.viewport === 'compact'}
+          compactViewport={presentationMode === 'compact-overlay'}
           onClickSubject={() => setClickCount((n) => n + 1)}
           simulateFailAssetIds={props.simulateFailAssetIds}
         />
@@ -89,11 +91,21 @@ export function PetSceneRenderer(props: PetSceneRendererProps) {
   )
 }
 
-function fitNodesToDomBudget(nodes: readonly RenderNode[]): RenderNode[] {
+function fitNodesToDomBudget(
+  nodes: readonly RenderNode[],
+  presentationMode: NonNullable<PetSceneRendererProps['presentationMode']>,
+): RenderNode[] {
+  // A 112px overlay is a Pet avatar, not a miniature information dashboard.
+  // Stage/milestone copy remains available in the panel and accessible subject
+  // label; the compact scene renders the generic subject only so no text,
+  // aggregate, Pack overlay, or dark world layer can cover it.
+  const candidates = presentationMode === 'compact-overlay'
+    ? nodes.filter(node => node.kind === 'subject')
+    : nodes
   const selected: RenderNode[] = []
   const populationCounts = new Map<string, number>()
   let descendants = 0
-  for (const node of nodes) {
+  for (const node of candidates) {
     if (node.kind === 'population-representative') {
       const populationKey = node.nodeId.replace(/:\d+$/, '')
       const count = populationCounts.get(populationKey) ?? 0

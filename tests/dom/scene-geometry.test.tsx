@@ -13,16 +13,16 @@ import { EngineStyles } from '../../src/react/styles'
 afterEach(cleanup)
 
 const CASES = [
-  { manifest: fleetCandidate as PetPackManifestV1, levels: ['l1', 'l7', 'l12'] },
+  { manifest: fleetCandidate as PetPackManifestV1, levels: ['l1', 'l2', 'l3', 'l4', 'l5', 'l6', 'l7', 'l8', 'l9', 'l10', 'l11', 'l12'] },
   { manifest: seedlingCandidate as PetPackManifestV1, levels: ['seed', 'sprout', 'tree', 'forest'] },
 ] as const
 
-function renderLevel(manifest: PetPackManifestV1, levelId: string, reducedMotion: boolean, viewport: 'scene' | 'compact') {
+function renderLevel(manifest: PetPackManifestV1, levelId: string, reducedMotion: boolean, presentationMode: 'full-journey' | 'compact-overlay') {
   const level = manifest.levels.find(candidate => candidate.levelId === levelId)
   if (level === undefined) throw new Error(`missing geometry fixture ${manifest.packId}/${levelId}`)
   const plan = buildSceneRenderPlan({ manifest, level, locale: 'en' })
   mocked.context = rendererContext(manifest, plan, reducedMotion)
-  return render(<><EngineStyles /><PetSceneRenderer viewport={viewport} /></>)
+  return render(<><EngineStyles /><PetSceneRenderer presentationMode={presentationMode} /></>)
 }
 
 function intersectionRatio(element: HTMLElement, sceneWidth: number, sceneHeight: number): number {
@@ -39,11 +39,11 @@ function intersectionRatio(element: HTMLElement, sceneWidth: number, sceneHeight
   return width * height === 0 ? 0 : (intersectionWidth * intersectionHeight) / (width * height)
 }
 
-describe('R2 scene geometry regressions', () => {
-  it('SCENE_COMPACT_GEOMETRY_TEST keeps Fleet and Seedling subjects centred and at least 85% visible in 112px', () => {
+describe('R3 compact/full-journey scene geometry', () => {
+  it('COMPACT_ALL_LEVEL_PIXEL_MATRIX_TEST keeps all 16 subjects centred and at least 90% visible in 112px', () => {
     for (const { manifest, levels } of CASES) {
       for (const levelId of levels) {
-        const view = renderLevel(manifest, levelId, false, 'compact')
+        const view = renderLevel(manifest, levelId, false, 'compact-overlay')
         const subject = view.container.querySelector<HTMLElement>('[data-pet-subject="true"]')!
         expect(subject.style.transform).toBe('translate(-50%, -50%)')
         expect(Number.parseFloat(subject.style.left)).toBeGreaterThanOrEqual(0)
@@ -51,7 +51,31 @@ describe('R2 scene geometry regressions', () => {
         expect(Number.parseFloat(subject.style.top)).toBeGreaterThanOrEqual(0)
         expect(Number.parseFloat(subject.style.top)).toBeLessThanOrEqual(100)
         expect(Number.parseFloat(subject.style.width)).toBeGreaterThanOrEqual(42)
-        expect(intersectionRatio(subject, 112, 112)).toBeGreaterThanOrEqual(0.85)
+        expect(intersectionRatio(subject, 112, 112)).toBeGreaterThanOrEqual(0.9)
+        expect(view.container.querySelectorAll('.vp-kind-milestone, .vp-kind-aggregate-label')).toHaveLength(0)
+        expect(view.container.querySelectorAll('.vp-node')).toHaveLength(1)
+        view.unmount()
+      }
+    }
+  })
+
+  it('COMPACT_MILESTONE_SUBJECT_OVERLAP_TEST renders no compact milestone or aggregate geometry', () => {
+    for (const { manifest, levels } of CASES) {
+      for (const levelId of levels) {
+        const view = renderLevel(manifest, levelId, false, 'compact-overlay')
+        const subject = view.container.querySelector<HTMLElement>('[data-pet-subject="true"]')!
+        expect(subject).not.toBeNull()
+        expect(view.container.querySelector('.vp-kind-milestone, .vp-kind-aggregate-label')).toBeNull()
+        view.unmount()
+      }
+    }
+  })
+
+  it('COMPACT_BLACK_VOID_TEST removes Pack world layers from the compact avatar', () => {
+    for (const { manifest, levels } of CASES) {
+      for (const levelId of levels) {
+        const view = renderLevel(manifest, levelId, false, 'compact-overlay')
+        expect(view.container.querySelector('[data-node-kind="background"], [data-node-kind="overlay"], [data-node-kind="terminal-overlay"]')).toBeNull()
         view.unmount()
       }
     }
@@ -60,7 +84,7 @@ describe('R2 scene geometry regressions', () => {
   it('SCENE_FULL_JOURNEY_GEOMETRY_TEST keeps plan layers inside the dialog scene and backgrounds filled', () => {
     for (const { manifest, levels } of CASES) {
       for (const levelId of levels) {
-        const view = renderLevel(manifest, levelId, false, 'scene')
+        const view = renderLevel(manifest, levelId, false, 'full-journey')
         const scene = view.container.querySelector<HTMLElement>('.vp-scene')!
         const subject = scene.querySelector<HTMLElement>('[data-pet-subject="true"]')!
         expect(intersectionRatio(subject, 800, 450)).toBeGreaterThanOrEqual(0.85)
@@ -77,10 +101,10 @@ describe('R2 scene geometry regressions', () => {
     }
   })
 
-  it('REDUCED_MOTION_STATIC_GEOMETRY_TEST preserves the normal-motion static bounding geometry', () => {
+  it('REDUCED_MOTION_COMPACT_GEOMETRY_TEST preserves the normal-motion static bounding geometry', () => {
     for (const { manifest, levels } of CASES) {
       for (const levelId of levels) {
-        const normal = renderLevel(manifest, levelId, false, 'compact')
+        const normal = renderLevel(manifest, levelId, false, 'compact-overlay')
         const normalSubject = normal.container.querySelector<HTMLElement>('[data-pet-subject="true"]')!
         const normalGeometry = {
           left: normalSubject.style.left,
@@ -91,7 +115,7 @@ describe('R2 scene geometry regressions', () => {
         }
         normal.unmount()
 
-        const reduced = renderLevel(manifest, levelId, true, 'compact')
+        const reduced = renderLevel(manifest, levelId, true, 'compact-overlay')
         const reducedSubject = reduced.container.querySelector<HTMLElement>('[data-pet-subject="true"]')!
         expect({
           left: reducedSubject.style.left,

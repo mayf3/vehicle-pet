@@ -76,6 +76,8 @@ export interface VehiclePetSessionAdapterOptions {
     readonly terminalDurationMs?: number;
     readonly setTimer?: (callback: () => void, delay: number) => unknown;
     readonly clearTimer?: (handle: unknown) => void;
+    /** E2E-only lifecycle ledger; absent in production. */
+    readonly trackResource?: (category: string) => () => void;
 }
 /** Map a structured `turn/end` reason kind to the pet terminal reaction status. */
 export declare function terminalStatusOf(reasonKind: string): VehiclePetTerminalReaction['status'] | null;
