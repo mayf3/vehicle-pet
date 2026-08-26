@@ -212,6 +212,8 @@ function OverlayEngineGate({
   clientGeneration: string | undefined
 }): ReactElement | null {
   const [storage, setStorage] = useState<PetStorageAdapter | null>(null)
+  const progressRuntime = useMemo(() => createOverlayProgressSource(clientGeneration), [clientGeneration])
+  useEffect(() => () => progressRuntime.dispose(), [progressRuntime])
   useEffect(() => acquireOwnedOverlayStorage({
     create: () => IndexedDbPetStorage.create(),
     onReady: setStorage,
@@ -225,7 +227,7 @@ function OverlayEngineGate({
       bundles={dshPackBundles}
       defaultPackId={dshDefaultPackId}
       storage={storage}
-      source={overlayProgressSource}
+      source={progressRuntime.source}
       locale={engineLocale}
       reducedMotion={reducedMotion}
       syncDocumentLanguage={false}
@@ -244,7 +246,6 @@ function OverlayEngineGate({
   )
 }
 
-const overlayProgressSource = createOverlayProgressSource()
 const MemoryStorageFallback = new MemoryPetStorageAdapter()
 
 function systemPrefersReducedMotion(): boolean {
@@ -280,6 +281,7 @@ function OverlaySurface({
   const [petInteractionCount, setPetInteractionCount] = useState(0)
   const collapsed = preferences.collapsed
   const { t, commitPreferences } = useOverlayChrome()
+  const { snapshot } = usePetEngine()
   const petButtonRef = useRef<HTMLButtonElement | null>(null)
   const journeyTriggerRef = useRef<HTMLButtonElement | null>(null)
   const drag = useOverlayDrag({ preferences, commitPreferences })
@@ -353,6 +355,8 @@ function OverlaySurface({
             aria-label={t('overlay.label', { state: t(stateKey) })}
             aria-expanded={interaction === 'PANEL_OPEN'}
             data-vehicle-pet-pet="true"
+            data-vehicle-pet-pack={snapshot.activePack?.manifest.packId}
+            data-vehicle-pet-level={snapshot.viewModel?.derivedLevelId}
             data-live={sessionView.terminal !== null ? 'terminal' : sessionView.live}
             data-terminal={sessionView.terminal?.status}
             onKeyDown={handleSurfaceKeyDown}
@@ -367,7 +371,7 @@ function OverlaySurface({
             onPointerCancel={drag.onPointerCancel}
           >
             <span className="vpo-scene">
-              <PetSceneRenderer subjectInteractive={false} interactionCount={petInteractionCount} viewport="compact" />
+              <PetSceneRenderer subjectInteractive={false} interactionCount={petInteractionCount} presentationMode="compact-overlay" />
             </span>
             {sessionView.live === 'needs-input' ? <span className="vpo-badge" aria-hidden="true" /> : null}
           </button>

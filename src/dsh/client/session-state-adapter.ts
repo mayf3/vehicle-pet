@@ -76,6 +76,8 @@ export interface VehiclePetSessionAdapterOptions {
   readonly terminalDurationMs?: number
   readonly setTimer?: (callback: () => void, delay: number) => unknown
   readonly clearTimer?: (handle: unknown) => void
+  /** E2E-only lifecycle ledger; absent in production. */
+  readonly trackResource?: (category: string) => () => void
 }
 
 type TimerHandle = unknown
@@ -101,7 +103,9 @@ export class VehiclePetSessionAdapter implements OverlayObservable<VehiclePetSes
   readonly #terminalDurationMs: number
   readonly #setTimer: (callback: () => void, delay: number) => TimerHandle
   readonly #clearTimer: (handle: TimerHandle) => void
+  readonly #trackResource: ((category: string) => () => void) | undefined
   readonly #listeners = new Set<() => void>()
+  readonly #listenerResourceDisposers = new Map<() => void, () => void>()
 
   #view: VehiclePetSessionView = IDLE_VIEW
   #listUnsubscribe: (() => void) | undefined
@@ -122,9 +126,15 @@ export class VehiclePetSessionAdapter implements OverlayObservable<VehiclePetSes
     this.#setTimer = options.setTimer ?? ((callback, delay) => setTimeout(callback, delay))
     this.#clearTimer = options.clearTimer
       ?? (handle => { clearTimeout(handle as Parameters<typeof clearTimeout>[0]) })
-    this.#listUnsubscribe = sessions.list.subscribe(() => {
+    this.#trackResource = options.trackResource
+    const unsubscribeList = sessions.list.subscribe(() => {
       this.#handleListChange()
     })
+    const untrackList = this.#trackResource?.('session-list-subscription')
+    this.#listUnsubscribe = () => {
+      unsubscribeList()
+      untrackList?.()
+    }
     this.#handleListChange()
   }
 
@@ -139,8 +149,12 @@ export class VehiclePetSessionAdapter implements OverlayObservable<VehiclePetSes
 
   subscribe = (listener: () => void): (() => void) => {
     this.#listeners.add(listener)
+    const untrack = this.#trackResource?.('terminal-event-subscription')
+    if (untrack !== undefined) this.#listenerResourceDisposers.set(listener, untrack)
     return () => {
       this.#listeners.delete(listener)
+      this.#listenerResourceDisposers.get(listener)?.()
+      this.#listenerResourceDisposers.delete(listener)
     }
   }
 
@@ -150,6 +164,8 @@ export class VehiclePetSessionAdapter implements OverlayObservable<VehiclePetSes
     this.#listUnsubscribe?.()
     this.#listUnsubscribe = undefined
     this.#unbindSession()
+    for (const dispose of this.#listenerResourceDisposers.values()) dispose()
+    this.#listenerResourceDisposers.clear()
     this.#listeners.clear()
   }
 
@@ -170,9 +186,16 @@ export class VehiclePetSessionAdapter implements OverlayObservable<VehiclePetSes
     this.#seeded = false
     if (current !== undefined) {
       this.#sessionSource = this.#sessions.binding(current)?.session
-      this.#sessionUnsubscribe = this.#sessionSource?.subscribe(() => {
+      const unsubscribeSession = this.#sessionSource?.subscribe(() => {
         this.#recompute()
       })
+      if (unsubscribeSession !== undefined) {
+        const untrackSession = this.#trackResource?.('current-session-subscription')
+        this.#sessionUnsubscribe = () => {
+          unsubscribeSession()
+          untrackSession?.()
+        }
+      }
     }
     this.#recompute()
   }

@@ -10,8 +10,8 @@ export interface PetSceneRendererProps {
     subjectInteractive?: boolean;
     /** Host-owned interaction count used for the same click-feedback presentation. */
     interactionCount?: number;
-    /** A 112px host keeps the generic subject legible without changing its plan. */
-    viewport?: 'scene' | 'compact';
+    /** Host presentation only; the same RenderPlan remains authoritative. */
+    presentationMode?: 'standalone' | 'full-journey' | 'compact-overlay';
     'aria-label'?: string;
 }
 export declare function PetSceneRenderer(props: PetSceneRendererProps): import("react").JSX.Element;

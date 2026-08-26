@@ -86,7 +86,7 @@ export function VehiclePetDialog({ onClose }: VehiclePetDialogProps): ReactEleme
           </button>
         </header>
         <div className="vpo-dialogBody">
-          <PetSceneRenderer />
+          <PetSceneRenderer presentationMode="full-journey" />
           <PetProgressPanel />
           <PetMilestonePanel />
           <PetKeepsakeCollection />
