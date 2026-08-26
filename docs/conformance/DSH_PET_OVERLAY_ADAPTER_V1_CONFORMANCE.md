@@ -251,3 +251,104 @@ NO
 | P1 — live locale propagation | Harness locale remains the only authority and synchronizes into the same mounted Engine through `setLocale`; the embedded provider does not write `<html lang>`. | `HARNESS_LOCALE_LIVE_SYNC_TEST` covers `zh-CN → en → zh-CN` across overlay chrome, Pack, stage, next target, keepsake, and Full Journey without remount or progress loss. | FIXED |
 
 The R2 amendment does not change the accepted Specs or the R1 B1–B4 semantics. Independent code and experience re-audits after this amendment remain separate work; this author record does not convert either post-amendment result from `NOT_RUN`.
+
+## Final R3 blocker-resolution amendment record
+
+```text
+R3_AMENDMENT_IMPLEMENTATION_HEAD =
+7c59bb0184f04e199923f676ded345b1df692623
+
+R3_G1_COMPACT_ALL_LEVEL_GEOMETRY_CLOSED =
+YES
+
+R3_G2_REAL_HARNESS_LIFECYCLE_EVIDENCE_CLOSED =
+YES
+
+R3_G3_SETTINGS_WORKSPACE_ACTION_OVERLAP_CLOSED =
+YES
+
+COMPACT_SUBJECT_INTERSECTION_RATIO_MIN =
+0.90
+
+COMPACT_MILESTONE_SUBJECT_OVERLAP_RATIO =
+0
+
+COMPACT_BLACK_PIXEL_RATIO_MAX =
+0.05
+
+REDUCED_MOTION_COMPACT_BBOX_DELTA_MAX_PX =
+2
+
+FULL_JOURNEY_GEOMETRY =
+PASS
+
+REAL_IDB_DELETE_BLOCKED_AFTER_DISPOSE =
+NO
+
+REAL_IDB_DELETE_SUCCESS_AFTER_DISPOSE =
+YES
+
+REAL_IDB_OPEN_CONNECTIONS_AFTER_DISPOSE =
+0
+
+REAL_HARNESS_ACTIVATION_DISPOSAL_CYCLES =
+5 PER TEST; 5/5 REPEATED RUNS PASS
+
+MAX_VEHICLE_PET_INSTANCES =
+1
+
+OLD_GENERATION_CALLBACKS_AFTER_REPLACE =
+0
+
+TERMINAL_REPLAY_AFTER_REPLACE =
+0
+
+RESOURCE_DISPOSED =
+RESOURCE_BASELINE
+
+SETTINGS_PRIMARY_ACTION_OVERLAP_PX2 =
+0
+
+WORKSPACE_PRIMARY_ACTION_OVERLAP_PX2 =
+0
+
+UNIFIED_SAFE_INSET_CHANGED =
+NO (MEASUREMENT PASSED)
+
+R3_PNPM_VERIFY =
+PASS (157 UNIT/DOM + 12 STANDALONE BROWSER + 18 CONTRACT TESTS)
+
+R3_PNPM_VERIFY_DSH =
+PASS (18 CONTRACT + 53 DSH UNIT/DOM + 23 PINNED-HARNESS BROWSER TESTS)
+
+R3_GOVERNANCE_VERIFY =
+PASS
+
+HISTORICAL_R1_R2_R3_AUDIT_DECISIONS_PRESERVED =
+YES
+
+ACCEPTED_SPEC_FILES_CHANGED =
+NO
+
+DSH_TRACKED_FILES_CHANGED =
+NO
+
+READY_FOR_R4_CODE_AUDIT =
+YES
+
+READY_FOR_R4_EXPERIENCE_AUDIT =
+YES
+
+READY_TO_MERGE =
+NO
+```
+
+| R3 gate | Amendment | Real / mechanical evidence | Claimed result |
+|---|---|---|---|
+| G1 — 112px compact focus | `PetSceneRenderer` now has Pack-neutral `standalone`, `full-journey`, and `compact-overlay` presentation modes. Compact renders only the subject over a generic light surface; milestone, aggregate, Pack world layers, and interaction copy are absent while stage information remains available through accessibility and the Panel. Full Journey remains plan-complete. | `COMPACT_ALL_LEVEL_PIXEL_MATRIX_TEST`, `COMPACT_MILESTONE_SUBJECT_OVERLAP_TEST`, `COMPACT_BLACK_VOID_TEST`, `REDUCED_MOTION_COMPACT_GEOMETRY_TEST`, and `SCENE_FULL_JOURNEY_GEOMETRY_TEST`; Fleet L1–L12 plus Seedling seed/sprout/tree/forest in normal compact, reduced compact, and Full Journey. | CLOSED |
+| G2 — real IndexedDB and HMR inventory | Pinned-Harness browser instrumentation tracks plugin slot/DOM/portal/style/subscriptions/global listeners/timers/observers/pointer capture/IndexedDB. A test-only esbuild fixture drives the all-level matrix without adding progress mutation to production. Real client-watcher replacement alternates active and disabled generations and verifies complete disposal before reactivation. | `REAL_HARNESS_INDEXEDDB_DISPOSAL_TEST` and `REAL_HARNESS_HMR_RESOURCE_INVENTORY_TEST`; delete succeeds unblocked with zero connections after every disposal; five cycles per test and `--repeat-each=5`; `RESOURCE_DISPOSED = RESOURCE_BASELINE`, one instance maximum, no old callbacks or terminal replay. | CLOSED |
+| G3 — Settings and Workspace actions | Existing unified safe default is unchanged because real geometry measurements passed. | `SETTINGS_PRIMARY_ACTION_OVERLAP_TEST` and `WORKSPACE_PRIMARY_ACTION_OVERLAP_TEST` measure both the Pet and open Panel against real accessible primary controls; overlap is zero. Existing desktop/mobile Composer tests remain green. | CLOSED |
+
+Evidence image: [`dsh-pet-overlay-v1-r3-final.webp`](../evidence/dsh-pet-overlay-v1-r3-final.webp), a 48-frame matrix containing every required Fleet and Seedling level in normal compact, reduced compact, and Full Journey modes from the pinned Harness run.
+
+This R3 amendment is author-executed blocker-closure evidence bound to implementation commit `7c59bb0184f04e199923f676ded345b1df692623`. It does not rewrite any historical independent audit decision. Fresh independent R4 code and experience audits must run on the final documentation Head before any merge decision; the PR remains Open, Draft, unmerged, and `READY_TO_MERGE = NO`.
