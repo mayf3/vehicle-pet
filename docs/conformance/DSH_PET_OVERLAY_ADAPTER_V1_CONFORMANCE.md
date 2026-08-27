@@ -416,3 +416,60 @@ verification with `--require-accepted`, and the final diff check. The pinned DSH
 worktree remained clean, the accepted Specs were unchanged, and no user DSH
 profile was used. This documentation commit records those results but does not
 convert either post-amendment independent result from `NOT_RUN`.
+
+## R5 PANEL_OPEN input-coordinate blocker-resolution amendment record
+
+```text
+INDEPENDENT_OVERLAY_AUDIT_R5_RESULT = REQUEST_CHANGES
+INDEPENDENT_OVERLAY_AUDIT_R5_HEAD = df563518fc714ec18a74498a39c6b98999f997b5
+INDEPENDENT_OVERLAY_AUDIT_R5_BLOCKERS = 1
+INDEPENDENT_OVERLAY_EXPERIENCE_AUDIT_R5_RESULT = ACCEPT
+INDEPENDENT_OVERLAY_EXPERIENCE_AUDIT_R5_HEAD = df563518fc714ec18a74498a39c6b98999f997b5
+INDEPENDENT_OVERLAY_EXPERIENCE_AUDIT_R5_BLOCKERS = 0
+R5_AMENDMENT_IMPLEMENTATION_HEAD = 765449d3e05972147ac8924a06b91b60eae2285c
+R5_B1_PANEL_OPEN_INPUT_COORDINATE_DEAD_ZONE_CLOSED = YES
+R5_BLOCKERS_CLAIMED_CLOSED = 1
+OLD_FAILURE_REPRODUCED = YES
+PANEL_OPEN_MOVEMENT_DEAD_ZONE_REPEAT = 10/10 PASS
+UNIT_DOM_TEST_COUNT = 157
+STANDALONE_E2E_COUNT = 12
+CONTRACT_TEST_COUNT = 18
+DSH_UNIT_DOM_COUNT = 59
+PINNED_DSH_E2E_COUNT = 26
+TARGETED_SECOND_SESSION_REPEAT = 5/5 PASS
+PNPM_VERIFY = PASS
+PNPM_VERIFY_DSH = PASS
+VERIFY_GOVERNANCE_REQUIRE_ACCEPTED = PASS
+DISPOSABLE_DSH_HOME = /tmp/vehicle-pet-overlay-amend-r5-20260827-g7e4
+REMOTE_INSTALL_DSH_HOME = /tmp/vehicle-pet-overlay-amend-r5-remote-20260827-g7e4
+PINNED_DSH_COMMIT = f77b5a2fcebc2d9138f6608a60636f2294868d42
+BROWSER = Playwright Chrome channel, real pinned Harness Web
+INDEPENDENT_OVERLAY_AUDIT_AFTER_AMENDMENT_R5 = NOT_RUN
+INDEPENDENT_OVERLAY_EXPERIENCE_AUDIT_AFTER_AMENDMENT_R5 = NOT_RUN
+READY_FOR_OVERLAY_REAUDIT_R6 = YES
+READY_FOR_OVERLAY_EXPERIENCE_REAUDIT_R6 = YES
+READY_TO_MERGE = NO
+```
+
+The independent R5 code audit bound Head
+`df563518fc714ec18a74498a39c6b98999f997b5` and returned
+`REQUEST_CHANGES` with one new blocker. The independent R5 experience audit bound
+that same Head and returned `ACCEPT` with zero blockers. Those historical results
+remain unchanged. This section is the author's direct R5 blocker-closure record;
+it is not an independent post-amendment `ACCEPT` claim.
+
+| R5 blocker | Fix files | Old failing coordinate and unified model | Regression evidence | Claimed result |
+|---|---|---|---|---|
+| B1 — PANEL_OPEN input-coordinate movement dead zone | `src/dsh/client/useOverlayDrag.ts` plus generated `lib/**`; `tests/dsh/unit/preferences.test.ts`; `tests/dsh/e2e/overlay.spec.ts` | At the old Head in real pinned Harness Chrome, viewport 390×844, preference xRatio=0.49/yRatio=1, PANEL_OPEN projected the visible Pet to (54,716). The first ArrowLeft changed persisted xRatio 0.49→0.45747967479674795 while the visible Pet stayed at (54,716), delta 0 despite 38px leftward space. The controller now starts pointer and keyboard input from `layout.point`, the current rendered/clamped Pet anchor, projects both through one `moveCompleteActiveSurface` algorithm, commits ratios only after actual visible movement, and keeps no-input or toward-boundary input from rewriting the latent preference. | Pure matrix: 4 viewports × 8 x ratios × 7 y ratios, signed 5/8/32px deltas, all directions, boundaries, and feasible left/right/above/below Panel placements. Real pinned Harness: first ArrowLeft moved (54,716)→(46,716), 8px; first 20px pointer drag moved (54,716)→(34,716), 20px; open/close without input preserved bytes and anchor; canonical ratio, close, refresh, resize, and two-tab propagation passed. Exact test `PANEL_OPEN movement has no coordinate dead zone` passed 10/10. | CLOSED |
+
+The complete author gate at implementation Head
+`765449d3e05972147ac8924a06b91b60eae2285c` passed `pnpm verify` (157
+unit/DOM, 12 standalone browser, 18 contract tests), `pnpm verify:dsh` (59 DSH
+unit/DOM and 26 real pinned-Harness browser tests), the targeted second-Session
+`--repeat-each=5`, the movement dead-zone `--repeat-each=10`, governance
+verification with `--require-accepted`, and diff checks. Existing R4 complete-surface
+clamp, cross-tab collapse invariant, Dialog focus containment, Full Journey light/dark
+contrast (minimum 5.641:1), 48-frame compact/reduced/full geometry, obstruction,
+IndexedDB/HMR/resource, onboarding, locale, React singleton, Engine singleton,
+lifecycle, and no-network gates all remained green. Accepted Specs and the pinned
+DSH tracked tree were unchanged, and no user DSH profile was used.
