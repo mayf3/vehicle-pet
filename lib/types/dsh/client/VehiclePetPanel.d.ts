@@ -9,6 +9,7 @@
 import { type ReactElement, type RefObject } from 'react';
 import type { VehiclePetOverlayPreferences } from './types';
 export interface VehiclePetPanelProps {
+    readonly panelRef: RefObject<HTMLElement>;
     readonly horizontal: 'left' | 'right';
     readonly vertical: 'above' | 'below';
     readonly preferences: VehiclePetOverlayPreferences;

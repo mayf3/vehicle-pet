@@ -13,6 +13,7 @@ import type { VehiclePetOverlayPreferences } from './types'
 import { useOverlayChrome } from './VehiclePetOverlay'
 
 export interface VehiclePetPanelProps {
+  readonly panelRef: RefObject<HTMLElement>
   readonly horizontal: 'left' | 'right'
   readonly vertical: 'above' | 'below'
   readonly preferences: VehiclePetOverlayPreferences
@@ -60,7 +61,8 @@ export function VehiclePetPanel(props: VehiclePetPanelProps): ReactElement {
 
   return (
     <section
-      style={{ width: '320px', maxWidth: 'calc(100vw - 24px)' }}
+      ref={props.panelRef}
+      style={{ width: '320px', maxWidth: 'calc(100vw - 32px)' }}
       className="vpo-panel"
       role="group"
       aria-label={t('panel.title')}

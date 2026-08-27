@@ -1,9 +1,8 @@
 /**
  * Overlay drag / keyboard movement / viewport clamping controller
- * (CTR-OVERLAY-003). Pointer drags have a threshold so a plain click never
- * counts as a drag and never toggles the panel; the active surface is clamped
- * inside the viewport; positions persist as normalized x/y ratios, never
- * absolute pixels. Viewport resize recomputes from the ratios.
+ * (CTR-OVERLAY-003). Ratios always describe the user's pet/launcher anchor.
+ * PANEL_OPEN temporarily projects that anchor through the complete active
+ * Pet + gap + Panel surface, flips the Panel, and clamps the final union.
  */
 
 import {
@@ -22,6 +21,24 @@ export interface OverlayPoint {
   readonly y: number
 }
 
+export interface PanelPlacement {
+  readonly horizontal: 'left' | 'right'
+  readonly vertical: 'above' | 'below'
+}
+
+export interface ActiveSurfaceBounds {
+  readonly left: number
+  readonly top: number
+  readonly right: number
+  readonly bottom: number
+}
+
+export interface CompleteActiveSurfaceLayout {
+  readonly point: OverlayPoint
+  readonly panelPlacement: PanelPlacement
+  readonly activeBounds: ActiveSurfaceBounds
+}
+
 interface DragState {
   readonly pointerId: number
   readonly start: OverlayPoint
@@ -32,6 +49,7 @@ interface DragState {
 
 export interface UseOverlayDragOptions {
   readonly preferences: VehiclePetOverlayPreferences
+  readonly panelOpen: boolean
   readonly commitPreferences: (update: (current: VehiclePetOverlayPreferences) => VehiclePetOverlayPreferences) => void
   /** Called after a real drag ended (never for a suppressed click). */
   readonly onDragEnd?: () => void
@@ -39,8 +57,11 @@ export interface UseOverlayDragOptions {
 
 export interface OverlayDragController {
   readonly rootRef: RefObject<HTMLDivElement>
+  readonly panelRef: RefObject<HTMLElement>
   readonly bounds: OverlayBounds
   readonly point: OverlayPoint
+  readonly panelPlacement: PanelPlacement
+  readonly activeBounds: ActiveSurfaceBounds
   readonly shellStyle: CSSProperties
   readonly isDragging: boolean
   /** True exactly once after a drag; consumes the flag so the click is ignored. */
@@ -55,6 +76,8 @@ export interface OverlayDragController {
 const DRAG_THRESHOLD_PX = 4
 const KEYBOARD_STEP_PX = 8
 const KEYBOARD_LARGE_STEP_PX = 32
+const PANEL_GAP_PX = 8
+const PANEL_FALLBACK_HEIGHT_PX = 440
 
 const clamp = (value: number, min: number, max: number): number => Math.min(max, Math.max(min, value))
 
@@ -96,8 +119,80 @@ function ratiosFromPoint(point: OverlayPoint, bounds: OverlayBounds, size: numbe
   }
 }
 
+function overflowForAxis(anchor: number, minOffset: number, maxOffset: number, viewportSize: number): number {
+  const margin = OVERLAY_GEOMETRY.viewportMarginPx
+  return Math.max(0, margin - (anchor + minOffset))
+    + Math.max(0, anchor + maxOffset - (viewportSize - margin))
+}
+
+/**
+ * Resolve and clamp the complete active surface without mutating the persisted
+ * anchor. `horizontal=left` means the Panel grows right from the Pet's left;
+ * `horizontal=right` means it grows left from the Pet's right.
+ */
+export function resolveCompleteActiveSurfaceLayout(
+  anchor: OverlayPoint,
+  viewport: OverlayBounds,
+  surfaceSize: number,
+  panelOpen: boolean,
+  panelSize: OverlayBounds,
+  preferred: PanelPlacement,
+): CompleteActiveSurfaceLayout {
+  const margin = OVERLAY_GEOMETRY.viewportMarginPx
+  if (!panelOpen) {
+    const point = {
+      x: clamp(anchor.x, margin, Math.max(margin, viewport.width - surfaceSize - margin)),
+      y: clamp(anchor.y, margin, Math.max(margin, viewport.height - surfaceSize - margin)),
+    }
+    return {
+      point,
+      panelPlacement: preferred,
+      activeBounds: { left: point.x, top: point.y, right: point.x + surfaceSize, bottom: point.y + surfaceSize },
+    }
+  }
+
+  const horizontalOffsets = {
+    left: { min: 0, max: Math.max(surfaceSize, panelSize.width) },
+    right: { min: Math.min(0, surfaceSize - panelSize.width), max: surfaceSize },
+  } as const
+  const verticalOffsets = {
+    below: { min: 0, max: Math.max(surfaceSize, surfaceSize + PANEL_GAP_PX + panelSize.height) },
+    above: { min: Math.min(0, -PANEL_GAP_PX - panelSize.height), max: surfaceSize },
+  } as const
+
+  const leftOverflow = overflowForAxis(anchor.x, horizontalOffsets.left.min, horizontalOffsets.left.max, viewport.width)
+  const rightOverflow = overflowForAxis(anchor.x, horizontalOffsets.right.min, horizontalOffsets.right.max, viewport.width)
+  const horizontal: PanelPlacement['horizontal'] = leftOverflow === rightOverflow
+    ? preferred.horizontal
+    : leftOverflow < rightOverflow ? 'left' : 'right'
+
+  const aboveOverflow = overflowForAxis(anchor.y, verticalOffsets.above.min, verticalOffsets.above.max, viewport.height)
+  const belowOverflow = overflowForAxis(anchor.y, verticalOffsets.below.min, verticalOffsets.below.max, viewport.height)
+  const vertical: PanelPlacement['vertical'] = aboveOverflow === belowOverflow
+    ? preferred.vertical
+    : aboveOverflow < belowOverflow ? 'above' : 'below'
+
+  const xOffsets = horizontalOffsets[horizontal]
+  const yOffsets = verticalOffsets[vertical]
+  const point = {
+    x: clamp(anchor.x, margin - xOffsets.min, Math.max(margin - xOffsets.min, viewport.width - margin - xOffsets.max)),
+    y: clamp(anchor.y, margin - yOffsets.min, Math.max(margin - yOffsets.min, viewport.height - margin - yOffsets.max)),
+  }
+  return {
+    point,
+    panelPlacement: { horizontal, vertical },
+    activeBounds: {
+      left: point.x + xOffsets.min,
+      top: point.y + yOffsets.min,
+      right: point.x + xOffsets.max,
+      bottom: point.y + yOffsets.max,
+    },
+  }
+}
+
 export function useOverlayDrag({
   preferences,
+  panelOpen,
   commitPreferences,
   onDragEnd,
 }: UseOverlayDragOptions): OverlayDragController {
@@ -105,17 +200,34 @@ export function useOverlayDrag({
     width: globalThis.innerWidth ?? 0,
     height: globalThis.innerHeight ?? 0,
   }))
-  const [dragPoint, setDragPoint] = useState<OverlayPoint | undefined>()
+  const [panelSize, setPanelSize] = useState<OverlayBounds>({
+    width: OVERLAY_GEOMETRY.compactPanelWidthPx,
+    height: PANEL_FALLBACK_HEIGHT_PX,
+  })
+  const [dragAnchor, setDragAnchor] = useState<OverlayPoint | undefined>()
   const [isDragging, setIsDragging] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
+  const panelRef = useRef<HTMLElement>(null)
   const dragRef = useRef<DragState | undefined>()
   const ignoreClickRef = useRef(false)
   const onDragEndRef = useRef(onDragEnd)
   onDragEndRef.current = onDragEnd
 
   const size = activeSurfaceSize(preferences.collapsed)
-  const persistedPoint = useMemo(() => pointFromRatios(preferences, bounds, size), [preferences, bounds, size])
-  const point = dragPoint ?? persistedPoint
+  const persistedAnchor = useMemo(() => pointFromRatios(preferences, bounds, size), [preferences, bounds, size])
+  const anchor = dragAnchor ?? persistedAnchor
+  const preferredPlacement = useMemo<PanelPlacement>(() => ({
+    horizontal: preferences.position.xRatio > 0.5 ? 'right' : 'left',
+    vertical: preferences.position.yRatio > 0.5 ? 'above' : 'below',
+  }), [preferences.position.xRatio, preferences.position.yRatio])
+  const layout = useMemo(() => resolveCompleteActiveSurfaceLayout(
+    anchor,
+    bounds,
+    size,
+    panelOpen && !preferences.collapsed,
+    panelSize,
+    preferredPlacement,
+  ), [anchor, bounds, panelOpen, panelSize, preferences.collapsed, preferredPlacement, size])
 
   useEffect(() => {
     const element = rootRef.current
@@ -137,6 +249,20 @@ export function useOverlayDrag({
     }
   }, [])
 
+  useEffect(() => {
+    if (!panelOpen) return
+    const element = panelRef.current
+    if (element === null) return
+    const update = (): void => {
+      const rect = element.getBoundingClientRect()
+      if (rect.width > 0 && rect.height > 0) setPanelSize({ width: rect.width, height: rect.height })
+    }
+    const observer = typeof ResizeObserver === 'undefined' ? undefined : new ResizeObserver(update)
+    observer?.observe(element)
+    update()
+    return () => observer?.disconnect()
+  }, [panelOpen])
+
   const finishDrag = useCallback((event: ReactPointerEvent<HTMLElement>): void => {
     const drag = dragRef.current
     if (drag === undefined || drag.pointerId !== event.pointerId) return
@@ -144,7 +270,7 @@ export function useOverlayDrag({
       event.currentTarget.releasePointerCapture(event.pointerId)
     }
     dragRef.current = undefined
-    setDragPoint(undefined)
+    setDragAnchor(undefined)
     setIsDragging(false)
     if (drag.moved) {
       ignoreClickRef.current = true
@@ -157,12 +283,12 @@ export function useOverlayDrag({
   const moveByKeyboard = useCallback((dx: number, dy: number): void => {
     const margin = OVERLAY_GEOMETRY.viewportMarginPx
     const next = {
-      x: clamp(persistedPoint.x + dx, margin, Math.max(margin, bounds.width - size - margin)),
-      y: clamp(persistedPoint.y + dy, margin, Math.max(margin, bounds.height - size - margin)),
+      x: clamp(persistedAnchor.x + dx, margin, Math.max(margin, bounds.width - size - margin)),
+      y: clamp(persistedAnchor.y + dy, margin, Math.max(margin, bounds.height - size - margin)),
     }
     const position = ratiosFromPoint(next, bounds, size)
     commitPreferences(current => ({ ...current, position, positionCustomized: true }))
-  }, [bounds, commitPreferences, persistedPoint, size])
+  }, [bounds, commitPreferences, persistedAnchor, size])
 
   const onPointerDown = useCallback((event: ReactPointerEvent<HTMLElement>): void => {
     if (event.button !== 0) return
@@ -171,11 +297,11 @@ export function useOverlayDrag({
     dragRef.current = {
       pointerId: event.pointerId,
       start: { x: event.clientX, y: event.clientY },
-      origin: persistedPoint,
-      current: persistedPoint,
+      origin: persistedAnchor,
+      current: persistedAnchor,
       moved: false,
     }
-  }, [persistedPoint])
+  }, [persistedAnchor])
 
   const onPointerMove = useCallback((event: ReactPointerEvent<HTMLElement>): void => {
     const drag = dragRef.current
@@ -189,14 +315,17 @@ export function useOverlayDrag({
       x: clamp(drag.origin.x + dx, margin, Math.max(margin, bounds.width - size - margin)),
       y: clamp(drag.origin.y + dy, margin, Math.max(margin, bounds.height - size - margin)),
     }
-    setDragPoint(drag.current)
+    setDragAnchor(drag.current)
   }, [bounds, size])
 
   return {
     rootRef,
+    panelRef,
     bounds,
-    point,
-    shellStyle: { left: point.x, top: point.y, width: size, height: size },
+    point: layout.point,
+    panelPlacement: layout.panelPlacement,
+    activeBounds: layout.activeBounds,
+    shellStyle: { left: layout.point.x, top: layout.point.y, width: size, height: size },
     isDragging,
     consumeSuppressedClick: () => {
       if (!ignoreClickRef.current) return false

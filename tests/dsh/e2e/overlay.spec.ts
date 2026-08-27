@@ -615,15 +615,60 @@ test('USER_CUSTOM_POSITION_PRESERVATION_TEST. dragged ratios survive refresh wit
   expect(Math.abs(after!.y - before!.y)).toBeLessThan(4)
 })
 
-test('9. viewport resize clamps the full surface inside the viewport', async ({ page }) => {
+test('PANEL_COMPLETE_ACTIVE_SURFACE_CLAMP_TEST. resize and xRatio 0.49 clamp the real Pet + Panel union', async ({ page }) => {
   await openOverlay(page)
-  await page.setViewportSize({ width: 800, height: 600 })
-  await page.waitForTimeout(400)
-  const box = await petBox(page)
-  expect(box!.x).toBeGreaterThanOrEqual(0)
-  expect(box!.y).toBeGreaterThanOrEqual(0)
-  expect(box!.x + box!.width).toBeLessThanOrEqual(800)
-  expect(box!.y + box!.height).toBeLessThanOrEqual(600)
+  await page.evaluate(() => localStorage.setItem('vehicle-pet/overlay-preferences/v1', JSON.stringify({
+    schemaVersion: 1,
+    position: { xRatio: 0.49, yRatio: 1 },
+    positionCustomized: true,
+    collapsed: false,
+  })))
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.reload()
+  await expect.poll(() => page.locator(PET).count(), { timeout: 30_000 }).toBe(1)
+  await page.waitForTimeout(300)
+  const anchorBeforeOpen = await page.locator(PET).boundingBox()
+  await page.locator(PET).click()
+  await page.locator(PANEL).waitFor()
+
+  const assertCompleteSurface = async (viewport: { width: number; height: number }) => {
+    await page.setViewportSize(viewport)
+    await page.waitForTimeout(350)
+    const pet = await page.locator(PET).boundingBox()
+    const panel = await page.locator(PANEL).boundingBox()
+    expect(pet).not.toBeNull()
+    expect(panel).not.toBeNull()
+    const union = {
+      left: Math.min(pet!.x, panel!.x),
+      top: Math.min(pet!.y, panel!.y),
+      right: Math.max(pet!.x + pet!.width, panel!.x + panel!.width),
+      bottom: Math.max(pet!.y + pet!.height, panel!.y + panel!.height),
+    }
+    expect(union.left).toBeGreaterThanOrEqual(15.5)
+    expect(union.top).toBeGreaterThanOrEqual(15.5)
+    expect(union.right).toBeLessThanOrEqual(viewport.width - 15.5)
+    expect(union.bottom).toBeLessThanOrEqual(viewport.height - 15.5)
+  }
+
+  for (const viewport of [
+    { width: 390, height: 844 },
+    { width: 768, height: 720 },
+    { width: 1280, height: 800 },
+    { width: 1440, height: 900 },
+  ]) await assertCompleteSurface(viewport)
+
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.locator(PET).focus()
+  await page.keyboard.press('Shift+ArrowRight')
+  await assertCompleteSurface({ width: 390, height: 844 })
+  await page.locator(PET).click()
+  await page.waitForTimeout(300)
+  const anchorAfterClose = await page.locator(PET).boundingBox()
+  expect(Math.abs(anchorAfterClose!.x - anchorBeforeOpen!.x)).toBeLessThanOrEqual(33)
+  expect(Math.abs(anchorAfterClose!.y - anchorBeforeOpen!.y)).toBeLessThanOrEqual(1)
+  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('vehicle-pet/overlay-preferences/v1') ?? '{}')) as { position: { xRatio: number } }
+  expect(stored.position.xRatio).toBeGreaterThanOrEqual(0)
+  expect(stored.position.xRatio).toBeLessThanOrEqual(1)
   await page.setViewportSize(VIEWPORT)
 })
 
@@ -698,7 +743,25 @@ test('SCENE_FULL_JOURNEY_GEOMETRY_TEST. Fleet and Seedling journey layers stay i
     expect(overlapArea(background!, scene!) / (background!.width * background!.height)).toBeGreaterThanOrEqual(0.85)
     await page.screenshot({ path: `${ARTIFACTS}/${screenshot}` })
     expect(await dialog.evaluate(node => node.contains(document.activeElement))).toBe(true)
+    expect(await page.locator('[data-vehicle-pet-dialog-close]').evaluate(node => document.activeElement === node)).toBe(true)
+
+    await page.keyboard.press('Shift+Tab')
+    expect(await dialog.evaluate(node => node.contains(document.activeElement))).toBe(true)
+    const tabbables = dialog.locator('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')
+    expect(await tabbables.last().evaluate(node => document.activeElement === node)).toBe(true)
+    await page.keyboard.press('Tab')
+    expect(await tabbables.first().evaluate(node => document.activeElement === node)).toBe(true)
+
+    const backgroundTarget = page.locator('textarea').first()
+    await backgroundTarget.evaluate(node => (node as HTMLElement).focus())
+    expect(await dialog.evaluate(node => node.contains(document.activeElement))).toBe(true)
     await page.keyboard.press('Escape')
+    await expect.poll(() => page.locator('[data-vehicle-pet-dialog]').count()).toBe(0)
+    expect(await trigger.evaluate(node => document.activeElement === node)).toBe(true)
+
+    await trigger.click()
+    await dialog.waitFor()
+    await page.locator('[data-vehicle-pet-dialog-close]').click()
     await expect.poll(() => page.locator('[data-vehicle-pet-dialog]').count()).toBe(0)
     expect(await trigger.evaluate(node => document.activeElement === node)).toBe(true)
   }
@@ -806,26 +869,202 @@ test('HARNESS_LOCALE_LIVE_SYNC_TEST. zh-CN → en → zh-CN updates Pack, stage,
   await expect(page.locator('.vpo-root')).toHaveCount(1)
 })
 
-test('26. multi-tab preference sync through storage events', async ({ context, page }) => {
+test('CROSSTAB_COLLAPSE_RESTORE_VISIBLE_TEST. two tabs destroy stale Panel/Dialog and never write-loop', async ({ context, page }) => {
   await openOverlay(page)
   const second = await context.newPage()
   await second.setViewportSize(VIEWPORT)
   await second.goto('/')
   await expect.poll(() => second.locator(PET).count(), { timeout: 30_000 }).toBe(1)
-  const before = await second.locator(PET).boundingBox()
 
-  const pet = page.locator(PET)
-  const origin = await pet.boundingBox()
-  await pet.hover()
-  await page.mouse.down()
-  await page.mouse.move(origin!.x - 200, origin!.y - 120, { steps: 8 })
-  await page.mouse.up()
+  const instrumentWrites = async (target: Page) => target.evaluate(() => {
+    const state = { writes: 0 }
+    const prototype = Storage.prototype
+    const native = prototype.setItem
+    prototype.setItem = function (...args) {
+      state.writes += 1
+      return native.apply(this, args)
+    }
+    ;(window as unknown as { __vpoPreferenceWrites: typeof state }).__vpoPreferenceWrites = state
+  })
+  const writes = async (target: Page) => target.evaluate(() => (window as unknown as { __vpoPreferenceWrites: { writes: number } }).__vpoPreferenceWrites.writes)
+  await instrumentWrites(page)
+  await instrumentWrites(second)
 
-  await expect.poll(async () => {
-    const after = await second.locator(PET).boundingBox()
-    return after !== null && before !== null && Math.abs(after.x - before!.x) > 40
-  }, { timeout: 15_000 }).toBe(true)
+  await page.locator(PET).click()
+  await page.locator('[data-vehicle-pet-pack-option="seedling-fixture"]').click()
+  await page.locator('[data-vehicle-pet-open-journey]').click()
+  await expect(page.locator('[data-vehicle-pet-dialog]')).toHaveCount(1)
+
+  await second.locator(PET).click()
+  await second.locator('[data-vehicle-pet-collapse]').click()
+  for (const target of [page, second]) {
+    await expect(target.locator(LAUNCHER)).toHaveCount(1)
+    await expect(target.locator(PET)).toHaveCount(0)
+    await expect(target.locator(PANEL)).toHaveCount(0)
+    await expect(target.locator('[data-vehicle-pet-dialog]')).toHaveCount(0)
+  }
+  expect(await writes(page)).toBe(0)
+  expect(await writes(second)).toBe(1)
+
+  await page.reload()
+  await expect(page.locator(LAUNCHER)).toHaveCount(1)
+  await instrumentWrites(page)
+  await second.locator(LAUNCHER).click()
+  for (const target of [page, second]) {
+    await expect(target.locator(PET)).toHaveCount(1)
+    await expect(target.locator(PANEL)).toHaveCount(0)
+    await expect(target.locator('[data-vehicle-pet-dialog]')).toHaveCount(0)
+  }
+  expect(await writes(page)).toBe(0)
+  expect(await writes(second)).toBe(2)
+
+  for (const target of [page, second]) {
+    await target.locator(PET).click()
+    await target.locator('[data-vehicle-pet-collapse]').click()
+    await expect(page.locator(LAUNCHER)).toHaveCount(1)
+    await expect(second.locator(LAUNCHER)).toHaveCount(1)
+    await target.locator(LAUNCHER).click()
+    await expect(page.locator(PET)).toHaveCount(1)
+    await expect(second.locator(PET)).toHaveCount(1)
+    await expect(page.locator(PANEL)).toHaveCount(0)
+    await expect(second.locator(PANEL)).toHaveCount(0)
+  }
+  expect(await writes(page)).toBe(2)
+  expect(await writes(second)).toBe(4)
   await second.close()
+})
+
+test('FULL_JOURNEY_LIGHT_THEME_CONTRAST_TEST + FULL_JOURNEY_DARK_THEME_CONTRAST_TEST', async ({ page }) => {
+  await openOverlay(page)
+  buildClientGeneration('e2e-r3-active-r4-contrast-matrix')
+  await expect(page.locator('.vpo-root')).toHaveAttribute('data-client-generation', 'e2e-r3-active-r4-contrast-matrix', { timeout: 60_000 })
+  await expect.poll(() => page.evaluate(() => Boolean((window as unknown as { __vehiclePetE2E?: { progress?: unknown } }).__vehiclePetE2E?.progress))).toBe(true)
+
+  const ensurePanel = async () => {
+    if (await page.locator(PANEL).count() === 0) await page.locator(PET).click()
+    await page.locator(PANEL).waitFor()
+  }
+  const setPoints = async (points: number) => page.evaluate(value => {
+    ;(window as unknown as { __vehiclePetE2E: { progress: { setPoints: (next: number) => void } } }).__vehiclePetE2E.progress.setPoints(value)
+  }, points)
+  const resetSubject = async () => page.evaluate(() => {
+    ;(window as unknown as { __vehiclePetE2E: { progress: { resetSubject: () => void } } }).__vehiclePetE2E.progress.resetSubject()
+  })
+  const setLocale = async (locale: 'zh-CN' | 'en') => {
+    if (await page.evaluate(() => document.documentElement.lang) === locale) return
+    const settings = page.getByRole('button', { name: /Settings|设置/i }).first()
+    await settings.click()
+    const selector = page.getByRole('button', { name: /^(中文|English)$/ }).last()
+    await selector.waitFor({ timeout: 20_000 })
+    await selector.click()
+    await page.getByRole('menuitem', { name: locale === 'en' ? 'English' : '中文', exact: true }).click()
+    await expect.poll(() => page.evaluate(() => document.documentElement.lang)).toBe(locale)
+    await page.keyboard.press('Escape')
+  }
+  const setReduced = async (reduced: boolean) => {
+    await ensurePanel()
+    await page.locator(`[data-vehicle-pet-reduced-motion-option="${reduced ? 'on' : 'off'}"]`).click()
+  }
+  const sampleContrast = async (): Promise<{ min: number; samples: number }> => {
+    await ensurePanel()
+    await page.locator('[data-vehicle-pet-open-journey]').click()
+    const dialog = page.locator('[data-vehicle-pet-dialog]')
+    await dialog.waitFor()
+    const result = await dialog.evaluate(root => {
+      const parse = (value: string): [number, number, number, number] => {
+        const parts = value.match(/[\d.]+/g)?.map(Number) ?? []
+        return [parts[0] ?? 0, parts[1] ?? 0, parts[2] ?? 0, parts[3] ?? 1]
+      }
+      const composite = (front: [number, number, number, number], back: [number, number, number, number]): [number, number, number, number] => {
+        const alpha = front[3] + back[3] * (1 - front[3])
+        return [
+          (front[0] * front[3] + back[0] * back[3] * (1 - front[3])) / alpha,
+          (front[1] * front[3] + back[1] * back[3] * (1 - front[3])) / alpha,
+          (front[2] * front[3] + back[2] * back[3] * (1 - front[3])) / alpha,
+          alpha,
+        ]
+      }
+      const background = (element: Element): [number, number, number, number] => {
+        const layers: [number, number, number, number][] = []
+        let current: Element | null = element
+        while (current !== null) {
+          const color = parse(getComputedStyle(current).backgroundColor)
+          if (color[3] > 0) layers.push(color)
+          current = current.parentElement
+        }
+        let result: [number, number, number, number] = [255, 255, 255, 1]
+        for (let index = layers.length - 1; index >= 0; index -= 1) result = composite(layers[index]!, result)
+        return result
+      }
+      const luminance = (rgb: [number, number, number, number]): number => {
+        const channels = rgb.slice(0, 3).map(channel => {
+          const value = channel / 255
+          return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4
+        })
+        return 0.2126 * channels[0]! + 0.7152 * channels[1]! + 0.0722 * channels[2]!
+      }
+      const ratio = (foreground: [number, number, number, number], bg: [number, number, number, number]): number => {
+        const fg = luminance(composite(foreground, bg))
+        const back = luminance(bg)
+        return (Math.max(fg, back) + 0.05) / (Math.min(fg, back) + 0.05)
+      }
+      const selector = '.vpo-dialogTitle,.vpo-control,.vp-panel h3,.vp-panel>p,.vp-progress-meta,.vp-milestone-copy,.vp-scene-label,.vp-keepsake-title,.vp-keepsake-desc,[data-pet-capped]'
+      const elements = Array.from(root.querySelectorAll<HTMLElement>(selector)).filter(element => {
+        const style = getComputedStyle(element)
+        return style.display !== 'none' && style.visibility !== 'hidden' && element.textContent?.trim()
+      })
+      const checks = elements.map(element => {
+        const style = getComputedStyle(element)
+        const fontSize = Number.parseFloat(style.fontSize)
+        const weight = Number.parseInt(style.fontWeight, 10) || (style.fontWeight === 'bold' ? 700 : 400)
+        const minimum = fontSize >= 24 || (fontSize >= 18.66 && weight >= 700) ? 3 : 4.5
+        return { ratio: ratio(parse(style.color), background(element)), minimum, text: element.textContent?.trim().slice(0, 40) }
+      })
+      const failure = checks.find(check => check.ratio + 0.001 < check.minimum)
+      if (failure !== undefined) throw new Error(`contrast ${failure.ratio.toFixed(3)} < ${failure.minimum}: ${failure.text}`)
+      return { min: Math.min(...checks.map(check => check.ratio)), samples: checks.length }
+    })
+    expect(result.samples).toBeGreaterThanOrEqual(10)
+    await page.keyboard.press('Escape')
+    return result
+  }
+
+  let minimum = Number.POSITIVE_INFINITY
+  const runVariants = async () => {
+    for (const [locale, reduced] of [['zh-CN', false], ['en', true]] as const) {
+      await setLocale(locale)
+      await setReduced(reduced)
+      const result = await sampleContrast()
+      minimum = Math.min(minimum, result.min)
+    }
+  }
+
+  try {
+    await setPoints(0)
+    await runVariants() // Fleet L1
+    await setPoints(2_500_000)
+    await expect(page.locator(PET)).toHaveAttribute('data-vehicle-pet-level', 'l12')
+    await runVariants() // Fleet L12
+    await resetSubject()
+    await ensurePanel()
+    await page.locator('[data-vehicle-pet-pack-option="seedling-fixture"]').click()
+    await expect(page.locator(PET)).toHaveAttribute('data-vehicle-pet-pack', 'seedling-fixture')
+    await setPoints(0)
+    await runVariants() // Seedling seed
+    await setPoints(300_000)
+    await expect(page.locator(PET)).toHaveAttribute('data-vehicle-pet-level', 'forest')
+    await runVariants() // Seedling forest
+
+    await page.evaluate(() => document.body.setAttribute('data-ds-dark-theme', ''))
+    const darkResult = await sampleContrast()
+    minimum = Math.min(minimum, darkResult.min)
+    console.log(`FULL_JOURNEY_MIN_CONTRAST_RATIO=${minimum.toFixed(3)}`)
+    expect(minimum).toBeGreaterThanOrEqual(4.5)
+  } finally {
+    await page.evaluate(() => document.body.removeAttribute('data-ds-dark-theme'))
+    buildClientGeneration('production')
+    await expect(page.locator('.vpo-root')).toHaveAttribute('data-client-generation', 'production', { timeout: 60_000 })
+  }
 })
 
 test('COMPACT_ALL_LEVEL_PIXEL_MATRIX_TEST + COMPACT_MILESTONE_SUBJECT_OVERLAP_TEST + COMPACT_BLACK_VOID_TEST', async ({ page }) => {

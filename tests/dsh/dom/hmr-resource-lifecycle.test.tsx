@@ -275,9 +275,12 @@ describe('client HMR generation and complete resource disposal inventory', () =>
       currentSessionSubscriptions: 1,
       storageListeners: 1,
       resizeListeners: 1,
-      keyboardDocumentListeners: 2,
+      // React's two host listeners plus the dialog's lifecycle-owned keydown
+      // and focusin containment listeners.
+      keyboardDocumentListeners: 4,
       pointerCaptureListeners: 4,
-      observers: 1,
+      // Root viewport + open Panel measurement; both must dispose at HMR.
+      observers: 2,
       indexedDbConnections: 1,
       dictionaries: 1,
     })

@@ -1,11 +1,7 @@
 /**
  * VehiclePetDialog: the in-Harness full journey dialog (CTR-OVERLAY-005).
- * Opens inside the same React slot subtree and reuses the existing React
- * product surface (scene, progress, milestones, keepsakes, greeting,
- * ceremony). Accessible: role="dialog", accessible name, focus moves in on
- * open, Escape and a close button close it, focus is constrained inside, and
- * focus returns to the triggering control. The background is covered so it
- * cannot be interacted with while open. Closing changes no progression.
+ * The same Engine product surface is reused, with complete modal focus
+ * containment and lifecycle-owned document listeners.
  */
 import { type ReactElement } from 'react';
 export interface VehiclePetDialogProps {
