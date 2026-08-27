@@ -60,6 +60,13 @@ export declare function pointFromRatios(preferences: VehiclePetOverlayPreference
  * `horizontal=right` means it grows left from the Pet's right.
  */
 export declare function resolveCompleteActiveSurfaceLayout(anchor: OverlayPoint, viewport: OverlayBounds, surfaceSize: number, panelOpen: boolean, panelSize: OverlayBounds, preferred: PanelPlacement): CompleteActiveSurfaceLayout;
+/**
+ * Apply one pointer/keyboard delta from the currently rendered Pet anchor.
+ * This is deliberately distinct from the latent preference anchor: PANEL_OPEN
+ * may project that preference to keep the full Pet + Panel union visible, and
+ * the first real input must start from that projected on-screen position.
+ */
+export declare function moveCompleteActiveSurface(renderedPoint: OverlayPoint, delta: OverlayPoint, viewport: OverlayBounds, surfaceSize: number, panelOpen: boolean, panelSize: OverlayBounds, currentPlacement: PanelPlacement): CompleteActiveSurfaceLayout;
 export declare function useOverlayDrag({ preferences, panelOpen, commitPreferences, onDragEnd, }: UseOverlayDragOptions): OverlayDragController;
 export declare const OVERLAY_KEYBOARD_STEPS: {
     readonly normal: 8;
