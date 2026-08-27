@@ -114,15 +114,25 @@ export function VehiclePetOverlay(props: VehiclePetOverlayProps): ReactElement |
   const interactionRef = useRef(interaction)
   interactionRef.current = interaction
   const preSuppressionRef = useRef<VehiclePetInteractionState | null>(null)
+
+  // R4-B2 invariant: every collapsed preference source (local action,
+  // storage adoption, reload, migration, or fallback) destroys transient open
+  // state. A later launcher restore therefore always starts from VISIBLE.
+  useEffect(() => {
+    if (!preferences.collapsed) return
+    preSuppressionRef.current = 'VISIBLE'
+    setInteraction('VISIBLE')
+  }, [preferences.collapsed])
+
   useEffect(() => {
     if (onboarding) {
       preSuppressionRef.current ??= interactionRef.current
     } else if (preSuppressionRef.current !== null) {
-      const restore = preSuppressionRef.current
+      const restore = preferences.collapsed ? 'VISIBLE' : preSuppressionRef.current
       preSuppressionRef.current = null
       setInteraction(restore)
     }
-  }, [onboarding])
+  }, [onboarding, preferences.collapsed])
 
   // CTR-OVERLAY-011: onboarding renders no pet DOM, launcher, panel, dialog,
   // or pointer/focus target at all.
@@ -280,20 +290,34 @@ function OverlaySurface({
   const [dialogOpen, setDialogOpen] = useState(false)
   const [petInteractionCount, setPetInteractionCount] = useState(0)
   const collapsed = preferences.collapsed
+  const effectiveInteraction: VehiclePetInteractionState = collapsed ? 'VISIBLE' : interaction
   const { t, commitPreferences } = useOverlayChrome()
   const { snapshot } = usePetEngine()
   const petButtonRef = useRef<HTMLButtonElement | null>(null)
   const journeyTriggerRef = useRef<HTMLButtonElement | null>(null)
-  const drag = useOverlayDrag({ preferences, commitPreferences })
+  const drag = useOverlayDrag({
+    preferences,
+    panelOpen: effectiveInteraction === 'PANEL_OPEN',
+    commitPreferences,
+  })
+
+  useEffect(() => {
+    if (!collapsed) return
+    setInteraction('VISIBLE')
+    setDialogOpen(false)
+  }, [collapsed, setInteraction])
 
   const collapse = useCallback(() => {
     setInteraction('VISIBLE')
+    setDialogOpen(false)
     commitPreferences(current => ({ ...current, collapsed: true }))
-  }, [commitPreferences])
+  }, [commitPreferences, setInteraction])
 
   const restore = useCallback(() => {
+    setInteraction('VISIBLE')
+    setDialogOpen(false)
     commitPreferences(current => ({ ...current, collapsed: false }))
-  }, [commitPreferences])
+  }, [commitPreferences, setInteraction])
 
   const closePanelToPet = useCallback(() => {
     setInteraction('VISIBLE')
@@ -303,7 +327,7 @@ function OverlaySurface({
   const handleSurfaceKeyDown = (event: ReactKeyboardEvent<HTMLElement>): void => {
     if (event.key === 'Escape') {
       if (dialogOpen) return // the dialog owns Escape while open
-      if (interaction === 'PANEL_OPEN') closePanelToPet()
+      if (effectiveInteraction === 'PANEL_OPEN') closePanelToPet()
       return
     }
     const step = event.shiftKey ? OVERLAY_KEYBOARD_STEPS.large : OVERLAY_KEYBOARD_STEPS.normal
@@ -327,7 +351,11 @@ function OverlaySurface({
     <div
       className="vpo-root"
       ref={drag.rootRef}
-      data-vehicle-pet={collapsed ? 'collapsed' : interaction}
+      data-vehicle-pet={collapsed ? 'collapsed' : effectiveInteraction}
+      data-active-surface-left={drag.activeBounds.left}
+      data-active-surface-top={drag.activeBounds.top}
+      data-active-surface-right={drag.activeBounds.right}
+      data-active-surface-bottom={drag.activeBounds.bottom}
       data-session-list-current={sessionListCurrent}
       data-session-list-contains-current={sessionListContainsCurrent ? 'true' : 'false'}
       data-adapter-session={bindingInfo?.currentId}
@@ -353,7 +381,7 @@ function OverlaySurface({
             type="button"
             className="vpo-surface vpo-pet"
             aria-label={t('overlay.label', { state: t(stateKey) })}
-            aria-expanded={interaction === 'PANEL_OPEN'}
+            aria-expanded={effectiveInteraction === 'PANEL_OPEN'}
             data-vehicle-pet-pet="true"
             data-vehicle-pet-pack={snapshot.activePack?.manifest.packId}
             data-vehicle-pet-level={snapshot.viewModel?.derivedLevelId}
@@ -363,7 +391,7 @@ function OverlaySurface({
             onClick={() => {
               if (drag.consumeSuppressedClick()) return
               setPetInteractionCount(count => count + 1)
-              setInteraction(interaction === 'PANEL_OPEN' ? 'VISIBLE' : 'PANEL_OPEN')
+              setInteraction(effectiveInteraction === 'PANEL_OPEN' ? 'VISIBLE' : 'PANEL_OPEN')
             }}
             onPointerDown={drag.onPointerDown}
             onPointerMove={drag.onPointerMove}
@@ -377,10 +405,11 @@ function OverlaySurface({
           </button>
         )}
 
-        {!collapsed && interaction === 'PANEL_OPEN' ? (
+        {!collapsed && effectiveInteraction === 'PANEL_OPEN' ? (
           <VehiclePetPanel
-            horizontal={preferences.position.xRatio > 0.5 ? 'right' : 'left'}
-            vertical={preferences.position.yRatio > 0.5 ? 'above' : 'below'}
+            panelRef={drag.panelRef}
+            horizontal={drag.panelPlacement.horizontal}
+            vertical={drag.panelPlacement.vertical}
             preferences={preferences}
             onCollapse={collapse}
             onRequestClose={closePanelToPet}
@@ -401,7 +430,7 @@ function OverlaySurface({
         ) : null}
       </div>
 
-      {dialogOpen ? (
+      {!collapsed && dialogOpen ? (
         <VehiclePetDialog
           onClose={() => {
             setDialogOpen(false)

@@ -1,14 +1,10 @@
 /**
  * VehiclePetDialog: the in-Harness full journey dialog (CTR-OVERLAY-005).
- * Opens inside the same React slot subtree and reuses the existing React
- * product surface (scene, progress, milestones, keepsakes, greeting,
- * ceremony). Accessible: role="dialog", accessible name, focus moves in on
- * open, Escape and a close button close it, focus is constrained inside, and
- * focus returns to the triggering control. The background is covered so it
- * cannot be interacted with while open. Closing changes no progression.
+ * The same Engine product surface is reused, with complete modal focus
+ * containment and lifecycle-owned document listeners.
  */
 
-import { useCallback, useEffect, useRef, type KeyboardEvent as ReactKeyboardEvent, type ReactElement } from 'react'
+import { useCallback, useEffect, useRef, type ReactElement } from 'react'
 import {
   PetKeepsakeCollection, PetMilestonePanel, PetProgressPanel, PetSceneRenderer,
 } from '../../react'
@@ -23,44 +19,85 @@ const FOCUSABLE_SELECTOR = [
   'textarea:not([disabled])', '[tabindex]:not([tabindex="-1"])',
 ].join(',')
 
+function focusableChildren(container: HTMLElement): HTMLElement[] {
+  return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR))
+    .filter(element => {
+      if (element.hidden || element.getAttribute('aria-hidden') === 'true') return false
+      const style = getComputedStyle(element)
+      return style.display !== 'none' && style.visibility !== 'hidden'
+    })
+}
+
 export function VehiclePetDialog({ onClose }: VehiclePetDialogProps): ReactElement {
   const { t } = useOverlayChrome()
   const dialogRef = useRef<HTMLDivElement | null>(null)
+  const closeRef = useRef<HTMLButtonElement | null>(null)
+  const closingRef = useRef(false)
+
+  const requestClose = useCallback(() => {
+    closingRef.current = true
+    onClose()
+  }, [onClose])
 
   useEffect(() => {
-    dialogRef.current?.focus()
-  }, [])
-
-  const handleKeyDown = useCallback((event: ReactKeyboardEvent<HTMLDivElement>) => {
-    if (event.key === 'Escape') {
-      event.stopPropagation()
-      onClose()
-      return
-    }
-    if (event.key !== 'Tab') return
     const container = dialogRef.current
     if (container === null) return
-    const focusables = Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR))
-      .filter(element => element.offsetParent !== null || element === document.activeElement)
-    if (focusables.length === 0) return
-    const first = focusables[0]
-    const last = focusables.at(-1)
-    if (first === undefined || last === undefined) return
-    if (event.shiftKey && document.activeElement === first) {
-      event.preventDefault()
-      last.focus()
-    } else if (!event.shiftKey && document.activeElement === last) {
-      event.preventDefault()
-      first.focus()
+    ;(closeRef.current ?? container).focus()
+
+    const onDocumentKeyDown = (event: KeyboardEvent): void => {
+      if (closingRef.current) return
+      const current = dialogRef.current
+      if (current === null) return
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        event.stopPropagation()
+        requestClose()
+        return
+      }
+      if (event.key !== 'Tab') return
+      const focusables = focusableChildren(current)
+      const first = focusables[0]
+      const last = focusables.at(-1)
+      if (first === undefined || last === undefined) {
+        event.preventDefault()
+        current.focus()
+        return
+      }
+      const active = document.activeElement
+      if (!current.contains(active) || active === current) {
+        event.preventDefault()
+        ;(event.shiftKey ? last : first).focus()
+      } else if (event.shiftKey && active === first) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault()
+        first.focus()
+      }
     }
-  }, [onClose])
+
+    const onDocumentFocusIn = (event: FocusEvent): void => {
+      if (closingRef.current) return
+      const current = dialogRef.current
+      if (current === null || current.contains(event.target as Node | null)) return
+      const first = focusableChildren(current)[0]
+      ;(first ?? current).focus()
+    }
+
+    document.addEventListener('keydown', onDocumentKeyDown, true)
+    document.addEventListener('focusin', onDocumentFocusIn, true)
+    return () => {
+      document.removeEventListener('keydown', onDocumentKeyDown, true)
+      document.removeEventListener('focusin', onDocumentFocusIn, true)
+    }
+  }, [requestClose])
 
   return (
     <div
       className="vpo-dialogBackdrop"
       data-vehicle-pet-dialog-backdrop="true"
       onPointerDown={event => {
-        if (event.target === event.currentTarget) onClose()
+        if (event.target === event.currentTarget) requestClose()
       }}
     >
       <div
@@ -71,16 +108,16 @@ export function VehiclePetDialog({ onClose }: VehiclePetDialogProps): ReactEleme
         aria-label={t('dialog.title')}
         tabIndex={-1}
         data-vehicle-pet-dialog="true"
-        onKeyDown={handleKeyDown}
       >
         <header className="vpo-dialogHeader">
           <h2 className="vpo-dialogTitle">{t('dialog.title')}</h2>
           <button
+            ref={closeRef}
             type="button"
             className="vpo-control"
             aria-label={t('dialog.close')}
             data-vehicle-pet-dialog-close="true"
-            onClick={onClose}
+            onClick={requestClose}
           >
             ×
           </button>

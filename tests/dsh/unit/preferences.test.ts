@@ -17,7 +17,7 @@ import {
   subscribeStorageEvents,
 } from '../../../src/dsh/client/preferences'
 import { OVERLAY_GEOMETRY } from '../../../src/dsh/client/types'
-import { pointFromRatios } from '../../../src/dsh/client/useOverlayDrag'
+import { pointFromRatios, resolveCompleteActiveSurfaceLayout } from '../../../src/dsh/client/useOverlayDrag'
 
 function memoryStorage(initial: Record<string, string> = {}) {
   const store = new Map(Object.entries(initial))
@@ -91,6 +91,74 @@ describe('safe bottom-right placement', () => {
       expect(point.y).toBeGreaterThanOrEqual(0)
       expect(point.x + size).toBeLessThanOrEqual(390)
       expect(point.y + size).toBeLessThanOrEqual(844)
+    }
+  })
+})
+
+describe('PANEL_COMPLETE_ACTIVE_SURFACE_CLAMP_TEST', () => {
+  const viewports = [
+    { width: 390, height: 844 },
+    { width: 768, height: 720 },
+    { width: 1280, height: 800 },
+    { width: 1440, height: 900 },
+  ] as const
+  const xRatios = [0, 0.25, 0.49, 0.5, 0.75, 1] as const
+  const yRatios = [0, 0.25, 0.5, 0.75, 1] as const
+
+  it('clamps every real Pet + gap + Panel union and preserves the ratio anchor', () => {
+    const margin = OVERLAY_GEOMETRY.viewportMarginPx
+    for (const viewport of viewports) {
+      for (const xRatio of xRatios) {
+        for (const yRatio of yRatios) {
+          const preferences = {
+            ...copyOverlayDefaults(),
+            position: { xRatio, yRatio },
+            positionCustomized: true,
+          }
+          const anchor = pointFromRatios(preferences, viewport, OVERLAY_GEOMETRY.visibleSizePx)
+          const original = { ...anchor }
+          const layout = resolveCompleteActiveSurfaceLayout(
+            anchor,
+            viewport,
+            OVERLAY_GEOMETRY.visibleSizePx,
+            true,
+            { width: OVERLAY_GEOMETRY.compactPanelWidthPx, height: 500 },
+            { horizontal: xRatio > 0.5 ? 'right' : 'left', vertical: yRatio > 0.5 ? 'above' : 'below' },
+          )
+          expect(layout.activeBounds.left, `${viewport.width}x${viewport.height} x=${xRatio} y=${yRatio} left`).toBeGreaterThanOrEqual(margin)
+          expect(layout.activeBounds.top, `${viewport.width}x${viewport.height} x=${xRatio} y=${yRatio} top`).toBeGreaterThanOrEqual(margin)
+          expect(layout.activeBounds.right, `${viewport.width}x${viewport.height} x=${xRatio} y=${yRatio} right`).toBeLessThanOrEqual(viewport.width - margin)
+          expect(layout.activeBounds.bottom, `${viewport.width}x${viewport.height} x=${xRatio} y=${yRatio} bottom`).toBeLessThanOrEqual(viewport.height - margin)
+          expect(anchor).toEqual(original)
+        }
+      }
+    }
+  })
+
+  it('keeps VISIBLE at 112px and COLLAPSED at 36px while flipping Panel directions', () => {
+    const viewport = { width: 390, height: 844 }
+    const nearCenter = { x: 16 + (390 - 112 - 32) * 0.49, y: 700 }
+    const panel = resolveCompleteActiveSurfaceLayout(
+      nearCenter,
+      viewport,
+      112,
+      true,
+      { width: 320, height: 500 },
+      { horizontal: 'left', vertical: 'below' },
+    )
+    expect(panel.panelPlacement.vertical).toBe('above')
+    expect(panel.activeBounds.right).toBeLessThanOrEqual(374)
+    expect(panel.activeBounds.bottom).toBeLessThanOrEqual(828)
+
+    for (const size of [112, 36]) {
+      const layout = resolveCompleteActiveSurfaceLayout(
+        { x: 999, y: 999 }, viewport, size, false, { width: 0, height: 0 },
+        { horizontal: 'left', vertical: 'below' },
+      )
+      expect(layout.activeBounds.right - layout.activeBounds.left).toBe(size)
+      expect(layout.activeBounds.bottom - layout.activeBounds.top).toBe(size)
+      expect(layout.activeBounds.right).toBeLessThanOrEqual(374)
+      expect(layout.activeBounds.bottom).toBeLessThanOrEqual(828)
     }
   })
 })

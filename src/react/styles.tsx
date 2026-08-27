@@ -75,6 +75,8 @@ export function EngineStyles() {
 .vp-panel h3, .vp-title { margin: 0 0 8px; font-size: 14px; color: #c6d8f5; font-weight: 600; }
 .vp-progressbar { position: relative; height: 10px; border-radius: 999px; background: #22304d; overflow: hidden; }
 .vp-progressbar-fill { position: absolute; inset: 0 auto 0 0; border-radius: 999px; background: linear-gradient(90deg, #38bdf8, #a78bfa); }
+.vp-progress-meta, .vp-scene-label { color: #9fb4d8; }
+.vp-milestone-copy { color: #ffd88a; }
 .vp-ceremony { position: fixed; inset: auto 0 12vh 0; display: flex; justify-content: center; pointer-events: none; z-index: 60; }
 .vp-ceremony-inner { pointer-events: auto; min-width: 280px; max-width: 420px; background: rgba(10, 15, 28, 0.92); border: 1px solid rgba(125, 211, 252, 0.35); border-radius: 16px; padding: 16px 20px; color: #f4f7ff; text-align: center; animation: vp-greeting-in 220ms ease-out; }
 .vp-ceremony-inner-reduced, .vp-ceremony-inner-reduced * { animation: none !important; transition: none !important; transform: none !important; translate: none !important; scale: none !important; }

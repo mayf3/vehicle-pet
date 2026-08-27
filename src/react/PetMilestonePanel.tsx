@@ -27,13 +27,13 @@ export function PetMilestonePanel() {
       {level !== undefined ? (
         <>
           <p style={{ margin: '0 0 6px', fontSize: 14 }}>{resolveText(level.summary)}</p>
-          <p style={{ margin: '0 0 6px', fontSize: 14, color: '#ffd88a' }} data-pet-milestone="true">
+          <p className="vp-milestone-copy" style={{ margin: '0 0 6px', fontSize: 14 }} data-pet-milestone="true">
             {resolveText(level.milestone)}
           </p>
         </>
       ) : null}
       {scene !== undefined ? (
-        <p style={{ margin: 0, fontSize: 12, color: '#9fb4d8' }}>{resolveText(scene.sceneLabel)}</p>
+        <p className="vp-scene-label" style={{ margin: 0, fontSize: 12 }}>{resolveText(scene.sceneLabel)}</p>
       ) : null}
     </section>
   )

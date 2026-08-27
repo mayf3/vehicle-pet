@@ -217,7 +217,10 @@ function feedbackStatus(node: HTMLElement): string {
 }
 
 describe('VehiclePetOverlay full journey dialog', () => {
-  it('opens an accessible in-Harness dialog, restores focus on close', async () => {
+  it('DIALOG_INITIAL_SHIFT_TAB_CONTAINMENT_TEST contains every focus path and restores focus', async () => {
+    const outside = document.createElement('button')
+    outside.textContent = 'background focus target'
+    document.body.append(outside)
     const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
     await renderOverlay(source)
     fireEvent.click(screen.getByRole('button', { name: t('overlay.label', { state: t('state.idle') }) }))
@@ -225,17 +228,30 @@ describe('VehiclePetOverlay full journey dialog', () => {
     fireEvent.click(trigger)
 
     const dialog = await screen.findByRole('dialog', { name: t('dialog.title') })
+    const focusables = Array.from(dialog.querySelectorAll<HTMLElement>('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])'))
+    const first = focusables[0]
+    const last = focusables.at(-1)
     expect(dialog).toHaveAttribute('aria-modal', 'true')
-    await waitFor(() => {
-      expect(dialog.contains(document.activeElement)).toBe(true)
-    })
+    expect(first).toBeDefined()
+    expect(last).toBeDefined()
+    await waitFor(() => expect(document.activeElement).toBe(first))
     expect(dialog.querySelector('.vp-scene')).not.toBeNull()
 
-    fireEvent.keyDown(dialog, { key: 'Escape', bubbles: true })
-    await waitFor(() => {
-      expect(screen.queryByRole('dialog')).toBeNull()
-    })
+    fireEvent.keyDown(document, { key: 'Tab', shiftKey: true, bubbles: true })
+    expect(document.activeElement).toBe(last)
+    fireEvent.keyDown(document, { key: 'Tab', bubbles: true })
+    expect(document.activeElement).toBe(first)
+
+    dialog.focus()
+    fireEvent.keyDown(document, { key: 'Tab', shiftKey: true, bubbles: true })
+    expect(document.activeElement).toBe(last)
+    outside.focus()
+    expect(dialog.contains(document.activeElement)).toBe(true)
+
+    fireEvent.keyDown(document, { key: 'Escape', bubbles: true })
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
     expect(document.activeElement).toBe(trigger)
+    outside.remove()
   })
 })
 
@@ -402,6 +418,42 @@ describe('VehiclePetOverlay movement and multi-tab sync', () => {
     await waitFor(() => {
       expect((pet.closest('.vpo-shell') as HTMLElement).style.left).toBe(before)
     })
+  })
+
+  it('CROSSTAB_COLLAPSE_RESTORE_VISIBLE_TEST destroys stale Panel and Dialog without writes', async () => {
+    const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
+    await renderOverlay(source)
+    fireEvent.click(screen.getByRole('button', { name: t('overlay.label', { state: t('state.idle') }) }))
+    fireEvent.click(screen.getByRole('button', { name: t('panel.viewJourney') }))
+    await screen.findByRole('dialog', { name: t('dialog.title') })
+
+    const setItem = vi.spyOn(Storage.prototype, 'setItem')
+    const record = (collapsed: boolean) => JSON.stringify({
+      schemaVersion: 1,
+      position: { xRatio: 0.49, yRatio: 0.5 },
+      positionCustomized: true,
+      collapsed,
+      reducedMotion: false,
+    })
+    fireEvent(window, new StorageEvent('storage', {
+      key: OVERLAY_PREFERENCES_KEY,
+      newValue: record(true),
+    }))
+    await screen.findByRole('button', { name: t('launcher.restore') })
+    expect(document.querySelector('[data-vehicle-pet-panel]')).toBeNull()
+    expect(document.querySelector('[data-vehicle-pet-dialog]')).toBeNull()
+    expect(document.querySelector('[data-vehicle-pet-pet]')).toBeNull()
+
+    source.locale = 'en'
+    fireEvent(window, new StorageEvent('storage', {
+      key: OVERLAY_PREFERENCES_KEY,
+      newValue: record(false),
+    }))
+    await waitFor(() => expect(document.querySelector('[data-vehicle-pet="VISIBLE"]')).not.toBeNull())
+    expect(document.querySelector('[data-vehicle-pet-panel]')).toBeNull()
+    expect(document.querySelector('[data-vehicle-pet-dialog]')).toBeNull()
+    expect(setItem).not.toHaveBeenCalled()
+    setItem.mockRestore()
   })
 
   it('adopts a same-origin storage event without writing back', async () => {
