@@ -672,6 +672,162 @@ test('PANEL_COMPLETE_ACTIVE_SURFACE_CLAMP_TEST. resize and xRatio 0.49 clamp the
   await page.setViewportSize(VIEWPORT)
 })
 
+test('PANEL_OPEN_FIRST_KEYBOARD_STEP_MOVES_TEST + PANEL_OPEN_FIRST_POINTER_DRAG_MOVES_TEST. PANEL_OPEN movement has no coordinate dead zone', async ({ page }) => {
+  await openOverlay(page)
+  await page.evaluate(() => localStorage.setItem('vehicle-pet/overlay-preferences/v1', JSON.stringify({
+    schemaVersion: 1,
+    position: { xRatio: 0.49, yRatio: 1 },
+    positionCustomized: true,
+    collapsed: false,
+  })))
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.reload()
+  await expect.poll(() => page.locator(PET).count(), { timeout: 30_000 }).toBe(1)
+  await page.locator(PET).click()
+  await page.locator(PANEL).waitFor()
+  await page.waitForTimeout(350)
+
+  const preference = async () => page.evaluate(() => {
+    const value = JSON.parse(localStorage.getItem('vehicle-pet/overlay-preferences/v1') ?? '{}') as {
+      position: { xRatio: number; yRatio: number }
+    }
+    return value.position
+  })
+  const keyboardBefore = await petBox(page)
+  const keyboardRatioBefore = await preference()
+  await page.locator(PET).focus()
+  await page.keyboard.press('ArrowLeft')
+  await page.waitForTimeout(350)
+  const keyboardAfter = await petBox(page)
+  const keyboardRatioAfter = await preference()
+  const keyboardDelta = Math.abs(keyboardAfter!.x - keyboardBefore!.x) + Math.abs(keyboardAfter!.y - keyboardBefore!.y)
+  console.info('PANEL_OPEN_DEAD_ZONE_TRACE', {
+    inputType: 'keyboard', inputDirection: 'left', inputApplied: true,
+    movementSpaceRemaining: keyboardBefore!.x > 16,
+    persistedRatioBefore: keyboardRatioBefore, persistedRatioAfter: keyboardRatioAfter,
+    visiblePetPositionBefore: { x: keyboardBefore!.x, y: keyboardBefore!.y },
+    visiblePetPositionAfter: { x: keyboardAfter!.x, y: keyboardAfter!.y },
+    visibleActiveSurfaceDeltaPx: keyboardDelta,
+  })
+  expect(keyboardBefore!.x).toBeGreaterThan(16)
+  expect(keyboardDelta).toBeGreaterThan(0)
+  expect(keyboardAfter!.x).toBeLessThan(keyboardBefore!.x)
+
+  await page.evaluate(() => localStorage.setItem('vehicle-pet/overlay-preferences/v1', JSON.stringify({
+    schemaVersion: 1,
+    position: { xRatio: 0.49, yRatio: 1 },
+    positionCustomized: true,
+    collapsed: false,
+  })))
+  await page.reload()
+  await expect.poll(() => page.locator(PET).count(), { timeout: 30_000 }).toBe(1)
+  await page.locator(PET).click()
+  await page.locator(PANEL).waitFor()
+  await page.waitForTimeout(350)
+  const pointerBefore = await petBox(page)
+  const pointerRatioBefore = await preference()
+  await page.mouse.move(pointerBefore!.x + pointerBefore!.width / 2, pointerBefore!.y + pointerBefore!.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(pointerBefore!.x + pointerBefore!.width / 2 - 20, pointerBefore!.y + pointerBefore!.height / 2, { steps: 2 })
+  await page.mouse.up()
+  await page.waitForTimeout(350)
+  const pointerAfter = await petBox(page)
+  const pointerRatioAfter = await preference()
+  const pointerDelta = Math.abs(pointerAfter!.x - pointerBefore!.x) + Math.abs(pointerAfter!.y - pointerBefore!.y)
+  console.info('PANEL_OPEN_DEAD_ZONE_TRACE', {
+    inputType: 'pointer', inputDirection: 'left', inputApplied: true,
+    movementSpaceRemaining: pointerBefore!.x > 16,
+    persistedRatioBefore: pointerRatioBefore, persistedRatioAfter: pointerRatioAfter,
+    visiblePetPositionBefore: { x: pointerBefore!.x, y: pointerBefore!.y },
+    visiblePetPositionAfter: { x: pointerAfter!.x, y: pointerAfter!.y },
+    visibleActiveSurfaceDeltaPx: pointerDelta,
+  })
+  expect(pointerBefore!.x).toBeGreaterThan(16)
+  expect(pointerDelta).toBeGreaterThan(0)
+  expect(pointerAfter!.x).toBeLessThan(pointerBefore!.x)
+  await page.setViewportSize(VIEWPORT)
+})
+
+test('PANEL_OPEN_OPEN_CLOSE_WITHOUT_INPUT_PRESERVES_ANCHOR_TEST + PANEL_OPEN_MOVEMENT_COMMITS_CANONICAL_RATIO_TEST + PANEL_OPEN_REFRESH_RESTORES_MOVED_POSITION_TEST + PANEL_OPEN_RESIZE_HAS_NO_DEAD_ZONE_TEST + PANEL_OPEN_MULTITAB_MOVEMENT_SYNC_TEST', async ({ context, page }) => {
+  await openOverlay(page)
+  await page.evaluate(() => localStorage.setItem('vehicle-pet/overlay-preferences/v1', JSON.stringify({
+    schemaVersion: 1,
+    position: { xRatio: 0.49, yRatio: 1 },
+    positionCustomized: true,
+    collapsed: false,
+  })))
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.reload()
+  await expect.poll(() => page.locator(PET).count(), { timeout: 30_000 }).toBe(1)
+  const closedBefore = await petBox(page)
+  const storedBeforeOpen = await page.evaluate(() => localStorage.getItem('vehicle-pet/overlay-preferences/v1'))
+  await page.locator(PET).click()
+  await page.locator(PANEL).waitFor()
+  await page.waitForTimeout(350)
+  expect(await page.evaluate(() => localStorage.getItem('vehicle-pet/overlay-preferences/v1'))).toBe(storedBeforeOpen)
+  await page.locator(PET).click()
+  await expect(page.locator(PANEL)).toHaveCount(0)
+  await page.waitForTimeout(300)
+  const closedWithoutInput = await petBox(page)
+  expect(Math.abs(closedWithoutInput!.x - closedBefore!.x)).toBeLessThan(1)
+  expect(Math.abs(closedWithoutInput!.y - closedBefore!.y)).toBeLessThan(1)
+  expect(await page.evaluate(() => localStorage.getItem('vehicle-pet/overlay-preferences/v1'))).toBe(storedBeforeOpen)
+
+  await page.locator(PET).click()
+  await page.locator(PANEL).waitFor()
+  const projectedBeforeMove = await petBox(page)
+  await page.locator(PET).focus()
+  await page.keyboard.press('Shift+ArrowLeft')
+  await page.waitForTimeout(300)
+  const projectedAfterMove = await petBox(page)
+  expect(projectedAfterMove!.x).toBeLessThan(projectedBeforeMove!.x)
+  const canonical = await page.evaluate(() => JSON.parse(localStorage.getItem('vehicle-pet/overlay-preferences/v1') ?? '{}')) as {
+    position: { xRatio: number; yRatio: number }; positionCustomized: boolean
+  }
+  expect(canonical.positionCustomized).toBe(true)
+  expect(canonical.position.xRatio).toBeGreaterThanOrEqual(0)
+  expect(canonical.position.xRatio).toBeLessThanOrEqual(1)
+  await page.locator(PET).click()
+  await expect(page.locator(PANEL)).toHaveCount(0)
+  await page.waitForTimeout(300)
+  const closedAfterMove = await petBox(page)
+  expect(Math.abs(closedAfterMove!.x - projectedAfterMove!.x)).toBeLessThan(1)
+
+  await page.reload()
+  await expect.poll(() => page.locator(PET).count(), { timeout: 30_000 }).toBe(1)
+  const refreshed = await petBox(page)
+  expect(Math.abs(refreshed!.x - closedAfterMove!.x)).toBeLessThan(1)
+  await page.locator(PET).click()
+  await page.locator(PANEL).waitFor()
+  await page.setViewportSize({ width: 768, height: 720 })
+  await page.waitForTimeout(350)
+  const resizedBefore = await petBox(page)
+  await page.locator(PET).focus()
+  await page.keyboard.press('ArrowRight')
+  await page.waitForTimeout(300)
+  const resizedAfter = await petBox(page)
+  expect(resizedAfter!.x).toBeGreaterThan(resizedBefore!.x)
+
+  const second = await context.newPage()
+  await second.setViewportSize({ width: 768, height: 720 })
+  await second.goto('/')
+  await expect.poll(() => second.locator(PET).count(), { timeout: 30_000 }).toBe(1)
+  await expect.poll(async () => second.evaluate(() => localStorage.getItem('vehicle-pet/overlay-preferences/v1')))
+    .toBe(await page.evaluate(() => localStorage.getItem('vehicle-pet/overlay-preferences/v1')))
+  await second.locator(PET).click()
+  await second.locator(PANEL).waitFor()
+  const secondBefore = await second.locator(PET).boundingBox()
+  await second.locator(PET).focus()
+  await second.keyboard.press('ArrowUp')
+  await second.waitForTimeout(300)
+  const secondAfter = await second.locator(PET).boundingBox()
+  expect(secondAfter!.y).toBeLessThan(secondBefore!.y)
+  await expect.poll(async () => page.evaluate(() => localStorage.getItem('vehicle-pet/overlay-preferences/v1')))
+    .toBe(await second.evaluate(() => localStorage.getItem('vehicle-pet/overlay-preferences/v1')))
+  await second.close()
+  await page.setViewportSize(VIEWPORT)
+})
+
 test('10. keyboard movement moves and persists new ratios', async ({ page }) => {
   await openOverlay(page)
   const pet = page.locator(PET)

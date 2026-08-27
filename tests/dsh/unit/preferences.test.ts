@@ -17,7 +17,7 @@ import {
   subscribeStorageEvents,
 } from '../../../src/dsh/client/preferences'
 import { OVERLAY_GEOMETRY } from '../../../src/dsh/client/types'
-import { pointFromRatios, resolveCompleteActiveSurfaceLayout } from '../../../src/dsh/client/useOverlayDrag'
+import { moveCompleteActiveSurface, pointFromRatios, resolveCompleteActiveSurfaceLayout } from '../../../src/dsh/client/useOverlayDrag'
 
 function memoryStorage(initial: Record<string, string> = {}) {
   const store = new Map(Object.entries(initial))
@@ -102,8 +102,8 @@ describe('PANEL_COMPLETE_ACTIVE_SURFACE_CLAMP_TEST', () => {
     { width: 1280, height: 800 },
     { width: 1440, height: 900 },
   ] as const
-  const xRatios = [0, 0.25, 0.49, 0.5, 0.75, 1] as const
-  const yRatios = [0, 0.25, 0.5, 0.75, 1] as const
+  const xRatios = [0, 0.1, 0.25, 0.49, 0.5, 0.75, 0.9, 1] as const
+  const yRatios = [0, 0.1, 0.25, 0.5, 0.75, 0.9, 1] as const
 
   it('clamps every real Pet + gap + Panel union and preserves the ratio anchor', () => {
     const margin = OVERLAY_GEOMETRY.viewportMarginPx
@@ -159,6 +159,81 @@ describe('PANEL_COMPLETE_ACTIVE_SURFACE_CLAMP_TEST', () => {
       expect(layout.activeBounds.bottom - layout.activeBounds.top).toBe(size)
       expect(layout.activeBounds.right).toBeLessThanOrEqual(374)
       expect(layout.activeBounds.bottom).toBeLessThanOrEqual(828)
+    }
+  })
+
+  it('PANEL_OPEN_ALL_DIRECTIONS_TEST starts every valid first input at the rendered anchor', () => {
+    const margin = OVERLAY_GEOMETRY.viewportMarginPx
+    const panelSize = { width: 320, height: 500 }
+    const deltas = [
+      { name: 'left-5', x: -5, y: 0 }, { name: 'left-8', x: -8, y: 0 }, { name: 'left-32', x: -32, y: 0 },
+      { name: 'right-5', x: 5, y: 0 }, { name: 'right-8', x: 8, y: 0 }, { name: 'right-32', x: 32, y: 0 },
+      { name: 'up-5', x: 0, y: -5 }, { name: 'up-8', x: 0, y: -8 }, { name: 'up-32', x: 0, y: -32 },
+      { name: 'down-5', x: 0, y: 5 }, { name: 'down-8', x: 0, y: 8 }, { name: 'down-32', x: 0, y: 32 },
+    ] as const
+    for (const viewport of viewports) {
+      for (const xRatio of xRatios) {
+        for (const yRatio of yRatios) {
+          const anchor = pointFromRatios({
+            ...copyOverlayDefaults(), position: { xRatio, yRatio }, positionCustomized: true,
+          }, viewport, OVERLAY_GEOMETRY.visibleSizePx)
+          const initial = resolveCompleteActiveSurfaceLayout(
+            anchor, viewport, 112, true, panelSize,
+            { horizontal: xRatio > 0.5 ? 'right' : 'left', vertical: yRatio > 0.5 ? 'above' : 'below' },
+          )
+          for (const delta of deltas) {
+            const hasSpace = delta.x < 0 ? initial.activeBounds.left > margin
+              : delta.x > 0 ? initial.activeBounds.right < viewport.width - margin
+                : delta.y < 0 ? initial.activeBounds.top > margin
+                  : initial.activeBounds.bottom < viewport.height - margin
+            const next = moveCompleteActiveSurface(
+              initial.point, delta, viewport, 112, true, panelSize, initial.panelPlacement,
+            )
+            expect(next.activeBounds.left, `${viewport.width}x${viewport.height} ${xRatio}/${yRatio} ${delta.name}`).toBeGreaterThanOrEqual(margin)
+            expect(next.activeBounds.top).toBeGreaterThanOrEqual(margin)
+            expect(next.activeBounds.right).toBeLessThanOrEqual(viewport.width - margin)
+            expect(next.activeBounds.bottom).toBeLessThanOrEqual(viewport.height - margin)
+            const visibleDelta = Math.abs(next.point.x - initial.point.x) + Math.abs(next.point.y - initial.point.y)
+            if (hasSpace) expect(visibleDelta, `${viewport.width}x${viewport.height} ${xRatio}/${yRatio} ${delta.name}`).toBeGreaterThan(0)
+          }
+        }
+      }
+    }
+  })
+
+  it('PANEL_OPEN_BOUNDARY_OPPOSITE_DIRECTION_TEST moves immediately away from every boundary', () => {
+    const viewport = { width: 1440, height: 900 }
+    const panelSize = { width: 320, height: 440 }
+    const cases = [
+      { anchor: { x: -999, y: 300 }, toward: { x: -8, y: 0 }, opposite: { x: 8, y: 0 } },
+      { anchor: { x: 9999, y: 300 }, toward: { x: 8, y: 0 }, opposite: { x: -8, y: 0 } },
+      { anchor: { x: 600, y: -999 }, toward: { x: 0, y: -8 }, opposite: { x: 0, y: 8 } },
+      { anchor: { x: 600, y: 9999 }, toward: { x: 0, y: 8 }, opposite: { x: 0, y: -8 } },
+    ] as const
+    for (const item of cases) {
+      const initial = resolveCompleteActiveSurfaceLayout(
+        item.anchor, viewport, 112, true, panelSize, { horizontal: 'left', vertical: 'below' },
+      )
+      const toward = moveCompleteActiveSurface(initial.point, item.toward, viewport, 112, true, panelSize, initial.panelPlacement)
+      expect(toward.point).toEqual(initial.point)
+      const opposite = moveCompleteActiveSurface(initial.point, item.opposite, viewport, 112, true, panelSize, initial.panelPlacement)
+      expect(Math.abs(opposite.point.x - initial.point.x) + Math.abs(opposite.point.y - initial.point.y)).toBeGreaterThan(0)
+    }
+  })
+
+  it('PANEL_OPEN_ALL_PANEL_ORIENTATIONS_TEST preserves each feasible preferred orientation', () => {
+    const viewport = { width: 1440, height: 900 }
+    const panelSize = { width: 320, height: 300 }
+    for (const horizontal of ['left', 'right'] as const) {
+      for (const vertical of ['above', 'below'] as const) {
+        const layout = resolveCompleteActiveSurfaceLayout(
+          { x: 664, y: 394 }, viewport, 112, true, panelSize, { horizontal, vertical },
+        )
+        expect(layout.panelPlacement).toEqual({ horizontal, vertical })
+        const moved = moveCompleteActiveSurface(layout.point, { x: 8, y: 8 }, viewport, 112, true, panelSize, layout.panelPlacement)
+        expect(moved.point.x).toBeGreaterThan(layout.point.x)
+        expect(moved.point.y).toBeGreaterThan(layout.point.y)
+      }
     }
   })
 })

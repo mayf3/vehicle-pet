@@ -44,7 +44,9 @@ interface DragState {
   readonly start: OverlayPoint
   readonly origin: OverlayPoint
   current: OverlayPoint
+  placement: PanelPlacement
   moved: boolean
+  visibleMoved: boolean
 }
 
 export interface UseOverlayDragOptions {
@@ -190,6 +192,31 @@ export function resolveCompleteActiveSurfaceLayout(
   }
 }
 
+/**
+ * Apply one pointer/keyboard delta from the currently rendered Pet anchor.
+ * This is deliberately distinct from the latent preference anchor: PANEL_OPEN
+ * may project that preference to keep the full Pet + Panel union visible, and
+ * the first real input must start from that projected on-screen position.
+ */
+export function moveCompleteActiveSurface(
+  renderedPoint: OverlayPoint,
+  delta: OverlayPoint,
+  viewport: OverlayBounds,
+  surfaceSize: number,
+  panelOpen: boolean,
+  panelSize: OverlayBounds,
+  currentPlacement: PanelPlacement,
+): CompleteActiveSurfaceLayout {
+  return resolveCompleteActiveSurfaceLayout(
+    { x: renderedPoint.x + delta.x, y: renderedPoint.y + delta.y },
+    viewport,
+    surfaceSize,
+    panelOpen,
+    panelSize,
+    currentPlacement,
+  )
+}
+
 export function useOverlayDrag({
   preferences,
   panelOpen,
@@ -274,21 +301,29 @@ export function useOverlayDrag({
     setIsDragging(false)
     if (drag.moved) {
       ignoreClickRef.current = true
-      const position = ratiosFromPoint(drag.current, bounds, size)
-      commitPreferences(current => ({ ...current, position, positionCustomized: true }))
+      if (drag.visibleMoved) {
+        const position = ratiosFromPoint(drag.current, bounds, size)
+        commitPreferences(current => ({ ...current, position, positionCustomized: true }))
+      }
       onDragEndRef.current?.()
     }
   }, [bounds, commitPreferences, size])
 
+  const movementUsesPanel = panelOpen && !preferences.collapsed
   const moveByKeyboard = useCallback((dx: number, dy: number): void => {
-    const margin = OVERLAY_GEOMETRY.viewportMarginPx
-    const next = {
-      x: clamp(persistedAnchor.x + dx, margin, Math.max(margin, bounds.width - size - margin)),
-      y: clamp(persistedAnchor.y + dy, margin, Math.max(margin, bounds.height - size - margin)),
-    }
-    const position = ratiosFromPoint(next, bounds, size)
+    const next = moveCompleteActiveSurface(
+      layout.point,
+      { x: dx, y: dy },
+      bounds,
+      size,
+      movementUsesPanel,
+      panelSize,
+      layout.panelPlacement,
+    )
+    if (next.point.x === layout.point.x && next.point.y === layout.point.y) return
+    const position = ratiosFromPoint(next.point, bounds, size)
     commitPreferences(current => ({ ...current, position, positionCustomized: true }))
-  }, [bounds, commitPreferences, persistedAnchor, size])
+  }, [bounds, commitPreferences, layout.panelPlacement, layout.point, movementUsesPanel, panelSize, size])
 
   const onPointerDown = useCallback((event: ReactPointerEvent<HTMLElement>): void => {
     if (event.button !== 0) return
@@ -297,11 +332,13 @@ export function useOverlayDrag({
     dragRef.current = {
       pointerId: event.pointerId,
       start: { x: event.clientX, y: event.clientY },
-      origin: persistedAnchor,
-      current: persistedAnchor,
+      origin: layout.point,
+      current: layout.point,
+      placement: layout.panelPlacement,
       moved: false,
+      visibleMoved: false,
     }
-  }, [persistedAnchor])
+  }, [layout.panelPlacement, layout.point])
 
   const onPointerMove = useCallback((event: ReactPointerEvent<HTMLElement>): void => {
     const drag = dragRef.current
@@ -310,13 +347,20 @@ export function useOverlayDrag({
     const dy = event.clientY - drag.start.y
     if (!drag.moved && Math.hypot(dx, dy) > DRAG_THRESHOLD_PX) drag.moved = true
     if (!drag.moved) return
-    const margin = OVERLAY_GEOMETRY.viewportMarginPx
-    drag.current = {
-      x: clamp(drag.origin.x + dx, margin, Math.max(margin, bounds.width - size - margin)),
-      y: clamp(drag.origin.y + dy, margin, Math.max(margin, bounds.height - size - margin)),
-    }
-    setDragAnchor(drag.current)
-  }, [bounds, size])
+    const next = moveCompleteActiveSurface(
+      drag.origin,
+      { x: dx, y: dy },
+      bounds,
+      size,
+      movementUsesPanel,
+      panelSize,
+      drag.placement,
+    )
+    if (next.point.x !== drag.current.x || next.point.y !== drag.current.y) drag.visibleMoved = true
+    drag.current = next.point
+    drag.placement = next.panelPlacement
+    setDragAnchor(next.point)
+  }, [bounds, movementUsesPanel, panelSize, size])
 
   return {
     rootRef,
