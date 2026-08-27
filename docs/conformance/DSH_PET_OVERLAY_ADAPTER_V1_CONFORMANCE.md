@@ -352,3 +352,67 @@ NO
 Evidence image: [`dsh-pet-overlay-v1-r3-final.webp`](../evidence/dsh-pet-overlay-v1-r3-final.webp), a 48-frame matrix containing every required Fleet and Seedling level in normal compact, reduced compact, and Full Journey modes from the pinned Harness run.
 
 This R3 amendment is author-executed blocker-closure evidence bound to implementation commit `7c59bb0184f04e199923f676ded345b1df692623`. It does not rewrite any historical independent audit decision. Fresh independent R4 code and experience audits must run on the final documentation Head before any merge decision; the PR remains Open, Draft, unmerged, and `READY_TO_MERGE = NO`.
+
+## Final R4 accessibility and state blocker-resolution amendment record
+
+```text
+INDEPENDENT_OVERLAY_AUDIT_R4_RESULT = REQUEST_CHANGES
+INDEPENDENT_OVERLAY_AUDIT_R4_HEAD = f973ee98df8f21d809038307ec613bca06e7e510
+INDEPENDENT_OVERLAY_AUDIT_R4_NEW_BLOCKERS = 3
+INDEPENDENT_OVERLAY_EXPERIENCE_AUDIT_R4_RESULT = REVISE
+INDEPENDENT_OVERLAY_EXPERIENCE_AUDIT_R4_HEAD = f973ee98df8f21d809038307ec613bca06e7e510
+INDEPENDENT_OVERLAY_EXPERIENCE_AUDIT_R4_NEW_BLOCKERS = 1
+R4_AMENDMENT_IMPLEMENTATION_HEAD = ddeccde2dfb98d4f7cb45f2be3572faa90b2503e
+R4_B1_PANEL_COMPLETE_SURFACE_CLAMP_CLOSED = YES
+R4_B2_CROSSTAB_COLLAPSE_RESTORE_CLOSED = YES
+R4_B3_DIALOG_FOCUS_CONTAINMENT_CLOSED = YES
+R4_X1_FULL_JOURNEY_CONTRAST_CLOSED = YES
+R4_BLOCKERS_CLAIMED_CLOSED = 4
+PANEL_COMPLETE_ACTIVE_SURFACE_CLAMP_TEST = PASS
+CROSSTAB_COLLAPSE_RESTORE_VISIBLE_TEST = PASS
+DIALOG_INITIAL_SHIFT_TAB_CONTAINMENT_TEST = PASS
+FULL_JOURNEY_LIGHT_THEME_CONTRAST_TEST = PASS
+FULL_JOURNEY_DARK_THEME_CONTRAST_TEST = PASS
+FULL_JOURNEY_MIN_CONTRAST_RATIO = 5.641
+UNIT_DOM_TEST_COUNT = 157
+STANDALONE_E2E_COUNT = 12
+DSH_UNIT_DOM_COUNT = 56
+PINNED_DSH_E2E_COUNT = 24
+CONTRACT_TEST_COUNT = 18
+TARGETED_SECOND_SESSION_REPEAT = 5/5 PASS
+PNPM_VERIFY = PASS
+PNPM_VERIFY_DSH = PASS
+VERIFY_GOVERNANCE_REQUIRE_ACCEPTED = PASS
+CONTRACTS_PASS_CLAIMED = 13/13
+ACCEPTANCE_PASS_CLAIMED = 18/18
+DISPOSABLE_DSH_HOME = /tmp/vehicle-pet-overlay-amend-r4-20260827-b6e2
+REMOTE_INSTALL_DSH_HOME = /tmp/vehicle-pet-overlay-amend-r4-remote-20260827-b6e2
+PINNED_DSH_COMMIT = f77b5a2fcebc2d9138f6608a60636f2294868d42
+BROWSER = Playwright Chrome channel, real pinned Harness Web
+INDEPENDENT_OVERLAY_AUDIT_AFTER_AMENDMENT_R4 = NOT_RUN
+INDEPENDENT_OVERLAY_EXPERIENCE_AUDIT_AFTER_AMENDMENT_R4 = NOT_RUN
+READY_FOR_OVERLAY_REAUDIT_R5 = YES
+READY_FOR_OVERLAY_EXPERIENCE_REAUDIT_R5 = YES
+READY_TO_MERGE = NO
+```
+
+Historical independent decisions remain unchanged: R1 code `REQUEST_CHANGES`; R2
+code `ACCEPT`; R2 experience `REVISE`; R3 code `REQUEST_CHANGES`; R3 experience
+`REVISE`; R4 code `REQUEST_CHANGES`; and R4 experience `REVISE`. The results in
+this section are the author's direct R4 self-check, not an independent audit and
+not an `ACCEPT` claim.
+
+| R4 blocker | Fix files | Regression and actual pinned-Harness measurement | Claimed result |
+|---|---|---|---|
+| B1 — complete active-surface clamp | `src/dsh/client/useOverlayDrag.ts`, `VehiclePetOverlay.tsx`, `VehiclePetPanel.tsx`, `styles.ts` and generated `lib/**` | Parameterized unit matrix covers 390×844, 768×720, 1280×800, 1440×900; x ratios 0/0.25/0.49/0.5/0.75/1; y ratios 0/0.25/0.5/0.75/1. Real Chrome at 390px and xRatio 0.49 measured the Pet + 8px gap + real 320px Panel union after open, keyboard movement, resize, and flip; every edge remained at least the 16px viewport margin. Persisted ratios remain the user anchor and closing the Panel restores it. | CLOSED |
+| B2 — cross-Tab collapse invariant | `src/dsh/client/VehiclePetOverlay.tsx`, `tests/dsh/dom/overlay.test.tsx`, `tests/dsh/e2e/overlay.spec.ts` | Two real same-origin pinned-Harness tabs exercised Panel open, Dialog open, Pack switch, remote collapse, collapsed reload, restore, and alternating collapse/restore. Both tabs showed only the launcher while collapsed and restored only `VISIBLE`; Panel/Dialog stayed absent. Instrumented preference writes were exactly the initiating local writes, with zero adoption writes. | CLOSED |
+| B3 — complete Dialog focus containment | `src/dsh/client/VehiclePetDialog.tsx`, `tests/dsh/dom/overlay.test.tsx`, `tests/dsh/e2e/overlay.spec.ts` | Real Chrome measured initial focus on the close control; initial Shift+Tab stayed inside; last→first Tab and first→last Shift+Tab wrapped; forced background focus was reclaimed; Escape and Close both closed; trigger focus restored. Lifecycle inventory returned document listeners to baseline after HMR/unmount. | CLOSED |
+| X1 — Full Journey contrast | `src/dsh/client/styles.ts`, `src/react/PetProgressPanel.tsx`, `PetMilestonePanel.tsx`, `styles.tsx` and generated `lib/**` | Computed foreground/background colors were mechanically measured in real pinned Harness Chrome for Fleet L1/L12, Seedling seed/forest, zh-CN/en, normal/reduced motion, plus Harness `body[data-ds-dark-theme]`. All ordinary text passed 4.5:1; measured minimum was 5.641:1. | CLOSED |
+
+The complete author gate at implementation Head
+`ddeccde2dfb98d4f7cb45f2be3572faa90b2503e` passed `pnpm verify`,
+`pnpm verify:dsh`, the targeted second-Session `--repeat-each=5`, governance
+verification with `--require-accepted`, and the final diff check. The pinned DSH
+worktree remained clean, the accepted Specs were unchanged, and no user DSH
+profile was used. This documentation commit records those results but does not
+convert either post-amendment independent result from `NOT_RUN`.
