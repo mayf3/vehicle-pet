@@ -46,7 +46,7 @@ export function PetProgressPanel() {
       >
         <div className="vp-progressbar-fill" style={{ width: `${percent}%` }} />
       </div>
-      <p style={{ margin: '8px 0 0', fontSize: 13, color: '#9fb4d8' }}>
+      <p className="vp-progress-meta" style={{ margin: '8px 0 0', fontSize: 13 }}>
         {viewModel.capped ? (
           <span data-pet-capped="true">{copy.capped}</span>
         ) : (
