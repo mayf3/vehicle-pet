@@ -24,11 +24,17 @@ const RENDERER_DESCENDANT_BUDGET = 63
 export interface PetSceneRendererProps {
   /** Prototype-only fault injection: asset ids forced to render their fallback. */
   simulateFailAssetIds?: readonly string[]
+  /** Compact hosts can own the activation control and render the subject non-interactively. */
+  subjectInteractive?: boolean
+  /** Host-owned interaction count used for the same click-feedback presentation. */
+  interactionCount?: number
+  /** Host presentation only; the same RenderPlan remains authoritative. */
+  presentationMode?: 'standalone' | 'full-journey' | 'compact-overlay'
   'aria-label'?: string
 }
 
 export function PetSceneRenderer(props: PetSceneRendererProps) {
-  const { snapshot, copy } = usePetEngine()
+  const { snapshot, copy, resolveText } = usePetEngine()
   const [clickCount, setClickCount] = useState(0)
 
   if (!snapshot.initialized) return <div className="vp-scene" aria-busy="true" />
@@ -48,13 +54,15 @@ export function PetSceneRenderer(props: PetSceneRendererProps) {
   const upgradeTransition = level?.upgrade?.transition ?? 'instant'
   const upgradeReveal = level?.upgrade?.reveal ?? 'subject-swap'
   const celebration = level?.upgrade?.celebration ?? 'ambient-highlight'
-  const visibleNodes = fitNodesToDomBudget(plan.nodes)
+  const presentationMode = props.presentationMode ?? 'standalone'
+  const visibleNodes = fitNodesToDomBudget(plan.nodes, presentationMode)
 
   return (
     <div
       className={`vp-scene vp-scene-transition-${sceneTransition} vp-upgrade-transition-${upgradeTransition} vp-upgrade-reveal-${upgradeReveal} vp-celebration-${celebration}`}
+      data-presentation-mode={presentationMode}
       role="group"
-      aria-label={props['aria-label'] ?? 'Pet scene'}
+      aria-label={props['aria-label'] ?? (presentationMode === 'compact-overlay' && level !== undefined ? resolveText(level.stageName) : 'Pet scene')}
       data-reduced-motion={reduced ? 'true' : 'false'}
       data-scene-transition={sceneTransition}
       data-upgrade-transition={upgradeTransition}
@@ -72,7 +80,9 @@ export function PetSceneRenderer(props: PetSceneRendererProps) {
           subjectScalePermille={plan.subjectScalePermille}
           reducedMotion={reduced}
           upgradeReveal={upgradeReveal}
-          clickCount={node.kind === 'subject' ? clickCount : 0}
+          clickCount={node.kind === 'subject' ? (props.interactionCount ?? clickCount) : 0}
+          subjectInteractive={props.subjectInteractive !== false}
+          compactViewport={presentationMode === 'compact-overlay'}
           onClickSubject={() => setClickCount((n) => n + 1)}
           simulateFailAssetIds={props.simulateFailAssetIds}
         />
@@ -81,11 +91,21 @@ export function PetSceneRenderer(props: PetSceneRendererProps) {
   )
 }
 
-function fitNodesToDomBudget(nodes: readonly RenderNode[]): RenderNode[] {
+function fitNodesToDomBudget(
+  nodes: readonly RenderNode[],
+  presentationMode: NonNullable<PetSceneRendererProps['presentationMode']>,
+): RenderNode[] {
+  // A 112px overlay is a Pet avatar, not a miniature information dashboard.
+  // Stage/milestone copy remains available in the panel and accessible subject
+  // label; the compact scene renders the generic subject only so no text,
+  // aggregate, Pack overlay, or dark world layer can cover it.
+  const candidates = presentationMode === 'compact-overlay'
+    ? nodes.filter(node => node.kind === 'subject')
+    : nodes
   const selected: RenderNode[] = []
   const populationCounts = new Map<string, number>()
   let descendants = 0
-  for (const node of nodes) {
+  for (const node of candidates) {
     if (node.kind === 'population-representative') {
       const populationKey = node.nodeId.replace(/:\d+$/, '')
       const count = populationCounts.get(populationKey) ?? 0
@@ -108,6 +128,8 @@ interface PlanNodeViewProps {
   reducedMotion: boolean
   upgradeReveal: 'subject-swap' | 'scene-expand' | 'milestone-card' | 'collection-add'
   clickCount: number
+  subjectInteractive: boolean
+  compactViewport: boolean
   onClickSubject: () => void
   simulateFailAssetIds?: readonly string[]
 }
@@ -119,13 +141,20 @@ function PlanNodeView(props: PlanNodeViewProps) {
   const y = 50 + (node.placement.y / 100 - 50) * camera
   const baseWidth = NODE_BASE_WIDTH_PERCENT[node.kind] ?? 30
   const subjectScale = node.kind === 'subject' ? subjectScalePermille / 1000 : 1
-  const widthPercent = (baseWidth * node.placement.scalePermille * camera * subjectScale) / 1000
+  const sceneFrame = node.kind === 'background' || node.kind === 'overlay' || node.kind === 'terminal-overlay'
+  const plannedWidthPercent = (baseWidth * node.placement.scalePermille * (sceneFrame ? 1 : camera) * subjectScale) / 1000
+  const widthPercent = node.kind === 'subject' && props.compactViewport
+    ? Math.max(42, plannedWidthPercent)
+    : plannedWidthPercent
+  // Static geometry and motion are separate concerns. Every plan coordinate is
+  // the node centre, so this layout translation must survive reduced motion;
+  // reduced motion disables animation below, never the centring transform.
   const placementStyle: CSSProperties = {
     left: `${x}%`,
     top: `${y}%`,
     zIndex: node.zOrder,
     '--vp-node-index': nodeIndex,
-    ...(reducedMotion ? {} : { transform: 'translate(-50%, -50%)' }),
+    transform: 'translate(-50%, -50%)',
   } as CSSProperties
 
   if (node.kind === 'aggregate-label' || node.kind === 'milestone') {
@@ -141,7 +170,9 @@ function PlanNodeView(props: PlanNodeViewProps) {
     )
   }
 
-  const sizedStyle = { ...placementStyle, width: `${widthPercent}%`, aspectRatio: '1 / 1' }
+  const sizedStyle = sceneFrame
+    ? { ...placementStyle, width: '100%', height: '100%' }
+    : { ...placementStyle, width: `${widthPercent}%`, aspectRatio: '1 / 1' }
   if (node.kind === 'subject') {
     return (
       <SubjectButton
@@ -150,6 +181,7 @@ function PlanNodeView(props: PlanNodeViewProps) {
         reducedMotion={reducedMotion}
         upgradeReveal={props.upgradeReveal}
         clickCount={props.clickCount}
+        interactive={props.subjectInteractive}
         onClick={props.onClickSubject}
         simulateFailAssetIds={props.simulateFailAssetIds}
       />
@@ -172,6 +204,7 @@ function SubjectButton(props: {
   reducedMotion: boolean
   upgradeReveal: 'subject-swap' | 'scene-expand' | 'milestone-card' | 'collection-add'
   clickCount: number
+  interactive: boolean
   onClick: () => void
   simulateFailAssetIds?: readonly string[]
 }) {
@@ -199,20 +232,19 @@ function SubjectButton(props: {
       ? `vp-subject-swap 300ms ease-out both, ${subjectMotion}`
       : subjectMotion
 
-  return (
-    <button
-      type="button"
-      className="vp-node vp-subject-btn vp-kind-subject"
-      style={{ ...props.style, animation }}
-      aria-label={node.altText || snapshot.viewModel?.derivedLevelId || 'Pet'}
-      onClick={onClick}
-      data-pet-subject="true"
-      data-feedback-visible={showFeedback ? 'true' : 'false'}
-      data-feedback={reducedMotion ? copy.clickFeedback : '✦'}
-    >
-      <SceneAsset node={node} className="vp-node-img" simulateFailAssetIds={props.simulateFailAssetIds} />
-    </button>
-  )
+  const common = {
+    className: 'vp-node vp-subject-btn vp-kind-subject',
+    style: { ...props.style, animation },
+    'aria-label': node.altText || snapshot.viewModel?.derivedLevelId || 'Pet',
+    'data-pet-subject': 'true',
+    'data-feedback-visible': showFeedback ? 'true' : 'false',
+    'data-feedback': reducedMotion ? copy.clickFeedback : '✦',
+  } as const
+  const asset = <SceneAsset node={node} className="vp-node-img" simulateFailAssetIds={props.simulateFailAssetIds} />
+  if (!props.interactive) {
+    return <span {...common} role="img">{asset}</span>
+  }
+  return <button {...common} type="button" onClick={onClick}>{asset}</button>
 }
 
 /** Asset node with the webp → png → text degradation chain (CTR-PET-017). */

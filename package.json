@@ -4,42 +4,113 @@
   "version": "0.1.0",
   "type": "module",
   "packageManager": "pnpm@10.28.1",
-  "description": "Configurable Pet Engine V1 with declarative bundled Pet Packs and a MockProgressSource prototype shell",
+  "description": "Configurable Pet Engine V1 with declarative bundled Pet Packs, a MockProgressSource prototype shell, and a DeepSeek Harness Web overlay plugin",
+  "main": "./lib/index.js",
+  "exports": {
+    ".": {
+      "types": "./lib/types/dsh/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./client": {
+      "types": "./lib/types/dsh/client/index.d.ts",
+      "default": "./lib/client.js"
+    },
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "cordis.patch.yml",
+    "README.md"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-runtime",
+        "@deepseek-ai/dsh-client-ui-slots",
+        "@deepseek-ai/dsh-client-ui-layout",
+        "@deepseek-ai/dsh-client-locale"
+      ]
+    }
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run --project unit --project dom",
     "test:e2e": "playwright test",
-    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.node.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.node.json --noEmit && tsc -p tsconfig.dsh.json --noEmit",
     "lint": "oxlint src tests scripts",
     "check:contracts": "vitest run --project contracts",
     "assets:generate": "node scripts/generate-pack-assets.mjs",
     "assets:check": "node scripts/generate-pack-assets.mjs --check",
-    "verify": "pnpm typecheck && pnpm lint && pnpm test && pnpm test:e2e && pnpm build && pnpm check:contracts && pnpm assets:check"
+    "assets:dsh-generate": "node scripts/generate-dsh-assets.mjs",
+    "assets:dsh-check": "node scripts/generate-dsh-assets.mjs --check",
+    "build:dsh": "node scripts/build-dsh-plugin.mjs",
+    "check:dsh-bundle": "node scripts/check-dsh-bundle.mjs",
+    "check:dsh-package": "node scripts/check-dsh-package.mjs",
+    "check:dsh-lifecycle": "node scripts/check-dsh-lifecycle.mjs",
+    "test:dsh": "vitest run --project dsh-unit --project dsh-dom",
+    "test:dsh:e2e": "playwright test -c playwright.dsh.config.ts",
+    "verify": "pnpm typecheck && pnpm lint && pnpm test && pnpm test:e2e && pnpm build && pnpm check:contracts && pnpm assets:check",
+    "verify:dsh": "pnpm typecheck && pnpm lint && pnpm check:contracts && pnpm assets:dsh-check && pnpm build:dsh && pnpm check:dsh-bundle && pnpm check:dsh-package && pnpm check:dsh-lifecycle && pnpm test:dsh && pnpm test:dsh:e2e"
   },
   "dependencies": {
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
     "idb": "^8.0.3",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh-client-locale": "0.1.0-rc.8",
+    "@deepseek-ai/dsh-client-runtime": "0.1.0-rc.8",
+    "@deepseek-ai/dsh-client-ui-slots": "0.1.0-rc.8",
+    "react": "^18.2.0",
+    "@deepseek-ai/dsh-client-ui-layout": "0.1.0-rc.8"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/dsh-client-locale": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-client-runtime": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-client-ui-slots": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-client-ui-layout": {
+      "optional": true
+    }
   },
   "devDependencies": {
+    "@deepseek-ai/cordis": "4.0.1",
+    "@deepseek-ai/dsh-client-locale": "0.1.0-rc.8",
+    "@deepseek-ai/dsh-client-runtime": "0.1.0-rc.8",
+    "@deepseek-ai/dsh-client-ui-slots": "0.1.0-rc.8",
     "@playwright/test": "^1.61.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
     "@types/node": "24.10.1",
-    "@types/react": "^19.1.0",
-    "@types/react-dom": "^19.1.0",
+    "@types/react": "^18.3.24",
+    "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^5.0.0",
+    "esbuild": "^0.25.10",
     "fake-indexeddb": "^6.2.2",
     "jsdom": "^27.0.0",
     "oxlint": "^1.14.0",
     "sharp": "^0.34.1",
     "typescript": "^5.9.0",
     "vite": "^7.0.0",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "@deepseek-ai/dsh-client-ui-layout": "0.1.0-rc.8"
   }
 }

@@ -13,7 +13,7 @@ import { EngineStyles } from '../../src/react/styles'
 afterEach(cleanup)
 
 describe('E03 reduced motion mechanics', () => {
-  it('has no animation, translate, scale, particles, bounce, or camera movement in computed renderer styles', () => {
+  it('removes motion while preserving the static centring transform', () => {
     const manifest = fleetCandidate as PetPackManifestV1
     const level = manifest.levels.find((candidate) => candidate.levelId === 'l12')!
     const plan = buildSceneRenderPlan({ manifest, level, locale: 'en' })
@@ -25,8 +25,12 @@ describe('E03 reduced motion mechanics', () => {
     for (const element of [scene, ...scene.querySelectorAll<HTMLElement>('*')]) {
       const computed = getComputedStyle(element)
       expect(computed.animationName).toMatch(/^(|none)$/)
-      expect(computed.transform).toMatch(/^(|none)$/)
       expect(computed.translate).toMatch(/^(|none)$/)
+    }
+    const positioned = scene.querySelectorAll<HTMLElement>('.vp-node')
+    expect(positioned.length).toBeGreaterThan(0)
+    for (const element of positioned) {
+      expect(element.style.transform).toBe('translate(-50%, -50%)')
     }
     expect(scene.getAttribute('data-camera-zoom-permille')).toBe('220')
     expect(scene.querySelectorAll('svg')).toHaveLength(0)
