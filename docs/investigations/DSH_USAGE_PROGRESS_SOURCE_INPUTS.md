@@ -63,3 +63,33 @@ daily events (messages with usage), last 7 active days: 457 / 5454 / 1065 / 6915
 Fleet ladder thresholds (points): L2 10k, L3 30k, L5 100k, L12 2.5M — confirming
 the Owner's arithmetic that points_per_1k=1 + full backfill would land a fresh
 install mid-ladder (≈L6/L7) and make L2 cost 10M counted tokens.
+
+## 7. 18-day observed-series simulation (2026-09-04, R1_CONT_2 calibration)
+
+Full observed window 2026-08-14..09-02 (18 active days, total 280,786,199
+counted): median 13,028,844/day, mean 15,599,233/day, min 241,724, p25
+5,791,707, max 47,479,532. Simulation applies each observed day's counted
+tokens as points from a fresh install (no backfill); "crossing days" = days
+where at least one level threshold is crossed.
+
+```text
+                 crossings/  crossing-  fresh-install (observed pace)   median-day ETA
+OPTION (pp1k)    active-day  days/18    L2    L3    L5     L12          L2 / L3 / L5 / L12
+A  (1.0)         0.28        5/18       1d    3d    7d     >18d         0.8d/2.3d/7.7d/192d
+B  (0.4)         0.22        4/18       2d    6d    15d    >18d         1.9d/5.8d/19.2d/480d
+C  (0.15)        0.11        2/18       6d    13d    >18d  >18d         5.1d/15.4d/51.2d/1279d
+A+cap10k         0.22        4/18       1d    4d    13d    >18d         same as A (cap binds only on heavy days)
+B+cap4k          0.11        2/18       3d    10d    >18d  >18d         same as B
+
+light persona 250k counted/day: A -> L2 40d, L5 400d, L12 ~27y; B/C worse
+heavy persona 30M counted/day:   A -> L2 0.3d, L3 1d (multi-jump days); B -> L2 0.8d, L3 2.5d
+within-level bar (resident micro progress): median day under A moves the
+current-level bar by ~130% of one L1 span (>=1 full bar/day), under B ~65%/day,
+under C ~20%/day — i.e. the resident bar gives daily-visible growth under A/B,
+subtle under C, independent of threshold crossings.
+```
+
+Reading: at this user's real distribution the fixed ladder crosses are rare
+(<=0.28/active-day even under A); daily perceivable growth is carried mainly by
+the resident within-level bar, while threshold crossings provide the rarer
+"stage-up" moments. Milestone ceremony frequency therefore matters most under A.
