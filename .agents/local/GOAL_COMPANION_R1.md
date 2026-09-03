@@ -5,15 +5,15 @@
 - GOAL_TERMINAL_BOUNDARY = READY_FOR_PRODUCTION_APPLY
 - WORKTREE = /Users/yanfenma/workspace/project/vehicle-pet-wt-companion-r1
 - BRANCH = companion/r1 (base = origin/main de5c6b585a55b79b6b129a459809c0ba25e0034d)
-- MERGED = PR #6 → main 272af9b92183519c21961aec421dcca9b65adc1f (2026-09-03)
+- MERGED = PR #6 reverted on main (a7fb676, Owner-directed semantic split); PR #8 (surface, head be60220, audit ACCEPT 0 blocker) merged → main 8035eda (2026-09-04)
 - DSH_FORK_MASTER_AT_VERIFY = 419ee11c9bd5d01b206c8660762525d151bc4b4b (mayf3/deepseek-harness fork)
 - FRESH_VERIFIED_AT = 2026-09-03
 
 ## Lanes
 
-- LANE_COMPANION_SURFACE = READY_FOR_INTEGRATION → merged (常驻微进度条; audit ACCEPT 0 blocker)
+- LANE_COMPANION_SURFACE = READY_FOR_INTEGRATION → merged via PR #8 (微进度条 + effective reduced-motion gate; audit ACCEPT 0 blocker, head-bound)
 - LANE_VISUAL_ASSETS = OWNER_GATE（ART_REQUEST_PACKET_COMPANION_R1.md 待 Owner 出图 4 张母图 l1–l4）
-- LANE_PROGRESS_SOURCE = PROPOSED（DSH_PET_USAGE_PROGRESS_SOURCE_V1 proposed; NEW authority; Owner gate = DEC-USAGE-003 参数 + spec acceptance; 实现未开始）
+- LANE_PROGRESS_SOURCE = DRAFT（ withdrawn V1 draft; successor VEHICLE_PET_PROGRESS_SOURCE_V2 Draft PR #9; SUPERSEDE route realized as the direction's own 'separate Progress Source Spec' path; token economy deferred to Owner packet, 7-day counts-only baseline measured 2026-09-04）
 - LANE_INTEGRATION = 隔离预览运行中 (port 3092, /tmp/vehicle-pet-companion-dsh-home-r1)
 
 ## Isolated preview (evidence)
@@ -24,9 +24,10 @@
 
 ## FOLLOW_UP_DEBT (audit, non-blocker)
 
-- tests: span<=0 / capped / viewModel-null 早退分支、percent clamp、collapsed 守卫用例补齐
-- VehiclePetOverlay.tsx: WithinLevelMicroProgress 注释 §8.1 归类措辞修正；内联类型改为 import PetViewModel；Math.round→floor
+- PR#8 audit: reducedMotion 有效偏好表达式与 Engine gate 重复（可改单源 viewModel.reducedMotion）；OS 偏好变化无 listener（既有模式）；capped/span<=0 边界无直接单测、宽度值未断言
+- PR#6 audit (prior round): §8.1 注释归类措辞；内联类型改 import PetViewModel；Math.round→floor
 - README/docs：常驻微条能力说明
+- collapsed/重度日 behavior：可选 daily_cap 未采纳（Owner 默认 NO），重度日可能单日跳 2–3 级，如需可后续以 amendment 引入
 
 ## Authority
 
