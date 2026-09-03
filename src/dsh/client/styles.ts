@@ -29,6 +29,12 @@ const css = `
 .vpo-launcher{position:relative;width:100%;height:100%;padding:0;border:1px solid color-mix(in srgb,var(--color-border,#9bb7cb) 60%,transparent);background:color-mix(in srgb,var(--color-surface,#fff) 84%,transparent);box-shadow:0 4px 16px rgba(16,52,76,.22);border-radius:999px;cursor:pointer;outline:none;display:grid;place-items:center;pointer-events:auto}
 .vpo-launcherDot{width:44%;height:44%;border-radius:50%;background:radial-gradient(circle at 32% 30%,color-mix(in srgb,var(--color-accent,#2f80ed) 30%,#ffffff) 0%,var(--color-accent,#2f80ed) 70%);box-shadow:0 1px 4px rgba(22,55,82,.35)}
 .vpo-badge{position:absolute;z-index:3;top:-4px;right:-4px;min-width:10px;height:10px;border-radius:999px;background:#e6a23c;box-shadow:0 0 0 2px var(--color-surface,#fff)}
+.vpo-progress{position:absolute;z-index:2;left:16%;right:16%;bottom:6px;height:4px;border-radius:999px;background:color-mix(in srgb,var(--color-border,#9bb7cb) 55%,transparent);overflow:hidden;pointer-events:none}
+.vpo-progressFill{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,color-mix(in srgb,var(--color-accent,#2f80ed) 70%,#7fd1a8),var(--color-accent,#2f80ed));transition:width 600ms cubic-bezier(.22,1,.36,1)}
+/* The effective plugin preference (explicit choice first, OS fallback) drives
+   the data attribute; an OS media query alone must not override an explicit
+   user OFF. */
+.vpo-progress[data-reduced-motion="true"] .vpo-progressFill{transition:none}
 .vpo-sr{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .vpo-panel{position:absolute;pointer-events:auto;width:min(320px,calc(100vw - 32px));max-height:calc(100vh - 152px);overflow:auto;box-sizing:border-box;padding:12px 14px;border-radius:14px;background:color-mix(in srgb,var(--color-surface,#fff) 95%,transparent);border:1px solid color-mix(in srgb,var(--color-border,#a8bdcc) 72%,transparent);box-shadow:0 14px 40px rgba(10,37,57,.22);font-size:13px;line-height:1.45;color:var(--color-text,#17324d)}
 .vpo-panel[data-horizontal="left"]{left:0}.vpo-panel[data-horizontal="right"]{right:0}
