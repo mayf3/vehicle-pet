@@ -35,3 +35,31 @@
 - AUTHORITY_ACTION = **NEW**（DSH_PET_USAGE_PROGRESS_SOURCE_V1）：真实 usage → progressPoints 是新 Decision（进度经济），超出严格 additive AMEND 边界（新增独立义务与进度语义）。
 - 实现在该 spec accepted 前不动代码。
 - Token 经济参数（input/output/cached/reasoning 是否计入、权重、token→progressPoints 比例、历史补算）为不可由事实推出的 Owner Decision。
+
+## 6. Measured 7-day counts-only baseline (2026-09-04, calibration for Owner packet)
+
+- Source: local DSH home session logs (~/.dsh/sessions, 1,640 session logs, zstd JSONL).
+- Method: counts-only script; read ONLY `assistant/message` events' numeric
+  `usage{inputTokens, outputTokens, cacheReadTokens}` + top-level `time` (epoch ms)
+  + identity `(workspace, sessionId, turn, step)`, dedup keep-last per identity.
+  Message content (`data.message`) was never read, decoded, or emitted.
+- counted = uncachedInputTokens + outputTokens (cache/reasoning excluded per
+  Owner default direction; observed usage rows carried cacheReadTokens=0 and no
+  reasoning/cacheWrite fields).
+
+```text
+window_days            = 2026-08-26 .. 2026-09-02 (8 calendar days, 7 active)
+counted_total_7d       = 90,306,345
+active_days            = 7 of 8 (2026-09-01 = 0)
+median_counted_active  = 9,808,994
+mean_counted_active    ≈ 12,901,000
+heaviest_day           = 32,805,557 (2026-08-29)
+lightest_active_day    = 241,724   (2026-09-02)
+previous_7d_total      = 134,212,939 (rate is stable at ~10–19M/day)
+grand_total_all_days   = 280,786,199 (backfill risk: ≈ 280,787 pts at 1/1k)
+daily events (messages with usage), last 7 active days: 457 / 5454 / 1065 / 6915 / 3910 / 2333 / 47
+```
+
+Fleet ladder thresholds (points): L2 10k, L3 30k, L5 100k, L12 2.5M — confirming
+the Owner's arithmetic that points_per_1k=1 + full backfill would land a fresh
+install mid-ladder (≈L6/L7) and make L2 cost 10M counted tokens.
