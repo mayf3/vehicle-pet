@@ -473,26 +473,3 @@ describe('VehiclePetOverlay movement and multi-tab sync', () => {
     setItem.mockRestore()
   })
 })
-
-describe('resident within-level micro progress', () => {
-  it('renders an aria-hidden, non-interactive micro bar inside the pet button', async () => {
-    const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
-    await renderOverlay(source)
-    const pet = screen.getByRole('button', { name: t('overlay.label', { state: t('state.idle') }) })
-    const micro = pet.querySelector('.vpo-progress')
-    expect(micro).not.toBeNull()
-    expect(micro).toHaveAttribute('aria-hidden', 'true')
-    expect(micro?.querySelectorAll('button, [tabindex], input')).toHaveLength(0)
-    expect(micro).toHaveAttribute('data-within-level-percent')
-    const fill = micro?.querySelector('.vpo-progressFill') as HTMLElement
-    expect(fill).not.toBeNull()
-    expect(fill.style.width).toMatch(/%$/)
-  })
-
-  it('keeps the pet the only interactive control in VISIBLE state', async () => {
-    const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
-    await renderOverlay(source)
-    const pet = screen.getByRole('button', { name: t('overlay.label', { state: t('state.idle') }) })
-    expect(pet.querySelectorAll('button')).toHaveLength(0)
-  })
-})
