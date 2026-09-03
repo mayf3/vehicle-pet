@@ -473,3 +473,94 @@ describe('VehiclePetOverlay movement and multi-tab sync', () => {
     setItem.mockRestore()
   })
 })
+
+describe('resident within-level micro progress', () => {
+  const prefRecord = (overrides: { collapsed?: boolean; reducedMotion?: boolean | undefined }) =>
+    JSON.stringify({
+      schemaVersion: 1,
+      position: { xRatio: 0.9, yRatio: 0.9 },
+      collapsed: false,
+      reducedMotion: undefined,
+      ...overrides,
+    })
+
+  function stubOsReduce(matches: boolean): () => void {
+    const descriptor = Object.getOwnPropertyDescriptor(window, 'matchMedia')
+    Object.defineProperty(window, 'matchMedia', {
+      configurable: true,
+      writable: true,
+      value: (query: string) => ({
+        matches: query.includes('prefers-reduced-motion') ? matches : false,
+        media: query,
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        addListener: () => {},
+        removeListener: () => {},
+      }),
+    })
+    return () => {
+      if (descriptor) Object.defineProperty(window, 'matchMedia', descriptor)
+      else delete (window as { matchMedia?: unknown }).matchMedia
+    }
+  }
+
+  it('renders an aria-hidden, non-interactive micro bar inside the pet button', async () => {
+    const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
+    await renderOverlay(source)
+    const pet = screen.getByRole('button', { name: t('overlay.label', { state: t('state.idle') }) })
+    const micro = pet.querySelector('.vpo-progress')
+    expect(micro).not.toBeNull()
+    expect(micro).toHaveAttribute('aria-hidden', 'true')
+    expect(micro?.querySelectorAll('button, [tabindex], input')).toHaveLength(0)
+    expect(micro).toHaveAttribute('data-within-level-percent')
+    const fill = micro?.querySelector('.vpo-progressFill') as HTMLElement
+    expect(fill).not.toBeNull()
+    expect(fill.style.width).toMatch(/%$/)
+  })
+
+  it('renders no micro bar in the collapsed launcher state', async () => {
+    window.localStorage.setItem(OVERLAY_PREFERENCES_KEY, prefRecord({ collapsed: true }))
+    const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
+    render(<VehiclePetOverlay {...stubProps(source)} />)
+    await waitFor(() => {
+      expect(screen.queryByRole('button', { name: t('launcher.restore') })).not.toBeNull()
+    })
+    expect(document.querySelector('[data-vehicle-pet-pet]')).toBeNull()
+    expect(document.querySelector('.vpo-progress')).toBeNull()
+  })
+
+  it('explicit reduced-motion ON silences the width transition even when the OS reports no preference', async () => {
+    const restoreOs = stubOsReduce(false)
+    window.localStorage.setItem(OVERLAY_PREFERENCES_KEY, prefRecord({ reducedMotion: true }))
+    const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
+    try {
+      await renderOverlay(source)
+      expect(document.querySelector('.vpo-progress')).toHaveAttribute('data-reduced-motion', 'true')
+    } finally {
+      restoreOs()
+    }
+  })
+
+  it('explicit reduced-motion OFF follows the effective preference over the OS reduce report', async () => {
+    const restoreOs = stubOsReduce(true)
+    window.localStorage.setItem(OVERLAY_PREFERENCES_KEY, prefRecord({ reducedMotion: false }))
+    const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
+    try {
+      await renderOverlay(source)
+      expect(document.querySelector('.vpo-progress')).toHaveAttribute('data-reduced-motion', 'false')
+    } finally {
+      restoreOs()
+    }
+  })
+
+  it('without an explicit preference the OS reduce report drives the transition gate', async () => {
+    const restoreOs = stubOsReduce(true)
+    const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
+    try {
+      await renderOverlay(source)
+      expect(document.querySelector('.vpo-progress')).toHaveAttribute('data-reduced-motion', 'true')
+    } finally {
+      restoreOs()
+    }
+  })
+})
