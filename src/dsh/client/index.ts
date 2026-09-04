@@ -84,13 +84,12 @@ export function apply(ctx: ClientContext): void {
       order: 900,
       locale: NS,
       inject: (): VehiclePetInjected => ({
-        usageSessions: sessions,
+        usageSessions: sessions as unknown as UsageSessionsSource,
         hooks: {
           sessionView: adapter,
           locale: ctx.locale,
         },
         sessionBinding: adapter.getBindingInfo,
-        usageSessions: sessions as unknown as UsageSessionsSource,
         clientGeneration: vehiclePetClientGeneration,
       }),
     }, VehiclePetOverlay)
