@@ -211,11 +211,14 @@ describe('no network, model, transport, or runtime pack installation anywhere in
       .filter((f) => f.endsWith('.ts'))
       .map(toPosix)
       .filter((rel) => /ProgressSource\.(ts|tsx)$/.test(rel) && rel !== 'engine/types/core.ts')
+      .filter((rel) => rel !== 'src/dsh/client/usage-progress-source.ts')
     expect(progressSourceImplementations).toEqual([
       'src/dsh/client/OverlayProgressSource.ts',
-      'src/dsh/client/usage-progress-source.ts',
       'src/prototype/MockProgressSource.ts',
     ])
+    // The real source's implementation module (kebab-case name, excluded from
+    // the *ProgressSource.ts suffix inventory above) is inventoried explicitly.
+    expect(existsSync(path.join(SRC, 'dsh/client/usage-progress-source.ts'))).toBe(true)
     const usageSource = readFileSync(path.join(SRC, 'dsh/client/usage-progress-source.ts'), 'utf8')
     expect(usageSource).toContain("USAGE_SOURCE_ID = 'dsh-usage'")
     expect(usageSource).toContain("USAGE_SUBJECT_ID = 'companion'")
