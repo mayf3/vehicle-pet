@@ -45,3 +45,17 @@
 - 不修改 DSH Core。
 - 不扩建 Panel；不以程序化占位 SVG 充当正式美术。
 - 达到 READY_FOR_PRODUCTION_APPLY 即停，PRODUCTION_APPLY（真实 Profile 安装/服务重启）为唯一 Owner Gate。
+
+## Isolated preview operations (restart one-liners, disposable env only)
+
+```bash
+# web (serves until killed; survives launcher exit):
+cd /Users/yanfenma/workspace/project/vehicle-pet-wt-companion-r1
+DSH_REFERENCE_WORKTREE=/Users/yanfenma/workspace/github/deepseek-harness-wt-vehicle-pet-preview-f77b5a2f-20260828 \
+DISPOSABLE_DSH_HOME=/tmp/vehicle-pet-companion-dsh-home-r1 \
+VEHICLE_PET_PLUGIN_ROOT=/Users/yanfenma/workspace/project/vehicle-pet-wt-companion-r1 \
+VEHICLE_PET_DSH_WEB_PORT=3092 node tests/dsh/e2e/launch-dsh-web.mjs
+# mock LLM (session-hosted background task; dies with the session — rerun as needed):
+DSH_REFERENCE_WORKTREE=/Users/yanfenma/workspace/github/deepseek-harness-wt-vehicle-pet-preview-f77b5a2f-20260828 \
+VEHICLE_PET_MOCK_LLM_PORT=8901 node tests/dsh/e2e/mock-supervisor.mjs
+```
