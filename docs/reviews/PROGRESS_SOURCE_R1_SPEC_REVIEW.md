@@ -331,3 +331,29 @@ the accepted head, this reviewer's recommendation becomes ACCEPT with 0 blockers
 and the delegation's `AUTO_APPROVE_IF_ALL_TRUE` precondition
 "independent spec audit = ACCEPT, 0 blockers" can be evaluated against that
 final head rather than against `0331b33`.
+
+## Final-head binding (completed)
+
+```text
+FINAL_ACCEPTED_HEAD = 9c17912574e526943ece14e39834a15e3f30140c
+SEMANTIC_DELTA_AFTER_REVIEW = NONE (lifecycle transition and provenance only: frontmatter status flips proposed → accepted; §13 READY_TO_MARK_ACCEPTED = PENDING_INDEPENDENT_AUDIT → YES with provenance paragraphs; new §14 acceptance records in both Specs; README.md index-row status/activation updates; the review record itself committed as a new file. No change to Goal, Scope, Current State, Observations, Claims/Evidence, Decisions, Contracts, Acceptance items or coverage tables, Alternatives, or Migration/rollback in either Spec — §1–§12 of both Specs are byte-unchanged.)
+FINAL_HEAD_RECHECK = PASS
+RECHECKED_AT = 2026-09-04T14:43:58Z
+RECHECKED_BY = independent-reviewer-agent-r2
+```
+
+Recheck facts:
+
+- `FINAL_ACCEPTED_HEAD` parent is exactly the rechecked head `e7984b206e9f7bb825952cb276d4a22c0f2e0664` (verified via `git rev-parse 9c17912^`), on branch `companion/usage-authority`; worktree clean at the acceptance commit.
+- The full diff `e7984b2..9c17912` was reviewed hunk-by-hunk. The B1 fix is preserved (README V2 row keeps `implementation_authority = none`; USG row keeps `contracts`, matching both frontmatters). Both §14 records correctly bind `REVIEWED_BASE_COMMIT = 3fac52f`, `REVIEWED_PROPOSED_HEAD = ACCEPTANCE_COMMIT_PARENT = e7984b206e9f7bb825952cb276d4a22c0f2e0664`, acceptance actor `mayf3` (executed under the explicit R1_CONT_3 Owner delegation), and `BLOCKERS_REMAINING = 0` — consistent with this review's ACCEPT-with-0-blockers recommendation at `e7984b2`. The records also fix atomic acceptance (`ACCEPTANCE_ORDER = FIRST/SECOND` in one commit), resolving this review's N3, and both record that implementation remains blocked until the accepted Heads are reachable from `mayf3/vehicle-pet:main` or a main-derived implementation base.
+- Changed paths verified (complete list; nothing else changed in the commit):
+  - `docs/specs/VEHICLE_PET_PROGRESS_SOURCE_V2.md` — frontmatter `status: proposed → accepted`; §13 `READY_TO_MARK_ACCEPTED` value + provenance paragraph; new §14 Acceptance record. §1–§12 unchanged.
+  - `docs/specs/DSH_USAGE_PROGRESS_SOURCE_V1.md` — frontmatter `status: proposed → accepted`; §13 `READY_TO_MARK_ACCEPTED` value + provenance paragraph; new §14 Acceptance record. §1–§12 unchanged.
+  - `docs/specs/README.md` — Spec-index rows for both Specs: `proposed → accepted` with accepted-candidate activation wording; implementation-authority cells unchanged (`none` for V2, `contracts` for USG).
+  - `docs/reviews/PROGRESS_SOURCE_R1_SPEC_REVIEW.md` — new file: this review record, committed verbatim (byte-identical to the worktree version at recheck time, i.e. including the `e7984b2` recheck; this completion section is appended afterwards).
+
+Verdict: the acceptance commit contains no semantic delta after review. Review
+recommendation stands as ACCEPT with 0 blockers at the accepted head
+`9c17912574e526943ece14e39834a15e3f30140c`. Acceptance remains the acceptance
+actor's act; both Specs are accepted candidates until this exact Head is
+reachable from `mayf3/vehicle-pet:main` or a main-derived implementation base.
