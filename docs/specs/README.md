@@ -51,7 +51,7 @@ NEXT_AUTHORITY_ACTION = Owner merge decision for the exact accepted overlay revi
 | `VEHICLE_PET_PRODUCT_DIRECTION_V1` | accepted | yes on designated branch/base | invariant | none | `mayf3/vehicle-pet` | none |
 | `CONFIGURABLE_PET_ENGINE_V1` | accepted | yes on designated branch/base | implementation | contracts | `pet-engine`, `bundled-pet-packs`, `prototype-shell` | none |
 | `DSH_PET_OVERLAY_ADAPTER_V1` | accepted | not yet; accepted candidate until the exact accepted revision is reachable from `mayf3/vehicle-pet:main` or a main-derived implementation base | implementation | contracts | `dsh-bundle-plugin`, `shell-overlay`, `compact-pet-surface`, `session-visual-reactions` | none |
-| `VEHICLE_PET_PROGRESS_SOURCE_V2` | proposed | no | implementation | none | `progress-source-registration`, `post-v1-external-progress-sources`, `token-usage-consumption-boundary` | none |
-| `DSH_USAGE_PROGRESS_SOURCE_V1` | proposed | no | implementation | contracts | `dsh-usage-progress-source`, `counts-only-token-economy`, `usage-ledger-persistence` | none |
+| `VEHICLE_PET_PROGRESS_SOURCE_V2` | accepted | not yet; accepted candidate until the exact accepted revision is reachable from `mayf3/vehicle-pet:main` or a main-derived implementation base | implementation | none | `progress-source-registration`, `post-v1-external-progress-sources`, `token-usage-consumption-boundary` | none |
+| `DSH_USAGE_PROGRESS_SOURCE_V1` | accepted | not yet; accepted candidate until the exact accepted revision is reachable from `mayf3/vehicle-pet:main` or a main-derived implementation base | implementation | contracts | `dsh-usage-progress-source`, `counts-only-token-economy`, `usage-ledger-persistence` | none |
 
 `CONFIGURABLE_PET_ENGINE_V1` and `DSH_PET_OVERLAY_ADAPTER_V1` are governed by `VEHICLE_PET_PRODUCT_DIRECTION_V1`; the adapter Spec is additionally governed by the accepted Engine Spec and Governance Adoption Spec.
