@@ -93,3 +93,46 @@ Reading: at this user's real distribution the fixed ladder crosses are rare
 (<=0.28/active-day even under A); daily perceivable growth is carried mainly by
 the resident within-level bar, while threshold crossings provide the rarer
 "stage-up" moments. Milestone ceremony frequency therefore matters most under A.
+
+## 8. Final calibration decision (2026-09-04, R1_CONT_3 — delegated autonomous decision)
+
+Per Owner delegation (`OWNER_DELEGATED_DECISION_AUTHORITY = YES`, Goal 陪伴
+R1_CONT_3), the A/B/C options above were calibration material only. The Goal
+Orchestrator selected the unique final policy that meets all frozen
+calibration targets; it is ratified in
+`docs/specs/DSH_USAGE_PROGRESS_SOURCE_V1.md` §3.5/§3.6.
+
+```text
+FINAL_TOKEN_ECONOMY_POLICY = daily diminishing returns, log2 form
+FINAL_COUNTED_CLASSES       = uncachedInputTokens + outputTokens
+FINAL_PROGRESS_FUNCTION     = dailyTargetPoints(T) = min(12000, 1350 x log2(1 + T / 1000000)); per-day applied increment = floor(target(dayTokens)) - alreadyApplied(day)
+FINAL_DAILY_CAP             = 12000
+FINAL_HISTORICAL_BACKFILL   = NO
+FINAL_CEREMONY_POLICY       = engine default (per-threshold, never repeated, merged multi-level, short/skippable/degradable); micro progress has no ceremony
+```
+
+Verification against the measured distribution (full-day targets, floor):
+
+```text
+persona (counted/day)      daily pts   L2 / L5 / L12
+median  13,028,844         5,144       day 2 / day 20 (~3.3 wk) / day 487 (~18.3 mo)
+light        250,000         435       day 23 / — / —   (L1 bar +4.3%/day)
+heavy     30,000,000       6,688       day 2 / day 15 / day 374
+heavy     47,479,532       7,559       day 2 / day 14 / day 331
+p25        5,791,707       3,731      day 3
+min       241,724   421.7 -> floor-int day gains never zero on active days
+zero            0               0     (NO_USAGE_NO_PROGRESS)
+1e9 (pathological)      12,000 cap   => install-day max 1 crossing (cap < L3 30,000)
+```
+
+Rejected alternatives and why:
+
+- linear A (1.0/1k): heavy 30M day = 30,000 pts → install-day crosses L2+L3
+  (multi-jump) and violates the ≤1-crossing target;
+- linear B/C: light persona earns 100/40 pts per day → L2 at 100+ days and
+  near-invisible micro progress, violating light-user targets;
+- log2 with large scale (S=4M): light day only ~190–210 pts → L1 bar <2.1%/day,
+  weaker early attachment for the same median outcomes;
+- selected S=1M/C=1350/cap=12000: the only evaluated family meeting every
+  frozen target simultaneously; cap makes the install-day invariant
+  unconditional rather than distribution-dependent.

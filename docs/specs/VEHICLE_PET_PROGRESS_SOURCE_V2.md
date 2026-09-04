@@ -103,6 +103,9 @@ values under the host's higher-seq-wins projection delivery, keyed by stable
 `(sessionId, turn, step)` identity, never derived from raw session logs — are
 the candidate source class for the follow-on implementation authorization.
 Prior structural investigation: `docs/investigations/DSH_USAGE_PROGRESS_SOURCE_INPUTS.md`.
+The proposed source-specific implementation authority for this class is
+`DSH_USAGE_PROGRESS_SOURCE_V1`; it carries the Owner-ratified calibration and
+authorizes no code while `proposed`.
 
 ## 5. Non-goals
 
