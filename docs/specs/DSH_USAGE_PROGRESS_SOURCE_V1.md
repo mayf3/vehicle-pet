@@ -1,6 +1,6 @@
 ---
 spec_id: DSH_USAGE_PROGRESS_SOURCE_V1
-status: proposed
+status: accepted
 spec_kind: implementation
 authority_level: governing_spec
 implementation_authority: contracts
@@ -479,5 +479,51 @@ OPEN_OWNER_DECISIONS = NONE
 NORMATIVE_TBD = NONE
 UNRESOLVED_AUTHORITY_CONFLICT = NONE
 PARTIAL_SUPERSESSION = NONE
-READY_TO_MARK_ACCEPTED = PENDING_INDEPENDENT_AUDIT
+READY_TO_MARK_ACCEPTED = YES
 ```
+
+`READY_TO_MARK_ACCEPTED = YES`: the independent audit of the exact Base
+`3fac52f` and Head `e7984b2` returned `ACCEPT` with zero blockers, and Owner
+`mayf3` preauthorized acceptance
+(`OWNER_SPEC_ACCEPTANCE_POLICY = AUTO_APPROVE_IF_ALL_TRUE`) under the explicit
+delegation of Goal 陪伴 (R1_CONT_3, `OWNER_DELEGATED_DECISION_AUTHORITY =
+YES`). See §14 for the acceptance record.
+
+## 14. Acceptance record
+
+```text
+SPEC_LIFECYCLE = proposed → accepted candidate
+SPEC_ACCEPTANCE_RECORD_V1 = YES
+ACCEPTED_BY = mayf3
+ACCEPTANCE_ACTOR = mayf3 (executed by the Goal Orchestrator under explicit Owner delegation)
+ACCEPTED_AT = 2026-09-04T14:40:19Z
+OWNER_ACCEPTANCE_DECISION = PREAUTHORIZED_ACCEPT
+ACCEPTANCE_EXECUTED_UNDER_EXPLICIT_OWNER_DELEGATION = YES
+INDEPENDENT_AUDIT_RESULT = ACCEPT
+REVIEWED_BASE_COMMIT = 3fac52f
+REVIEWED_PROPOSED_HEAD = e7984b206e9f7bb825952cb276d4a22c0f2e0664
+ACCEPTANCE_COMMIT_PARENT = e7984b206e9f7bb825952cb276d4a22c0f2e0664
+SEMANTIC_DELTA_AFTER_REVIEW = NONE (lifecycle transition only: proposed → accepted candidate)
+BLOCKERS_CLOSED = B01, B02, B04, B05 (audit rounds at 7ff9a58, 0331b33; all closed and re-verified at e7984b2)
+BLOCKERS_REMAINING = 0
+OPEN_OWNER_DECISIONS = NONE
+NORMATIVE_TBD = NONE
+ACCEPTANCE_ORDER = SECOND (atomically accepted with, and logically after, its parent VEHICLE_PET_PROGRESS_SOURCE_V2)
+```
+
+Binding facts:
+
+- The independent audit bound the reviewed Base `3fac52f` and the reviewed
+  Head `e7984b206e9f7bb825952cb276d4a22c0f2e0664` and returned `ACCEPT` with
+  zero blockers; all earlier blockers are closed and re-verified at that Head.
+- This acceptance commit's parent is exactly the reviewed Head; the only
+  semantic change is the lifecycle transition `proposed → accepted candidate`
+  recorded here and in the matching sections of `VEHICLE_PET_PROGRESS_SOURCE_V2`
+  and `docs/specs/README.md`.
+- This Spec is now an `accepted candidate`: `status: accepted` with
+  `implementation_authority: contracts` unchanged. It is not yet active
+  repository authority because this exact accepted Head is not yet reachable
+  from `mayf3/vehicle-pet:main`.
+- Implementation of §9 remains blocked until this exact accepted Head and its
+  parent's accepted Head are reachable from `mayf3/vehicle-pet:main` or a
+  main-derived implementation base; acceptance alone authorizes no code.
