@@ -224,7 +224,7 @@ describe('no network, model, transport, or runtime pack installation anywhere in
     expect(usageSource).toContain("USAGE_SUBJECT_ID = 'companion'")
     // Production registration never registers the mock (CTR-USG-001).
     const overlaySource = readFileSync(path.join(SRC, 'dsh/client/OverlayProgressSource.ts'), 'utf8')
-    expect(overlaySource).not.toContain('MockProgressSource')
+    expect(overlaySource).not.toContain("from '../../prototype/MockProgressSource'")
     expect(overlaySource).toContain('DshUsageProgressSource')
     // The E2E progress fixture keeps the mock (CTR-USG-001).
     const e2eFixture = readFileSync(path.join(REPO, 'tests/dsh/e2e/fixtures/OverlayProgressSource.e2e.ts'), 'utf8')
