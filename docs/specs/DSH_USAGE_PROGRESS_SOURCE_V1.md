@@ -237,7 +237,7 @@ Owner preauthorized acceptance
 | NO_USAGE_NO_PROGRESS = YES | delta 0 → gain 0 → no snapshot | MET |
 
   Exact function vectors: T = 0 → 0; 250,000 → 434; 13,028,844 → 5,143; 30,000,000 → 6,688; 47,479,532 → 7,559; 1,000,000,000 → 12,000.
-- Rejected alternative: larger scale (e.g. 4,000,000) which halves light-day feedback (~200 pts) for no median benefit; smaller caps that make the install-day invariant distribution-dependent.
+- Rejected alternative: larger scale (e.g. 4,000,000) which cuts light-day feedback to well under half (~120-220 pts depending on coefficient matching) for no median benefit; smaller caps that make the install-day invariant distribution-dependent.
 - Reason: the only evaluated family meeting every frozen target simultaneously; the cap makes the install-day invariant unconditional.
 - Owner input remaining: NONE
 
