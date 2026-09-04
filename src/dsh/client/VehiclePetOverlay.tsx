@@ -291,6 +291,9 @@ function OverlaySurface({
   const [petInteractionCount, setPetInteractionCount] = useState(0)
   const collapsed = preferences.collapsed
   const effectiveInteraction: VehiclePetInteractionState = collapsed ? 'VISIBLE' : interaction
+  // Same effective-preference computation as the Engine provider: an explicit
+  // user choice always wins over the OS setting (Owner direction R1_CONT).
+  const reducedMotion = preferences.reducedMotion ?? systemPrefersReducedMotion()
   const { t, commitPreferences } = useOverlayChrome()
   const { snapshot } = usePetEngine()
   const petButtonRef = useRef<HTMLButtonElement | null>(null)
@@ -401,6 +404,7 @@ function OverlaySurface({
             <span className="vpo-scene">
               <PetSceneRenderer subjectInteractive={false} interactionCount={petInteractionCount} presentationMode="compact-overlay" />
             </span>
+            <WithinLevelMicroProgress viewModel={snapshot.viewModel} reducedMotion={reducedMotion} />
             {sessionView.live === 'needs-input' ? <span className="vpo-badge" aria-hidden="true" /> : null}
           </button>
         )}
@@ -439,6 +443,28 @@ function OverlaySurface({
         />
       ) : null}
     </div>
+  )
+}
+
+/**
+ * Resident within-level micro progress: a non-interactive, aria-hidden sliver
+ * under the pet so stage-internal progress is perceivable without opening the
+ * panel. It renders from the derived view model only, adds no pointer/focus
+ * target, and therefore does not alter the CTR-OVERLAY-004 click contract.
+ * The width transition is gated by the overlay's effective reduced-motion
+ * preference (explicit plugin preference first, OS setting as fallback), so an
+ * explicit ON silences it regardless of the OS report.
+ */
+function WithinLevelMicroProgress({ viewModel, reducedMotion }: {
+  viewModel: { withinLevelEarned: number; withinLevelSpan: number; capped: boolean } | null | undefined
+  reducedMotion: boolean
+}): ReactElement | null {
+  if (!viewModel || viewModel.withinLevelSpan <= 0 || viewModel.capped) return null
+  const percent = Math.max(0, Math.min(100, Math.round((viewModel.withinLevelEarned / viewModel.withinLevelSpan) * 100)))
+  return (
+    <span className="vpo-progress" aria-hidden="true" data-reduced-motion={reducedMotion ? 'true' : 'false'} data-within-level-percent={percent}>
+      <span className="vpo-progressFill" style={{ width: `${percent}%` }} />
+    </span>
   )
 }
 
