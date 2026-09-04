@@ -1033,12 +1033,17 @@ test('CROSSTAB_COLLAPSE_RESTORE_VISIBLE_TEST. two tabs destroy stale Panel/Dialo
   await expect.poll(() => second.locator(PET).count(), { timeout: 30_000 }).toBe(1)
 
   const instrumentWrites = async (target: Page) => target.evaluate(() => {
+    // Count PREFERENCE writes only (the write-loop contract under test).
+    // The usage ledger record (vehicle-pet/usage-ledger/v1, DSH_USAGE_
+    // PROGRESS_SOURCE_V1 CTR-USG-009) is a separate sanctioned writer whose
+    // persistence frequency is bounded by its own change-only rule.
+    const preferenceKey = 'vehicle-pet/overlay-preferences/v1'
     const state = { writes: 0 }
     const prototype = Storage.prototype
     const native = prototype.setItem
-    prototype.setItem = function (...args) {
-      state.writes += 1
-      return native.apply(this, args)
+    prototype.setItem = function (key, ...args) {
+      if (String(key) === preferenceKey) state.writes += 1
+      return native.apply(this, [key, ...args])
     }
     ;(window as unknown as { __vpoPreferenceWrites: typeof state }).__vpoPreferenceWrites = state
   })

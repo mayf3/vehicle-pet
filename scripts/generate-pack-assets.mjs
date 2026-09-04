@@ -492,10 +492,49 @@ fleetRecipes['sprite-subject-pod--l3'] = withProtectionVehicle(fleetRecipes['spr
 fleetRecipes['sprite-subject-pod--l4'] = fleetRecipes['sprite-cabin-safety']
 
 // ---------------------------------------------------------------------------
+// Master-image-driven subject sprites (GOAL 陪伴 R1正式美术; provenance in
+// assets/masters/PROVENANCE.json). The committed master PNG is cut at fixed
+// cell boundaries and deterministically fitted; no image model runs at build
+// time. Master cells supersede the SVG recipes above for these five IDs.
+// ---------------------------------------------------------------------------
+const AUTONOMOUS_FLEET_MASTER = path.join(PACKS_DIR, 'autonomous-fleet/assets/masters/master-road-test-l1-l5.png')
+const MASTER_SPRITE_CELLS = {
+  'sprite-subject-pod--l1': 0,
+  'sprite-subject-pod--l2': 1,
+  'sprite-subject-pod--l3': 2,
+  'sprite-subject-pod--l4': 3,
+  'sprite-subject-pod': 4,
+}
+const MASTER_CUTS = [0, 255, 527, 845, 1192, 1536]
+
+async function renderMasterSprite(cellIndex) {
+  const cellBuffer = await sharp(AUTONOMOUS_FLEET_MASTER)
+    .extract({
+      left: MASTER_CUTS[cellIndex],
+      top: 0,
+      width: MASTER_CUTS[cellIndex + 1] - MASTER_CUTS[cellIndex],
+      height: 1024,
+    })
+    .png()
+    .toBuffer()
+  const trimmed = await sharp(cellBuffer).trim({ threshold: 12 }).toBuffer()
+  const png = await sharp(trimmed)
+    .resize(480, 480, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+    .png({ compressionLevel: 9 })
+    .toBuffer()
+  const webp = await sharp(png).webp({ lossless: true }).toBuffer()
+  return { png, webp, width: 480, height: 480 }
+}
+
+// ---------------------------------------------------------------------------
 // Rendering and sync
 // ---------------------------------------------------------------------------
 
 async function renderAsset(stem, packId) {
+  const masterCell = packId === 'autonomous-fleet' ? MASTER_SPRITE_CELLS[stem] : undefined
+  if (masterCell !== undefined) {
+    return renderMasterSprite(masterCell)
+  }
   const recipe = RECIPES[packId]?.[stem]
   if (recipe === undefined) {
     throw new Error(`no recipe for pack ${packId} asset stem ${stem}`)

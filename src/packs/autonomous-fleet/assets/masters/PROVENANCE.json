@@ -1,0 +1,21 @@
+{
+  "master": "master-road-test-l1-l5.png",
+  "generatedWith": "ChatGPT image generation (Goal 陪伴 R1 art route; CHATGPT_BROWSER_ROUTE = CODEX_SIDEBAR_BROWSER)",
+  "date": "2026-09-04",
+  "rounds": [
+    "R1: three original candidate lineups generated from the sanitized ART_REQUEST_PACKET; independent blind review selected candidate A (cream/ivory + yellow, 62/80, 112px recognition PASS, no brand risk)",
+    "R2/R3: two focused revisions of candidate A per the frozen stage semantics (humans leave the cabin as autonomy grows; escorts trail behind; no ground shadows)"
+  ],
+  "deterministicPostProcess": [
+    "cell 5 windshield: driver silhouette removed via fixed-coordinate per-row glass fill (columns 1288-1318 sampled, region 1319-1371 x 442-500, script in generate-pack-assets.mjs history)",
+    "asset cells cut at fixed x boundaries [0,255,527,845,1192,1536]"
+  ],
+  "cells": {
+    "sprite-subject-pod--l1": 0,
+    "sprite-subject-pod--l2": 1,
+    "sprite-subject-pod--l3": 2,
+    "sprite-subject-pod--l4": 3,
+    "sprite-subject-pod": 4
+  },
+  "selection": "blind review record in docs/reviews/; no Owner selection required (delegated)"
+}

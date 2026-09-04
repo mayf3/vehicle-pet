@@ -868,7 +868,7 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 13978,
+      "byteSizeCompressed": 166996,
       "altText": {
         "zh-CN": "你的 Pet：主驾有人、副驾空座，后方保护车随行",
         "en": "Your pet: driver aboard, empty co-pilot seat, protection vehicle behind"
@@ -881,7 +881,7 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 21507,
+      "byteSizeCompressed": 301031,
       "altText": {
         "zh-CN": "你的 Pet：主驾有人、副驾空座，后方保护车随行",
         "en": "Your pet: driver aboard, empty co-pilot seat, protection vehicle behind"
@@ -894,7 +894,7 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 11864,
+      "byteSizeCompressed": 144172,
       "altText": {
         "zh-CN": "你的 Pet：主驾有人、副驾空座，无后方保护车",
         "en": "Your pet: driver aboard, empty co-pilot seat, no protection vehicle"
@@ -907,7 +907,7 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 19464,
+      "byteSizeCompressed": 249140,
       "altText": {
         "zh-CN": "你的 Pet：主驾有人、副驾空座，无后方保护车",
         "en": "Your pet: driver aboard, empty co-pilot seat, no protection vehicle"
@@ -920,7 +920,7 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 13788,
+      "byteSizeCompressed": 134194,
       "altText": {
         "zh-CN": "你的 Pet：主驾空座、副驾安全员随行，后方保护车随行",
         "en": "Your pet: empty driver seat, safety officer aboard, protection vehicle behind"
@@ -933,7 +933,7 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 21571,
+      "byteSizeCompressed": 219721,
       "altText": {
         "zh-CN": "你的 Pet：主驾空座、副驾安全员随行，后方保护车随行",
         "en": "Your pet: empty driver seat, safety officer aboard, protection vehicle behind"
@@ -946,7 +946,7 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 11672,
+      "byteSizeCompressed": 128334,
       "altText": {
         "zh-CN": "你的 Pet：主驾空座、副驾安全员随行，无后方保护车",
         "en": "Your pet: empty driver seat, safety officer aboard, no protection vehicle"
@@ -959,7 +959,7 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 19514,
+      "byteSizeCompressed": 208874,
       "altText": {
         "zh-CN": "你的 Pet：主驾空座、副驾安全员随行，无后方保护车",
         "en": "Your pet: empty driver seat, safety officer aboard, no protection vehicle"
@@ -972,7 +972,7 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 9618,
+      "byteSizeCompressed": 130836,
       "altText": {
         "zh-CN": "你的 Pet：无人车座舱",
         "en": "Your pet: the autonomous cabin pod"
@@ -985,7 +985,7 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 15223,
+      "byteSizeCompressed": 212948,
       "altText": {
         "zh-CN": "你的 Pet：无人车座舱",
         "en": "Your pet: the autonomous cabin pod"

@@ -12,6 +12,7 @@ import { type ReactElement } from 'react';
 import type { HostObservable, InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots';
 import { type PetStorageAdapter } from '../../engine';
 import type { VehiclePetBindingInfo } from './session-state-adapter';
+import type { UsageSessionsSource } from './usage-progress-source';
 import type { VehiclePetOverlayPreferences, VehiclePetSessionView } from './types';
 /** The injected hooks share the renderer binds from the `hooks` compartment. */
 export interface VehiclePetInjected {
@@ -24,6 +25,8 @@ export interface VehiclePetInjected {
     };
     /** Structured adapter-binding handshake; exposed as inert data attributes. */
     sessionBinding?: () => VehiclePetBindingInfo;
+    /** Injected `ctx.sessions` face feeding the authorized usage source (DSH_USAGE_PROGRESS_SOURCE_V1). */
+    usageSessions?: UsageSessionsSource;
     clientGeneration?: string;
 }
 export type VehiclePetOverlayProps = PropsRuntime<'shell.overlay'> & InjectFace<VehiclePetInjected> & PropsLocale<'vehicle-pet'>;

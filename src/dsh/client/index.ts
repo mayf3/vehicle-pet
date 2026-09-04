@@ -17,6 +17,7 @@ import { createE2EResourceLedger } from './e2e-resource-ledger'
 import { NS, en, zh } from './locales'
 import { VehiclePetSessionAdapter, type VehiclePetSessionsSource } from './session-state-adapter'
 import { adoptStyles } from './styles'
+import type { UsageSessionsSource } from './usage-progress-source'
 import { VehiclePetOverlay, type VehiclePetInjected } from './VehiclePetOverlay'
 
 export const inject = ['slots', 'sessions', 'locale']
@@ -83,6 +84,7 @@ export function apply(ctx: ClientContext): void {
       order: 900,
       locale: NS,
       inject: (): VehiclePetInjected => ({
+        usageSessions: sessions as unknown as UsageSessionsSource,
         hooks: {
           sessionView: adapter,
           locale: ctx.locale,
