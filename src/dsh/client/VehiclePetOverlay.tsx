@@ -22,7 +22,8 @@ import {
 import { dshPackBundles, dshDefaultPackId } from './engine-bundles'
 import type { VehiclePetLocaleKey } from './locales'
 import { createOverlayProgressSource } from './OverlayProgressSource'
-import type { VehiclePetBindingInfo } from './session-state-adapter'
+import type { VehiclePetBindingInfo, VehiclePetSessionsSource } from './session-state-adapter'
+import type { UsageSessionListLike } from './UsageProgressSource'
 import { adoptStorageEvent, loadOverlayPreferences, saveOverlayPreferences, subscribeStorageEvents } from './preferences'
 import type {
   VehiclePetInteractionState, VehiclePetOverlayPreferences, VehiclePetSessionView,
@@ -37,6 +38,12 @@ export interface VehiclePetInjected {
     sessionView: HostObservable<VehiclePetSessionView>
     locale: HostObservable<{ active: string; revision: number }>
   }
+  /**
+   * Structured sessions service feeding the usage progress source
+   * (DSH_USAGE_PROGRESS_SOURCE_V1); absent in the E2E mock build. Top-level
+   * member (not a hook): the hooks compartment carries HostObservable faces.
+   */
+  usageSessions?: VehiclePetSessionsSource
   /** Structured adapter-binding handshake; exposed as inert data attributes. */
   sessionBinding?: () => VehiclePetBindingInfo
   clientGeneration?: string
@@ -71,6 +78,7 @@ export function useOverlayCommitPreferences(): OverlayChrome['commitPreferences'
 
 export function VehiclePetOverlay(props: VehiclePetOverlayProps): ReactElement | null {
   const { useSessionView, useLocale, useSessions, t, sessionBinding, clientGeneration } = props
+  const usageSessions = props.usageSessions
 
   const sessionView = useSessionView(view => view)
   const activeLocale = useLocale(snapshot => snapshot.active)
@@ -149,6 +157,7 @@ export function VehiclePetOverlay(props: VehiclePetOverlayProps): ReactElement |
         sessionListContainsCurrent={sessionListContainsCurrent}
         bindingInfo={bindingInfo}
         clientGeneration={clientGeneration}
+        usageSessions={usageSessions}
       />
     </OverlayChromeContext.Provider>
   )
@@ -210,6 +219,7 @@ function OverlayEngineGate({
   sessionListContainsCurrent,
   bindingInfo,
   clientGeneration,
+  usageSessions,
 }: {
   preferences: VehiclePetOverlayPreferences
   sessionView: VehiclePetSessionView
@@ -220,10 +230,22 @@ function OverlayEngineGate({
   sessionListContainsCurrent: boolean
   bindingInfo: VehiclePetBindingInfo | undefined
   clientGeneration: string | undefined
+  usageSessions: VehiclePetSessionsSource | undefined
 }): ReactElement | null {
   const [storage, setStorage] = useState<PetStorageAdapter | null>(null)
   const progressRuntime = useMemo(() => createOverlayProgressSource(clientGeneration), [clientGeneration])
   useEffect(() => () => progressRuntime.dispose(), [progressRuntime])
+  // CTR-USG-013: the structured list feed lives in the same fiber as the
+  // source; every observe() result is already deduped inside the source.
+  useEffect(() => {
+    const observe = progressRuntime.observe
+    if (usageSessions === undefined || observe === undefined) return
+    const feed = () => {
+      observe(usageSessions.list.getSnapshot() as unknown as UsageSessionListLike)
+    }
+    feed()
+    return usageSessions.list.subscribe(feed)
+  }, [progressRuntime, usageSessions])
   useEffect(() => acquireOwnedOverlayStorage({
     create: () => IndexedDbPetStorage.create(),
     onReady: setStorage,

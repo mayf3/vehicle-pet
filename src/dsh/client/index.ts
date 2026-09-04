@@ -83,6 +83,7 @@ export function apply(ctx: ClientContext): void {
       order: 900,
       locale: NS,
       inject: (): VehiclePetInjected => ({
+        usageSessions: sessions,
         hooks: {
           sessionView: adapter,
           locale: ctx.locale,

@@ -203,18 +203,26 @@ describe('no network, model, transport, or runtime pack installation anywhere in
     expect(existsSync(mockSourcePath)).toBe(true)
     const engineSources = srcFiles.filter((f) => toPosix(f).startsWith('src/engine/')).map(toPosix)
     expect(engineSources.some((rel) => rel.includes('MockProgressSource'))).toBe(false)
-    // DSH_PET_OVERLAY_ADAPTER_V1 additionally authorizes one zero-progress
-    // overlay placeholder that must REUSE the prototype implementation
-    // (import it), never fork a second progress semantics.
+    // DSH_USAGE_PROGRESS_SOURCE_V1 (accepted) authorizes exactly one real
+    // source for the production DSH overlay: DshUsageProgressSource
+    // (counts-only tokenUsage seam). The prototype shell and the E2E
+    // fixture keep the mock; the engine itself still knows no source.
     const progressSourceImplementations = walk(SRC)
       .filter((f) => f.endsWith('.ts'))
       .map(toPosix)
       .filter((rel) => /ProgressSource\.(ts|tsx)$/.test(rel) && rel !== 'engine/types/core.ts')
     expect(progressSourceImplementations).toEqual([
       'src/dsh/client/OverlayProgressSource.ts',
+      'src/dsh/client/UsageProgressSource.ts',
       'src/prototype/MockProgressSource.ts',
     ])
     const overlaySource = readFileSync(path.join(SRC, 'dsh/client/OverlayProgressSource.ts'), 'utf8')
-    expect(overlaySource).toContain("from '../../prototype/MockProgressSource'")
+    expect(overlaySource).toContain("from './UsageProgressSource'")
+    expect(overlaySource).not.toContain("from '../../prototype/MockProgressSource'")
+    const usageSource = readFileSync(path.join(SRC, 'dsh/client/UsageProgressSource.ts'), 'utf8')
+    expect(usageSource).toContain("from '../../engine'")
+    expect(usageSource).not.toContain('fetch(')
+    expect(usageSource).not.toContain('XMLHttpRequest')
+    expect(usageSource).not.toContain('WebSocket')
   })
 })
