@@ -45,6 +45,12 @@ export interface ConversationLike {
 /** The `SessionSummary` fields this adapter reads. */
 export interface SessionSummaryLike {
   readonly pendingInteraction?: string
+  /**
+   * Host-computed projection values (counts-only numeric fields; the
+   * DSH_USAGE_PROGRESS_SOURCE_V1 seam). This adapter never reads them —
+   * they are carried structurally for the usage progress source's list feed.
+   */
+  readonly projectionValues?: Readonly<Record<string, unknown>>
 }
 
 /** The `SessionListState` fields this adapter reads. */
