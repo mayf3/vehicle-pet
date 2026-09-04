@@ -110,10 +110,10 @@ test('real DSH usage drives the resident pet through the snapshot seam', async (
   // both daily tokens and cumulative points never regressed.
   const parse = (raw: string | null) => {
     if (raw === null) return null
-    const parsed = JSON.parse(raw) as { cumulativePoints?: number; byDay?: Record<string, { tokens?: number }> }
+    const parsed = JSON.parse(raw) as { cumulativePoints?: number; byDay?: Record<string, { dailyTokens?: number }> }
     return {
       points: parsed.cumulativePoints ?? 0,
-      tokens: Object.values(parsed.byDay ?? {}).reduce((sum, day) => sum + (day.dailyTokens ?? day.tokens ?? 0), 0),
+      tokens: Object.values(parsed.byDay ?? {}).reduce((sum, day) => sum + (day.dailyTokens ?? 0), 0),
     }
   }
   const observed = [parse(after1.ledgerRaw), parse(after2.ledgerRaw)].filter(v => v !== null) as Array<{ points: number; tokens: number }>
