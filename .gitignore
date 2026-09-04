@@ -7,3 +7,4 @@ playwright-report/
 .DS_Store
 test-results-dsh/
 tests/dsh/e2e/.artifacts/
+.art-candidates/
