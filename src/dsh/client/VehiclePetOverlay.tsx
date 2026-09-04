@@ -23,6 +23,7 @@ import { dshPackBundles, dshDefaultPackId } from './engine-bundles'
 import type { VehiclePetLocaleKey } from './locales'
 import { createOverlayProgressSource } from './OverlayProgressSource'
 import type { VehiclePetBindingInfo } from './session-state-adapter'
+import type { UsageSessionsSource } from './usage-progress-source'
 import { adoptStorageEvent, loadOverlayPreferences, saveOverlayPreferences, subscribeStorageEvents } from './preferences'
 import type {
   VehiclePetInteractionState, VehiclePetOverlayPreferences, VehiclePetSessionView,
@@ -39,6 +40,8 @@ export interface VehiclePetInjected {
   }
   /** Structured adapter-binding handshake; exposed as inert data attributes. */
   sessionBinding?: () => VehiclePetBindingInfo
+  /** Injected `ctx.sessions` face feeding the authorized usage source (DSH_USAGE_PROGRESS_SOURCE_V1). */
+  usageSessions?: UsageSessionsSource
   clientGeneration?: string
 }
 
@@ -70,7 +73,7 @@ export function useOverlayCommitPreferences(): OverlayChrome['commitPreferences'
 }
 
 export function VehiclePetOverlay(props: VehiclePetOverlayProps): ReactElement | null {
-  const { useSessionView, useLocale, useSessions, t, sessionBinding, clientGeneration } = props
+  const { useSessionView, useLocale, useSessions, t, sessionBinding, usageSessions, clientGeneration } = props
 
   const sessionView = useSessionView(view => view)
   const activeLocale = useLocale(snapshot => snapshot.active)
@@ -148,6 +151,7 @@ export function VehiclePetOverlay(props: VehiclePetOverlayProps): ReactElement |
         sessionListCurrent={sessionListCurrent}
         sessionListContainsCurrent={sessionListContainsCurrent}
         bindingInfo={bindingInfo}
+        usageSessions={usageSessions}
         clientGeneration={clientGeneration}
       />
     </OverlayChromeContext.Provider>
@@ -209,6 +213,7 @@ function OverlayEngineGate({
   sessionListCurrent,
   sessionListContainsCurrent,
   bindingInfo,
+  usageSessions,
   clientGeneration,
 }: {
   preferences: VehiclePetOverlayPreferences
@@ -219,10 +224,11 @@ function OverlayEngineGate({
   sessionListCurrent: string | undefined
   sessionListContainsCurrent: boolean
   bindingInfo: VehiclePetBindingInfo | undefined
+  usageSessions: UsageSessionsSource | undefined
   clientGeneration: string | undefined
 }): ReactElement | null {
   const [storage, setStorage] = useState<PetStorageAdapter | null>(null)
-  const progressRuntime = useMemo(() => createOverlayProgressSource(clientGeneration), [clientGeneration])
+  const progressRuntime = useMemo(() => createOverlayProgressSource({ sessions: usageSessions }), [usageSessions])
   useEffect(() => () => progressRuntime.dispose(), [progressRuntime])
   useEffect(() => acquireOwnedOverlayStorage({
     create: () => IndexedDbPetStorage.create(),
