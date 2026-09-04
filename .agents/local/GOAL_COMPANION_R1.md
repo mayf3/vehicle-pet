@@ -13,8 +13,8 @@
 ## Lanes
 
 - LANE_COMPANION_SURFACE = READY_FOR_INTEGRATION → merged via PR #8（微进度条 + effective reduced-motion gate；audit ACCEPT 0 blocker）
-- LANE_VISUAL_ASSETS = ACTIVE（自主路线：ART_REQUEST_PACKET 经授权 CHATGPT_BROWSER_ROUTE 生成 ≥3 套候选 → 独立视觉 Agent 盲评 → 自主选定；连续三轮不可行才 BLOCKED_IMAGE_CAPABILITY）
-- LANE_PROGRESS_SOURCE = ACTIVE（FINAL_TOKEN_ECONOMY_POLICY 已自主确定：daily log2 递减 min(12000, 1350×log2(1+T/1M))，counted = uncachedInput+output，无补算；successor VEHICLE_PET_PROGRESS_SOURCE_V2 + DSH_USAGE_PROGRESS_SOURCE_V1 提案中，独立审计后按 OWNER_SPEC_ACCEPTANCE_POLICY=AUTO_APPROVE_IF_ALL_TRUE（decision=PREAUTHORIZED_ACCEPT） 接受）
+- LANE_VISUAL_ASSETS = INTEGRATED（R1 三候选盲评：A 唯一过线 62/80；R2/R3 集中修订+确定性清舱；母图归档 assets/masters/+PROVENANCE.json；五格精灵接入确定性管线，ASSETS_CHECK_PASS。原注：自主路线：ART_REQUEST_PACKET 经授权 CHATGPT_BROWSER_ROUTE 生成 ≥3 套候选 → 独立视觉 Agent 盲评 → 自主选定；连续三轮不可行才 BLOCKED_IMAGE_CAPABILITY）
+- LANE_PROGRESS_SOURCE = LIVE-VERIFIED（FINAL_TOKEN_ECONOMY_POLICY 已自主确定：daily log2 递减 min(12000, 1350×log2(1+T/1M))，counted = uncachedInput+output，无补算；successor VEHICLE_PET_PROGRESS_SOURCE_V2 + DSH_USAGE_PROGRESS_SOURCE_V1 提案中，独立审计后按 OWNER_SPEC_ACCEPTANCE_POLICY=AUTO_APPROVE_IF_ALL_TRUE（decision=PREAUTHORIZED_ACCEPT） 接受）
 - LANE_INTEGRATION = BLOCKED_BY_DEPENDENCY（等 Progress Source 实现与资产接入后联合集成）
 
 ## Isolated preview (evidence)
