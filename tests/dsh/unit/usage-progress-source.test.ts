@@ -40,7 +40,7 @@ function clock(day: string): UsageClock {
 }
 
 function list(entries: Record<string, { uncached?: number; output?: number; cacheRead?: number; reasoning?: number } | undefined>): UsageSessionListLike {
-  const byId: Record<string, UsageSessionListLike[string]> = {}
+  const byId: Record<string, UsageSessionListLike['byId'][string]> = {}
   for (const [id, usage] of Object.entries(entries)) {
     byId[id] = usage === undefined
       ? undefined
@@ -158,7 +158,7 @@ describe('attribution semantics (CTR-USG-006, CTR-USG-007; ACC-USG-005)', () => 
     source.observe(list({ a: { uncached: 100, output: 0 }, b: { uncached: 100, output: 0 } })) // seed both
     source.observe(list({ a: { uncached: 400_000, output: 0 }, b: { uncached: 400_000, output: 0 } }))
     expect(seen.count()).toBe(2)
-    expect(source.ledger.byDay['2026-09-05'].dailyTokens).toBe(799_800)
+    expect(source.ledger.byDay['2026-09-05']?.dailyTokens).toBe(799_800)
   })
 
   it('attributes usage after a gap to the observation day, never a past day', () => {
@@ -167,8 +167,8 @@ describe('attribution semantics (CTR-USG-006, CTR-USG-007; ACC-USG-005)', () => 
     day1.observe(list({ s1: { uncached: 100, output: 0 } }))
     const day9 = new DshUsageProgressSource({ storage, clock: clock('2026-09-09') })
     day9.observe(list({ s1: { uncached: 1_000, output: 0 } }))
-    expect(day9.ledger.byDay['2026-09-09'].dailyTokens).toBe(900)
-    expect(day9.ledger.byDay['2026-09-09'].appliedPoints).toBeGreaterThanOrEqual(1)
+    expect(day9.ledger.byDay['2026-09-09']?.dailyTokens).toBe(900)
+    expect(day9.ledger.byDay['2026-09-09']?.appliedPoints).toBeGreaterThanOrEqual(1)
     expect(day9.ledger.byDay['2026-09-05']).toBeDefined() // first-day marker retained
   })
 })
@@ -192,12 +192,12 @@ describe('persistence, merge-guard, and pruning (CTR-USG-009, CTR-USG-011; ACC-U
     const source = new DshUsageProgressSource({ storage, clock: clock('2026-09-05') })
     source.observe(list({ s1: { uncached: 6_000_000, output: 0 } }))
     // A newer tab stored a higher cumulative total.
-    const stored = JSON.parse(storage.dump()[USAGE_LEDGER_STORAGE_KEY])
+    const stored = JSON.parse(storage.dump()[USAGE_LEDGER_STORAGE_KEY]!)
     stored.cumulativePoints += 5_000
     stored.revision += 7
     storage.setItem(USAGE_LEDGER_STORAGE_KEY, JSON.stringify(stored))
     source.observe(list({ s1: { uncached: 6_100_000, output: 0 } }))
-    const afterWrite = JSON.parse(storage.dump()[USAGE_LEDGER_STORAGE_KEY])
+    const afterWrite = JSON.parse(storage.dump()[USAGE_LEDGER_STORAGE_KEY]!)
     expect(afterWrite.cumulativePoints).toBeGreaterThanOrEqual(stored.cumulativePoints)
     expect(afterWrite.revision).toBeGreaterThanOrEqual(stored.revision)
   })
