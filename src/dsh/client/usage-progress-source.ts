@@ -298,21 +298,25 @@ export class DshUsageProgressSource implements ProgressSource {
     }
     const dayEntry = this.#ledger.byDay[day] ?? { dailyTokens: 0, appliedPoints: 0 }
     let gainTotal = 0
-    let touched = firstOfDay
+    // Persist only when the observation changed state: a first-of-day prune,
+    // a session seed, or attributed growth (keeps browser-local writes rare
+    // and the crosstab write-loop contract intact).
+    let changed = firstOfDay && (Object.keys(this.#ledger.byDay).length > 0 || Object.keys(this.#ledger.lastSeen).length > 0)
     for (const [sessionId, summary] of Object.entries(byId)) {
       const usage = summary?.projectionValues?.tokenUsage
       if (!usage) continue // capability absent for this session: no new counts (CTR-USG-004)
-      touched = true
       const counted = countedTokensOf(usage)
       const previous = this.#ledger.lastSeen[sessionId]
       if (previous === undefined) {
         // First observation seeds silently and attributes nothing (CTR-USG-006).
         this.#ledger.lastSeen[sessionId] = counted
+        changed = true
         continue
       }
       const delta = Math.max(0, counted - previous)
       if (delta === 0) continue
       this.#ledger.lastSeen[sessionId] = counted
+      changed = true
       dayEntry.dailyTokens += delta
       const target = Math.floor(dailyTargetPoints(dayEntry.dailyTokens))
       const gain = target - dayEntry.appliedPoints
@@ -322,7 +326,7 @@ export class DshUsageProgressSource implements ProgressSource {
         gainTotal += gain
       }
     }
-    if (!touched) return
+    if (!changed) return
     this.#ledger.byDay[day] = dayEntry
     if (gainTotal > 0) {
       this.#ledger.revision += 1
