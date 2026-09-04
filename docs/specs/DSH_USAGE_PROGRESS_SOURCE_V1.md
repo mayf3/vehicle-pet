@@ -146,10 +146,10 @@ tokens/day.
 
 | Frozen target | Selected-policy outcome | Result |
 |---|---|---|
-| MEDIAN_USER_L2 = 2–3 active days | 10,000 pts at 5,144/day → day 2 | MET |
+| MEDIAN_USER_L2 = 2–3 active days | 10,000 pts at 5,143/day → day 2 | MET |
 | MEDIAN_USER_L5 = 3–6 weeks | 100,000 pts → 20 active days ≈ 3.3 calendar weeks at observed 7/8 cadence | MET |
 | MEDIAN_USER_L12 = 12–24 months | 2,500,000 pts → 487 active days ≈ 18.3 calendar months | MET |
-| LIGHT_USER_DAILY_VISIBLE_PROGRESS | 435 pts/day ≈ 4.3% of the L1 micro-progress bar per day | MET |
+| LIGHT_USER_DAILY_VISIBLE_PROGRESS | 434 pts/day ≈ 4.3% of the L1 micro-progress bar per day | MET |
 | LIGHT_USER_L2 < 100 days | 23 active days | MET |
 | HEAVY_USER ≤ 1 level crossing per local day | heavy days earn 6,688–7,559 pts (< L2 span 10,000 at ladder top span) — at most one threshold per day across the whole ladder | MET |
 | INSTALL_DAY_MULTI_LEVEL_JUMP = NO | cap 12,000 < L3 threshold 30,000 — even 1e9 counted tokens cross at most L2 | MET (invariant) |
@@ -313,7 +313,7 @@ resource); the source owns no timers and no network surface.
 
 - Contracts: `CTR-USG-005`
 - Method: unit tests assert exact function values for the frozen vectors
-  (0; 250k; 13,028,844; 30M; 47,479,532; 1e9 → 0; 435; 5,144; 6,688; 7,559;
+  (0; 250k; 13,028,844; 30M; 47,479,532; 1e9 → 0; 434; 5,143; 6,688; 7,559;
   12,000) and the cap invariant `DAILY_CAP < L3 threshold`.
 - Failure condition: any vector mismatch or configuration surface for the
   constants.
