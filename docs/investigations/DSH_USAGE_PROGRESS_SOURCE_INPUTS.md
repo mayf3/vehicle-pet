@@ -115,12 +115,12 @@ Verification against the measured distribution (full-day targets, floor):
 
 ```text
 persona (counted/day)      daily pts   L2 / L5 / L12
-median  13,028,844         5,144       day 2 / day 20 (~3.3 wk) / day 487 (~18.3 mo)
-light        250,000         435       day 23 / — / —   (L1 bar +4.3%/day)
+median  13,028,844         5,143       day 2 / day 20 (~3.3 wk) / day 487 (~18.3 mo)
+light        250,000         434       day 23 / — / —   (L1 bar +4.34%/day)
 heavy     30,000,000       6,688       day 2 / day 15 / day 374
 heavy     47,479,532       7,559       day 2 / day 14 / day 331
 p25        5,791,707       3,731      day 3
-min       241,724   421.7 -> floor-int day gains never zero on active days
+min       241,724   421 (floor) -> floor-int day gains never zero on active days
 zero            0               0     (NO_USAGE_NO_PROGRESS)
 1e9 (pathological)      12,000 cap   => install-day max 1 crossing (cap < L3 30,000)
 ```
