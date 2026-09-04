@@ -198,23 +198,36 @@ describe('no network, model, transport, or runtime pack installation anywhere in
     expect(hits).toEqual([])
   })
 
-  it('registers exactly one Progress Source: the prototype MockProgressSource', () => {
+  it('registers exactly one real source plus the prototype mock (DSH_USAGE_PROGRESS_SOURCE_V1 CTR-USG-001)', () => {
     const mockSourcePath = path.join(SRC, 'prototype', 'MockProgressSource.ts')
     expect(existsSync(mockSourcePath)).toBe(true)
     const engineSources = srcFiles.filter((f) => toPosix(f).startsWith('src/engine/')).map(toPosix)
     expect(engineSources.some((rel) => rel.includes('MockProgressSource'))).toBe(false)
-    // DSH_PET_OVERLAY_ADAPTER_V1 additionally authorizes one zero-progress
-    // overlay placeholder that must REUSE the prototype implementation
-    // (import it), never fork a second progress semantics.
+    // DSH_USAGE_PROGRESS_SOURCE_V1 authorizes exactly one real source
+    // (DshUsageProgressSource) for the DSH overlay; MockProgressSource stays
+    // the prototype/test/E2E-fixture source and is never imported by the
+    // production overlay registration.
     const progressSourceImplementations = walk(SRC)
       .filter((f) => f.endsWith('.ts'))
       .map(toPosix)
       .filter((rel) => /ProgressSource\.(ts|tsx)$/.test(rel) && rel !== 'engine/types/core.ts')
+      .filter((rel) => rel !== 'src/dsh/client/usage-progress-source.ts')
     expect(progressSourceImplementations).toEqual([
       'src/dsh/client/OverlayProgressSource.ts',
       'src/prototype/MockProgressSource.ts',
     ])
+    // The real source's implementation module (kebab-case name, excluded from
+    // the *ProgressSource.ts suffix inventory above) is inventoried explicitly.
+    expect(existsSync(path.join(SRC, 'dsh/client/usage-progress-source.ts'))).toBe(true)
+    const usageSource = readFileSync(path.join(SRC, 'dsh/client/usage-progress-source.ts'), 'utf8')
+    expect(usageSource).toContain("USAGE_SOURCE_ID = 'dsh-usage'")
+    expect(usageSource).toContain("USAGE_SUBJECT_ID = 'companion'")
+    // Production registration never registers the mock (CTR-USG-001).
     const overlaySource = readFileSync(path.join(SRC, 'dsh/client/OverlayProgressSource.ts'), 'utf8')
-    expect(overlaySource).toContain("from '../../prototype/MockProgressSource'")
+    expect(overlaySource).not.toContain("from '../../prototype/MockProgressSource'")
+    expect(overlaySource).toContain('DshUsageProgressSource')
+    // The E2E progress fixture keeps the mock (CTR-USG-001).
+    const e2eFixture = readFileSync(path.join(REPO, 'tests/dsh/e2e/fixtures/OverlayProgressSource.e2e.ts'), 'utf8')
+    expect(e2eFixture).toContain("from '../../../../src/prototype/MockProgressSource'")
   })
 })
