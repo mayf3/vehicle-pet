@@ -10,18 +10,18 @@ describe('autonomous-fleet content freeze (CTR-PET-010, ACC-PET-010)', () => {
 
   it('keeps the frozen zh-CN narrative for every level', () => {
     const summaries = [
-      '主驾有人，副驾无人，有后方保护车，1 辆车。',
-      '主驾有人，副驾无人，无后方保护车，1 辆车。',
-      '主驾无人，副驾有安全员，有后方保护车，1 辆车。',
-      '主驾无人，副驾有安全员，无后方保护车，1 辆车。',
-      '主驾、副驾均无人，无保护车，1 名远程人员监管 1 辆车。',
-      '1 名远程人员监管 3 辆无人车。',
-      '1 名远程人员监管 10 辆无人车。',
-      '1 名远程人员监管 100 辆无人车。',
-      '1 名远程人员监管 1,000 辆无人车。',
-      '1 名远程人员监管 10,000 辆无人车。',
-      '1 名远程人员监管 100,000 辆无人车。',
-      '1 名远程人员监管 1,000,000 辆无人车；V1 当前封顶。',
+      '无人驾驶小车首航出发，车内无人，后方跟着 1 辆迷你保护车。',
+      '车顶立起天线，小车渐入佳境，迷你保护车紧随其后，车内无人。',
+      '第一条黄色饰条与小灯条点亮，保护车同行，车内无人。',
+      '方形传感盒装上车顶，车身略长，保护车随行，车内无人。',
+      '完整传感环绕上车顶，小车眼神更自信，1 名远程人员监管 1 辆无人车。',
+      '车身加宽，双侧灯带点亮，1 名远程人员监管 3 辆无人车。',
+      '更大的传感环上车顶，巡游范围扩大，1 名远程人员监管 10 辆无人车。',
+      '车侧发光显示窗与双灯条点亮，1 名远程人员监管 100 辆无人车。',
+      '加长车身与车顶传感塔就位，1 名远程人员监管 1,000 辆无人车。',
+      '双层传感环转动，1 名远程人员监管 10,000 辆无人车。',
+      '发光灯带、传感环与天线全开，1 名远程人员监管 100,000 辆无人车。',
+      '旗舰传感冠与多灯带点亮，两辆迷你保护车随行，1 名远程人员监管 1,000,000 辆无人车；V2 当前封顶。',
     ]
     expect(manifest.levels.map((l) => l.summary['zh-CN'])).toEqual(summaries)
   })
@@ -29,10 +29,10 @@ describe('autonomous-fleet content freeze (CTR-PET-010, ACC-PET-010)', () => {
   it('assigns the frozen per-level scene/scale/camera/milestone presets', () => {
     const expected = [
       ['road-test', 'individual', 'close', 'inline'],
-      ['road-test', 'individual', 'close', 'inline'],
-      ['road-test', 'individual', 'close', 'inline'],
-      ['road-test', 'individual', 'close', 'inline'],
-      ['road-test', 'individual', 'close', 'inline'],
+      ['road-test-l2', 'individual', 'close', 'inline'],
+      ['road-test-l3', 'individual', 'close', 'inline'],
+      ['road-test-l4', 'individual', 'close', 'inline'],
+      ['road-test-l5', 'individual', 'close', 'inline'],
       ['convoy', 'individual', 'close', 'inline'],
       ['district-fleet', 'individual', 'district', 'inline'],
       ['city-fleet', 'group', 'city', 'inline'],
@@ -81,7 +81,7 @@ describe('autonomous-fleet content freeze (CTR-PET-010, ACC-PET-010)', () => {
     }
   })
 
-  it('uses exactly the frozen eight-scene set', () => {
+  it('uses exactly the frozen twelve-scene set (V2 per-level road-test variants)', () => {
     expect(manifest.scenes.map((s) => s.sceneId).sort()).toEqual(
       [
         'city-fleet',
@@ -91,6 +91,10 @@ describe('autonomous-fleet content freeze (CTR-PET-010, ACC-PET-010)', () => {
         'metro-network',
         'regional-field',
         'road-test',
+        'road-test-l2',
+        'road-test-l3',
+        'road-test-l4',
+        'road-test-l5',
         'terminal-horizon',
       ].sort(),
     )
