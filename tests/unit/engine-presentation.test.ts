@@ -188,10 +188,12 @@ describe('keepsake lifecycle (CTR-PET-023, ACC-PET-023)', () => {
     const backing = createMemoryBackingStore()
     const storage = new MemoryPetStorageAdapter(backing)
     const v1 = fleetBundle().manifestCandidate
+    const v1Downgraded = JSON.parse(JSON.stringify(v1))
+    v1Downgraded.packVersion = '1.0.0'
     const v2 = JSON.parse(JSON.stringify(v1))
     v2.packVersion = '2.0.0'
 
-    const first = new PetEngine({ bundles: [{ manifestCandidate: v1, resolveAssetUrl: fleetBundle().resolveAssetUrl }], defaultPackId: 'autonomous-fleet', storage })
+    const first = new PetEngine({ bundles: [{ manifestCandidate: v1Downgraded, resolveAssetUrl: fleetBundle().resolveAssetUrl }], defaultPackId: 'autonomous-fleet', storage })
     await first.initialize()
     first.ingestSnapshot(snapshot(0, 0))
     first.ingestSnapshot(snapshot(10_000, 1))

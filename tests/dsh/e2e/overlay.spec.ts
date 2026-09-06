@@ -1004,14 +1004,14 @@ test('HARNESS_LOCALE_LIVE_SYNC_TEST. zh-CN → en → zh-CN updates Pack, stage,
   }
   const assertCopy = async (english: boolean) => {
     await expect(page.locator('[data-vehicle-pet-pack-name]')).toHaveText(english ? 'Autonomous Fleet' : '无人车队')
-    await expect(page.locator('[data-vehicle-pet-stage]')).toContainText(english ? 'First Road Test' : '首航路测')
+    await expect(page.locator('[data-vehicle-pet-stage]')).toContainText(english ? 'First Dispatch' : '首航出发')
     await expect(page.locator('[data-vehicle-pet-next-threshold]')).toContainText(english ? 'Next milestone' : '下一目标')
     await expect(page.locator('[data-vehicle-pet-keepsake]')).toHaveText(english ? 'No keepsakes yet' : '还没有纪念品')
     const trigger = page.locator('[data-vehicle-pet-open-journey]')
     await trigger.click()
     const dialog = page.locator('[data-vehicle-pet-dialog]')
     await expect(dialog).toHaveAttribute('aria-label', english ? 'Growth Journey' : '成长旅程')
-    await expect(dialog).toContainText(english ? 'First run on the road; road testing begins.' : '第一次上路，路测正式开始。')
+    await expect(dialog).toContainText(english ? 'First run on the road; the journey begins.' : '第一次上路，旅程正式开始。')
     await page.keyboard.press('Escape')
   }
 
