@@ -11,7 +11,7 @@ scope:
   - session-visual-reactions
 governed_by:
   - VEHICLE_PET_PRODUCT_DIRECTION_V1
-  - CONFIGURABLE_PET_ENGINE_V1
+  - CONFIGURABLE_PET_ENGINE_V2
   - VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V1
 external_authorities:
   - repository: mayf3/deepseek-harness
