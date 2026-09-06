@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "packId": "autonomous-fleet",
-  "packVersion": "1.0.0",
+  "packVersion": "2.0.0",
   "name": {
     "zh-CN": "无人车队",
     "en": "Autonomous Fleet"
@@ -18,16 +18,16 @@
       "levelId": "l1",
       "threshold": 0,
       "stageName": {
-        "zh-CN": "首航路测",
-        "en": "First Road Test"
+        "zh-CN": "首航出发",
+        "en": "First Dispatch"
       },
       "summary": {
-        "zh-CN": "主驾有人，副驾无人，有后方保护车，1 辆车。",
-        "en": "A driver in the main seat, empty co-pilot seat, a protection car behind: 1 vehicle."
+        "zh-CN": "无人驾驶小车首航出发，车内无人，后方跟着 1 辆迷你保护车。",
+        "en": "An unmanned car sets out on its first run, a mini escort car following behind."
       },
       "milestone": {
-        "zh-CN": "第一次上路，路测正式开始。",
-        "en": "First run on the road; road testing begins."
+        "zh-CN": "第一次上路，旅程正式开始。",
+        "en": "First run on the road; the journey begins."
       },
       "sceneId": "road-test",
       "presentation": {
@@ -40,18 +40,18 @@
       "levelId": "l2",
       "threshold": 10000,
       "stageName": {
-        "zh-CN": "独立巡航",
-        "en": "Solo Cruise"
+        "zh-CN": "结伴巡航",
+        "en": "Companion Cruise"
       },
       "summary": {
-        "zh-CN": "主驾有人，副驾无人，无后方保护车，1 辆车。",
-        "en": "A driver in the main seat, empty co-pilot seat, no protection car: 1 vehicle."
+        "zh-CN": "车顶立起天线，小车渐入佳境，迷你保护车紧随其后，车内无人。",
+        "en": "An antenna rises from the roof; the mini escort car follows closely behind."
       },
       "milestone": {
-        "zh-CN": "后方保护车撤下了，你开始独立行驶。",
-        "en": "The protection car dropped back; you drive on your own now."
+        "zh-CN": "天线立起来了，看得更远了。",
+        "en": "The antenna is up; the car sees further now."
       },
-      "sceneId": "road-test",
+      "sceneId": "road-test-l2",
       "presentation": {
         "scale": "individual",
         "camera": "close",
@@ -68,18 +68,18 @@
       "levelId": "l3",
       "threshold": 30000,
       "stageName": {
-        "zh-CN": "安全员随行",
-        "en": "Safety Officer Aboard"
+        "zh-CN": "饰条初亮",
+        "en": "First Trim of Light"
       },
       "summary": {
-        "zh-CN": "主驾无人，副驾有安全员，有后方保护车，1 辆车。",
-        "en": "Empty main seat, a safety officer in the co-pilot seat, protection car behind: 1 vehicle."
+        "zh-CN": "第一条黄色饰条与小灯条点亮，保护车同行，车内无人。",
+        "en": "The first yellow trim and small light bar light up; the escort car rides along."
       },
       "milestone": {
-        "zh-CN": "主驾第一次空了出来。",
-        "en": "The main seat is empty for the first time."
+        "zh-CN": "第一条灯带亮了。",
+        "en": "The first light strip glows."
       },
-      "sceneId": "road-test",
+      "sceneId": "road-test-l3",
       "presentation": {
         "scale": "individual",
         "camera": "close",
@@ -96,18 +96,18 @@
       "levelId": "l4",
       "threshold": 60000,
       "stageName": {
-        "zh-CN": "双座无人",
-        "en": "Empty Seats"
+        "zh-CN": "传感升级",
+        "en": "Sensor Upgrade"
       },
       "summary": {
-        "zh-CN": "主驾无人，副驾有安全员，无后方保护车，1 辆车。",
-        "en": "Empty main seat, a safety officer in the co-pilot seat, no protection car: 1 vehicle."
+        "zh-CN": "方形传感盒装上车顶，车身略长，保护车随行，车内无人。",
+        "en": "A square sensor box mounts on the roof as the body stretches a little."
       },
       "milestone": {
-        "zh-CN": "主驾与保护车都空了，只留一位安全员。",
-        "en": "Main seat and protection car both gone; one safety officer remains."
+        "zh-CN": "方形传感盒装上车顶。",
+        "en": "The square sensor box is on the roof."
       },
-      "sceneId": "road-test",
+      "sceneId": "road-test-l4",
       "presentation": {
         "scale": "individual",
         "camera": "close",
@@ -124,18 +124,18 @@
       "levelId": "l5",
       "threshold": 100000,
       "stageName": {
-        "zh-CN": "远程监管",
-        "en": "Remote Supervision"
+        "zh-CN": "传感环成型",
+        "en": "Ring Complete"
       },
       "summary": {
-        "zh-CN": "主驾、副驾均无人，无保护车，1 名远程人员监管 1 辆车。",
-        "en": "Nobody aboard, no protection car: 1 remote supervisor watches 1 vehicle."
+        "zh-CN": "完整传感环绕上车顶，小车眼神更自信，1 名远程人员监管 1 辆无人车。",
+        "en": "A full sensor ring wraps the roof; one remote operator supervises one driverless car."
       },
       "milestone": {
-        "zh-CN": "车内空了，远方有人守护。",
-        "en": "The cabin is empty; someone far away is watching over it."
+        "zh-CN": "完整传感环绕上车顶。",
+        "en": "The full sensor ring wraps the roof."
       },
-      "sceneId": "road-test",
+      "sceneId": "road-test-l5",
       "presentation": {
         "scale": "individual",
         "camera": "close",
@@ -152,16 +152,16 @@
       "levelId": "l6",
       "threshold": 180000,
       "stageName": {
-        "zh-CN": "一拖三",
-        "en": "One Oversees Three"
+        "zh-CN": "宽体编队",
+        "en": "Wide-body Convoy"
       },
       "summary": {
-        "zh-CN": "1 名远程人员监管 3 辆无人车。",
-        "en": "1 remote supervisor watches 3 unmanned vehicles."
+        "zh-CN": "车身加宽，双侧灯带点亮，1 名远程人员监管 3 辆无人车。",
+        "en": "The body widens and dual light strips glow; one remote operator supervises three driverless cars."
       },
       "milestone": {
-        "zh-CN": "一名远程人员，看顾三辆无人车。",
-        "en": "One remote person, three unmanned vehicles in care."
+        "zh-CN": "车身加宽，双侧灯带点亮。",
+        "en": "Wider body, dual light strips glowing."
       },
       "sceneId": "convoy",
       "presentation": {
@@ -180,16 +180,16 @@
       "levelId": "l7",
       "threshold": 300000,
       "stageName": {
-        "zh-CN": "区队成型",
-        "en": "District Convoy"
+        "zh-CN": "街区巡游",
+        "en": "District Patrol"
       },
       "summary": {
-        "zh-CN": "1 名远程人员监管 10 辆无人车。",
-        "en": "1 remote supervisor watches 10 unmanned vehicles."
+        "zh-CN": "更大的传感环上车顶，巡游范围扩大，1 名远程人员监管 10 辆无人车。",
+        "en": "A larger sensor ring mounts on the roof; one remote operator supervises ten driverless cars."
       },
       "milestone": {
-        "zh-CN": "十辆车的区队上路了。",
-        "en": "A ten-vehicle district convoy is on the road."
+        "zh-CN": "更大的传感环上车顶。",
+        "en": "The larger sensor ring is on the roof."
       },
       "sceneId": "district-fleet",
       "presentation": {
@@ -208,16 +208,16 @@
       "levelId": "l8",
       "threshold": 500000,
       "stageName": {
-        "zh-CN": "城市车群",
-        "en": "City Swarm"
+        "zh-CN": "城市网络",
+        "en": "City Network"
       },
       "summary": {
-        "zh-CN": "1 名远程人员监管 100 辆无人车。",
-        "en": "1 remote supervisor watches 100 unmanned vehicles."
+        "zh-CN": "车侧发光显示窗与双灯条点亮，1 名远程人员监管 100 辆无人车。",
+        "en": "Glowing display windows and twin light strips light up; one remote operator supervises a hundred driverless cars."
       },
       "milestone": {
-        "zh-CN": "一百辆车汇成城市车群。",
-        "en": "A hundred vehicles merge into a city swarm."
+        "zh-CN": "车侧显示窗与双灯条点亮。",
+        "en": "Display windows and twin light strips glow."
       },
       "sceneId": "city-fleet",
       "presentation": {
@@ -236,16 +236,16 @@
       "levelId": "l9",
       "threshold": 800000,
       "stageName": {
-        "zh-CN": "都市网络",
-        "en": "Metro Network"
+        "zh-CN": "干线挺进",
+        "en": "Trunk Line Push"
       },
       "summary": {
-        "zh-CN": "1 名远程人员监管 1,000 辆无人车。",
-        "en": "1 remote supervisor watches 1,000 unmanned vehicles."
+        "zh-CN": "加长车身与车顶传感塔就位，1 名远程人员监管 1,000 辆无人车。",
+        "en": "A stretched body and roof sensor tower stand ready; one remote operator supervises a thousand driverless cars."
       },
       "milestone": {
-        "zh-CN": "一千辆车织成都市网络。",
-        "en": "A thousand vehicles weave a metro network."
+        "zh-CN": "加长车身与传感塔就位。",
+        "en": "Stretched body and sensor tower in place."
       },
       "sceneId": "metro-network",
       "presentation": {
@@ -264,16 +264,16 @@
       "levelId": "l10",
       "threshold": 1200000,
       "stageName": {
-        "zh-CN": "区域路网",
-        "en": "Regional Field"
+        "zh-CN": "区域织网",
+        "en": "Regional Web"
       },
       "summary": {
-        "zh-CN": "1 名远程人员监管 10,000 辆无人车。",
-        "en": "1 remote supervisor watches 10,000 unmanned vehicles."
+        "zh-CN": "双层传感环转动，1 名远程人员监管 10,000 辆无人车。",
+        "en": "The double-deck sensor ring spins; one remote operator supervises ten thousand driverless cars."
       },
       "milestone": {
-        "zh-CN": "万辆车铺开区域路网。",
-        "en": "Ten thousand vehicles spread a regional route field."
+        "zh-CN": "双层传感环转动。",
+        "en": "The double-deck sensor ring spins."
       },
       "sceneId": "regional-field",
       "presentation": {
@@ -292,16 +292,16 @@
       "levelId": "l11",
       "threshold": 1800000,
       "stageName": {
-        "zh-CN": "大陆网络",
-        "en": "Continental Web"
+        "zh-CN": "洲际连线",
+        "en": "Continental Link"
       },
       "summary": {
-        "zh-CN": "1 名远程人员监管 100,000 辆无人车。",
-        "en": "1 remote supervisor watches 100,000 unmanned vehicles."
+        "zh-CN": "发光灯带、传感环与天线全开，1 名远程人员监管 100,000 辆无人车。",
+        "en": "Light strips, sensor ring, and antenna all ablaze; one remote operator supervises a hundred thousand driverless cars."
       },
       "milestone": {
-        "zh-CN": "十万辆车连成大陆网络。",
-        "en": "A hundred thousand vehicles link into a continental web."
+        "zh-CN": "灯带、传感环与天线全开。",
+        "en": "Strips, ring, and antenna all ablaze."
       },
       "sceneId": "continental-web",
       "presentation": {
@@ -324,12 +324,12 @@
         "en": "Million Horizon"
       },
       "summary": {
-        "zh-CN": "1 名远程人员监管 1,000,000 辆无人车；V1 当前封顶。",
-        "en": "1 remote supervisor watches 1,000,000 unmanned vehicles; the V1 cap."
+        "zh-CN": "旗舰传感冠与多灯带点亮，两辆迷你保护车随行，1 名远程人员监管 1,000,000 辆无人车；V2 当前封顶。",
+        "en": "The flagship sensor crown and light strips blaze with two mini escort cars in trail; one remote operator supervises a million driverless cars; V2 currently caps the ladder."
       },
       "milestone": {
-        "zh-CN": "百万车队抵达地平线，V1 在此封顶。",
-        "en": "A million-strong convoy reaches the horizon; V1 caps here."
+        "zh-CN": "传感冠点亮，两辆迷你保护车随行。",
+        "en": "The sensor crown lights; two mini escorts in trail."
       },
       "sceneId": "terminal-horizon",
       "presentation": {
@@ -395,7 +395,7 @@
         {
           "layerId": "pod",
           "kind": "subject",
-          "assetId": "sprite-subject-pod",
+          "assetId": "sprite-subject-pod--l6",
           "placement": "center",
           "zOrder": 20
         }
@@ -430,7 +430,7 @@
         {
           "layerId": "pod",
           "kind": "subject",
-          "assetId": "sprite-subject-pod",
+          "assetId": "sprite-subject-pod--l7",
           "placement": "center",
           "zOrder": 20
         }
@@ -465,7 +465,7 @@
         {
           "layerId": "pod",
           "kind": "subject",
-          "assetId": "sprite-subject-pod",
+          "assetId": "sprite-subject-pod--l8",
           "placement": "center",
           "zOrder": 20
         }
@@ -507,7 +507,7 @@
         {
           "layerId": "pod",
           "kind": "subject",
-          "assetId": "sprite-subject-pod",
+          "assetId": "sprite-subject-pod--l9",
           "placement": "center",
           "zOrder": 20
         }
@@ -549,7 +549,7 @@
         {
           "layerId": "pod",
           "kind": "subject",
-          "assetId": "sprite-subject-pod",
+          "assetId": "sprite-subject-pod--l10",
           "placement": "center",
           "zOrder": 20
         }
@@ -591,7 +591,7 @@
         {
           "layerId": "pod",
           "kind": "subject",
-          "assetId": "sprite-subject-pod",
+          "assetId": "sprite-subject-pod--l11",
           "placement": "center",
           "zOrder": 20
         }
@@ -633,7 +633,7 @@
         {
           "layerId": "pod",
           "kind": "subject",
-          "assetId": "sprite-subject-pod",
+          "assetId": "sprite-subject-pod--l12",
           "placement": "center",
           "zOrder": 20
         },
@@ -649,6 +649,106 @@
       "sceneLabel": {
         "zh-CN": "终局地平线",
         "en": "Terminal horizon"
+      }
+    },
+    {
+      "sceneId": "road-test-l2",
+      "backgroundAssetId": "bg-road-test",
+      "layers": [
+        {
+          "layerId": "lane-lines",
+          "kind": "decoration",
+          "assetId": "overlay-lane-lines",
+          "placement": "center",
+          "zOrder": 5
+        },
+        {
+          "layerId": "pod",
+          "kind": "subject",
+          "assetId": "sprite-subject-pod--l2",
+          "placement": "center",
+          "zOrder": 20
+        }
+      ],
+      "transition": "crossfade",
+      "sceneLabel": {
+        "zh-CN": "路测道路",
+        "en": "Road test course"
+      }
+    },
+    {
+      "sceneId": "road-test-l3",
+      "backgroundAssetId": "bg-road-test",
+      "layers": [
+        {
+          "layerId": "lane-lines",
+          "kind": "decoration",
+          "assetId": "overlay-lane-lines",
+          "placement": "center",
+          "zOrder": 5
+        },
+        {
+          "layerId": "pod",
+          "kind": "subject",
+          "assetId": "sprite-subject-pod--l3",
+          "placement": "center",
+          "zOrder": 20
+        }
+      ],
+      "transition": "crossfade",
+      "sceneLabel": {
+        "zh-CN": "路测道路",
+        "en": "Road test course"
+      }
+    },
+    {
+      "sceneId": "road-test-l4",
+      "backgroundAssetId": "bg-road-test",
+      "layers": [
+        {
+          "layerId": "lane-lines",
+          "kind": "decoration",
+          "assetId": "overlay-lane-lines",
+          "placement": "center",
+          "zOrder": 5
+        },
+        {
+          "layerId": "pod",
+          "kind": "subject",
+          "assetId": "sprite-subject-pod--l4",
+          "placement": "center",
+          "zOrder": 20
+        }
+      ],
+      "transition": "crossfade",
+      "sceneLabel": {
+        "zh-CN": "路测道路",
+        "en": "Road test course"
+      }
+    },
+    {
+      "sceneId": "road-test-l5",
+      "backgroundAssetId": "bg-road-test",
+      "layers": [
+        {
+          "layerId": "lane-lines",
+          "kind": "decoration",
+          "assetId": "overlay-lane-lines",
+          "placement": "center",
+          "zOrder": 5
+        },
+        {
+          "layerId": "pod",
+          "kind": "subject",
+          "assetId": "sprite-subject-pod--l5",
+          "placement": "center",
+          "zOrder": 20
+        }
+      ],
+      "transition": "crossfade",
+      "sceneLabel": {
+        "zh-CN": "路测道路",
+        "en": "Road test course"
       }
     }
   ],
@@ -868,10 +968,10 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 166996,
+      "byteSizeCompressed": 119368,
       "altText": {
-        "zh-CN": "你的 Pet：主驾有人、副驾空座，后方保护车随行",
-        "en": "Your pet: driver aboard, empty co-pilot seat, protection vehicle behind"
+        "zh-CN": "你的 Pet：无人驾驶小车（L1 阶段），后方跟着迷你保护车",
+        "en": "Your pet: the unmanned car at level 1, mini escort car in trail"
       }
     },
     {
@@ -881,10 +981,10 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 301031,
+      "byteSizeCompressed": 208431,
       "altText": {
-        "zh-CN": "你的 Pet：主驾有人、副驾空座，后方保护车随行",
-        "en": "Your pet: driver aboard, empty co-pilot seat, protection vehicle behind"
+        "zh-CN": "你的 Pet：无人驾驶小车（L1 阶段），后方跟着迷你保护车",
+        "en": "Your pet: the unmanned car at level 1, mini escort car in trail"
       }
     },
     {
@@ -894,10 +994,10 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 144172,
+      "byteSizeCompressed": 124536,
       "altText": {
-        "zh-CN": "你的 Pet：主驾有人、副驾空座，无后方保护车",
-        "en": "Your pet: driver aboard, empty co-pilot seat, no protection vehicle"
+        "zh-CN": "你的 Pet：无人驾驶小车（L2 阶段），后方跟着迷你保护车",
+        "en": "Your pet: the unmanned car at level 2, mini escort car in trail"
       }
     },
     {
@@ -907,10 +1007,10 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 249140,
+      "byteSizeCompressed": 216030,
       "altText": {
-        "zh-CN": "你的 Pet：主驾有人、副驾空座，无后方保护车",
-        "en": "Your pet: driver aboard, empty co-pilot seat, no protection vehicle"
+        "zh-CN": "你的 Pet：无人驾驶小车（L2 阶段），后方跟着迷你保护车",
+        "en": "Your pet: the unmanned car at level 2, mini escort car in trail"
       }
     },
     {
@@ -920,10 +1020,10 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 134194,
+      "byteSizeCompressed": 121994,
       "altText": {
-        "zh-CN": "你的 Pet：主驾空座、副驾安全员随行，后方保护车随行",
-        "en": "Your pet: empty driver seat, safety officer aboard, protection vehicle behind"
+        "zh-CN": "你的 Pet：无人驾驶小车（L3 阶段），后方跟着迷你保护车",
+        "en": "Your pet: the unmanned car at level 3, mini escort car in trail"
       }
     },
     {
@@ -933,10 +1033,10 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 219721,
+      "byteSizeCompressed": 210025,
       "altText": {
-        "zh-CN": "你的 Pet：主驾空座、副驾安全员随行，后方保护车随行",
-        "en": "Your pet: empty driver seat, safety officer aboard, protection vehicle behind"
+        "zh-CN": "你的 Pet：无人驾驶小车（L3 阶段），后方跟着迷你保护车",
+        "en": "Your pet: the unmanned car at level 3, mini escort car in trail"
       }
     },
     {
@@ -946,10 +1046,10 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 128334,
+      "byteSizeCompressed": 119542,
       "altText": {
-        "zh-CN": "你的 Pet：主驾空座、副驾安全员随行，无后方保护车",
-        "en": "Your pet: empty driver seat, safety officer aboard, no protection vehicle"
+        "zh-CN": "你的 Pet：无人驾驶小车（L4 阶段），后方跟着迷你保护车",
+        "en": "Your pet: the unmanned car at level 4, mini escort car in trail"
       }
     },
     {
@@ -959,36 +1059,10 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 208874,
+      "byteSizeCompressed": 204205,
       "altText": {
-        "zh-CN": "你的 Pet：主驾空座、副驾安全员随行，无后方保护车",
-        "en": "Your pet: empty driver seat, safety officer aboard, no protection vehicle"
-      }
-    },
-    {
-      "assetId": "sprite-subject-pod",
-      "path": "assets/autonomous-fleet/sprite-subject-pod.webp",
-      "format": "webp",
-      "role": "sprite",
-      "width": 480,
-      "height": 480,
-      "byteSizeCompressed": 130836,
-      "altText": {
-        "zh-CN": "你的 Pet：无人车座舱",
-        "en": "Your pet: the autonomous cabin pod"
-      }
-    },
-    {
-      "assetId": "sprite-subject-pod-png",
-      "path": "assets/autonomous-fleet/sprite-subject-pod.png",
-      "format": "png",
-      "role": "sprite",
-      "width": 480,
-      "height": 480,
-      "byteSizeCompressed": 212948,
-      "altText": {
-        "zh-CN": "你的 Pet：无人车座舱",
-        "en": "Your pet: the autonomous cabin pod"
+        "zh-CN": "你的 Pet：无人驾驶小车（L4 阶段），后方跟着迷你保护车",
+        "en": "Your pet: the unmanned car at level 4, mini escort car in trail"
       }
     },
     {
@@ -1015,6 +1089,214 @@
       "altText": {
         "zh-CN": "无人车",
         "en": "unmanned vehicle"
+      }
+    },
+    {
+      "assetId": "sprite-subject-pod--l5",
+      "path": "assets/autonomous-fleet/sprite-subject-pod--l5.webp",
+      "format": "webp",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 118408,
+      "altText": {
+        "zh-CN": "你的 Pet：无人驾驶小车（L5 阶段），后方跟着迷你保护车",
+        "en": "Your pet: the unmanned car at level 5, mini escort car in trail"
+      }
+    },
+    {
+      "assetId": "sprite-subject-pod--l5-png",
+      "path": "assets/autonomous-fleet/sprite-subject-pod--l5.png",
+      "format": "png",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 200177,
+      "altText": {
+        "zh-CN": "你的 Pet：无人驾驶小车（L5 阶段），后方跟着迷你保护车",
+        "en": "Your pet: the unmanned car at level 5, mini escort car in trail"
+      }
+    },
+    {
+      "assetId": "sprite-subject-pod--l6",
+      "path": "assets/autonomous-fleet/sprite-subject-pod--l6.webp",
+      "format": "webp",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 115636,
+      "altText": {
+        "zh-CN": "你的 Pet：无人驾驶小车（L6 阶段），后方跟着迷你保护车",
+        "en": "Your pet: the unmanned car at level 6, mini escort car in trail"
+      }
+    },
+    {
+      "assetId": "sprite-subject-pod--l6-png",
+      "path": "assets/autonomous-fleet/sprite-subject-pod--l6.png",
+      "format": "png",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 194187,
+      "altText": {
+        "zh-CN": "你的 Pet：无人驾驶小车（L6 阶段），后方跟着迷你保护车",
+        "en": "Your pet: the unmanned car at level 6, mini escort car in trail"
+      }
+    },
+    {
+      "assetId": "sprite-subject-pod--l7",
+      "path": "assets/autonomous-fleet/sprite-subject-pod--l7.webp",
+      "format": "webp",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 121848,
+      "altText": {
+        "zh-CN": "你的 Pet：无人驾驶小车（L7 阶段），后方跟着迷你保护车",
+        "en": "Your pet: the unmanned car at level 7, mini escort car in trail"
+      }
+    },
+    {
+      "assetId": "sprite-subject-pod--l7-png",
+      "path": "assets/autonomous-fleet/sprite-subject-pod--l7.png",
+      "format": "png",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 214382,
+      "altText": {
+        "zh-CN": "你的 Pet：无人驾驶小车（L7 阶段），后方跟着迷你保护车",
+        "en": "Your pet: the unmanned car at level 7, mini escort car in trail"
+      }
+    },
+    {
+      "assetId": "sprite-subject-pod--l8",
+      "path": "assets/autonomous-fleet/sprite-subject-pod--l8.webp",
+      "format": "webp",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 126554,
+      "altText": {
+        "zh-CN": "你的 Pet：无人驾驶小车（L8 阶段），后方跟着迷你保护车",
+        "en": "Your pet: the unmanned car at level 8, mini escort car in trail"
+      }
+    },
+    {
+      "assetId": "sprite-subject-pod--l8-png",
+      "path": "assets/autonomous-fleet/sprite-subject-pod--l8.png",
+      "format": "png",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 225587,
+      "altText": {
+        "zh-CN": "你的 Pet：无人驾驶小车（L8 阶段），后方跟着迷你保护车",
+        "en": "Your pet: the unmanned car at level 8, mini escort car in trail"
+      }
+    },
+    {
+      "assetId": "sprite-subject-pod--l9",
+      "path": "assets/autonomous-fleet/sprite-subject-pod--l9.webp",
+      "format": "webp",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 125938,
+      "altText": {
+        "zh-CN": "你的 Pet：无人驾驶小车（L9 阶段），后方跟着迷你保护车",
+        "en": "Your pet: the unmanned car at level 9, mini escort car in trail"
+      }
+    },
+    {
+      "assetId": "sprite-subject-pod--l9-png",
+      "path": "assets/autonomous-fleet/sprite-subject-pod--l9.png",
+      "format": "png",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 222615,
+      "altText": {
+        "zh-CN": "你的 Pet：无人驾驶小车（L9 阶段），后方跟着迷你保护车",
+        "en": "Your pet: the unmanned car at level 9, mini escort car in trail"
+      }
+    },
+    {
+      "assetId": "sprite-subject-pod--l10",
+      "path": "assets/autonomous-fleet/sprite-subject-pod--l10.webp",
+      "format": "webp",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 118750,
+      "altText": {
+        "zh-CN": "你的 Pet：无人驾驶小车（L10 阶段），后方跟着迷你保护车",
+        "en": "Your pet: the unmanned car at level 10, mini escort car in trail"
+      }
+    },
+    {
+      "assetId": "sprite-subject-pod--l10-png",
+      "path": "assets/autonomous-fleet/sprite-subject-pod--l10.png",
+      "format": "png",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 202678,
+      "altText": {
+        "zh-CN": "你的 Pet：无人驾驶小车（L10 阶段），后方跟着迷你保护车",
+        "en": "Your pet: the unmanned car at level 10, mini escort car in trail"
+      }
+    },
+    {
+      "assetId": "sprite-subject-pod--l11",
+      "path": "assets/autonomous-fleet/sprite-subject-pod--l11.webp",
+      "format": "webp",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 124426,
+      "altText": {
+        "zh-CN": "你的 Pet：无人驾驶小车（L11 阶段），后方跟着迷你保护车",
+        "en": "Your pet: the unmanned car at level 11, mini escort car in trail"
+      }
+    },
+    {
+      "assetId": "sprite-subject-pod--l11-png",
+      "path": "assets/autonomous-fleet/sprite-subject-pod--l11.png",
+      "format": "png",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 214931,
+      "altText": {
+        "zh-CN": "你的 Pet：无人驾驶小车（L11 阶段），后方跟着迷你保护车",
+        "en": "Your pet: the unmanned car at level 11, mini escort car in trail"
+      }
+    },
+    {
+      "assetId": "sprite-subject-pod--l12",
+      "path": "assets/autonomous-fleet/sprite-subject-pod--l12.webp",
+      "format": "webp",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 112208,
+      "altText": {
+        "zh-CN": "你的 Pet：无人驾驶小车（L12 阶段），后方跟着迷你保护车",
+        "en": "Your pet: the unmanned car at level 12, mini escort car in trail"
+      }
+    },
+    {
+      "assetId": "sprite-subject-pod--l12-png",
+      "path": "assets/autonomous-fleet/sprite-subject-pod--l12.png",
+      "format": "png",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 180513,
+      "altText": {
+        "zh-CN": "你的 Pet：无人驾驶小车（L12 阶段），后方跟着迷你保护车",
+        "en": "Your pet: the unmanned car at level 12, mini escort car in trail"
       }
     },
     {
@@ -1127,12 +1409,12 @@
       "keepsakeId": "ks-l2",
       "levelId": "l2",
       "title": {
-        "zh-CN": "独立巡航徽",
-        "en": "Solo Cruise Badge"
+        "zh-CN": "巡航徽章",
+        "en": "Cruise Badge"
       },
       "accessDescription": {
-        "zh-CN": "纪念第一次没有保护车的独立行驶。",
-        "en": "Marks the first solo run without a protection car."
+        "zh-CN": "纪念车顶天线立起、看得更远的时刻。",
+        "en": "Marks the antenna rising for a longer view."
       },
       "assetId": "sprite-subject-pod--l2"
     },
@@ -1140,12 +1422,12 @@
       "keepsakeId": "ks-l3",
       "levelId": "l3",
       "title": {
-        "zh-CN": "安全员肩章",
-        "en": "Safety Officer Patch"
+        "zh-CN": "饰条初亮徽",
+        "en": "First Light Badge"
       },
       "accessDescription": {
-        "zh-CN": "纪念主驾第一次空出的时刻。",
-        "en": "Marks the moment the main seat first went empty."
+        "zh-CN": "纪念第一条黄色饰条点亮的时刻。",
+        "en": "Marks the first yellow trim lighting up."
       },
       "assetId": "sprite-subject-pod--l3"
     },
@@ -1153,12 +1435,12 @@
       "keepsakeId": "ks-l4",
       "levelId": "l4",
       "title": {
-        "zh-CN": "双座无人证",
-        "en": "Empty Cabin Certificate"
+        "zh-CN": "传感盒徽",
+        "en": "Sensor Box Badge"
       },
       "accessDescription": {
-        "zh-CN": "纪念保护车撤除后的全车无人。",
-        "en": "Marks full driverless operation without a protection car."
+        "zh-CN": "纪念方形传感盒装上车顶的时刻。",
+        "en": "Marks the square sensor box joining the roof."
       },
       "assetId": "sprite-subject-pod--l4"
     },
@@ -1166,92 +1448,92 @@
       "keepsakeId": "ks-l5",
       "levelId": "l5",
       "title": {
-        "zh-CN": "远程监管印章",
-        "en": "Remote Supervision Seal"
+        "zh-CN": "传感环徽",
+        "en": "Sensor Ring Badge"
       },
       "accessDescription": {
-        "zh-CN": "纪念车内空无一人、远方守护的第一天。",
-        "en": "Marks the first day of an empty cabin watched from afar."
+        "zh-CN": "纪念完整传感环绕上车顶的时刻。",
+        "en": "Marks the full sensor ring wrapping the roof."
       },
-      "assetId": "sprite-subject-pod"
+      "assetId": "sprite-subject-pod--l5"
     },
     {
       "keepsakeId": "ks-l6",
       "levelId": "l6",
       "title": {
-        "zh-CN": "三车编队旗",
-        "en": "Three-Vehicle Pennant"
+        "zh-CN": "宽体灯带徽",
+        "en": "Wide-body Badge"
       },
       "accessDescription": {
-        "zh-CN": "纪念一人看顾三辆车的编队起步。",
-        "en": "Marks the convoy start of one person overseeing three vehicles."
+        "zh-CN": "纪念车身加宽、双侧灯带点亮的时刻。",
+        "en": "Marks the wider body and dual light strips."
       },
-      "assetId": "sprite-unit-car"
+      "assetId": "sprite-subject-pod--l6"
     },
     {
       "keepsakeId": "ks-l7",
       "levelId": "l7",
       "title": {
-        "zh-CN": "区队钥匙",
-        "en": "District Convoy Key"
+        "zh-CN": "街区巡游徽",
+        "en": "District Patrol Badge"
       },
       "accessDescription": {
-        "zh-CN": "纪念十车区队的成立。",
-        "en": "Marks the forming of the ten-vehicle district convoy."
+        "zh-CN": "纪念更大的传感环与街区巡游范围。",
+        "en": "Marks the larger ring and the district patrol range."
       },
-      "assetId": "sprite-unit-car"
+      "assetId": "sprite-subject-pod--l7"
     },
     {
       "keepsakeId": "ks-l8",
       "levelId": "l8",
       "title": {
-        "zh-CN": "城市车群徽",
-        "en": "City Swarm Crest"
+        "zh-CN": "城市网络徽",
+        "en": "City Network Badge"
       },
       "accessDescription": {
-        "zh-CN": "纪念一百辆车汇成的城市车群。",
-        "en": "Marks the hundred-vehicle city swarm."
+        "zh-CN": "纪念发光显示窗与双灯带点亮。",
+        "en": "Marks the glowing display windows and twin strips."
       },
-      "assetId": "sprite-unit-car"
+      "assetId": "sprite-subject-pod--l8"
     },
     {
       "keepsakeId": "ks-l9",
       "levelId": "l9",
       "title": {
-        "zh-CN": "都市枢纽章",
-        "en": "Metro Hub Medal"
+        "zh-CN": "传感塔徽",
+        "en": "Sensor Tower Badge"
       },
       "accessDescription": {
-        "zh-CN": "纪念一千辆车织成的都市网络。",
-        "en": "Marks the thousand-vehicle metro network."
+        "zh-CN": "纪念加长车身与车顶传感塔就位。",
+        "en": "Marks the stretched body and roof sensor tower."
       },
-      "assetId": "sprite-unit-car"
+      "assetId": "sprite-subject-pod--l9"
     },
     {
       "keepsakeId": "ks-l10",
       "levelId": "l10",
       "title": {
-        "zh-CN": "区域路网证书",
-        "en": "Regional Field Diploma"
+        "zh-CN": "双层环徽",
+        "en": "Double Ring Badge"
       },
       "accessDescription": {
-        "zh-CN": "纪念万辆车铺开的区域路网。",
-        "en": "Marks the ten-thousand-vehicle regional field."
+        "zh-CN": "纪念双层传感环转动的时刻。",
+        "en": "Marks the double-deck sensor ring spinning."
       },
-      "assetId": "sprite-unit-car"
+      "assetId": "sprite-subject-pod--l10"
     },
     {
       "keepsakeId": "ks-l11",
       "levelId": "l11",
       "title": {
-        "zh-CN": "大陆网络星章",
-        "en": "Continental Star"
+        "zh-CN": "洲际灯带徽",
+        "en": "Continental Badge"
       },
       "accessDescription": {
-        "zh-CN": "纪念十万辆车连成的大陆网络。",
-        "en": "Marks the hundred-thousand-vehicle continental web."
+        "zh-CN": "纪念灯带、传感环与天线全开。",
+        "en": "Marks strips, ring, and antenna all ablaze."
       },
-      "assetId": "sprite-unit-car"
+      "assetId": "sprite-subject-pod--l11"
     },
     {
       "keepsakeId": "ks-l12",
@@ -1261,10 +1543,10 @@
         "en": "Million Horizon Memento"
       },
       "accessDescription": {
-        "zh-CN": "纪念百万车队抵达地平线的 V1 终局。",
-        "en": "Marks the V1 finale of a million vehicles reaching the horizon."
+        "zh-CN": "纪念传感冠点亮、两辆迷你保护车随行的封顶时刻。",
+        "en": "Marks the sensor crown and two mini escorts at the summit."
       },
-      "assetId": "sprite-subject-pod"
+      "assetId": "sprite-subject-pod--l12"
     }
   ]
 }

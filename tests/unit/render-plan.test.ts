@@ -54,7 +54,7 @@ describe('SceneRenderPlan determinism and caps (CTR-PET-007, CTR-PET-008)', () =
         population: {
           populationId: `pop-${i}`,
           logicalCount: 40,
-          assetId: 'sprite-subject-pod',
+          assetId: 'sprite-subject-pod--l1',
           density: 'dense' as const,
           placement: 'grid-even' as const,
           aggregateLabel: { 'zh-CN': '个单元' },
@@ -63,7 +63,7 @@ describe('SceneRenderPlan determinism and caps (CTR-PET-007, CTR-PET-008)', () =
         zOrder: 10 + i,
       })
     }
-    layers.push({ layerId: 'pod', kind: 'subject' as const, assetId: 'sprite-subject-pod', placement: 'center' as const, zOrder: 30 })
+    layers.push({ layerId: 'pod', kind: 'subject' as const, assetId: 'sprite-subject-pod--l1', placement: 'center' as const, zOrder: 30 })
     const synthetic: PetPackManifestV1 = {
       ...pack,
       scenes: [{ ...pack.scenes[0]!, sceneId: 'budget-scene', layers: layers as never }],
@@ -110,7 +110,7 @@ describe('accessibility semantics (§10.2, CTR-PET-030)', () => {
   it('carries an accessible name on the subject node via the milestone/alt rules', () => {
     const plan = planFor(0)
     const subject = plan.nodes.find((n) => n.kind === 'subject')
-    expect(subject?.altText).toBe('你的 Pet：主驾有人、副驾空座，后方保护车随行')
+    expect(subject?.altText).toBe('你的 Pet：无人驾驶小车（L1 阶段），后方跟着迷你保护车')
     expect(subject?.ariaHidden).toBe(false)
     const milestone = plan.nodes.find((n) => n.kind === 'milestone')
     expect(milestone?.altText).toBe(milestone?.text)
