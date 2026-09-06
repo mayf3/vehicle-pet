@@ -1,6 +1,6 @@
 ---
 spec_id: CONFIGURABLE_PET_ENGINE_V3
-status: proposed
+status: accepted
 spec_kind: implementation
 authority_level: governing_spec
 implementation_authority: contracts
@@ -1398,19 +1398,19 @@ and the Spec index (docs/specs/README.md) gains the V3 entry.
 ## 17. Acceptance record
 
 ```text
-SPEC_LIFECYCLE = proposed → accepted candidate
+SPEC_LIFECYCLE = proposed → accepted candidate (this commit)
 SPEC_ACCEPTANCE_RECORD_V1 = YES
 ACCEPTED_BY = mayf3
 ACCEPTANCE_ACTOR = mayf3 (executed under the Goal 进化 Owner delegation: Goal-autonomous merge after the required independent audits return ACCEPT with zero SHIP_BLOCKERs)
-ACCEPTED_AT = <filled at the atomic acceptance transition>
+ACCEPTED_AT = 2026-09-06T13:09:24Z
 OWNER_ACCEPTANCE_DECISION = PREAUTHORIZED_BY_GOAL_DISPATCH
 ACCEPTANCE_EXECUTED_UNDER_EXPLICIT_OWNER_DELEGATION = YES
-INDEPENDENT_AUDIT_RESULT = <filled at the atomic acceptance transition>
-REVIEWED_BASE_COMMIT = <filled at the atomic acceptance transition>
-REVIEWED_PROPOSED_HEAD = <filled at the atomic acceptance transition>
-ACCEPTANCE_COMMIT_PARENT = <filled at the atomic acceptance transition>
+INDEPENDENT_AUDIT_RESULT = ACCEPT (0 blockers; independent spec audit)
+REVIEWED_BASE_COMMIT = aa0a014dfc7767f1ff25c73c4775fdd687d56734
+REVIEWED_PROPOSED_HEAD = 4332cd1c4f9abe3616929cac3534cba861593177
+ACCEPTANCE_COMMIT_PARENT = 4332cd1c4f9abe3616929cac3534cba861593177
 SEMANTIC_DELTA_AFTER_REVIEW = NONE (lifecycle transition only: proposed → accepted candidate)
-BLOCKERS_REMAINING = <filled at the atomic acceptance transition>
+BLOCKERS_REMAINING = 0
 OPEN_OWNER_DECISIONS = NONE
 NORMATIVE_TBD = NONE
 ACCEPTANCE_ORDER = ATOMIC (CONFIGURABLE_PET_ENGINE_V2 flips to superseded in the same commit)
