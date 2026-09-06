@@ -492,34 +492,95 @@ fleetRecipes['sprite-subject-pod--l3'] = withProtectionVehicle(fleetRecipes['spr
 fleetRecipes['sprite-subject-pod--l4'] = fleetRecipes['sprite-cabin-safety']
 
 // ---------------------------------------------------------------------------
-// Master-image-driven subject sprites (GOAL 陪伴 R1正式美术; provenance in
-// assets/masters/PROVENANCE.json). The committed master PNG is cut at fixed
-// cell boundaries and deterministically fitted; no image model runs at build
-// time. Master cells supersede the SVG recipes above for these five IDs.
+// Master-image-driven subject sprites (GOAL 陪伴 R1 · 12 级方案; provenance in
+// assets/masters/PROVENANCE-l12.json). Two committed family masters are cut at
+// measured group boundaries and deterministically post-processed (fragment
+// cleanup, L12 second-escort restoration); no image model runs at build time.
+// The twelve level sprites supersede the SVG recipes and the earlier five-cell
+// master for these IDs.
 // ---------------------------------------------------------------------------
-const AUTONOMOUS_FLEET_MASTER = path.join(PACKS_DIR, 'autonomous-fleet/assets/masters/master-road-test-l1-l5.png')
-const MASTER_SPRITE_CELLS = {
-  'sprite-subject-pod--l1': 0,
-  'sprite-subject-pod--l2': 1,
-  'sprite-subject-pod--l3': 2,
-  'sprite-subject-pod--l4': 3,
-  'sprite-subject-pod': 4,
-}
-const MASTER_CUTS = [0, 255, 527, 845, 1192, 1536]
+const FAMILY_MASTERS = [
+  { master: 'master-l1-l6-family.png', cuts: [0, 339, 654, 999, 1362, 1743, 2172] },
+  { master: 'master-l7-l12-family.png', cuts: [0, 323, 628, 963, 1340, 1687, 2172] },
+]
+const MASTER_SPRITE_STEMS = Array.from({ length: 12 }, (_, i) => `sprite-subject-pod--l${i + 1}`)
 
-async function renderMasterSprite(cellIndex) {
-  const cellBuffer = await sharp(AUTONOMOUS_FLEET_MASTER)
-    .extract({
-      left: MASTER_CUTS[cellIndex],
-      top: 0,
-      width: MASTER_CUTS[cellIndex + 1] - MASTER_CUTS[cellIndex],
-      height: 1024,
-    })
+async function sliceCell(levelIndex) {
+  const src = FAMILY_MASTERS[levelIndex < 6 ? 0 : 1]
+  const idx = levelIndex % 6
+  const raw = await sharp(path.join(PACKS_DIR, 'autonomous-fleet/assets/masters', src.master))
+    .extract({ left: src.cuts[idx], top: 0, width: src.cuts[idx + 1] - src.cuts[idx], height: 724 })
     .png()
     .toBuffer()
-  const trimmed = await sharp(cellBuffer).trim({ threshold: 12 }).toBuffer()
-  const png = await sharp(trimmed)
-    .resize(480, 480, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+  return sharp(raw).trim({ threshold: 12 }).png().toBuffer()
+}
+
+function columnStats(data, info) {
+  const W = info.width, H = info.height, CH = info.channels
+  const cov = new Array(W).fill(0)
+  const colHeight = new Array(W).fill(0)
+  for (let x = 0; x < W; x++) {
+    let top = H, bottom = 0
+    for (let y = 0; y < H; y++) if (data[(y * W + x) * CH + 3] > 16) { cov[x]++; if (y < top) top = y; if (y > bottom) bottom = y }
+    colHeight[x] = bottom - top + 1
+  }
+  return { cov, colHeight, maxH: Math.max(...colHeight) }
+}
+
+async function edgeFragmentCrop(cellBuffer, side) {
+    // Crop a thin leftover next-car fragment (≤26px wide, ≤60% cell height)
+  // from the given edge, cutting at the nearest low-coverage valley.
+  const sideHoriz = side === 'right' || side === 'left'
+  const { data, info } = await (sideHoriz
+    ? sharp(cellBuffer).raw()
+    : sharp(cellBuffer).rotate(90).raw()).toBuffer({ resolveWithObject: true })
+  const W = info.width, H = info.height, CH = info.channels
+  const { cov, colHeight, maxH } = columnStats(data, info)
+  let valley = -1
+  if (side === 'right') {
+    for (let x = W - 2; x >= Math.floor(W * 0.5); x--) if (cov[x] < 12) { valley = x; break }
+    if (valley < 0 || W - valley - 1 > 26) return cellBuffer
+    if (Math.max(...colHeight.slice(valley + 1)) > maxH * 0.6) return cellBuffer
+    return sharp(cellBuffer).extract({ left: 0, top: 0, width: valley + 1, height: H }).png().toBuffer()
+  }
+  for (let x = 1; x <= Math.floor(W * 0.5); x++) if (cov[x] < 12) { valley = x; break }
+  if (valley < 0 || valley > 26) return cellBuffer
+  if (Math.max(...colHeight.slice(0, valley)) > maxH * 0.6) return cellBuffer
+  return sharp(cellBuffer).extract({ left: valley, top: 0, width: W - valley, height: H }).png().toBuffer()
+}
+
+const L12_ESCORT_RECT = { left: 375, top: 112, width: 89, height: 108 }
+
+async function renderMasterSprite(levelIndex) {
+  let cell = await sliceCell(levelIndex)
+  cell = await edgeFragmentCrop(cell, 'right')
+  cell = await edgeFragmentCrop(cell, 'left')
+  if (levelIndex === 11) {
+    // Deterministic restoration: the flagship's second mini escort (the
+    // source render omitted it). Copy the cell's own escort rect (anchored to
+    // the cell's right edge; the fragment cleanup may have narrowed the cell)
+    // at 85%, ground-aligned immediately in front of the original.
+    const cm = await sharp(cell).metadata()
+    const escortLeft = cm.width - L12_ESCORT_RECT.width
+    const escortTop = cm.height - L12_ESCORT_RECT.height - 12
+    const escortCrop = await sharp(cell)
+      .extract({ left: escortLeft, top: escortTop, width: L12_ESCORT_RECT.width, height: L12_ESCORT_RECT.height })
+      .png()
+      .toBuffer()
+    const dup = await sharp(escortCrop).resize(Math.round(L12_ESCORT_RECT.width * 0.85)).png().toBuffer()
+    const dm = await sharp(dup).metadata()
+    const dupLeft = Math.max(0, escortLeft - dm.width + Math.round(dm.width * 0.3))
+    const dupTop = Math.max(0, escortTop + L12_ESCORT_RECT.height - dm.height)
+    cell = await sharp(cell).composite([{ input: dup, left: dupLeft, top: dupTop }]).png().toBuffer()
+  }
+  const MARGIN = 14
+  const inner = 480 - MARGIN * 2
+  const m = await sharp(cell).metadata()
+  const scale = Math.min(inner / m.width, inner / m.height)
+  const w = Math.round(m.width * scale), h = Math.round(m.height * scale)
+  const resized = await sharp(cell).resize(w, h).png().toBuffer()
+  const png = await sharp({ create: { width: 480, height: 480, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
+    .composite([{ input: resized, left: Math.round((480 - w) / 2), top: 480 - MARGIN - h }])
     .png({ compressionLevel: 9 })
     .toBuffer()
   const webp = await sharp(png).webp({ lossless: true }).toBuffer()
@@ -531,9 +592,9 @@ async function renderMasterSprite(cellIndex) {
 // ---------------------------------------------------------------------------
 
 async function renderAsset(stem, packId) {
-  const masterCell = packId === 'autonomous-fleet' ? MASTER_SPRITE_CELLS[stem] : undefined
-  if (masterCell !== undefined) {
-    return renderMasterSprite(masterCell)
+  if (packId === 'autonomous-fleet') {
+    const levelIndex = MASTER_SPRITE_STEMS.indexOf(stem)
+    if (levelIndex >= 0) return renderMasterSprite(levelIndex)
   }
   const recipe = RECIPES[packId]?.[stem]
   if (recipe === undefined) {

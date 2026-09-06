@@ -100,6 +100,7 @@ describe('pack lifecycle (CTR-PET-005, CTR-PET-006, CTR-PET-025, CTR-PET-029)', 
     const backing = createMemoryBackingStore()
     const storage = new MemoryPetStorageAdapter(backing)
     const v1 = JSON.parse(JSON.stringify(fleetBundle().manifestCandidate))
+    v1.packVersion = '1.0.0'
     const v2 = JSON.parse(JSON.stringify(fleetBundle().manifestCandidate))
     v2.packVersion = '2.0.0'
 

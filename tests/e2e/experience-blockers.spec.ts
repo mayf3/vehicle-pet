@@ -46,14 +46,14 @@ test('X02: frozen Fleet L1-L4 states have four visibly distinct Pack sprites', a
 
   const captures: Buffer[] = []
   const stageAssets = [
-    ['l1', 'sprite-subject-pod--l1'],
-    ['l2', 'sprite-subject-pod--l2'],
-    ['l3', 'sprite-subject-pod--l3'],
-    ['l4', 'sprite-subject-pod--l4'],
+    ['l1', 'sprite-subject-pod--l1', 'road-test'],
+    ['l2', 'sprite-subject-pod--l2', 'road-test-l2'],
+    ['l3', 'sprite-subject-pod--l3', 'road-test-l3'],
+    ['l4', 'sprite-subject-pod--l4', 'road-test-l4'],
   ] as const
-  for (const [levelId, assetId] of stageAssets) {
+  for (const [levelId, assetId, sceneId] of stageAssets) {
     const cell = page.locator(`[data-showcase-pack="autonomous-fleet"][data-showcase-level="${levelId}"]`)
-    await expect(cell).toHaveAttribute('data-showcase-scene', 'road-test')
+    await expect(cell).toHaveAttribute('data-showcase-scene', sceneId)
     await expect(cell.locator(`img[src*="${assetId}.webp"]`)).toBeVisible()
     captures.push(await cell.locator('div').first().screenshot())
   }

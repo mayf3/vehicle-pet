@@ -269,11 +269,11 @@ describe('VehiclePetOverlay live Harness locale', () => {
         const dialog = document.querySelector<HTMLElement>('[data-vehicle-pet-dialog]')!
         expect(panel.getAttribute('aria-label')).toBe(english ? en['panel.title'] : zh['panel.title'])
         expect(panel.querySelector('[data-vehicle-pet-pack-name]')?.textContent).toBe(english ? 'Autonomous Fleet' : '无人车队')
-        expect(panel.querySelector('[data-vehicle-pet-stage]')?.textContent).toContain(english ? 'First Road Test' : '首航路测')
+        expect(panel.querySelector('[data-vehicle-pet-stage]')?.textContent).toContain(english ? 'First Dispatch' : '首航出发')
         expect(panel.querySelector('[data-vehicle-pet-next-threshold]')?.textContent).toContain(english ? 'Next milestone' : '下一目标')
         expect(panel.querySelector('[data-vehicle-pet-keepsake]')?.textContent).toBe(english ? 'No keepsakes yet' : '还没有纪念品')
         expect(dialog.getAttribute('aria-label')).toBe(english ? en['dialog.title'] : zh['dialog.title'])
-        expect(dialog.textContent).toContain(english ? 'First run on the road; road testing begins.' : '第一次上路，路测正式开始。')
+        expect(dialog.textContent).toContain(english ? 'First run on the road; the journey begins.' : '第一次上路，旅程正式开始。')
       })
     }
 
