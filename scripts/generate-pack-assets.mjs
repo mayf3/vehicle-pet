@@ -492,27 +492,28 @@ fleetRecipes['sprite-subject-pod--l3'] = withProtectionVehicle(fleetRecipes['spr
 fleetRecipes['sprite-subject-pod--l4'] = fleetRecipes['sprite-cabin-safety']
 
 // ---------------------------------------------------------------------------
-// Master-image-driven subject sprites (GOAL 陪伴 R1 · 12 级方案; provenance in
-// assets/masters/PROVENANCE-l12.json). Two committed family masters are cut at
-// measured group boundaries and deterministically post-processed (fragment
-// cleanup, L12 second-escort restoration); no image model runs at build time.
-// The twelve level sprites supersede the SVG recipes and the earlier five-cell
-// master for these IDs.
+// Master-image-driven subject sprites. L1–L5 (GOAL 陪伴 R1 · 12 级方案):
+// the committed L1–L6 family master is cut at measured group boundaries and
+// deterministically post-processed (fragment cleanup); no image model runs at
+// build time. L6–L12 (GOAL 进化 · V3 DEC-PET-032; provenance in
+// assets/masters/PROVENANCE-l6-l12-evolution.json): each level derives from
+// its own committed scale-evolution master (supervision-count label, remote
+// operator, and scale outline already composed in the approved art), so no
+// fragment cleanup or escort restoration applies there.
 // ---------------------------------------------------------------------------
-const FAMILY_MASTERS = [
-  { master: 'master-l1-l6-family.png', cuts: [0, 339, 654, 999, 1362, 1743, 2172] },
-  { master: 'master-l7-l12-family.png', cuts: [0, 323, 628, 963, 1340, 1687, 2172] },
-]
+const FAMILY_MASTER = { master: 'master-l1-l6-family.png', cuts: [0, 339, 654, 999, 1362, 1743, 2172] }
 const MASTER_SPRITE_STEMS = Array.from({ length: 12 }, (_, i) => `sprite-subject-pod--l${i + 1}`)
 
-async function sliceCell(levelIndex) {
-  const src = FAMILY_MASTERS[levelIndex < 6 ? 0 : 1]
-  const idx = levelIndex % 6
-  const raw = await sharp(path.join(PACKS_DIR, 'autonomous-fleet/assets/masters', src.master))
-    .extract({ left: src.cuts[idx], top: 0, width: src.cuts[idx + 1] - src.cuts[idx], height: 724 })
+async function sliceFamilyCell(levelIndex) {
+  const raw = await sharp(path.join(PACKS_DIR, 'autonomous-fleet/assets/masters', FAMILY_MASTER.master))
+    .extract({ left: FAMILY_MASTER.cuts[levelIndex], top: 0, width: FAMILY_MASTER.cuts[levelIndex + 1] - FAMILY_MASTER.cuts[levelIndex], height: 724 })
     .png()
     .toBuffer()
   return sharp(raw).trim({ threshold: 12 }).png().toBuffer()
+}
+
+function evolutionMasterPath(levelIndex) {
+  return path.join(PACKS_DIR, 'autonomous-fleet/assets/masters', `master-l${levelIndex + 1}.png`)
 }
 
 function columnStats(data, info) {
@@ -549,29 +550,14 @@ async function edgeFragmentCrop(cellBuffer, side) {
   return sharp(cellBuffer).extract({ left: valley, top: 0, width: W - valley, height: H }).png().toBuffer()
 }
 
-const L12_ESCORT_RECT = { left: 375, top: 112, width: 89, height: 108 }
-
 async function renderMasterSprite(levelIndex) {
-  let cell = await sliceCell(levelIndex)
-  cell = await edgeFragmentCrop(cell, 'right')
-  cell = await edgeFragmentCrop(cell, 'left')
-  if (levelIndex === 11) {
-    // Deterministic restoration: the flagship's second mini escort (the
-    // source render omitted it). Copy the cell's own escort rect (anchored to
-    // the cell's right edge; the fragment cleanup may have narrowed the cell)
-    // at 85%, ground-aligned immediately in front of the original.
-    const cm = await sharp(cell).metadata()
-    const escortLeft = cm.width - L12_ESCORT_RECT.width
-    const escortTop = cm.height - L12_ESCORT_RECT.height - 12
-    const escortCrop = await sharp(cell)
-      .extract({ left: escortLeft, top: escortTop, width: L12_ESCORT_RECT.width, height: L12_ESCORT_RECT.height })
-      .png()
-      .toBuffer()
-    const dup = await sharp(escortCrop).resize(Math.round(L12_ESCORT_RECT.width * 0.85)).png().toBuffer()
-    const dm = await sharp(dup).metadata()
-    const dupLeft = Math.max(0, escortLeft - dm.width + Math.round(dm.width * 0.3))
-    const dupTop = Math.max(0, escortTop + L12_ESCORT_RECT.height - dm.height)
-    cell = await sharp(cell).composite([{ input: dup, left: dupLeft, top: dupTop }]).png().toBuffer()
+  let cell
+  if (levelIndex < 5) {
+    cell = await sliceFamilyCell(levelIndex)
+    cell = await edgeFragmentCrop(cell, 'right')
+    cell = await edgeFragmentCrop(cell, 'left')
+  } else {
+    cell = await sharp(evolutionMasterPath(levelIndex)).png().toBuffer()
   }
   const MARGIN = 14
   const inner = 480 - MARGIN * 2

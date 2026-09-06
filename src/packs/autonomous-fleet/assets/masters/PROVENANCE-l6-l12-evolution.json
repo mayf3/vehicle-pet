@@ -1,0 +1,37 @@
+{
+  "masters": [
+    "master-l6.png",
+    "master-l7.png",
+    "master-l8.png",
+    "master-l9.png",
+    "master-l10.png",
+    "master-l11.png",
+    "master-l12.png"
+  ],
+  "generatedWith": "Owner-approved local art (Goal 进化): per-level image generation with the confirmed blue-white Pony.ai-style car, deterministic local post-process (build.py in the source directory): fragment cleanup, bbox crop, 1024x1024 RGBA canvas composition, supervision-count label '1 人监管 N 辆' typeset with local fonts, lossless WebP and 480px derivatives",
+  "sourceCoordinates": "/Users/yanfenma/workspace/project/vehicle-pet-wt-light-companion-spec-20260906/docs/evidence/pony-v1-scale-v2-20260906 (read-only input; served by the Owner's 127.0.0.1:3088 preview)",
+  "date": "2026-09-06",
+  "authority": "CONFIGURABLE_PET_ENGINE_V3 (DEC-PET-032); preflight record docs/investigations/AUTONOMOUS_FLEET_L6_L12_SCALE_EVOLUTION.md",
+  "frozenInputSha256": {
+    "master-l6.png": "3304df2c5a971406d63cdb9931204d47d699600441928b85811fe2c62baf0d6f",
+    "master-l7.png": "094f893d7da8e1c933679dde0547de28823e28436fcd22e07558442d3d150c48",
+    "master-l8.png": "75a0b4ce1285e2ef657a47b70a3f66927688eecd3bba08832e90ac78f5f6db1e",
+    "master-l9.png": "45bd6f5d28ffb38bdebf18fb3586955bbb2c36c71bfd5799d2da9eb1c256c2d5",
+    "master-l10.png": "4e326d8b178b22a3e1f17a1568051fa3445f998070e413c85ff91df9f0f421c8",
+    "master-l11.png": "7689b40aa08687c363cabfd14ce0159ac821f381950834ab42af986ee0736f38",
+    "master-l12.png": "0ce66bef9501df0a5b131e0aa76adb0f532b5e6cfb53d814fd3d7003fc750d20"
+  },
+  "deterministicPostProcess": [
+    "L6-L12 sprites: the committed master is fitted into the 480x480 transparent canvas inside a 14px bottom-anchored safe margin (shared with the family-master path); no fragment cleanup, no escort restoration, no image model at build time",
+    "L1-L5 sprites: unchanged family-master derivation (master-l1-l6-family.png cells 0-4, edge fragment cleanup); master-l7-l12-family.png and its cut metadata left the repo with this change (recoverable at git history of the base commit)"
+  ],
+  "rawGenerationInputSha256": {
+    "raw-l6.png": "abf237d92b652d5a79695d1199fa31a129ed96e687bbadc2a2c36c57fa2a587e",
+    "raw-l7.png": "f11b33b3c576ed53998e68cf5912a0e07204d7e442cf89c8ef059c158f156b88",
+    "raw-l8.png": "5d07830ea1494f71fedea74822286f77de773e48b48759954ed5fcf2da380c77",
+    "raw-l9.png": "f84f990db722363d512df3c1a6f933fa1067c7e49a4407b1b3a705e2f38e4639",
+    "raw-l10.png": "e0db9307d4f719d453a658f10c66184da73776135d7e0186b95ff5d34ffa8558",
+    "raw-l11.png": "fa4fce1e4dfb9f29cf2eace72592a4ec9a2ca89cdebe885b0b360ba0759fbade",
+    "raw-l12.png": "0ed4f9ef3b3be6d30901cf2d01757e01ce9321722d798fffd5d6a78f5d8f3904"
+  }
+}
