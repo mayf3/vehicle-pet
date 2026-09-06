@@ -791,10 +791,10 @@ points for V1; they MUST NOT be described as real Token billing rules.
 | Level | Points | Frozen zh-CN narrative | subject sprite | sceneId | scale | camera | density | milestone | population |
 |---|---|---|---|---|---|---|---|---|---|
 | L1 | 0 | 无人驾驶小车首航出发，车内无人，后方跟着 1 辆迷你保护车。 | `sprite-subject-pod--l1` | `road-test` | individual | close | sparse | inline | — |
-| L2 | 10,000 | 车顶立起天线，小车渐入佳境，迷你保护车紧随其后，车内无人。 | `sprite-subject-pod--l2` | `road-test` | individual | close | sparse | inline | — |
-| L3 | 30,000 | 第一条黄色饰条与小灯条点亮，保护车同行，车内无人。 | `sprite-subject-pod--l3` | `road-test` | individual | close | sparse | inline | — |
-| L4 | 60,000 | 方形传感盒装上车顶，车身略长，保护车随行，车内无人。 | `sprite-subject-pod--l4` | `road-test` | individual | close | sparse | inline | — |
-| L5 | 100,000 | 完整传感环绕上车顶，小车眼神更自信，1 名远程人员监管 1 辆无人车。 | `sprite-subject-pod--l5` | `road-test` | individual | close | moderate | inline | — |
+| L2 | 10,000 | 车顶立起天线，小车渐入佳境，迷你保护车紧随其后，车内无人。 | `sprite-subject-pod--l2` | `road-test-l2` | individual | close | sparse | inline | — |
+| L3 | 30,000 | 第一条黄色饰条与小灯条点亮，保护车同行，车内无人。 | `sprite-subject-pod--l3` | `road-test-l3` | individual | close | sparse | inline | — |
+| L4 | 60,000 | 方形传感盒装上车顶，车身略长，保护车随行，车内无人。 | `sprite-subject-pod--l4` | `road-test-l4` | individual | close | sparse | inline | — |
+| L5 | 100,000 | 完整传感环绕上车顶，小车眼神更自信，1 名远程人员监管 1 辆无人车。 | `sprite-subject-pod--l5` | `road-test-l5` | individual | close | moderate | inline | — |
 | L6 | 180,000 | 车身加宽，双侧灯带点亮，1 名远程人员监管 3 辆无人车。 | `sprite-subject-pod--l6` | `convoy` | individual | close | moderate | inline | vehicles ×3 |
 | L7 | 300,000 | 更大的传感环上车顶，巡游范围扩大，1 名远程人员监管 10 辆无人车。 | `sprite-subject-pod--l7` | `district-fleet` | individual | district | moderate | inline | vehicles ×10 |
 | L8 | 500,000 | 车侧发光显示窗与双灯条点亮，1 名远程人员监管 100 辆无人车。 | `sprite-subject-pod--l8` | `city-fleet` | group | city | dense | inline | vehicles ×100 |
@@ -803,12 +803,17 @@ points for V1; they MUST NOT be described as real Token billing rules.
 | L11 | 1,800,000 | 发光灯带、传感环与天线全开，1 名远程人员监管 100,000 辆无人车。 | `sprite-subject-pod--l11` | `continental-web` | region | continental | luminous | inline | vehicles ×100,000 |
 | L12 | 2,500,000 | 旗舰传感冠与多灯带点亮，两辆迷你保护车随行，1 名远程人员监管 1,000,000 辆无人车；V2 当前封顶。 | `sprite-subject-pod--l12` | `terminal-horizon` | horizon | terminal | luminous | terminal | vehicles ×1,000,000 |
 
-Per-level subject sprites (V2 revision): each level's scene subject layer
-binds to exactly its own `sprite-subject-pod--lN` asset (PNG + lossless WebP
-pair, 480×480 transparent canvas, mini escort included; L12 carries two
-minis). No level shares another level's subject sprite.
+Per-level subject sprites and scene variants (V2 revision): every level binds
+to exactly its own subject sprite (`sprite-subject-pod--lN`, PNG + lossless
+WebP pair, 480×480 transparent canvas, mini escort included; L12 carries two
+minis) through its own scene — no level shares another level's subject
+sprite. The shared V1 `road-test` scene becomes five per-level variants of
+the same visual scene (`road-test` for L1; `road-test-l2`…`road-test-l5` for
+L2–L5), identical except each variant's subject assetId; L6–L12 already have
+unique scenes and rebind their subject assetId to `sprite-subject-pod--lN`.
 
-Scene set: `road-test` (L1–L5), `convoy`, `district-fleet`, `city-fleet`,
+Scene set: `road-test` family (`road-test` for L1; `road-test-l2`…`road-test-l5`
+for L2–L5), `convoy`, `district-fleet`, `city-fleet`,
 `metro-network` (route/network overlay class), `regional-field` (route/network
 overlay class), `continental-web` (network + glow/highlight class),
 `terminal-horizon` (dedicated terminal scene with `terminal-overlay` layer and
