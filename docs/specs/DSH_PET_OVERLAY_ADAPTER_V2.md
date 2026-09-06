@@ -1,6 +1,6 @@
 ---
-spec_id: DSH_PET_OVERLAY_ADAPTER_V1
-status: superseded
+spec_id: DSH_PET_OVERLAY_ADAPTER_V2
+status: accepted
 spec_kind: implementation
 authority_level: governing_spec
 implementation_authority: contracts
@@ -11,26 +11,42 @@ scope:
   - session-visual-reactions
 governed_by:
   - VEHICLE_PET_PRODUCT_DIRECTION_V1
-  - CONFIGURABLE_PET_ENGINE_V2
+  - CONFIGURABLE_PET_ENGINE_V3
   - VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V1
 external_authorities:
   - repository: mayf3/deepseek-harness
     authority_id: DEEPSEEK_HARNESS_PINNED_INTEROP_V1
     revision: f77b5a2fcebc2d9138f6608a60636f2294868d42
     relation: interoperates_with
-supersedes: []
-superseded_by: DSH_PET_OVERLAY_ADAPTER_V2
+supersedes:
+  - DSH_PET_OVERLAY_ADAPTER_V1
+superseded_by: null
 owners:
   - mayf3
 ---
 
-# DSH_PET_OVERLAY_ADAPTER_V1
+# DSH_PET_OVERLAY_ADAPTER_V2
 
 ## 1. Goal
 
+This V2 supersedes `DSH_PET_OVERLAY_ADAPTER_V1` and carries every V1 Decision and
+Contract forward unchanged except the compact-panel simplification (§7
+`DEC-OVERLAY-002`, §8 frozen model, §8.2 item set, `CTR-OVERLAY-005`, and the
+matching acceptance rows), the DSH product-Pack user-surface boundary
+(`DEC-OVERLAY-006`, `CTR-OVERLAY-006`), and the static multi-expression session
+presentation (`DEC-OVERLAY-007`, `CTR-OVERLAY-007`, new `CTR-OVERLAY-014` and
+`CTR-OVERLAY-015` with their acceptance rows).
+
+Motivation: the Owner-frozen direction of Goal 常伴 (LESS_PANEL / MORE_PET). The
+resident 112 px pet — level visual, within-level micro progress, per-state
+expression — carries the daily value; the compact panel becomes a low-frequency
+surface; `seedling-fixture` remains an internal conformance fixture and leaves
+the DSH daily user surface.
+
 Authorize, after independent review and Owner acceptance of this exact proposed
 revision, a narrow DeepSeek Harness adapter that runs Vehicle Pet as a native
-bottom-right Harness Web plugin while preserving Configurable Pet Engine V1 as the
+bottom-right Harness Web plugin while preserving the active Configurable Pet
+Engine authority as the
 only owner of progression, Packs, keepsakes, receipts, and product rendering.
 
 ```text
@@ -56,7 +72,11 @@ an independent reviewer audits the exact proposed Head and `mayf3` accepts it.
 - structured current-session state translated into visual-only reactions;
 - install, update, restart, HMR/reload, uninstall, and reinstallation lifecycle;
 - compatibility with the pinned Harness Web React major;
-- continued standalone prototype use for development, showcase, and E2E.
+- continued standalone prototype use for development, showcase, and E2E;
+- a simplified low-frequency compact panel behind a pet-first default experience;
+- a DSH user-surface Pack boundary that keeps `seedling-fixture` internal to
+  Engine conformance;
+- static per-state expression presentation for structured session reactions.
 
 ### Out of scope
 
@@ -74,7 +94,7 @@ an independent reviewer audits the exact proposed Head and `mayf3` accepts it.
 
 ```text
 PRIMARY_PARENT_AUTHORITY = VEHICLE_PET_PRODUCT_DIRECTION_V1
-ENGINE_PARENT_AUTHORITY = CONFIGURABLE_PET_ENGINE_V1
+ENGINE_PARENT_AUTHORITY = CONFIGURABLE_PET_ENGINE_V3
 GOVERNANCE_PARENT = VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V1
 IMPLEMENTATION_AUTHORITY = contracts
 EXTERNAL_AUTHORITIES = mayf3/deepseek-harness@f77b5a2fcebc2d9138f6608a60636f2294868d42 interoperates_with
@@ -82,8 +102,11 @@ AUTHORITY_CONFLICT = NONE
 ```
 
 `VEHICLE_PET_PRODUCT_DIRECTION_V1` remains product authority.
-`CONFIGURABLE_PET_ENGINE_V1` remains authority for the Engine, bundled Packs,
-progression, presentation journal, keepsakes, and receipts. This Spec adds only a
+`CONFIGURABLE_PET_ENGINE_V3` — which supersedes and carries forward
+`CONFIGURABLE_PET_ENGINE_V2`/`V1` — remains authority for the Engine, bundled
+Packs, progression, presentation journal, keepsakes, and receipts. References to
+earlier Engine revisions in inherited prose resolve to that active lineage. This
+Spec adds only a
 Harness delivery adapter and compact host experience. It does not reinterpret any
 Engine Contract.
 
@@ -218,10 +241,13 @@ and semantics MUST NOT be copied.
 
 - Decision owner: `mayf3`.
 - Decision: `VISIBLE`, `PANEL_OPEN`, and `COLLAPSED`; default `VISIBLE`; no full
-  hide in V1. The visible pet is 112 px, collapsed launcher 36 px, compact panel
-  width 320 px, default bottom-right.
+  hide. The visible pet is 112 px, collapsed launcher 36 px, compact panel
+  width 264 px, default bottom-right.
 - Rejected alternatives: permanently expanded dashboard, full hide, sidebar replacement.
 - Reason: pet-first, passive, recoverable interaction.
+- Amendment (V2, Goal 常伴): panel width 320 px → 264 px and the panel content is
+  reduced to the five-item low-frequency set of §8.2; keeping the eight-item
+  320 px panel, or redesigning an equally complex panel, is rejected.
 - Owner decision remaining: NONE.
 
 ### DEC-OVERLAY-003 — Reuse Engine, React product surface, and both bundled Packs
@@ -251,6 +277,44 @@ and semantics MUST NOT be copied.
 - Reason: presentation preferences are local while Engine state stays canonical.
 - Owner decision remaining: NONE.
 
+### DEC-OVERLAY-006 — One product Pack on the DSH user surface
+
+- Decision owner: `mayf3` (Goal 常伴 frozen direction).
+- Decision: the DSH daily user surface exposes `autonomous-fleet` as the only
+  user-selectable product Pack. `seedling-fixture` remains bundled and
+  Engine-visible for conformance but is not offered or rendered as a
+  user-selectable option in the DSH overlay; the standalone prototype keeps both
+  Packs selectable for development and conformance.
+- Rejected alternatives: keeping the panel Pack switch, removing the
+  `seedling-fixture` Pack from the repository, weakening Engine second-Pack
+  conformance.
+- Reason: "a second Pack can run on the Engine" and "the user must see a second
+  Pack" are different obligations; product direction already classifies
+  `seedling-fixture` as the conformance Pack.
+- Owner decision remaining: NONE.
+
+### DEC-OVERLAY-007 — Static multi-expression session presentation
+
+- Decision owner: `mayf3` (Goal 常伴 frozen direction).
+- Decision: structured session states additionally drive a static, per-state
+  expression/pose layer over the resident level visual, so the five
+  user-perceivable states (idle, working, needs-input, completed,
+  failed/cancelled) are distinguishable in still screenshots at 112 px,
+  including under reduced motion. Existing motion presentation is kept on top.
+  Expression assets are bundled plugin presentation assets: transparent, WebP
+  primary with PNG fallback, produced by the repository deterministic asset
+  pipeline with recorded provenance and exact bytes; they never replace level
+  identity and never touch growth. One-time source masters MAY be produced with
+  an authorized image-generation route; the repository stores only the selected
+  masters, provenance, deterministic exports, and exact output hashes.
+- Rejected alternatives: CSS-filter-only reactions, a 12×5 per-level full-sprite
+  matrix, runtime or build-time model calls.
+- Reason: the referenced whale-pet experience (one character visibly changing
+  expression and pose per state) is achieved without copying its character,
+  art, animation, palette, or brand, and without touching the Engine schema or
+  Pack data.
+- Owner decision remaining: NONE.
+
 ## 8. Frozen product and adapter model
 
 ```text
@@ -265,7 +329,7 @@ SECOND_REACT_OR_REACTDOM = NO
 DEFAULT_STATE = VISIBLE
 VISIBLE_PET_SIZE_PX = 112
 COLLAPSED_LAUNCHER_SIZE_PX = 36
-COMPACT_PANEL_WIDTH_PX = 320
+COMPACT_PANEL_WIDTH_PX = 264
 FULL_HIDE_IN_V1 = NO
 DRAG = YES
 KEYBOARD_MOVE = YES
@@ -281,6 +345,12 @@ MODEL_CALLS = NO
 REMOTE_PACK = NO
 AUDIO = NO
 MULTI_PET = NO
+DSH_USER_SELECTABLE_PRODUCT_PACKS = autonomous-fleet
+SEEDLING_FIXTURE_DSH_USER_VISIBLE = NO
+SEEDLING_FIXTURE_BUNDLED_FOR_CONFORMANCE = YES
+EXPRESSION_STATES = IDLE, WORKING, NEEDS_INPUT, COMPLETED, FAILED_OR_CANCELLED
+EXPRESSION_PRESENTATION = STATIC_PER_STATE_LAYER_PLUS_MOTION
+EXPRESSION_ASSETS = BUNDLED_WEBP_PRIMARY_PNG_FALLBACK_DETERMINISTIC
 ```
 
 ### 8.1 State transitions
@@ -288,7 +358,7 @@ MULTI_PET = NO
 - `VISIBLE`: render only the current pet at 112 px, light idle movement, temporary
   session state, and necessary upgrade/greeting/host feedback. It MUST NOT render a
   full monitoring dashboard by default. Clicking the pet toggles `PANEL_OPEN`.
-- `PANEL_OPEN`: keep the pet and show one 320 px compact panel. Clicking the pet
+- `PANEL_OPEN`: keep the pet and show one 264 px compact panel. Clicking the pet
   closes it back to `VISIBLE`; Escape also closes it.
 - `COLLAPSED`: render only a 36 px keyboard-accessible launcher. It is not full
   hide. Clicking or activating the launcher restores `VISIBLE`.
@@ -299,14 +369,19 @@ MULTI_PET = NO
 
 The compact panel contains only:
 
-1. active Pack name;
-2. current stage/level;
-3. progress plus next threshold;
-4. most recent keepsake, if any;
-5. `autonomous-fleet` / `seedling-fixture` Pack switch;
-6. Reduced Motion control;
-7. Collapse action;
-8. “View full journey” action.
+1. current stage/level name and level index;
+2. progress plus next threshold;
+3. “View full journey” action;
+4. one low-disturbance “More” disclosure containing the Reduced Motion control
+   with unchanged system/on/off semantics;
+5. Collapse action.
+
+The panel header carries only the panel title and the close action; close and
+Escape return to `VISIBLE`. The active Pack name, the most recent keepsake, and
+any Pack switch remain available in the full journey dialog and standalone
+surfaces, not in the compact panel. `autonomous-fleet` is the only
+user-selectable product Pack rendered anywhere in the DSH overlay
+(`DEC-OVERLAY-006`).
 
 “View full journey” opens a larger Overlay/Dialog inside Harness and reuses the
 existing React product surface for scene, milestones, progress, keepsakes,
@@ -321,12 +396,12 @@ state inference are forbidden.
 
 | Adapter state | Structured DSH meaning | Vehicle Pet presentation |
 |---|---|---|
-| `DSH_RUNNING` | current selected session is running | working/focus visual state while true |
-| `DSH_NEEDS_INPUT` | current selected session has a structured pending interaction | waiting visual state while pending |
-| `DSH_TURN_COMPLETED` | structured terminal edge reports successful turn completion | one short `completed` `HostActivityEventV1` feedback |
-| `DSH_TURN_FAILED` | structured terminal/error edge reports failure | one short `failed` `HostActivityEventV1` feedback |
-| `DSH_TURN_CANCELLED` | structured terminal edge reports cancellation | one short `cancelled` `HostActivityEventV1` feedback |
-| `DSH_IDLE` | none of the above applies | normal idle presentation |
+| `DSH_RUNNING` | current selected session is running | working expression (static layer + focus motion) while true |
+| `DSH_NEEDS_INPUT` | current selected session has a structured pending interaction | waiting expression (static layer + attention motion) while pending |
+| `DSH_TURN_COMPLETED` | structured terminal edge reports successful turn completion | one short `completed` reaction (`HostActivityEventV1` feedback + transient completed expression) |
+| `DSH_TURN_FAILED` | structured terminal/error edge reports failure | one short `failed` reaction (`HostActivityEventV1` feedback + transient failed expression) |
+| `DSH_TURN_CANCELLED` | structured terminal edge reports cancellation | one short `cancelled` reaction (`HostActivityEventV1` feedback + transient failed/cancelled expression) |
+| `DSH_IDLE` | none of the above applies | idle expression (calm static layer, normal idle presentation) |
 
 Precedence is `NEEDS_INPUT` over `RUNNING` over a currently active short terminal
 reaction over `IDLE`. A terminal structured identity is edge-deduplicated, so reload,
@@ -417,18 +492,30 @@ pre-suppression interaction state is restored, and across reload the persisted
 
 ### CTR-OVERLAY-005 — Compact panel and full dialog have distinct boundaries
 
-The 320 px compact panel MUST contain only the eight items in §8.2. The full journey
+The 264 px compact panel MUST contain only the five items in §8.2 plus the header
+close action. The full journey
 MUST open in an accessible Harness-contained Overlay/Dialog and reuse the existing
 React product surface. It MUST close without changing progression. Rendering the
-full dashboard by default, putting a development console in the compact panel, or
-opening an external page/iframe fails.
+full dashboard by default, exposing a Pack switch, the active Pack name, a
+keepsake row, or any other non-§8.2 item in the compact panel, putting a
+development console in the compact panel, or opening an external page/iframe
+fails.
 
 ### CTR-OVERLAY-006 — One Engine and the two existing Packs
 
-The adapter MUST instantiate/reuse Configurable Pet Engine V1, its React layer, and
+The adapter MUST instantiate/reuse the active Configurable Pet Engine authority
+(carried forward from V1 by V3), its React layer, and
 exactly the bundled `autonomous-fleet` and `seedling-fixture` Packs. Pack switching
 MUST use Engine `activePackId` and preserve the same `progressPoints`, source/subject
-identity, receipts, keepsakes, and journal semantics. No DSH-specific forked Engine,
+identity, receipts, keepsakes, and journal semantics. The DSH daily user surface
+MUST present `autonomous-fleet` as the only user-selectable product Pack:
+`seedling-fixture` stays bundled and continues to validate and render through the
+same Engine for conformance, but MUST NOT be offered or rendered as a
+user-selectable option anywhere in the DSH overlay. Stored Engine state naming a
+non-product Pack MUST resolve to the product Pack on the DSH surface without
+deleting or rewriting any stored progression, keepsakes, or receipts. The
+standalone prototype keeps both Packs user-selectable for development and
+conformance. No DSH-specific forked Engine,
 Pack copy, Pack code, or second progress ledger is allowed.
 
 ### CTR-OVERLAY-007 — Session mapping is transient and visual-only
@@ -436,7 +523,10 @@ Pack copy, Pack code, or second progress ledger is allowed.
 The adapter MUST implement the complete structured mapping in §8.3. Running and
 needs-input are live visual states; completed, failed, and cancelled create one
 short, edge-deduplicated existing `HostActivityEventV1` reaction. Idle is normal
-idle. No mapped event may mutate growth, derived level, keepsakes, receipts, Pack,
+idle. The live and terminal presentations additionally carry the static
+per-state expression layer of `DEC-OVERLAY-007`/`CTR-OVERLAY-014`; that layer is
+as transient as the rest of the mapping. No mapped event may mutate growth,
+derived level, keepsakes, receipts, Pack,
 or presentation journal. Treating a turn/tool/task as points is a failure.
 
 ### CTR-OVERLAY-008 — No iframe, Vite runtime, scrape, or pet network path
@@ -491,6 +581,31 @@ This adapter MUST NOT read real token usage, convert tokens/turns/tools/tasks to
 API. It may display the Engine's existing current snapshot only. Real token
 integration requires a separate accepted governing Spec and is not authorized by
 this Contract.
+
+### CTR-OVERLAY-014 — Five-state static expression distinction
+
+The resident 112 px surface MUST present the five user-perceivable session
+states — idle, working, needs-input, completed, failed/cancelled — with static
+expression/pose layers that are visibly different in still screenshots at
+112 px for the bundled level visuals, including when all motion is suppressed by
+reduced motion. The expression layer MUST preserve level identity: the
+underlying level visual stays recognizable, expression art MUST NOT replace or
+obscure level-critical identity, and the same character identity is kept across
+states. Expression assets are bundled plugin presentation assets: transparent,
+WebP primary with PNG fallback, produced by the repository deterministic asset
+pipeline with recorded provenance and exact output bytes, and loaded only as
+bundled assets — no network request, no model call, no runtime image generation.
+Expression presentation MUST NOT change progression and MUST NOT add pointer or
+focus targets beyond the existing pet surface.
+
+### CTR-OVERLAY-015 — Reduced motion keeps static state readability
+
+With reduced motion in effect (explicit preference first, OS setting as
+fallback, per `CTR-OVERLAY-010`), the overlay MUST suppress motion as before,
+and the static expression layer of `CTR-OVERLAY-014` MUST remain the state
+carrier: all five states stay distinguishable without animation. Relocating the
+Reduced Motion control into the §8.2 “More” disclosure MUST NOT change the
+persisted preference semantics of `CTR-OVERLAY-010`.
 
 ## 10. Acceptance
 
@@ -559,11 +674,14 @@ inspection is insufficient where runtime behavior is required.
   `activePackId`, points, receipts, keepsakes, registry, and dependency graph.
 - Environment: adapter integration test plus pinned Harness Web using deterministic Engine storage and both bundled Packs.
 - Required evidence: before/after serialized owned Engine facts, rendered Pack IDs, storage-key inventory, import graph, and DSH-dependency boundary scan.
-- Expected result: both existing Packs render; `progressPoints` and identity remain
+- Expected result: both existing Packs validate and render through the same Engine
+  (prototype/conformance surfaces); the DSH overlay renders only the product Pack
+  and offers no Pack switch; `progressPoints` and identity remain
   unchanged; only existing Engine storage owns Pack selection; only `src/dsh/**`
   imports DSH contracts.
 - Failure condition: points reset/change, forked Pack/Engine, duplicate preference,
-  lost product records, or DSH dependency outside adapter.
+  lost product records, a user-selectable non-product Pack in the DSH overlay, or
+  DSH dependency outside adapter.
 
 ### ACC-OVERLAY-007 — Complete session visual-reaction matrix
 
@@ -690,8 +808,8 @@ inspection is insufficient where runtime behavior is required.
   and collapsed state.
 - Environment: pinned Harness Web browser at a recorded standard viewport with onboarding inactive.
 - Required evidence: computed bounding boxes, semantic element inventory for each state, and exact allowed compact-item comparison.
-- Expected result: 112 px pet, 320 px compact panel, 36 px launcher, authorized
-  compact fields/actions only, and pet-only default.
+- Expected result: 112 px pet, 264 px compact panel, 36 px launcher, the exact
+  five authorized compact items plus header close only, and pet-only default.
 - Failure condition: numeric or content-boundary mismatch.
 
 ### ACC-OVERLAY-018 — Deferred-token and no-growth static architecture gate
@@ -706,6 +824,41 @@ inspection is insufficient where runtime behavior is required.
   adapter exists; session adapter can only dispatch visual state/HostActivityEvent.
 - Failure condition: forbidden import, source, conversion, call, or capability.
 
+### ACC-OVERLAY-019 — Seedling fixture stays internal to conformance
+
+- Contracts: `CTR-OVERLAY-006`.
+- Method: drive the DSH overlay through default, panel, full-journey dialog, and
+  preference states and enumerate every rendered Pack option; seed Engine storage
+  with a legacy non-product `activePackId`; run the second-Pack conformance path
+  (standalone prototype, tests) and inspect the Engine registry.
+- Environment: pinned Harness Web with deterministic Engine storage, plus the
+  standalone prototype for the conformance path.
+- Required evidence: rendered-option inventory for every DSH surface, the
+  coercion trace for legacy stored Pack state, a registry/conformance transcript
+  for `seedling-fixture`, and unchanged keepsake/progress records.
+- Expected result: no DSH surface offers or renders `seedling-fixture` as a user
+  option; legacy non-product stored state resolves to the product Pack without
+  data loss; second-Pack conformance still passes unchanged.
+- Failure condition: any seedling option in DSH UI, deleted or lost records, or
+  weakened second-Pack conformance.
+
+### ACC-OVERLAY-020 — Static five-state expression distinction
+
+- Contracts: `CTR-OVERLAY-007`, `CTR-OVERLAY-014`, `CTR-OVERLAY-015`.
+- Method: drive the five structured states at representative levels; capture
+  still screenshots at 112 px with motion enabled and with reduced motion on;
+  assemble a contact sheet; assert the distinct rendered expression asset per
+  state; compare Engine snapshots before/after.
+- Environment: pinned Harness Web browser or the DOM fixture harness at a
+  recorded viewport, with deterministic Engine fixtures.
+- Required evidence: contact sheet, per-state rendered-asset assertions, 112 px
+  crops, reduced-motion variants, and exact before/after Engine snapshots.
+- Expected result: five states are visually distinct in stills at 112 px
+  including under reduced motion; the level visual remains recognizable; no
+  pointer/focus target is added; progression is byte-equivalent.
+- Failure condition: indistinguishable states, replaced or obscured level
+  identity, added pointer/focus targets, or any growth mutation.
+
 ### 10.1 Contract-to-Acceptance coverage
 
 | Contract | Acceptance | Evidence class | Covered |
@@ -715,7 +868,7 @@ inspection is insufficient where runtime behavior is required.
 | `CTR-OVERLAY-003` | `ACC-OVERLAY-003`, `ACC-OVERLAY-011`, `ACC-OVERLAY-017` | browser/runtime | YES |
 | `CTR-OVERLAY-004` | `ACC-OVERLAY-004`, `ACC-OVERLAY-011`, `ACC-OVERLAY-017` | browser/runtime | YES |
 | `CTR-OVERLAY-005` | `ACC-OVERLAY-005`, `ACC-OVERLAY-009`, `ACC-OVERLAY-017` | browser/static | YES |
-| `CTR-OVERLAY-006` | `ACC-OVERLAY-006`, `ACC-OVERLAY-016`, `ACC-OVERLAY-018` | state/static/regression | YES |
+| `CTR-OVERLAY-006` | `ACC-OVERLAY-006`, `ACC-OVERLAY-016`, `ACC-OVERLAY-018`, `ACC-OVERLAY-019` | state/static/regression | YES |
 | `CTR-OVERLAY-007` | `ACC-OVERLAY-007`, `ACC-OVERLAY-008`, `ACC-OVERLAY-018` | fixture/runtime/state | YES |
 | `CTR-OVERLAY-008` | `ACC-OVERLAY-009`, `ACC-OVERLAY-018` | browser/static | YES |
 | `CTR-OVERLAY-009` | `ACC-OVERLAY-010`, `ACC-OVERLAY-016` | artifact/runtime/regression | YES |
@@ -723,6 +876,8 @@ inspection is insufficient where runtime behavior is required.
 | `CTR-OVERLAY-011` | `ACC-OVERLAY-012` | structured-fixture/browser | YES |
 | `CTR-OVERLAY-012` | `ACC-OVERLAY-002`, `ACC-OVERLAY-013`, `ACC-OVERLAY-014`, `ACC-OVERLAY-015` | CLI/runtime/instrumented | YES |
 | `CTR-OVERLAY-013` | `ACC-OVERLAY-008`, `ACC-OVERLAY-009`, `ACC-OVERLAY-018` | state/network/static | YES |
+| `CTR-OVERLAY-014` | `ACC-OVERLAY-020` | fixture/browser/static | YES |
+| `CTR-OVERLAY-015` | `ACC-OVERLAY-020` | fixture/browser/static | YES |
 
 ### 10.2 Acceptance-to-Contract coverage
 
@@ -746,6 +901,8 @@ inspection is insufficient where runtime behavior is required.
 | `ACC-OVERLAY-016` | `CTR-OVERLAY-006`, `CTR-OVERLAY-009` |
 | `ACC-OVERLAY-017` | `CTR-OVERLAY-003`, `CTR-OVERLAY-004`, `CTR-OVERLAY-005` |
 | `ACC-OVERLAY-018` | `CTR-OVERLAY-006`, `CTR-OVERLAY-007`, `CTR-OVERLAY-008`, `CTR-OVERLAY-013` |
+| `ACC-OVERLAY-019` | `CTR-OVERLAY-006` |
+| `ACC-OVERLAY-020` | `CTR-OVERLAY-007`, `CTR-OVERLAY-014`, `CTR-OVERLAY-015` |
 
 ## 11. Alternatives and disposition
 
@@ -771,6 +928,18 @@ inspection is insufficient where runtime behavior is required.
 - Evidence/Claims considered: `CLM-OVERLAY-002`.
 - What would reopen: a separate accepted token/progress governing Spec.
 
+### ALT-OVERLAY-004 — Keep the eight-item panel; per-level full-sprite expressions
+
+- Disposition: rejected.
+- Reason: the Owner-frozen LESS_PANEL / MORE_PET direction requires a visibly
+  lower-frequency panel, and a 12×5 per-level full-sprite matrix is an asset
+  explosion duplicating level identity; a per-state overlay layer plus the
+  existing level visuals reaches the referenced state readability without
+  copying the whale-pet character and without touching the Engine schema.
+- Evidence/Claims considered: Goal 常伴 frozen direction; `CLM-OVERLAY-002`.
+- What would reopen: an accepted authority change demanding full-sprite
+  per-state level art.
+
 ## 12. Migration, compatibility, and rollback
 
 ```text
@@ -794,20 +963,22 @@ PNPM_DEV_REQUIRED_FOR_PRODUCTION = NO
 
 ```text
 SPEC_GOVERNANCE_MODE = AUTHOR
-SPEC_ID = DSH_PET_OVERLAY_ADAPTER_V1
+SPEC_ID = DSH_PET_OVERLAY_ADAPTER_V2
 SPEC_KIND = implementation
 STATUS = accepted
 AUTHORITY_LEVEL = governing_spec
 IMPLEMENTATION_AUTHORITY = contracts
 PRIMARY_PARENT_AUTHORITY = VEHICLE_PET_PRODUCT_DIRECTION_V1
 EXTERNAL_AUTHORITIES = mayf3/deepseek-harness@f77b5a2fcebc2d9138f6608a60636f2294868d42
+SUPERSEDES = DSH_PET_OVERLAY_ADAPTER_V1
+SUPERSESSION_MODE = WHOLE_AUTHORITY_ATOMIC
 OPEN_OWNER_DECISIONS = NONE
 NORMATIVE_TBD = NONE
 UNRESOLVED_AUTHORITY_CONFLICT = NONE
 PARTIAL_SUPERSESSION = NONE
-CONTRACT_COUNT = 13
-CONTRACTS_WITH_ACCEPTANCE = 13
-ACCEPTANCE_COUNT = 18
+CONTRACT_COUNT = 15
+CONTRACTS_WITH_ACCEPTANCE = 15
+ACCEPTANCE_COUNT = 20
 REAL_TOKEN_INTEGRATION_AUTHORIZED = NO
 DSH_TOKEN_TO_PROGRESS_AUTHORIZED = NO
 DEEPSEEK_HARNESS_CORE_CHANGE_AUTHORIZED = NO
@@ -816,74 +987,70 @@ AUDIO_AUTHORIZED = NO
 MULTI_PET_AUTHORIZED = NO
 AUTHORING_READY_FOR_REVIEW = YES
 READY_TO_MARK_ACCEPTED = YES
-READY_TO_MARK_ACCEPTED_REASON = exact proposed Head passed the independent review (ACCEPT, zero blockers) and Owner mayf3 accepted those exact coordinates with execution-time ACCEPTED_AT
+READY_TO_MARK_ACCEPTED_REASON = the exact proposed Head passed the independent review (ACCEPT, zero blockers) and the authorized acceptance transition recorded it in §14 with execution-time ACCEPTED_AT
+INDEPENDENT_REVIEW_RESULT = ACCEPT
 ```
 
 `READY_TO_MARK_ACCEPTED = YES`: the exact proposed Head
-`bdd9c8a32bcb3309d7e44a359cce9a9e48c82d1c` passed the independent review (`ACCEPT`,
-zero blockers) and `mayf3` explicitly authorized acceptance of those exact
-coordinates with actual execution-time `ACCEPTED_AT`. Independent review, Owner
-acceptance, and the authorized acceptance transition are complete process facts,
-not unresolved normative decisions. See §14 for the acceptance record.
+`2dd0401654f507be6ab4643bbd8ed3831b094dca` passed the independent review (`ACCEPT`,
+zero blockers; `SEMANTIC_DELTA_AFTER_REVIEW = NONE`), and the authorized
+acceptance transition accepted those exact coordinates with execution-time
+`ACCEPTED_AT`. Acceptance authority is the Owner preauthorization of Goal 常伴
+(SPEC_ACCEPTANCE_ACTOR = `mayf3`); independent review, acceptance decision, and
+the authorized transition are complete process facts, not unresolved normative
+decisions. See §14 for the acceptance record.
 
 ## 14. Acceptance record
 
 ```text
 SPEC_LIFECYCLE = proposed → accepted candidate
-DSH_OVERLAY_ADAPTER_SPEC_ACCEPTANCE_RECORD_V1 = YES
+DSH_OVERLAY_ADAPTER_SPEC_ACCEPTANCE_RECORD_V2 = YES
 ACCEPTED_BY = mayf3
-ACCEPTANCE_ACTOR = mayf3
-ACCEPTED_AT = 2026-08-23T14:04:21Z
+ACCEPTANCE_ACTOR = mayf3 (Goal 常伴 Owner preauthorization; Goal-internal acceptance per GOAL §13–§14)
+ACCEPTED_AT = 2026-09-06T23:26:30Z
 OWNER_ACCEPTANCE_DECISION = ACCEPT
 INDEPENDENT_REVIEW_RESULT = ACCEPT
-REVIEWED_BASE_COMMIT = 25b56b3b8540031e9d6e320d22872d86a136c7ad
-REVIEWED_PROPOSED_HEAD = bdd9c8a32bcb3309d7e44a359cce9a9e48c82d1c
-ACCEPTANCE_COMMIT_PARENT = bdd9c8a32bcb3309d7e44a359cce9a9e48c82d1c
+REVIEWED_BASE_COMMIT = 92aca75249afd082cceb6e3c26dd0d549809746d
+REVIEWED_PROPOSED_HEAD = 2dd0401654f507be6ab4643bbd8ed3831b094dca
+ACCEPTANCE_COMMIT_PARENT = 2dd0401654f507be6ab4643bbd8ed3831b094dca
 SEMANTIC_DELTA_AFTER_REVIEW = NONE (lifecycle transition only: proposed → accepted candidate)
 BLOCKERS = 0
-CONTRACT_COUNT = 13
-CONTRACTS_WITH_ACCEPTANCE = 13
-ACCEPTANCE_COUNT = 18
+CONTRACT_COUNT = 15
+CONTRACTS_WITH_ACCEPTANCE = 15
+ACCEPTANCE_COUNT = 20
 OPEN_OWNER_DECISIONS = NONE
 NORMATIVE_TBD = NONE
-MERGE_AUTHORIZED = NO
-OVERLAY_IMPLEMENTATION_AUTHORIZED_BEFORE_MERGE = NO
+SUPERSEDES = DSH_PET_OVERLAY_ADAPTER_V1
+SUPERSESSION_ATOMIC_IN_ACCEPTANCE_COMMIT = YES
 REAL_TOKEN_INTEGRATION_AUTHORIZED = NO
 DSH_TOKEN_TO_PROGRESS_AUTHORIZED = NO
 DEEPSEEK_HARNESS_CORE_CHANGE_AUTHORIZED = NO
 REMOTE_PACK_AUTHORIZED = NO
 AUDIO_AUTHORIZED = NO
 MULTI_PET_AUTHORIZED = NO
+MERGE_AUTHORIZED = YES (Goal 常伴 §14: the Goal completes PR ready/merge without per-item Owner approval)
 ```
 
 Binding facts:
 
 - The independent review bound the reviewed Base
-  `25b56b3b8540031e9d6e320d22872d86a136c7ad` and the reviewed proposed Head
-  `bdd9c8a32bcb3309d7e44a359cce9a9e48c82d1c` and returned `ACCEPT` with zero
-  blockers.
+  `92aca75249afd082cceb6e3c26dd0d549809746d` and the reviewed proposed Head
+  `2dd0401654f507be6ab4643bbd8ed3831b094dca` and returned `ACCEPT` with zero
+  blockers and `SEMANTIC_DELTA_AFTER_REVIEW = NONE`.
 - This acceptance commit's parent is exactly
-  `bdd9c8a32bcb3309d7e44a359cce9a9e48c82d1c`; the only semantic change from the
-  reviewed Head is the lifecycle transition `proposed → accepted candidate`
-  recorded here and in the matching section of `docs/specs/README.md`.
-- Goal, Scope, Current State, Observations, Claims/evidence, Decisions
-  `DEC-OVERLAY-001`–`DEC-OVERLAY-005`, Contracts `CTR-OVERLAY-001`–`CTR-OVERLAY-013`,
-  Acceptance items `ACC-OVERLAY-001`–`ACC-OVERLAY-018` and both coverage tables,
-  the frozen model of §8 including the exact DSH pin
-  `f77b5a2fcebc2d9138f6608a60636f2294868d42`, the overlay state machine and sizes,
-  the structured session mapping, local preferences semantics, the React
-  singleton boundary, install/update/uninstall rules, onboarding suppression, the
-  real-token deferral, Alternatives §11, and Migration/rollback §12 are unchanged.
-- This Spec is now an `accepted candidate`: `status: accepted` with
-  `implementation_authority: contracts` unchanged. On this branch it is an
-  accepted candidate, not yet active repository authority.
-- Activation is a reachability rule, not a recorded value: this Spec becomes
-  active repository authority only when the exact accepted revision is reachable
-  from `mayf3/vehicle-pet:main` or an implementation base derived from it. This
-  record deliberately hardcodes no `ACTIVE_ON_MAIN` value that would go stale
-  after merge.
-- DSH overlay implementation MUST NOT begin until the exact accepted revision of
-  this Spec is reachable from `mayf3/vehicle-pet:main` or an implementation base
+  `2dd0401654f507be6ab4643bbd8ed3831b094dca`; the only content changes from the
+  reviewed Head are lifecycle fields: this §14 record, the matching §13
+  status fields, the frontmatter lifecycle flip of `DSH_PET_OVERLAY_ADAPTER_V1`
+  to `status: superseded` with `superseded_by: DSH_PET_OVERLAY_ADAPTER_V2`, and
+  the `docs/specs/README.md` index rows. Goal, Scope, Decisions, Contracts,
+  Acceptance items, coverage tables, and the frozen model are byte-unchanged
+  from the reviewed Head.
+- With this commit, `DSH_PET_OVERLAY_ADAPTER_V1` flips to `status: superseded`
+  and `DSH_PET_OVERLAY_ADAPTER_V2` becomes `status: accepted` in the same
+  atomic docs-only change (V0 §6.3; no partial supersession).
+- Activation is a reachability rule: this Spec is active repository authority
+  when the exact accepted revision is reachable from `mayf3/vehicle-pet:main`
+  or an implementation base derived from it.
+- DSH overlay implementation against V2 MUST NOT begin until the exact accepted
+  revision is reachable from `mayf3/vehicle-pet:main` or an implementation base
   derived from it.
-- Merge authorization is a separate Owner decision; PR #4 remains open, draft,
-  and unmerged at `ACCEPTED_AT`. No merge has occurred.
