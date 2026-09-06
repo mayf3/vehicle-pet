@@ -63,6 +63,18 @@ const css = `
 @media (prefers-reduced-motion: reduce){.vpo-shell,.vpo-surface{transition:none!important;animation:none!important}}
 @keyframes vpo-working-pulse{0%,100%{box-shadow:0 0 0 2px color-mix(in srgb,var(--color-accent,#2f80ed) 25%,transparent)}50%{box-shadow:0 0 0 4px color-mix(in srgb,var(--color-accent,#2f80ed) 55%,transparent)}}
 @keyframes vpo-waiting-wobble{0%,100%{transform:translateX(0)}25%{transform:translateX(-1.5px)}75%{transform:translateX(1.5px)}}
+/* State poses on the subject sprite (whale-style variety). Every rule is
+   gated by the scene's effective reduced-motion flag, so an explicit
+   reduced-motion choice silences them all. */
+.vpo-surface[data-live="running"] .vp-scene[data-reduced-motion="false"] .vp-subject-btn>.vp-node-img{animation:vpo-drive-rock .9s ease-in-out infinite}
+.vpo-surface[data-live="needs-input"] .vp-scene[data-reduced-motion="false"] .vp-subject-btn>.vp-node-img{animation:vpo-attention-glow 1.3s ease-in-out infinite}
+.vpo-surface[data-live="terminal"][data-terminal="completed"] .vp-scene[data-reduced-motion="false"] .vp-subject-btn>.vp-node-img{animation:vpo-happy-hop 1.5s ease-out 1}
+.vpo-surface[data-live="terminal"][data-terminal="failed"] .vp-scene[data-reduced-motion="false"] .vp-subject-btn>.vp-node-img,
+.vpo-surface[data-live="terminal"][data-terminal="cancelled"] .vp-scene[data-reduced-motion="false"] .vp-subject-btn>.vp-node-img{animation:vpo-quiet-sag 1.8s ease-in-out 1}
+@keyframes vpo-drive-rock{0%,100%{transform:translateY(0) rotate(0deg)}25%{transform:translateY(-2px) rotate(-1deg)}75%{transform:translateY(-1px) rotate(1deg)}}
+@keyframes vpo-attention-glow{0%,100%{filter:drop-shadow(0 0 0 rgba(230,162,60,0))}50%{filter:drop-shadow(0 0 9px rgba(230,162,60,.85))}}
+@keyframes vpo-happy-hop{0%{transform:translateY(0)}30%{transform:translateY(-10px) scale(1.05)}55%{transform:translateY(0)}75%{transform:translateY(-4px)}100%{transform:translateY(0)}}
+@keyframes vpo-quiet-sag{0%,100%{transform:translateY(0);filter:none}50%{transform:translateY(2px);filter:saturate(.55) brightness(.94)}}
 `
 
 /** Adopt the overlay stylesheet; the disposer removes it. Idempotent. */
