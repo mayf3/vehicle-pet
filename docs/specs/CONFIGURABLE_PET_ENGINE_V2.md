@@ -1,6 +1,6 @@
 ---
 spec_id: CONFIGURABLE_PET_ENGINE_V2
-status: proposed
+status: accepted
 spec_kind: implementation
 authority_level: governing_spec
 implementation_authority: contracts
@@ -1344,10 +1344,10 @@ OPEN_OWNER_DECISIONS = NONE
 NORMATIVE_TBD = NONE
 UNRESOLVED_AUTHORITY_CONFLICT = NONE
 PARTIAL_SUPERSESSION = NONE
-READY_TO_MARK_ACCEPTED = PENDING_INDEPENDENT_AUDIT
+READY_TO_MARK_ACCEPTED = YES
 ```
 
-`READY_TO_MARK_ACCEPTED = PENDING_INDEPENDENT_AUDIT`: this Spec is a
+`READY_TO_MARK_ACCEPTED = YES`: this Spec is a
 candidate. Acceptance requires an independent audit of the exact Base/Head
 returning `ACCEPT` with zero blockers, after which `mayf3` accepts under the
 standing Goal 陪伴 delegation
@@ -1360,14 +1360,35 @@ and the Spec index (docs/specs/README.md) gains the V2 entry.
 ## 17. Acceptance record
 
 ```text
-SPEC_LIFECYCLE = proposed (pending independent audit)
-ACCEPTED_BY = PENDING
-INDEPENDENT_AUDIT_RESULT = PENDING
-REVIEWED_BASE_COMMIT = PENDING
-REVIEWED_PROPOSED_HEAD = PENDING
-OWNER_ACCEPTANCE_DECISION = PENDING (preauthorized AUTO_APPROVE_IF_ALL_TRUE under Goal 陪伴 delegation)
-SEMANTIC_DELTA_VS_V1 = §11.1 autonomous-fleet narrative + per-level subject sprite binding revised; DEC-PET-031 added; all other V1 Contracts, Acceptances, Decisions, and frozen values carried forward verbatim
+SPEC_LIFECYCLE = proposed → accepted candidate
+SPEC_ACCEPTANCE_RECORD_V1 = YES
+ACCEPTED_BY = mayf3
+ACCEPTANCE_ACTOR = mayf3 (executed by the Goal Orchestrator under explicit Owner delegation)
+ACCEPTED_AT = 2026-09-06T03:59:25Z
+OWNER_ACCEPTANCE_DECISION = PREAUTHORIZED_ACCEPT
+ACCEPTANCE_EXECUTED_UNDER_EXPLICIT_OWNER_DELEGATION = YES
+INDEPENDENT_AUDIT_RESULT = ACCEPT (0 blockers; spec/code/experience audits at head 0e8ebdc)
+REVIEWED_BASE_COMMIT = cb985413dfe67917b4b3c4ee761cb6b9eceee3c4
+REVIEWED_PROPOSED_HEAD = 0e8ebdc5c9b549cc5c186bd343c31865e9027989
+ACCEPTANCE_COMMIT_PARENT = 0e8ebdc5c9b549cc5c186bd343c31865e9027989
+SEMANTIC_DELTA_AFTER_REVIEW = NONE (lifecycle transition only: proposed → accepted candidate)
+BLOCKERS_REMAINING = 0
 OPEN_OWNER_DECISIONS = NONE
 NORMATIVE_TBD = NONE
+ACCEPTANCE_ORDER = ATOMIC (CONFIGURABLE_PET_ENGINE_V1 flips to superseded in the same commit)
 ```
+
+Binding facts:
+
+- Three independent audits (spec, code, experience) of the exact Base
+  `cb985413dfe67917b4b3c4ee761cb6b9eceee3c4` and Head
+  `0e8ebdc5c9b549cc5c186bd343c31865e9027989` returned `ACCEPT` with zero
+  blockers.
+- This acceptance commit's parent is exactly the reviewed Head; the only
+  semantic change is the lifecycle transition plus the superseded flip of
+  `CONFIGURABLE_PET_ENGINE_V1` recorded here and in the Spec index.
+- This Spec is an `accepted candidate` until this exact Head is reachable from
+  `mayf3/vehicle-pet:main`; the implementation (12-sprite manifest wiring)
+  riding the same PR is authorized once the accepted revision is reachable
+  from `main` or a main-derived implementation base.
 
