@@ -23,7 +23,9 @@ owners:
 
 ## 1. Goal
 
-Define the V1 architecture Contracts of the configurable, domain-neutral Pet
+This V2 supersedes `CONFIGURABLE_PET_ENGINE_V1` and carries every V1
+Decision and Contract forward unchanged except the §11.1 autonomous-fleet
+content revision (`DEC-PET-031`). Define the V1 architecture Contracts of the configurable, domain-neutral Pet
 Engine, its declarative Pet Pack format, and the prototype shell, with
 `implementation_authority: contracts`. The Engine consumes external
 `ProgressSnapshotV1` input, derives level and presentation purely, renders
@@ -1345,14 +1347,15 @@ PARTIAL_SUPERSESSION = NONE
 READY_TO_MARK_ACCEPTED = PENDING_INDEPENDENT_AUDIT
 ```
 
-`READY_TO_MARK_ACCEPTED = PENDING_INDEPENDENT_AUDIT`: the amended exact Head passed a new independent
-re-audit (`ACCEPT`, zero blockers) and Owner `mayf3` explicitly authorized
-acceptance of those exact coordinates with actual execution-time `accepted_at`.
-Independent review, Owner acceptance, and the authorized acceptance transition
-are complete process facts, not unresolved normative decisions.
-Implementation-stage choices such as specific library selections or internal
-function names are deliberately not elevated into Contracts and are not open
-normative decisions. See §17 for the acceptance record.
+`READY_TO_MARK_ACCEPTED = PENDING_INDEPENDENT_AUDIT`: this Spec is a
+candidate. Acceptance requires an independent audit of the exact Base/Head
+returning `ACCEPT` with zero blockers, after which `mayf3` accepts under the
+standing Goal 陪伴 delegation
+(`OWNER_SPEC_ACCEPTANCE_POLICY = AUTO_APPROVE_IF_ALL_TRUE`). At the atomic
+acceptance transition: `status: accepted`, `CONFIGURABLE_PET_ENGINE_V1`
+flips to `status: superseded` with `superseded_by: CONFIGURABLE_PET_ENGINE_V2`,
+and the Spec index (docs/specs/README.md) gains the V2 entry.
+
 
 ## 17. Acceptance record
 
