@@ -152,16 +152,16 @@
       "levelId": "l6",
       "threshold": 180000,
       "stageName": {
-        "zh-CN": "宽体编队",
-        "en": "Wide-body Convoy"
+        "zh-CN": "三车小队",
+        "en": "3-Car Squad"
       },
       "summary": {
-        "zh-CN": "车身加宽，双侧灯带点亮，1 名远程人员监管 3 辆无人车。",
-        "en": "The body widens and dual light strips glow; one remote operator supervises three driverless cars."
+        "zh-CN": "三车小队集结出发，1 名远程人员监管 3 辆无人车。",
+        "en": "A three-car squad sets out; one remote operator supervises 3 autonomous vehicles."
       },
       "milestone": {
-        "zh-CN": "车身加宽，双侧灯带点亮。",
-        "en": "Wider body, dual light strips glowing."
+        "zh-CN": "三车小队集结出发。",
+        "en": "The three-car squad assembles."
       },
       "sceneId": "convoy",
       "presentation": {
@@ -180,16 +180,16 @@
       "levelId": "l7",
       "threshold": 300000,
       "stageName": {
-        "zh-CN": "街区巡游",
-        "en": "District Patrol"
+        "zh-CN": "十车阵列",
+        "en": "10-Car Array"
       },
       "summary": {
-        "zh-CN": "更大的传感环上车顶，巡游范围扩大，1 名远程人员监管 10 辆无人车。",
-        "en": "A larger sensor ring mounts on the roof; one remote operator supervises ten driverless cars."
+        "zh-CN": "十车阵列展开巡游，1 名远程人员监管 10 辆无人车。",
+        "en": "A ten-car array deploys on patrol; one remote operator supervises 10 autonomous vehicles."
       },
       "milestone": {
-        "zh-CN": "更大的传感环上车顶。",
-        "en": "The larger sensor ring is on the roof."
+        "zh-CN": "十车阵列展开巡游。",
+        "en": "The ten-car array deploys."
       },
       "sceneId": "district-fleet",
       "presentation": {
@@ -208,16 +208,16 @@
       "levelId": "l8",
       "threshold": 500000,
       "stageName": {
-        "zh-CN": "城市网络",
-        "en": "City Network"
+        "zh-CN": "百车车队",
+        "en": "100-Car Fleet"
       },
       "summary": {
-        "zh-CN": "车侧发光显示窗与双灯条点亮，1 名远程人员监管 100 辆无人车。",
-        "en": "Glowing display windows and twin light strips light up; one remote operator supervises a hundred driverless cars."
+        "zh-CN": "百车车队密集列阵，1 名远程人员监管 100 辆无人车。",
+        "en": "A dense 100-car fleet stands in formation; one remote operator supervises 100 autonomous vehicles."
       },
       "milestone": {
-        "zh-CN": "车侧显示窗与双灯条点亮。",
-        "en": "Display windows and twin light strips glow."
+        "zh-CN": "百车车队密集列阵。",
+        "en": "The 100-car fleet stands in formation."
       },
       "sceneId": "city-fleet",
       "presentation": {
@@ -236,16 +236,16 @@
       "levelId": "l9",
       "threshold": 800000,
       "stageName": {
-        "zh-CN": "干线挺进",
-        "en": "Trunk Line Push"
+        "zh-CN": "千车城市",
+        "en": "City Scale"
       },
       "summary": {
-        "zh-CN": "加长车身与车顶传感塔就位，1 名远程人员监管 1,000 辆无人车。",
-        "en": "A stretched body and roof sensor tower stand ready; one remote operator supervises a thousand driverless cars."
+        "zh-CN": "领航车驶入城市天际线，1 名远程人员监管 1,000 辆无人车。",
+        "en": "The lead car enters a city skyline; one remote operator supervises 1,000 autonomous vehicles."
       },
       "milestone": {
-        "zh-CN": "加长车身与传感塔就位。",
-        "en": "Stretched body and sensor tower in place."
+        "zh-CN": "领航车驶入城市天际线。",
+        "en": "The lead car enters a city skyline."
       },
       "sceneId": "metro-network",
       "presentation": {
@@ -264,16 +264,16 @@
       "levelId": "l10",
       "threshold": 1200000,
       "stageName": {
-        "zh-CN": "区域织网",
-        "en": "Regional Web"
+        "zh-CN": "万车多城",
+        "en": "Multi-City Scale"
       },
       "summary": {
-        "zh-CN": "双层传感环转动，1 名远程人员监管 10,000 辆无人车。",
-        "en": "The double-deck sensor ring spins; one remote operator supervises ten thousand driverless cars."
+        "zh-CN": "多城天际线同框点亮，1 名远程人员监管 10,000 辆无人车。",
+        "en": "Multi-city skylines light up together; one remote operator supervises 10,000 autonomous vehicles."
       },
       "milestone": {
-        "zh-CN": "双层传感环转动。",
-        "en": "The double-deck sensor ring spins."
+        "zh-CN": "多城天际线同框点亮。",
+        "en": "Multi-city skylines light up together."
       },
       "sceneId": "regional-field",
       "presentation": {
@@ -292,16 +292,16 @@
       "levelId": "l11",
       "threshold": 1800000,
       "stageName": {
-        "zh-CN": "洲际连线",
-        "en": "Continental Link"
+        "zh-CN": "多区域版图",
+        "en": "Multi-Region Scale"
       },
       "summary": {
-        "zh-CN": "发光灯带、传感环与天线全开，1 名远程人员监管 100,000 辆无人车。",
-        "en": "Light strips, sensor ring, and antenna all ablaze; one remote operator supervises a hundred thousand driverless cars."
+        "zh-CN": "多区域地标连成网络，1 名远程人员监管 100,000 辆无人车。",
+        "en": "Multi-region landmarks link into a network; one remote operator supervises 100,000 autonomous vehicles."
       },
       "milestone": {
-        "zh-CN": "灯带、传感环与天线全开。",
-        "en": "Strips, ring, and antenna all ablaze."
+        "zh-CN": "多区域地标连成网络。",
+        "en": "Multi-region landmarks link up."
       },
       "sceneId": "continental-web",
       "presentation": {
@@ -320,16 +320,16 @@
       "levelId": "l12",
       "threshold": 2500000,
       "stageName": {
-        "zh-CN": "百万地平线",
-        "en": "Million Horizon"
+        "zh-CN": "百万全球",
+        "en": "Global Scale"
       },
       "summary": {
-        "zh-CN": "旗舰传感冠与多灯带点亮，两辆迷你保护车随行，1 名远程人员监管 1,000,000 辆无人车；V2 当前封顶。",
-        "en": "The flagship sensor crown and light strips blaze with two mini escort cars in trail; one remote operator supervises a million driverless cars; V2 currently caps the ladder."
+        "zh-CN": "领航车与蓝色全球同框，1 名远程人员监管 1,000,000 辆无人车；V3 当前封顶。",
+        "en": "The lead car meets the blue globe; one remote operator supervises 1,000,000 autonomous vehicles; currently capped at V3."
       },
       "milestone": {
-        "zh-CN": "传感冠点亮，两辆迷你保护车随行。",
-        "en": "The sensor crown lights; two mini escorts in trail."
+        "zh-CN": "领航车与蓝色全球同框。",
+        "en": "The lead car meets the blue globe."
       },
       "sceneId": "terminal-horizon",
       "presentation": {
@@ -1124,10 +1124,10 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 115636,
+      "byteSizeCompressed": 111866,
       "altText": {
-        "zh-CN": "你的 Pet：无人驾驶小车（L6 阶段），后方跟着迷你保护车",
-        "en": "Your pet: the unmanned car at level 6, mini escort car in trail"
+        "zh-CN": "你的 Pet：三车小队（L6 阶段），1 名远程人员监管 3 辆无人车",
+        "en": "Your pet: the three-car squad at level 6; one remote operator supervises 3 autonomous vehicles"
       }
     },
     {
@@ -1137,10 +1137,10 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 194187,
+      "byteSizeCompressed": 164503,
       "altText": {
-        "zh-CN": "你的 Pet：无人驾驶小车（L6 阶段），后方跟着迷你保护车",
-        "en": "Your pet: the unmanned car at level 6, mini escort car in trail"
+        "zh-CN": "你的 Pet：三车小队（L6 阶段），1 名远程人员监管 3 辆无人车",
+        "en": "Your pet: the three-car squad at level 6; one remote operator supervises 3 autonomous vehicles"
       }
     },
     {
@@ -1150,10 +1150,10 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 121848,
+      "byteSizeCompressed": 126684,
       "altText": {
-        "zh-CN": "你的 Pet：无人驾驶小车（L7 阶段），后方跟着迷你保护车",
-        "en": "Your pet: the unmanned car at level 7, mini escort car in trail"
+        "zh-CN": "你的 Pet：十车阵列（L7 阶段），1 名远程人员监管 10 辆无人车",
+        "en": "Your pet: the ten-car array at level 7; one remote operator supervises 10 autonomous vehicles"
       }
     },
     {
@@ -1163,10 +1163,10 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 214382,
+      "byteSizeCompressed": 178379,
       "altText": {
-        "zh-CN": "你的 Pet：无人驾驶小车（L7 阶段），后方跟着迷你保护车",
-        "en": "Your pet: the unmanned car at level 7, mini escort car in trail"
+        "zh-CN": "你的 Pet：十车阵列（L7 阶段），1 名远程人员监管 10 辆无人车",
+        "en": "Your pet: the ten-car array at level 7; one remote operator supervises 10 autonomous vehicles"
       }
     },
     {
@@ -1176,10 +1176,10 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 126554,
+      "byteSizeCompressed": 164466,
       "altText": {
-        "zh-CN": "你的 Pet：无人驾驶小车（L8 阶段），后方跟着迷你保护车",
-        "en": "Your pet: the unmanned car at level 8, mini escort car in trail"
+        "zh-CN": "你的 Pet：百车车队（L8 阶段），1 名远程人员监管 100 辆无人车",
+        "en": "Your pet: the 100-car fleet at level 8; one remote operator supervises 100 autonomous vehicles"
       }
     },
     {
@@ -1189,10 +1189,10 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 225587,
+      "byteSizeCompressed": 212350,
       "altText": {
-        "zh-CN": "你的 Pet：无人驾驶小车（L8 阶段），后方跟着迷你保护车",
-        "en": "Your pet: the unmanned car at level 8, mini escort car in trail"
+        "zh-CN": "你的 Pet：百车车队（L8 阶段），1 名远程人员监管 100 辆无人车",
+        "en": "Your pet: the 100-car fleet at level 8; one remote operator supervises 100 autonomous vehicles"
       }
     },
     {
@@ -1202,10 +1202,10 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 125938,
+      "byteSizeCompressed": 131034,
       "altText": {
-        "zh-CN": "你的 Pet：无人驾驶小车（L9 阶段），后方跟着迷你保护车",
-        "en": "Your pet: the unmanned car at level 9, mini escort car in trail"
+        "zh-CN": "你的 Pet：城市规模的领航车（L9 阶段），1 名远程人员监管 1,000 辆无人车",
+        "en": "Your pet: the lead car at city scale, level 9; one remote operator supervises 1,000 autonomous vehicles"
       }
     },
     {
@@ -1215,10 +1215,10 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 222615,
+      "byteSizeCompressed": 185203,
       "altText": {
-        "zh-CN": "你的 Pet：无人驾驶小车（L9 阶段），后方跟着迷你保护车",
-        "en": "Your pet: the unmanned car at level 9, mini escort car in trail"
+        "zh-CN": "你的 Pet：城市规模的领航车（L9 阶段），1 名远程人员监管 1,000 辆无人车",
+        "en": "Your pet: the lead car at city scale, level 9; one remote operator supervises 1,000 autonomous vehicles"
       }
     },
     {
@@ -1228,10 +1228,10 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 118750,
+      "byteSizeCompressed": 112234,
       "altText": {
-        "zh-CN": "你的 Pet：无人驾驶小车（L10 阶段），后方跟着迷你保护车",
-        "en": "Your pet: the unmanned car at level 10, mini escort car in trail"
+        "zh-CN": "你的 Pet：多城规模的天际线（L10 阶段），1 名远程人员监管 10,000 辆无人车",
+        "en": "Your pet: multi-city skylines at level 10; one remote operator supervises 10,000 autonomous vehicles"
       }
     },
     {
@@ -1241,10 +1241,10 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 202678,
+      "byteSizeCompressed": 154770,
       "altText": {
-        "zh-CN": "你的 Pet：无人驾驶小车（L10 阶段），后方跟着迷你保护车",
-        "en": "Your pet: the unmanned car at level 10, mini escort car in trail"
+        "zh-CN": "你的 Pet：多城规模的天际线（L10 阶段），1 名远程人员监管 10,000 辆无人车",
+        "en": "Your pet: multi-city skylines at level 10; one remote operator supervises 10,000 autonomous vehicles"
       }
     },
     {
@@ -1254,10 +1254,10 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 124426,
+      "byteSizeCompressed": 152306,
       "altText": {
-        "zh-CN": "你的 Pet：无人驾驶小车（L11 阶段），后方跟着迷你保护车",
-        "en": "Your pet: the unmanned car at level 11, mini escort car in trail"
+        "zh-CN": "你的 Pet：多区域地标网络（L11 阶段），1 名远程人员监管 100,000 辆无人车",
+        "en": "Your pet: the multi-region landmark network at level 11; one remote operator supervises 100,000 autonomous vehicles"
       }
     },
     {
@@ -1267,10 +1267,10 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 214931,
+      "byteSizeCompressed": 202084,
       "altText": {
-        "zh-CN": "你的 Pet：无人驾驶小车（L11 阶段），后方跟着迷你保护车",
-        "en": "Your pet: the unmanned car at level 11, mini escort car in trail"
+        "zh-CN": "你的 Pet：多区域地标网络（L11 阶段），1 名远程人员监管 100,000 辆无人车",
+        "en": "Your pet: the multi-region landmark network at level 11; one remote operator supervises 100,000 autonomous vehicles"
       }
     },
     {
@@ -1280,10 +1280,10 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 112208,
+      "byteSizeCompressed": 110440,
       "altText": {
-        "zh-CN": "你的 Pet：无人驾驶小车（L12 阶段），后方跟着迷你保护车",
-        "en": "Your pet: the unmanned car at level 12, mini escort car in trail"
+        "zh-CN": "你的 Pet：全球规模的领航车（L12 阶段），1 名远程人员监管 1,000,000 辆无人车",
+        "en": "Your pet: the lead car at global scale, level 12; one remote operator supervises 1,000,000 autonomous vehicles"
       }
     },
     {
@@ -1293,10 +1293,10 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 180513,
+      "byteSizeCompressed": 147038,
       "altText": {
-        "zh-CN": "你的 Pet：无人驾驶小车（L12 阶段），后方跟着迷你保护车",
-        "en": "Your pet: the unmanned car at level 12, mini escort car in trail"
+        "zh-CN": "你的 Pet：全球规模的领航车（L12 阶段），1 名远程人员监管 1,000,000 辆无人车",
+        "en": "Your pet: the lead car at global scale, level 12; one remote operator supervises 1,000,000 autonomous vehicles"
       }
     },
     {
@@ -1461,12 +1461,12 @@
       "keepsakeId": "ks-l6",
       "levelId": "l6",
       "title": {
-        "zh-CN": "宽体灯带徽",
-        "en": "Wide-body Badge"
+        "zh-CN": "三车小队徽",
+        "en": "3-Car Squad Badge"
       },
       "accessDescription": {
-        "zh-CN": "纪念车身加宽、双侧灯带点亮的时刻。",
-        "en": "Marks the wider body and dual light strips."
+        "zh-CN": "纪念三车小队集结出发的时刻。",
+        "en": "Marks the three-car squad assembling."
       },
       "assetId": "sprite-subject-pod--l6"
     },
@@ -1474,12 +1474,12 @@
       "keepsakeId": "ks-l7",
       "levelId": "l7",
       "title": {
-        "zh-CN": "街区巡游徽",
-        "en": "District Patrol Badge"
+        "zh-CN": "十车阵列徽",
+        "en": "10-Car Array Badge"
       },
       "accessDescription": {
-        "zh-CN": "纪念更大的传感环与街区巡游范围。",
-        "en": "Marks the larger ring and the district patrol range."
+        "zh-CN": "纪念十车阵列展开巡游的时刻。",
+        "en": "Marks the ten-car array deploying on patrol."
       },
       "assetId": "sprite-subject-pod--l7"
     },
@@ -1487,12 +1487,12 @@
       "keepsakeId": "ks-l8",
       "levelId": "l8",
       "title": {
-        "zh-CN": "城市网络徽",
-        "en": "City Network Badge"
+        "zh-CN": "百车车队徽",
+        "en": "100-Car Fleet Badge"
       },
       "accessDescription": {
-        "zh-CN": "纪念发光显示窗与双灯带点亮。",
-        "en": "Marks the glowing display windows and twin strips."
+        "zh-CN": "纪念百车车队密集列阵的时刻。",
+        "en": "Marks the dense 100-car fleet in formation."
       },
       "assetId": "sprite-subject-pod--l8"
     },
@@ -1500,12 +1500,12 @@
       "keepsakeId": "ks-l9",
       "levelId": "l9",
       "title": {
-        "zh-CN": "传感塔徽",
-        "en": "Sensor Tower Badge"
+        "zh-CN": "千车城市徽",
+        "en": "City Scale Badge"
       },
       "accessDescription": {
-        "zh-CN": "纪念加长车身与车顶传感塔就位。",
-        "en": "Marks the stretched body and roof sensor tower."
+        "zh-CN": "纪念领航车驶入城市天际线的时刻。",
+        "en": "Marks the lead car entering the city skyline."
       },
       "assetId": "sprite-subject-pod--l9"
     },
@@ -1513,12 +1513,12 @@
       "keepsakeId": "ks-l10",
       "levelId": "l10",
       "title": {
-        "zh-CN": "双层环徽",
-        "en": "Double Ring Badge"
+        "zh-CN": "万车多城徽",
+        "en": "Multi-City Badge"
       },
       "accessDescription": {
-        "zh-CN": "纪念双层传感环转动的时刻。",
-        "en": "Marks the double-deck sensor ring spinning."
+        "zh-CN": "纪念多城天际线同框点亮的时刻。",
+        "en": "Marks multi-city skylines lighting up together."
       },
       "assetId": "sprite-subject-pod--l10"
     },
@@ -1526,12 +1526,12 @@
       "keepsakeId": "ks-l11",
       "levelId": "l11",
       "title": {
-        "zh-CN": "洲际灯带徽",
-        "en": "Continental Badge"
+        "zh-CN": "多区域网络徽",
+        "en": "Multi-Region Badge"
       },
       "accessDescription": {
-        "zh-CN": "纪念灯带、传感环与天线全开。",
-        "en": "Marks strips, ring, and antenna all ablaze."
+        "zh-CN": "纪念多区域地标连成网络的时刻。",
+        "en": "Marks multi-region landmarks linking into a network."
       },
       "assetId": "sprite-subject-pod--l11"
     },
@@ -1539,12 +1539,12 @@
       "keepsakeId": "ks-l12",
       "levelId": "l12",
       "title": {
-        "zh-CN": "百万地平线纪念",
-        "en": "Million Horizon Memento"
+        "zh-CN": "百万全球纪念",
+        "en": "Global Scale Memento"
       },
       "accessDescription": {
-        "zh-CN": "纪念传感冠点亮、两辆迷你保护车随行的封顶时刻。",
-        "en": "Marks the sensor crown and two mini escorts at the summit."
+        "zh-CN": "纪念领航车与蓝色全球同框的封顶时刻。",
+        "en": "Marks the lead car meeting the blue globe at the summit."
       },
       "assetId": "sprite-subject-pod--l12"
     }
