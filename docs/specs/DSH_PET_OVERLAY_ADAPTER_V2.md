@@ -1,6 +1,6 @@
 ---
 spec_id: DSH_PET_OVERLAY_ADAPTER_V2
-status: proposed
+status: accepted
 spec_kind: implementation
 authority_level: governing_spec
 implementation_authority: contracts
@@ -965,7 +965,7 @@ PNPM_DEV_REQUIRED_FOR_PRODUCTION = NO
 SPEC_GOVERNANCE_MODE = AUTHOR
 SPEC_ID = DSH_PET_OVERLAY_ADAPTER_V2
 SPEC_KIND = implementation
-STATUS = proposed
+STATUS = accepted
 AUTHORITY_LEVEL = governing_spec
 IMPLEMENTATION_AUTHORITY = contracts
 PRIMARY_PARENT_AUTHORITY = VEHICLE_PET_PRODUCT_DIRECTION_V1
@@ -986,48 +986,71 @@ REMOTE_PACK_AUTHORIZED = NO
 AUDIO_AUTHORIZED = NO
 MULTI_PET_AUTHORIZED = NO
 AUTHORING_READY_FOR_REVIEW = YES
-READY_TO_MARK_ACCEPTED = NO
-READY_TO_MARK_ACCEPTED_REASON = pending independent review of the exact proposed Head
-INDEPENDENT_REVIEW_RESULT = PENDING
+READY_TO_MARK_ACCEPTED = YES
+READY_TO_MARK_ACCEPTED_REASON = the exact proposed Head passed the independent review (ACCEPT, zero blockers) and the authorized acceptance transition recorded it in §14 with execution-time ACCEPTED_AT
+INDEPENDENT_REVIEW_RESULT = ACCEPT
 ```
 
-`READY_TO_MARK_ACCEPTED = NO` until an independent reviewer audits the exact
-proposed Head of this V2 and returns `ACCEPT` with zero blockers. Acceptance
-authorization is carried by the Owner standing Goal directive (Goal 常伴: the
-Goal completes authority, implementation, audits, and merge without per-item
-Owner approval), matching the repository established preauthorized-acceptance
-pattern; the acceptance record in §14 is filled only at that transition.
+`READY_TO_MARK_ACCEPTED = YES`: the exact proposed Head
+`2dd0401654f507be6ab4643bbd8ed3831b094dca` passed the independent review (`ACCEPT`,
+zero blockers; `SEMANTIC_DELTA_AFTER_REVIEW = NONE`), and the authorized
+acceptance transition accepted those exact coordinates with execution-time
+`ACCEPTED_AT`. Acceptance authority is the Owner preauthorization of Goal 常伴
+(SPEC_ACCEPTANCE_ACTOR = `mayf3`); independent review, acceptance decision, and
+the authorized transition are complete process facts, not unresolved normative
+decisions. See §14 for the acceptance record.
 
 ## 14. Acceptance record
 
 ```text
-SPEC_LIFECYCLE = proposed
-DSH_OVERLAY_ADAPTER_SPEC_ACCEPTANCE_RECORD_V2 = RESERVED_UNTIL_ACCEPTANCE
-ACCEPTED_BY = PENDING
-ACCEPTED_AT = PENDING
-OWNER_ACCEPTANCE_DECISION = PENDING
-INDEPENDENT_REVIEW_RESULT = PENDING
-REVIEWED_BASE_COMMIT = PENDING
-REVIEWED_PROPOSED_HEAD = PENDING
-ACCEPTANCE_COMMIT_PARENT = PENDING
-SEMANTIC_DELTA_AFTER_REVIEW = PENDING
-BLOCKERS = PENDING
+SPEC_LIFECYCLE = proposed → accepted candidate
+DSH_OVERLAY_ADAPTER_SPEC_ACCEPTANCE_RECORD_V2 = YES
+ACCEPTED_BY = mayf3
+ACCEPTANCE_ACTOR = mayf3 (Goal 常伴 Owner preauthorization; Goal-internal acceptance per GOAL §13–§14)
+ACCEPTED_AT = 2026-09-06T23:26:30Z
+OWNER_ACCEPTANCE_DECISION = ACCEPT
+INDEPENDENT_REVIEW_RESULT = ACCEPT
+REVIEWED_BASE_COMMIT = 92aca75249afd082cceb6e3c26dd0d549809746d
+REVIEWED_PROPOSED_HEAD = 2dd0401654f507be6ab4643bbd8ed3831b094dca
+ACCEPTANCE_COMMIT_PARENT = 2dd0401654f507be6ab4643bbd8ed3831b094dca
+SEMANTIC_DELTA_AFTER_REVIEW = NONE (lifecycle transition only: proposed → accepted candidate)
+BLOCKERS = 0
 CONTRACT_COUNT = 15
 CONTRACTS_WITH_ACCEPTANCE = 15
 ACCEPTANCE_COUNT = 20
 OPEN_OWNER_DECISIONS = NONE
 NORMATIVE_TBD = NONE
 SUPERSEDES = DSH_PET_OVERLAY_ADAPTER_V1
-SUPERSESSION_ATOMIC_IN_ACCEPTANCE_COMMIT = PLANNED
+SUPERSESSION_ATOMIC_IN_ACCEPTANCE_COMMIT = YES
 REAL_TOKEN_INTEGRATION_AUTHORIZED = NO
 DSH_TOKEN_TO_PROGRESS_AUTHORIZED = NO
 DEEPSEEK_HARNESS_CORE_CHANGE_AUTHORIZED = NO
 REMOTE_PACK_AUTHORIZED = NO
 AUDIO_AUTHORIZED = NO
 MULTI_PET_AUTHORIZED = NO
+MERGE_AUTHORIZED = YES (Goal 常伴 §14: the Goal completes PR ready/merge without per-item Owner approval)
 ```
 
-Reserved for the acceptance transition. At acceptance this record is filled with
-the exact reviewed base/head, reviewer result, acceptance actor and time, and the
-atomic supersession flip of `DSH_PET_OVERLAY_ADAPTER_V1` (`status: superseded`,
-`superseded_by: DSH_PET_OVERLAY_ADAPTER_V2`) in the same commit.
+Binding facts:
+
+- The independent review bound the reviewed Base
+  `92aca75249afd082cceb6e3c26dd0d549809746d` and the reviewed proposed Head
+  `2dd0401654f507be6ab4643bbd8ed3831b094dca` and returned `ACCEPT` with zero
+  blockers and `SEMANTIC_DELTA_AFTER_REVIEW = NONE`.
+- This acceptance commit's parent is exactly
+  `2dd0401654f507be6ab4643bbd8ed3831b094dca`; the only content changes from the
+  reviewed Head are lifecycle fields: this §14 record, the matching §13
+  status fields, the frontmatter lifecycle flip of `DSH_PET_OVERLAY_ADAPTER_V1`
+  to `status: superseded` with `superseded_by: DSH_PET_OVERLAY_ADAPTER_V2`, and
+  the `docs/specs/README.md` index rows. Goal, Scope, Decisions, Contracts,
+  Acceptance items, coverage tables, and the frozen model are byte-unchanged
+  from the reviewed Head.
+- With this commit, `DSH_PET_OVERLAY_ADAPTER_V1` flips to `status: superseded`
+  and `DSH_PET_OVERLAY_ADAPTER_V2` becomes `status: accepted` in the same
+  atomic docs-only change (V0 §6.3; no partial supersession).
+- Activation is a reachability rule: this Spec is active repository authority
+  when the exact accepted revision is reachable from `mayf3/vehicle-pet:main`
+  or an implementation base derived from it.
+- DSH overlay implementation against V2 MUST NOT begin until the exact accepted
+  revision is reachable from `mayf3/vehicle-pet:main` or an implementation base
+  derived from it.
