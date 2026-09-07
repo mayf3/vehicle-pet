@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "task_id": "GOAL-LINGDONG-AUTHORITY-R1",
+  "goal": "Goal 灵动 authority round: supersede DSH_PET_OVERLAY_ADAPTER_V2 with the whole-authority successor V3 so the resident Vehicle Pet becomes a two-size (SMALL/LARGE) pet-first companion — no resident progress bar, no daily panel, >=8 expression variants, >=30 original structured-state speech lines per locale with strict anti-harassment cadence — while Engine V3, Progress Source V2, Usage Source V1, and the token economy are reused unchanged; the Goal stops at READY_FOR_PRODUCTION_APPLY with no production mutation.",
+  "current_gap": "The accepted DSH_PET_OVERLAY_ADAPTER_V2 freezes the daily 112px single size, the VISIBLE/PANEL_OPEN/COLLAPSED machine whose normal click toggles the 264px compact panel, the panel as the daily settings surface, the resident within-level micro progress sliver, and exact-size assertions (ACC-OVERLAY-017); Goal 灵动 reverses each of these and adds speech and an extended expression layer, so the accepted meaning of the overlay adapter authority is deleted and replaced.",
+  "done_when": "DSH_PET_OVERLAY_ADAPTER_V3 accepted at exact reviewed coordinates and DSH_PET_OVERLAY_ADAPTER_V2 superseded atomically; transition, route, and governance validators PASS; independent spec audit ACCEPT with 0 blockers; PR merged into mayf3/vehicle-pet:main; then a separate REUSE implementation round reaches Goal DONE_WHEN (E1-E12, ALL_GATES PASS, independent code + experience audits ACCEPT, merged, isolated fixed-ref acceptance PASS) and the Goal stops at READY_FOR_PRODUCTION_APPLY.",
+  "route_stage": "AUTHORITY_AUTHORING",
+  "authority_accepted_in_base": "NO",
+  "owner_decision_required": false,
+  "authority": {
+    "declared_action": "SUPERSEDE",
+    "ownership_known": true,
+    "accepted_owner_exists": true,
+    "accepted_meaning_changed": true,
+    "accepted_strict_addition": false,
+    "proposed_target_named": true,
+    "proposal_scope_changed": false,
+    "proposal_ownership_changed": false,
+    "proposal_decision_identity_changed": false,
+    "implementation_authority": "contracts",
+    "atomic_spec_implementation_permitted": false
+  },
+  "plan": {
+    "complexity": "BOUNDED",
+    "level": "BRIEF",
+    "brief_location": "Owner Goal dispatch prompt (GOAL_NAME=灵动, OWNER_DISPATCH_UNIT=GOAL) plus docs/investigations/GOAL_LINGDONG_PREFLIGHT.md"
+  },
+  "assurance": {
+    "failure_consequence": "DURABLE_STATE",
+    "level": "DURABLE",
+    "controlled_runbook_present": false,
+    "rationale": "durable long-term user-interaction contract change on the resident surface; no production data migration, permission, Secret, or destructive operation; production application excluded and left to a separate Owner gate; independent spec, code, and experience audits required"
+  },
+  "execution_mandate": {
+    "status": "VALID",
+    "attributable": true,
+    "target_bound": true,
+    "actor_bound": true,
+    "environment_bound": true,
+    "scope_bound": true,
+    "allowed_effects_bound": true,
+    "forbidden_effects_bound": true,
+    "exact_operation_bound": false,
+    "done_when_bound": true,
+    "abort_conditions_bound": true,
+    "secret_handling_bound": true,
+    "receipt_bound": true,
+    "attempt_bounds_bound": true,
+    "self_issued": false,
+    "note": "the Owner Goal dispatch (OWNER_DISPATCH_UNIT=GOAL, explicit DONE_WHEN and anti-churn boundary, PRODUCTION_APPLY_ALLOWED=NO) is the attributable mandate; it is goal-scoped, not a single-operation runbook mandate, so exact_operation_bound is false by design"
+  },
+  "write_surface": {
+    "mutation_planned": true,
+    "isolated": true,
+    "note": "docs-only authority authoring on branch lingdong/overlay-adapter-v3 in the exclusive worktree vehicle-pet-lingdong-docs cut from cce0e9d24907e7c17e42fd2b310a68a98860d5cf; no implementation in this stage; the later implementation round uses a fresh worktree from the post-merge main"
+  },
+  "spec_gap_dependency": "NONE",
+  "evidence": {
+    "load_bearing_required": true,
+    "reviewability": "PASS",
+    "fabrication_observed": false,
+    "failure_class": "NONE"
+  },
+  "live_authority_gap": {
+    "state": "NONE",
+    "expansion_frozen": true,
+    "auto_delete": false,
+    "permanent_grandfather": false,
+    "owner_disposition_present": false
+  },
+  "emergency": {
+    "state": "NONE",
+    "action_kind": "NONE",
+    "owner_authorized": false,
+    "incident_reference_present": false,
+    "durable_new_behavior": false,
+    "normal_authority_reconciliation_required": false
+  },
+  "review": {
+    "review_target_head": "PENDING_COMMIT",
+    "base_head": "cce0e9d24907e7c17e42fd2b310a68a98860d5cf",
+    "current_base_head": "cce0e9d24907e7c17e42fd2b310a68a98860d5cf",
+    "target_head_changed": false,
+    "relevant_base_impact": false,
+    "full_rereview_required": false,
+    "review_scope": "independent spec audit of the exact proposed Head once committed; the only post-review delta is the pre-declared atomic acceptance transition (lifecycle fields, V2 flip, README index rows), which receives an independent final-head delta recheck"
+  },
+  "readiness": {
+    "implementation_allowed": "NO",
+    "merge_ready": "NOT_APPLICABLE",
+    "operation_allowed": "NOT_APPLICABLE"
+  },
+  "stop": {
+    "done_when_met": false,
+    "expansion_triggered": false,
+    "next_action": "CONTINUE"
+  },
+  "findings": []
+}
