@@ -1,6 +1,6 @@
 ---
 spec_id: VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V2
-status: proposed
+status: accepted
 spec_kind: invariant
 authority_level: governing_spec
 implementation_authority: none
