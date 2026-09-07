@@ -35,5 +35,6 @@ export const dshDefaultPackId = 'autonomous-fleet'
  * keeps both Packs selectable. Pure so the resolution stays unit-testable.
  */
 export function resolveDshProductPackId(packId: string | undefined): string {
-  return packId === dshDefaultPackId ? dshDefaultPackId : dshDefaultPackId
+  void packId
+  return dshDefaultPackId
 }
