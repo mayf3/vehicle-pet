@@ -1,0 +1,268 @@
+[
+  {
+    "spec_id": "CONFIGURABLE_PET_ENGINE_V1",
+    "status": "superseded",
+    "spec_kind": "implementation",
+    "authority_level": "governing_spec",
+    "implementation_authority": "contracts",
+    "scope": [
+      "pet-engine",
+      "bundled-pet-packs",
+      "prototype-shell"
+    ],
+    "governed_by": [
+      "VEHICLE_PET_PRODUCT_DIRECTION_V1",
+      "VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V1"
+    ],
+    "external_authorities": [],
+    "supersedes": [],
+    "superseded_by": "CONFIGURABLE_PET_ENGINE_V2",
+    "owners": [
+      "mayf3"
+    ]
+  },
+  {
+    "spec_id": "CONFIGURABLE_PET_ENGINE_V2",
+    "status": "superseded",
+    "spec_kind": "implementation",
+    "authority_level": "governing_spec",
+    "implementation_authority": "contracts",
+    "scope": [
+      "pet-engine",
+      "bundled-pet-packs",
+      "prototype-shell"
+    ],
+    "governed_by": [
+      "VEHICLE_PET_PRODUCT_DIRECTION_V1",
+      "VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V1"
+    ],
+    "external_authorities": [],
+    "supersedes": [
+      "CONFIGURABLE_PET_ENGINE_V1"
+    ],
+    "superseded_by": "CONFIGURABLE_PET_ENGINE_V3",
+    "owners": [
+      "mayf3"
+    ]
+  },
+  {
+    "spec_id": "CONFIGURABLE_PET_ENGINE_V3",
+    "status": "accepted",
+    "spec_kind": "implementation",
+    "authority_level": "governing_spec",
+    "implementation_authority": "contracts",
+    "scope": [
+      "pet-engine",
+      "bundled-pet-packs",
+      "prototype-shell"
+    ],
+    "governed_by": [
+      "VEHICLE_PET_PRODUCT_DIRECTION_V1",
+      "VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V1"
+    ],
+    "external_authorities": [],
+    "supersedes": [
+      "CONFIGURABLE_PET_ENGINE_V2"
+    ],
+    "superseded_by": null,
+    "owners": [
+      "mayf3"
+    ]
+  },
+  {
+    "spec_id": "DSH_PET_OVERLAY_ADAPTER_V1",
+    "status": "superseded",
+    "spec_kind": "implementation",
+    "authority_level": "governing_spec",
+    "implementation_authority": "contracts",
+    "scope": [
+      "dsh-bundle-plugin",
+      "shell-overlay",
+      "compact-pet-surface",
+      "session-visual-reactions"
+    ],
+    "governed_by": [
+      "VEHICLE_PET_PRODUCT_DIRECTION_V1",
+      "CONFIGURABLE_PET_ENGINE_V2",
+      "VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V1"
+    ],
+    "external_authorities": [
+      {
+        "repository": "mayf3/deepseek-harness",
+        "authority_id": "DEEPSEEK_HARNESS_PINNED_INTEROP_V1",
+        "revision": "f77b5a2fcebc2d9138f6608a60636f2294868d42",
+        "relation": "interoperates_with"
+      }
+    ],
+    "supersedes": [],
+    "superseded_by": "DSH_PET_OVERLAY_ADAPTER_V2",
+    "owners": [
+      "mayf3"
+    ]
+  },
+  {
+    "spec_id": "DSH_PET_OVERLAY_ADAPTER_V2",
+    "status": "accepted",
+    "spec_kind": "implementation",
+    "authority_level": "governing_spec",
+    "implementation_authority": "contracts",
+    "scope": [
+      "dsh-bundle-plugin",
+      "shell-overlay",
+      "compact-pet-surface",
+      "session-visual-reactions"
+    ],
+    "governed_by": [
+      "VEHICLE_PET_PRODUCT_DIRECTION_V1",
+      "CONFIGURABLE_PET_ENGINE_V3",
+      "VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V1"
+    ],
+    "external_authorities": [
+      {
+        "repository": "mayf3/deepseek-harness",
+        "authority_id": "DEEPSEEK_HARNESS_PINNED_INTEROP_V1",
+        "revision": "f77b5a2fcebc2d9138f6608a60636f2294868d42",
+        "relation": "interoperates_with"
+      }
+    ],
+    "supersedes": [
+      "DSH_PET_OVERLAY_ADAPTER_V1"
+    ],
+    "superseded_by": null,
+    "owners": [
+      "mayf3"
+    ]
+  },
+  {
+    "spec_id": "DSH_USAGE_PROGRESS_SOURCE_V1",
+    "status": "accepted",
+    "spec_kind": "implementation",
+    "authority_level": "governing_spec",
+    "implementation_authority": "contracts",
+    "scope": [
+      "dsh-usage-progress-source",
+      "counts-only-token-economy",
+      "usage-ledger-persistence"
+    ],
+    "governed_by": [
+      "VEHICLE_PET_PRODUCT_DIRECTION_V1",
+      "CONFIGURABLE_PET_ENGINE_V2",
+      "DSH_PET_OVERLAY_ADAPTER_V1",
+      "VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V1",
+      "VEHICLE_PET_PROGRESS_SOURCE_V2"
+    ],
+    "external_authorities": [
+      {
+        "repository": "mayf3/deepseek-harness",
+        "authority_id": "DEEPSEEK_HARNESS_PINNED_INTEROP_V1",
+        "revision": "419ee11c9bd5d01b206c8660762525d151bc4b4b",
+        "relation": "interoperates_with"
+      }
+    ],
+    "supersedes": [],
+    "superseded_by": null,
+    "owners": [
+      "mayf3"
+    ]
+  },
+  {
+    "spec_id": "VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V1",
+    "status": "superseded",
+    "spec_kind": "invariant",
+    "authority_level": "governing_spec",
+    "implementation_authority": "none",
+    "scope": [
+      "mayf3/vehicle-pet"
+    ],
+    "governed_by": [],
+    "external_authorities": [
+      {
+        "repository": "mayf3/agent-development-governance",
+        "authority_id": "AGENT_DEVELOPMENT_GOVERNANCE_BOOTSTRAP_V0",
+        "revision": "46f78c3f00d768d99a4c8c2da975b124bce042f9",
+        "relation": "constrained_by"
+      }
+    ],
+    "supersedes": [],
+    "superseded_by": "VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V2",
+    "owners": [
+      "mayf3"
+    ]
+  },
+  {
+    "spec_id": "VEHICLE_PET_PRODUCT_DIRECTION_V1",
+    "status": "accepted",
+    "spec_kind": "invariant",
+    "authority_level": "governing_spec",
+    "implementation_authority": "none",
+    "scope": [
+      "mayf3/vehicle-pet"
+    ],
+    "governed_by": [
+      "VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V1"
+    ],
+    "external_authorities": [],
+    "supersedes": [],
+    "superseded_by": null,
+    "owners": [
+      "mayf3"
+    ]
+  },
+  {
+    "spec_id": "VEHICLE_PET_PROGRESS_SOURCE_V2",
+    "status": "accepted",
+    "spec_kind": "implementation",
+    "authority_level": "governing_spec",
+    "implementation_authority": "none",
+    "scope": [
+      "progress-source-registration",
+      "post-v1-external-progress-sources",
+      "token-usage-consumption-boundary"
+    ],
+    "governed_by": [
+      "VEHICLE_PET_PRODUCT_DIRECTION_V1",
+      "CONFIGURABLE_PET_ENGINE_V2",
+      "DSH_PET_OVERLAY_ADAPTER_V1",
+      "VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V1"
+    ],
+    "external_authorities": [
+      {
+        "repository": "mayf3/deepseek-harness",
+        "authority_id": "DEEPSEEK_HARNESS_PINNED_INTEROP_V1",
+        "revision": "419ee11c9bd5d01b206c8660762525d151bc4b4b",
+        "relation": "interoperates_with"
+      }
+    ],
+    "supersedes": [],
+    "superseded_by": null,
+    "owners": [
+      "mayf3"
+    ]
+  },
+  {
+    "spec_id": "VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V2",
+    "status": "accepted",
+    "spec_kind": "invariant",
+    "authority_level": "governing_spec",
+    "implementation_authority": "none",
+    "scope": [
+      "mayf3/vehicle-pet"
+    ],
+    "governed_by": [],
+    "external_authorities": [
+      {
+        "repository": "mayf3/agent-development-governance",
+        "authority_id": "AGENT_DEVELOPMENT_GOVERNANCE_V1",
+        "revision": "0d61433339ef563f82307b70120d9fcee168cdab",
+        "relation": "constrained_by"
+      }
+    ],
+    "supersedes": [
+      "VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V1"
+    ],
+    "superseded_by": null,
+    "owners": [
+      "mayf3"
+    ]
+  }
+]
