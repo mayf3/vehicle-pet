@@ -97,5 +97,7 @@
     "copied_path": "docs/evidence/artswap-v2-20260908/superseded-round-prompts.json",
     "sha256": "67b8d8a3a5bc9dde50c8aa7884cf0f732c06432b821f50162c564205e23ead0e",
     "levels": "L6-L12 (7 entries)"
-  }
+  },
+  "status": "SUPERSEDED_BY_OWNER_MATERIAL_20260908",
+  "superseded_note": "Owner review of the deployed result (2026-09-08): \"这不是我做的效果\". The Owner designated the pony-v1-scale-v2 material (per-level final images listed in superseded-round-prompts.json output_hints, plus l1.png-l5.png in the same evidence directory) as THE source material. The Astra-reference-derived masters from this round are removed from the Pack (recoverable in git at 2049fd8). Runtime now ships: L6-L12 = the accepted c3d1d4e masters (built from those exact exec images), L1-L5 = Owner l1.png-l5.png as master-l1.png-master-l5.png."
 }
