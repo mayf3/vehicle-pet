@@ -37,38 +37,43 @@ const NAVY = '#223047'
 const AMBER = '#F5B840'
 const PINK = '#F6A8B8'
 const BLUE = '#8FC3EF'
-const SLATE = '#5E6F85'
 const WHITE = '#FFFFFF'
+// GOAL 换图: the V2 identity renders the face on a dark navy display, so the
+// stroke-drawn features flip to light cyan/white to stay readable on it.
+// Fill-drawn elements (speech bubble, blush, sparkles, sweat drop) keep their
+// own contrast against the dark screen.
+const LIGHT = '#EAF6FF'
+const CYAN = '#7FD8FF'
 const stroke = (w) => `stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"`
 
 // Face anchor rects per level as percentages of the 480x480 level sprite
-// canvas: [left, top, size]. Measured against the shipped autonomous-fleet
-// sprites at base 6350ce8 (see PROVENANCE.json).
+// canvas: [left, top, size]. Measured against the shipped V2 autonomous-fleet
+// sprites (see PROVENANCE.json; mirrors src/dsh/client/expressions.ts).
 const ANCHOR_PX = {
-  l1: [5, 53, 28], l2: [6, 52, 30], l3: [5, 53, 28], l4: [5, 53, 28],
-  l5: [2, 55, 28], l6: [29, 53, 27], l7: [43, 66, 23], l8: [51, 67, 23],
-  l9: [26, 63, 27], l10: [28, 62, 24], l11: [22, 62, 24], l12: [8, 59, 26],
+  l1: [8, 37, 45], l2: [8, 37, 45], l3: [8, 37, 45], l4: [7, 45, 40],
+  l5: [8, 38, 45], l6: [32, 61, 22], l7: [36, 70, 13], l8: [36, 66, 14],
+  l9: [36, 67, 14], l10: [41, 68, 11], l11: [35, 63, 15], l12: [16, 65, 22],
 }
 
 function idle() {
   return `
-  <ellipse cx="38" cy="180" rx="30" ry="15" fill="${PINK}" opacity="0.8"/>
-  <ellipse cx="154" cy="180" rx="30" ry="15" fill="${PINK}" opacity="0.8"/>
-  <path d="M 46 120 Q 68 108 90 116" fill="none" stroke="${NAVY}" ${stroke(9)} opacity="0.9"/>
-  <path d="M 130 116 Q 152 108 174 120" fill="none" stroke="${NAVY}" ${stroke(9)} opacity="0.9"/>`
+  <ellipse cx="38" cy="180" rx="30" ry="15" fill="${PINK}" opacity="0.85"/>
+  <ellipse cx="154" cy="180" rx="30" ry="15" fill="${PINK}" opacity="0.85"/>
+  <path d="M 46 120 Q 68 108 90 116" fill="none" stroke="${CYAN}" ${stroke(9)} opacity="0.95"/>
+  <path d="M 130 116 Q 152 108 174 120" fill="none" stroke="${CYAN}" ${stroke(9)} opacity="0.95"/>`
 }
 function working() {
   return `
-  <path d="M 36 108 L 92 124" fill="none" stroke="${NAVY}" ${stroke(12)}/>
-  <path d="M 128 124 L 184 108" fill="none" stroke="${NAVY}" ${stroke(12)}/>
+  <path d="M 36 108 L 92 124" fill="none" stroke="${LIGHT}" ${stroke(12)}/>
+  <path d="M 128 124 L 184 108" fill="none" stroke="${LIGHT}" ${stroke(12)}/>
   <path d="M 6 146 L 62 146" stroke="${AMBER}" ${stroke(12)}/>
   <path d="M 0 172 L 46 172" stroke="${AMBER}" ${stroke(12)} opacity="0.85"/>
   <path d="M 8 198 L 54 198" stroke="${AMBER}" ${stroke(12)} opacity="0.7"/>`
 }
 function needsInput() {
   return `
-  <path d="M 40 94 Q 66 74 92 94" fill="none" stroke="${NAVY}" ${stroke(10)}/>
-  <path d="M 128 94 Q 154 74 180 94" fill="none" stroke="${NAVY}" ${stroke(10)}/>
+  <path d="M 40 94 Q 66 74 92 94" fill="none" stroke="${LIGHT}" ${stroke(10)}/>
+  <path d="M 128 94 Q 154 74 180 94" fill="none" stroke="${LIGHT}" ${stroke(10)}/>
   <rect x="148" y="4" width="104" height="90" rx="20" fill="${WHITE}" stroke="${NAVY}" ${stroke(8)}/>
   <path d="M 166 92 L 150 122 L 196 92 Z" fill="${WHITE}" stroke="${NAVY}" ${stroke(8)}/>
   <path d="M 185 34 A 16 16 0 1 1 200 62 L 200 71" fill="none" stroke="${NAVY}" ${stroke(12)}/>
@@ -76,22 +81,22 @@ function needsInput() {
 }
 function completed() {
   return `
-  <path d="M 26 132 A 29 29 0 0 1 84 132" fill="none" stroke="${NAVY}" ${stroke(12)}/>
-  <path d="M 122 132 A 29 29 0 0 1 180 132" fill="none" stroke="${NAVY}" ${stroke(12)}/>
-  <path d="M 88 178 A 38 38 0 0 0 164 178 Z" fill="${NAVY}"/>
+  <path d="M 26 132 A 29 29 0 0 1 84 132" fill="none" stroke="${LIGHT}" ${stroke(12)}/>
+  <path d="M 122 132 A 29 29 0 0 1 180 132" fill="none" stroke="${LIGHT}" ${stroke(12)}/>
+  <path d="M 88 178 A 38 38 0 0 0 164 178 Z" fill="${LIGHT}"/>
   <path d="M 103 178 A 23 17 0 0 0 149 178 Z" fill="${PINK}"/>
-  <g transform="translate(26,52) scale(1.25)"><path d="M 0 -16 L 5 -5 L 16 0 L 5 5 L 0 16 L -5 5 L -16 0 L -5 -5 Z" fill="${AMBER}" stroke="${NAVY}" ${stroke(4)}/></g>
-  <g transform="translate(218,90) scale(1.0)"><path d="M 0 -16 L 5 -5 L 16 0 L 5 5 L 0 16 L -5 5 L -16 0 L -5 -5 Z" fill="${AMBER}" stroke="${NAVY}" ${stroke(4)}/></g>
+  <g transform="translate(26,52) scale(1.25)"><path d="M 0 -16 L 5 -5 L 16 0 L 5 5 L 0 16 L -5 5 L -16 0 L -5 -5 Z" fill="${AMBER}" stroke="${LIGHT}" ${stroke(4)}/></g>
+  <g transform="translate(218,90) scale(1.0)"><path d="M 0 -16 L 5 -5 L 16 0 L 5 5 L 0 16 L -5 5 L -16 0 L -5 -5 Z" fill="${AMBER}" stroke="${LIGHT}" ${stroke(4)}/></g>
   <circle cx="62" cy="30" r="8" fill="${AMBER}"/>
-  <circle cx="178" cy="26" r="7" fill="${BLUE}"/>
+  <circle cx="178" cy="26" r="7" fill="${CYAN}"/>
   <circle cx="230" cy="158" r="7" fill="${PINK}"/>`
 }
 function failed() {
   return `
-  <path d="M 40 108 Q 64 122 92 114" fill="none" stroke="${SLATE}" ${stroke(11)}/>
-  <path d="M 128 114 Q 156 122 180 108" fill="none" stroke="${SLATE}" ${stroke(11)}/>
-  <path d="M 94 202 Q 110 188 126 202 Q 142 216 158 202" fill="none" stroke="${SLATE}" ${stroke(12)}/>
-  <path d="M 204 58 Q 224 92 204 108 Q 184 92 204 58 Z" fill="${BLUE}" stroke="${NAVY}" ${stroke(7)}/>`
+  <path d="M 40 108 Q 64 122 92 114" fill="none" stroke="${LIGHT}" ${stroke(11)}/>
+  <path d="M 128 114 Q 156 122 180 108" fill="none" stroke="${LIGHT}" ${stroke(11)}/>
+  <path d="M 94 202 Q 110 188 126 202 Q 142 216 158 202" fill="none" stroke="${LIGHT}" ${stroke(12)}/>
+  <path d="M 204 58 Q 224 92 204 108 Q 184 92 204 58 Z" fill="${BLUE}" stroke="${LIGHT}" ${stroke(7)}/>`
 }
 
 const STATES = [
