@@ -91,5 +91,11 @@
     "master-v2-l7.png": "e8e717c31bb383e0c3967f27496754e99a438449735d8abc412160000ef86766",
     "master-v2-l8.png": "8cab7c88f35b9104768cd15f5816c19f781564e272f8cc828c6b6743b4f037c3",
     "master-v2-l9.png": "18b1d756d17562e2f6a47eaed478779152e46a5847152be5e32d641c64c15a85"
+  },
+  "superseded_round_lineage": {
+    "note": "Owner-provided pointer (2026-09-08): the superseded white/yellow + Pony.ai round generated its L6-L12 compositions from the per-level prompts archived at the copied path below (original: vehicle-pet-wt-light-companion-spec-20260906/docs/evidence/pony-v1-scale-v2-20260906/prompts.json). Those prompts deliberately baked \"Pony.ai lowercase-ai door text\" into the art — the exact brand identity Goal 换图 removes. The V2 round prompts keep the same structure (reference-locked identity, per-level composition, style constraints) but pin the V2 identity and forbid all brand marks.",
+    "copied_path": "docs/evidence/artswap-v2-20260908/superseded-round-prompts.json",
+    "sha256": "67b8d8a3a5bc9dde50c8aa7884cf0f732c06432b821f50162c564205e23ead0e",
+    "levels": "L6-L12 (7 entries)"
   }
 }
