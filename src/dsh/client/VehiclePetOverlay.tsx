@@ -19,7 +19,7 @@ import { IndexedDbPetStorage, MemoryPetStorageAdapter, type Locale, type PetStor
 import {
   DailyGreeting, HostActivityFeedback, PetEngineProvider, PetSceneRenderer, UpgradeCeremony, usePetEngine,
 } from '../../react'
-import { dshPackBundles, dshDefaultPackId } from './engine-bundles'
+import { dshPackBundles, dshDefaultPackId, resolveDshProductPackId } from './engine-bundles'
 import type { VehiclePetLocaleKey } from './locales'
 import { createOverlayProgressSource } from './OverlayProgressSource'
 import type { VehiclePetBindingInfo } from './session-state-adapter'
@@ -29,6 +29,7 @@ import type {
   VehiclePetInteractionState, VehiclePetOverlayPreferences, VehiclePetSessionView,
 } from './types'
 import { OVERLAY_KEYBOARD_STEPS, useOverlayDrag } from './useOverlayDrag'
+import { ExpressionLayer } from './ExpressionLayer'
 import { VehiclePetDialog } from './VehiclePetDialog'
 import { VehiclePetPanel } from './VehiclePetPanel'
 
@@ -270,7 +271,8 @@ function systemPrefersReducedMotion(): boolean {
 }
 
 /**
- * The visible overlay: pet (112px), launcher (36px), compact panel (320px),
+ * The visible overlay: pet (112px), launcher (36px), compact panel
+ * (OVERLAY_GEOMETRY.compactPanelWidthPx),
  * engine feedback surfaces, and the in-Harness full journey dialog.
  */
 function OverlaySurface({
@@ -301,9 +303,24 @@ function OverlaySurface({
   // user choice always wins over the OS setting (Owner direction R1_CONT).
   const reducedMotion = preferences.reducedMotion ?? systemPrefersReducedMotion()
   const { t, commitPreferences } = useOverlayChrome()
-  const { snapshot } = usePetEngine()
+  const { snapshot, switchPack } = usePetEngine()
   const petButtonRef = useRef<HTMLButtonElement | null>(null)
   const journeyTriggerRef = useRef<HTMLButtonElement | null>(null)
+
+  // CTR-OVERLAY-006 (V2): the DSH surface presents `autonomous-fleet` as the
+  // only user-selectable product Pack. Stored Engine state naming a
+  // non-product Pack (e.g. a pre-V2 seedling selection) resolves to the
+  // product Pack through the ordinary Engine `activePackId` mechanism; this
+  // repoints the displayed Pack only and deletes or rewrites no stored
+  // progression, keepsakes, or receipts.
+  const activePackId = snapshot.activePack?.manifest.packId
+  useEffect(() => {
+    if (!snapshot.initialized) return
+    const resolved = resolveDshProductPackId(activePackId)
+    if (activePackId !== undefined && activePackId !== resolved) {
+      switchPack(resolved)
+    }
+  }, [snapshot.initialized, activePackId, switchPack])
   const drag = useOverlayDrag({
     preferences,
     panelOpen: effectiveInteraction === 'PANEL_OPEN',
@@ -408,7 +425,17 @@ function OverlaySurface({
             onPointerCancel={drag.onPointerCancel}
           >
             <span className="vpo-scene">
-              <PetSceneRenderer subjectInteractive={false} interactionCount={petInteractionCount} presentationMode="compact-overlay" />
+              <PetSceneRenderer
+                subjectInteractive={false}
+                interactionCount={petInteractionCount}
+                presentationMode="compact-overlay"
+                subjectOverlay={
+                  <ExpressionLayer
+                    sessionView={sessionView}
+                    derivedLevelId={snapshot.viewModel?.derivedLevelId}
+                  />
+                }
+              />
             </span>
             <WithinLevelMicroProgress viewModel={snapshot.viewModel} reducedMotion={reducedMotion} />
             {sessionView.live === 'needs-input' ? <span className="vpo-badge" aria-hidden="true" /> : null}

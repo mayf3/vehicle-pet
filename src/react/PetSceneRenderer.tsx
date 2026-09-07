@@ -4,7 +4,7 @@
  * every whitelisted presentation preset to engine-owned visual semantics.
  */
 
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import type { RenderNode } from '../engine'
 import { usePetEngine } from './PetEngineProvider'
 import { AssetFallback } from './AssetFallback'
@@ -30,6 +30,13 @@ export interface PetSceneRendererProps {
   interactionCount?: number
   /** Host presentation only; the same RenderPlan remains authoritative. */
   presentationMode?: 'standalone' | 'full-journey' | 'compact-overlay'
+  /**
+   * Optional host-owned decoration rendered inside the subject box after the
+   * subject asset (e.g. the DSH overlay session-expression layer). It is
+   * plain presentation: the RenderPlan, schema, and Pack data stay
+   * authoritative, and the host element keeps its own pointer/focus surface.
+   */
+  subjectOverlay?: ReactNode
   'aria-label'?: string
 }
 
@@ -85,6 +92,7 @@ export function PetSceneRenderer(props: PetSceneRendererProps) {
           compactViewport={presentationMode === 'compact-overlay'}
           onClickSubject={() => setClickCount((n) => n + 1)}
           simulateFailAssetIds={props.simulateFailAssetIds}
+          subjectOverlay={node.kind === 'subject' ? props.subjectOverlay : undefined}
         />
       ))}
     </div>
@@ -132,6 +140,7 @@ interface PlanNodeViewProps {
   compactViewport: boolean
   onClickSubject: () => void
   simulateFailAssetIds?: readonly string[]
+  subjectOverlay?: ReactNode
 }
 
 function PlanNodeView(props: PlanNodeViewProps) {
@@ -184,6 +193,7 @@ function PlanNodeView(props: PlanNodeViewProps) {
         interactive={props.subjectInteractive}
         onClick={props.onClickSubject}
         simulateFailAssetIds={props.simulateFailAssetIds}
+        overlay={props.subjectOverlay}
       />
     )
   }
@@ -207,6 +217,7 @@ function SubjectButton(props: {
   interactive: boolean
   onClick: () => void
   simulateFailAssetIds?: readonly string[]
+  overlay?: ReactNode
 }) {
   const { node, reducedMotion, upgradeReveal, clickCount, onClick } = props
   const { snapshot, copy } = usePetEngine()
@@ -242,9 +253,9 @@ function SubjectButton(props: {
   } as const
   const asset = <SceneAsset node={node} className="vp-node-img" simulateFailAssetIds={props.simulateFailAssetIds} />
   if (!props.interactive) {
-    return <span {...common} role="img">{asset}</span>
+    return <span {...common} role="img">{asset}{props.overlay}</span>
   }
-  return <button {...common} type="button" onClick={onClick}>{asset}</button>
+  return <button {...common} type="button" onClick={onClick}>{asset}{props.overlay}</button>
 }
 
 /** Asset node with the webp → png → text degradation chain (CTR-PET-017). */

@@ -26,9 +26,15 @@ const css = `
 .vpo-scene .vp-scene[data-presentation-mode="compact-overlay"] .vp-subject-btn{animation:none!important}
 .vpo-scene .vp-scene[data-presentation-mode="compact-overlay"] .vp-subject-btn::after{display:none!important}
 .vpo-scene .vp-scene[data-presentation-mode="compact-overlay"][data-reduced-motion="false"] .vp-subject-btn>.vp-node-img{animation:vp-idle-float 3.6s ease-in-out infinite}
+.vpo-scene .vp-scene[data-presentation-mode="compact-overlay"][data-reduced-motion="false"] .vpo-expr{animation:vp-idle-float 3.6s ease-in-out infinite}
 .vpo-launcher{position:relative;width:100%;height:100%;padding:0;border:1px solid color-mix(in srgb,var(--color-border,#9bb7cb) 60%,transparent);background:color-mix(in srgb,var(--color-surface,#fff) 84%,transparent);box-shadow:0 4px 16px rgba(16,52,76,.22);border-radius:999px;cursor:pointer;outline:none;display:grid;place-items:center;pointer-events:auto}
 .vpo-launcherDot{width:44%;height:44%;border-radius:50%;background:radial-gradient(circle at 32% 30%,color-mix(in srgb,var(--color-accent,#2f80ed) 30%,#ffffff) 0%,var(--color-accent,#2f80ed) 70%);box-shadow:0 1px 4px rgba(22,55,82,.35)}
 .vpo-badge{position:absolute;z-index:3;top:-4px;right:-4px;min-width:10px;height:10px;border-radius:999px;background:#e6a23c;box-shadow:0 0 0 2px var(--color-surface,#fff)}
+/* Static per-state expression layer (CTR-OVERLAY-014): positioned inside the
+   subject box by the per-level face anchor table; never interactive and never
+   hidden by reduced motion (CTR-OVERLAY-015). */
+.vpo-expr{position:absolute;z-index:3;aspect-ratio:1/1;pointer-events:none}
+.vpo-exprImg{display:block;width:100%;height:100%}
 .vpo-progress{position:absolute;z-index:2;left:16%;right:16%;bottom:6px;height:4px;border-radius:999px;background:color-mix(in srgb,var(--color-border,#9bb7cb) 55%,transparent);overflow:hidden;pointer-events:none}
 .vpo-progressFill{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,color-mix(in srgb,var(--color-accent,#2f80ed) 70%,#7fd1a8),var(--color-accent,#2f80ed));transition:width 600ms cubic-bezier(.22,1,.36,1)}
 /* The effective plugin preference (explicit choice first, OS fallback) drives
@@ -36,7 +42,7 @@ const css = `
    user OFF. */
 .vpo-progress[data-reduced-motion="true"] .vpo-progressFill{transition:none}
 .vpo-sr{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-.vpo-panel{position:absolute;pointer-events:auto;width:min(320px,calc(100vw - 32px));max-height:calc(100vh - 152px);overflow:auto;box-sizing:border-box;padding:12px 14px;border-radius:14px;background:color-mix(in srgb,var(--color-surface,#fff) 95%,transparent);border:1px solid color-mix(in srgb,var(--color-border,#a8bdcc) 72%,transparent);box-shadow:0 14px 40px rgba(10,37,57,.22);font-size:13px;line-height:1.45;color:var(--color-text,#17324d)}
+.vpo-panel{position:absolute;pointer-events:auto;width:min(264px,calc(100vw - 32px));max-height:calc(100vh - 152px);overflow:auto;box-sizing:border-box;padding:12px 14px;border-radius:14px;background:color-mix(in srgb,var(--color-surface,#fff) 95%,transparent);border:1px solid color-mix(in srgb,var(--color-border,#a8bdcc) 72%,transparent);box-shadow:0 14px 40px rgba(10,37,57,.22);font-size:13px;line-height:1.45;color:var(--color-text,#17324d)}
 .vpo-panel[data-horizontal="left"]{left:0}.vpo-panel[data-horizontal="right"]{right:0}
 .vpo-panel[data-vertical="above"]{bottom:calc(100% + 8px)}.vpo-panel[data-vertical="below"]{top:calc(100% + 8px)}
 .vpo-panelHeader{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
@@ -45,10 +51,15 @@ const css = `
 .vpo-meta{display:grid;grid-template-columns:max-content 1fr;gap:4px 10px;margin:0 0 8px}
 .vpo-meta dt{opacity:.65}.vpo-meta dd{margin:0;overflow-wrap:anywhere}
 .vpo-actions{display:grid;gap:6px;margin-top:8px}
+.vpo-more{margin-top:8px}
+.vpo-moreSummary{display:flex;align-items:center;min-height:30px;cursor:pointer;list-style:none}
+.vpo-moreSummary::-webkit-details-marker{display:none}
+.vpo-moreSummary::after{content:"›";margin-left:auto;opacity:.6;transform:rotate(90deg)}
+.vpo-more[open] .vpo-moreSummary::after{transform:rotate(-90deg)}
+.vpo-more[open] .vpo-moreSummary{border-color:var(--color-accent,#2f80ed)}
+.vpo-moreContent{display:grid;gap:6px;margin-top:6px}
 .vpo-control{font:inherit;min-height:30px;padding:5px 10px;border-radius:8px;border:1px solid color-mix(in srgb,var(--color-border,#a8bdcc) 72%,transparent);background:color-mix(in srgb,var(--color-surface,#fff) 84%,transparent);color:inherit;cursor:pointer;text-align:start}
 .vpo-control[aria-pressed="true"]{border-color:var(--color-accent,#2f80ed)}
-.vpo-packRow{display:flex;gap:6px;flex-wrap:wrap}
-.vpo-packRow .vpo-control{flex:1 1 auto}
 .vpo-dialogBackdrop{position:fixed;inset:0;pointer-events:auto;background:var(--dsw-alias-bg-mask-3,rgba(13,18,32,.46));display:grid;place-items:center;padding:24px;z-index:4}
 .vpo-dialog{--vpo-dialog-surface:var(--dsw-alias-bg-layer-2,var(--color-surface,#fff));--vpo-dialog-panel:var(--dsw-alias-bg-layer-1,#f5f7fa);--vpo-dialog-text:var(--dsw-alias-label-primary,var(--color-text,#17324d));--vpo-dialog-muted:var(--dsw-alias-label-secondary,#43566f);--vpo-dialog-border:var(--dsw-alias-border-l2,#8291a3);--vpo-dialog-focus:var(--dsw-alias-state-business-primary,#1d63c4);position:relative;pointer-events:auto;width:min(860px,calc(100vw - 48px));max-height:min(82vh,760px);overflow:auto;border-radius:16px;background:var(--vpo-dialog-surface);color:var(--vpo-dialog-text);box-shadow:0 24px 80px rgba(6,20,34,.45);padding:16px 18px 22px}
 .vpo-dialogHeader{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--vpo-dialog-surface);padding-bottom:8px;margin-bottom:8px;border-bottom:1px solid var(--vpo-dialog-border)}
@@ -71,6 +82,15 @@ const css = `
 .vpo-surface[data-live="terminal"][data-terminal="completed"] .vp-scene[data-reduced-motion="false"] .vp-subject-btn>.vp-node-img{animation:vpo-happy-hop 1.5s ease-out 1}
 .vpo-surface[data-live="terminal"][data-terminal="failed"] .vp-scene[data-reduced-motion="false"] .vp-subject-btn>.vp-node-img,
 .vpo-surface[data-live="terminal"][data-terminal="cancelled"] .vp-scene[data-reduced-motion="false"] .vp-subject-btn>.vp-node-img{animation:vpo-quiet-sag 1.8s ease-in-out 1}
+/* The expression layer rides the same motion as its subject asset: identical
+   keyframes and timing applied in the same commit keep the pair registered.
+   All rules stay gated by the scene's effective reduced-motion flag
+   (CTR-OVERLAY-015). */
+.vpo-surface[data-live="running"] .vp-scene[data-reduced-motion="false"] .vpo-expr{animation:vpo-drive-rock .9s ease-in-out infinite}
+.vpo-surface[data-live="needs-input"] .vp-scene[data-reduced-motion="false"] .vpo-expr{animation:vpo-attention-glow 1.3s ease-in-out infinite}
+.vpo-surface[data-live="terminal"][data-terminal="completed"] .vp-scene[data-reduced-motion="false"] .vpo-expr{animation:vpo-happy-hop 1.5s ease-out 1}
+.vpo-surface[data-live="terminal"][data-terminal="failed"] .vp-scene[data-reduced-motion="false"] .vpo-expr,
+.vpo-surface[data-live="terminal"][data-terminal="cancelled"] .vp-scene[data-reduced-motion="false"] .vpo-expr{animation:vpo-quiet-sag 1.8s ease-in-out 1}
 @keyframes vpo-drive-rock{0%,100%{transform:translateY(0) rotate(0deg)}25%{transform:translateY(-2px) rotate(-1deg)}75%{transform:translateY(-1px) rotate(1deg)}}
 @keyframes vpo-attention-glow{0%,100%{filter:drop-shadow(0 0 0 rgba(230,162,60,0))}50%{filter:drop-shadow(0 0 9px rgba(230,162,60,.85))}}
 @keyframes vpo-happy-hop{0%{transform:translateY(0)}30%{transform:translateY(-10px) scale(1.05)}55%{transform:translateY(0)}75%{transform:translateY(-4px)}100%{transform:translateY(0)}}

@@ -1,10 +1,11 @@
 /**
- * Overlay DOM behavior (CTR-OVERLAY-003..005, 010, 011; ACC-OVERLAY-004/005/
- * 008/011/012/017): three-state machine and sizes, exact compact-panel item
- * inventory, dialog accessibility and focus restore, onboarding suppression
- * with exact same-mount restoration, pack switching without progress change,
- * session reactions that never touch progressPoints, keyboard movement, and
- * multi-tab preference adoption.
+ * Overlay DOM behavior (DSH_PET_OVERLAY_ADAPTER_V2 CTR-OVERLAY-003..007,
+ * 010, 011, 014, 015; ACC-OVERLAY-004/005/008/011/012/017/019/020): three-state
+ * machine and sizes, exact five-item compact-panel inventory, the product-Pack
+ * only DSH surface (no seedling option), static five-state expression layers,
+ * dialog accessibility and focus restore, onboarding suppression with exact
+ * same-mount restoration, session reactions that never touch progressPoints,
+ * keyboard movement, and multi-tab preference adoption.
  */
 
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
@@ -69,7 +70,7 @@ afterEach(() => {
 })
 
 describe('VehiclePetOverlay states', () => {
-  it('renders the default VISIBLE pet at 112px and toggles the 320px panel', async () => {
+  it('renders the default VISIBLE pet at 112px and toggles the 264px panel', async () => {
     const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
     await renderOverlay(source)
     const pet = screen.getByRole('button', { name: t('overlay.label', { state: t('state.idle') }) })
@@ -82,41 +83,60 @@ describe('VehiclePetOverlay states', () => {
     fireEvent.click(pet)
     const panel = screen.getByRole('group', { name: t('panel.title') })
     expect(panel).toHaveAttribute('data-vehicle-pet-panel', 'true')
-    expect(panel.style.width).toBe('320px')
+    expect(panel.style.width).toBe('264px')
 
     fireEvent.click(pet)
     expect(screen.queryByRole('group', { name: t('panel.title') })).toBeNull()
   })
 
-  it('contains exactly the eight authorized compact items and no dev surfaces', async () => {
+  it('contains exactly the five authorized compact items and no dev surfaces', async () => {
     const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
     await renderOverlay(source)
     fireEvent.click(screen.getByRole('button', { name: t('overlay.label', { state: t('state.idle') }) }))
     const panel = screen.getByRole('group', { name: t('panel.title') })
 
     const authorized = [
-      panel.querySelector('[data-vehicle-pet-pack-name]'),
       panel.querySelector('[data-vehicle-pet-stage]'),
       panel.querySelector('[data-vehicle-pet-progress]'),
       panel.querySelector('[data-vehicle-pet-next-threshold]'),
-      panel.querySelector('[data-vehicle-pet-keepsake]'),
-      panel.querySelector('[data-vehicle-pet-pack-switch]'),
+      panel.querySelector('[data-vehicle-pet-open-journey]'),
+      panel.querySelector('[data-vehicle-pet-more]'),
       panel.querySelector('[data-vehicle-pet-reduced-motion]'),
       panel.querySelector('[data-vehicle-pet-collapse]'),
-      panel.querySelector('[data-vehicle-pet-open-journey]'),
     ]
-    // 1 pack name, 2 stage, 3 progress+next, 4 keepsake, 5 switch, 6 reduced
-    // motion, 7 collapse, 8 view journey (close is chrome, not content).
+    // 1 stage, 2 progress+next, 3 view journey, 4 "More" disclosure holding
+    // the reduced-motion control, 5 collapse (close is chrome, not content).
     expect(authorized.every(node => node !== null)).toBe(true)
+
+    // V2 removals: no pack name row, no keepsake row, no Pack switch.
+    for (const removed of ['[data-vehicle-pet-pack-name]', '[data-vehicle-pet-keepsake]', '[data-vehicle-pet-pack-switch]', '[data-vehicle-pet-pack-option]']) {
+      expect(panel.querySelector(removed)).toBeNull()
+    }
     expect(panel.querySelectorAll('button').length).toBe(
-      2 /* pack options */ + 3 /* reduced-motion options */ + 1 /* journey */ + 1 /* collapse */ + 1 /* close chrome */,
+      3 /* reduced-motion options inside More */ + 1 /* journey */ + 1 /* collapse */ + 1 /* close chrome */,
     )
 
     const panelText = panel.textContent ?? ''
-    for (const forbidden of ['MockProgressSource', '精确输入', '故障', 'diagnostics', '开发控制台', '+100']) {
+    for (const forbidden of ['MockProgressSource', '精确输入', '故障', 'diagnostics', '开发控制台', '+100', '种子伙伴', 'seedling']) {
       expect(panelText).not.toContain(forbidden)
     }
     expect(document.querySelector('[data-prototype-controls]')).toBeNull()
+  })
+
+  it('offers no Pack switch anywhere: autonomous-fleet is the only product Pack (seedling stays internal)', async () => {
+    const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
+    await renderOverlay(source)
+    const pet = screen.getByRole('button', { name: t('overlay.label', { state: t('state.idle') }) })
+    await waitFor(() => {
+      expect(pet.getAttribute('data-vehicle-pet-pack')).toBe('autonomous-fleet')
+    })
+    fireEvent.click(pet)
+    // Panel and whole overlay surface expose no Pack option and no seedling copy.
+    expect(document.querySelector('[data-vehicle-pet-pack-option]')).toBeNull()
+    expect(document.body.textContent).not.toContain('种子伙伴')
+    fireEvent.click(screen.getByRole('button', { name: t('panel.viewJourney') }))
+    await screen.findByRole('dialog', { name: t('dialog.title') })
+    expect(document.querySelector('[data-vehicle-pet-pack-option]')).toBeNull()
   })
 
   it('Escape closes the panel and returns focus to the pet', async () => {
@@ -185,28 +205,51 @@ describe('VehiclePetOverlay session reactions', () => {
     view.unmount()
   })
 
-  it('switches packs both ways without touching progress', async () => {
+  it('shows the static expression layer for every session state without adding interaction targets', async () => {
     const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
-    await renderOverlay(source)
-    const pet = screen.getByRole('button', { name: t('overlay.label', { state: t('state.idle') }) })
-    fireEvent.click(pet)
+    const view = await renderOverlay(source)
+    const exprState = () => document.querySelector('[data-vehicle-pet-expression]')?.getAttribute('data-vehicle-pet-expression')
+    await waitFor(() => {
+      expect(exprState()).toBe('idle')
+    })
+    const expr = document.querySelector('[data-vehicle-pet-expression]') as HTMLElement
+    expect(expr).toHaveAttribute('aria-hidden', 'true')
+    expect(expr.querySelectorAll('button, [tabindex], input')).toHaveLength(0)
+    expect(expr.querySelector('img')?.getAttribute('src')).not.toBe('')
 
-    const fleet = screen.getByRole('button', { name: '无人车队' })
-    const seedling = screen.getByRole('button', { name: '种子伙伴' })
-    fireEvent.click(seedling)
-    await waitFor(() => {
-      expect(screen.getByRole('group', { name: t('panel.title') }).querySelector('[data-vehicle-pet-pack-name]')?.textContent).toBe('种子伙伴')
-    })
-    const pointsOf = () => {
-      const text = screen.getByRole('group', { name: t('panel.title') }).querySelector('[data-vehicle-pet-progress]')?.textContent ?? ''
-      return /^([0-9,.]+)/.exec(text.replace(/\s/g, ''))?.[1] ?? ''
+    const expectState = async (viewState: VehiclePetSessionView, expected: string) => {
+      source.view = viewState
+      view.rerender(<VehiclePetOverlay {...stubProps(source)} />)
+      await waitFor(() => {
+        expect(exprState()).toBe(expected)
+      })
     }
-    const progressAfterSwitch = pointsOf()
-    fireEvent.click(fleet)
-    await waitFor(() => {
-      expect(screen.getByRole('group', { name: t('panel.title') }).querySelector('[data-vehicle-pet-pack-name]')?.textContent).toBe('无人车队')
-    })
-    expect(pointsOf()).toBe(progressAfterSwitch)
+    await expectState({ live: 'running', terminal: null }, 'working')
+    await expectState({ live: 'needs-input', terminal: null }, 'needs-input')
+    await expectState({ live: 'idle', terminal: { identity: 's1#1#1', status: 'completed' } }, 'completed')
+    await expectState({ live: 'idle', terminal: { identity: 's1#1#2', status: 'failed' } }, 'failed')
+    await expectState({ live: 'idle', terminal: { identity: 's1#1#3', status: 'cancelled' } }, 'failed')
+    await expectState(IDLE_VIEW, 'idle')
+    view.unmount()
+  })
+
+  it('keeps the static expression layer rendered under reduced motion (CTR-OVERLAY-015)', async () => {
+    window.localStorage.setItem(OVERLAY_PREFERENCES_KEY, JSON.stringify({
+      schemaVersion: 1,
+      position: { xRatio: 0.9, yRatio: 0.9 },
+      collapsed: false,
+      reducedMotion: true,
+    }))
+    const source: Source = { view: { live: 'running', terminal: null }, sessions: SESSIONS_ON, locale: 'zh' }
+    const view = render(<VehiclePetOverlay {...stubProps(source)} />)
+    const expr = await waitFor(() => {
+      const node = document.querySelector('[data-vehicle-pet-expression]')
+      expect(node).not.toBeNull()
+      return node
+    }, { timeout: 3000 })
+    expect(expr).toHaveAttribute('data-vehicle-pet-expression', 'working')
+    expect(expr?.querySelectorAll('button, [tabindex], input')).toHaveLength(0)
+    view.unmount()
   })
 })
 
@@ -268,10 +311,9 @@ describe('VehiclePetOverlay live Harness locale', () => {
         const panel = document.querySelector<HTMLElement>('[data-vehicle-pet-panel]')!
         const dialog = document.querySelector<HTMLElement>('[data-vehicle-pet-dialog]')!
         expect(panel.getAttribute('aria-label')).toBe(english ? en['panel.title'] : zh['panel.title'])
-        expect(panel.querySelector('[data-vehicle-pet-pack-name]')?.textContent).toBe(english ? 'Autonomous Fleet' : '无人车队')
         expect(panel.querySelector('[data-vehicle-pet-stage]')?.textContent).toContain(english ? 'First Dispatch' : '首航出发')
         expect(panel.querySelector('[data-vehicle-pet-next-threshold]')?.textContent).toContain(english ? 'Next milestone' : '下一目标')
-        expect(panel.querySelector('[data-vehicle-pet-keepsake]')?.textContent).toBe(english ? 'No keepsakes yet' : '还没有纪念品')
+        expect(panel.querySelector('[data-vehicle-pet-more] summary')?.textContent).toBe(english ? en['panel.more'] : zh['panel.more'])
         expect(dialog.getAttribute('aria-label')).toBe(english ? en['dialog.title'] : zh['dialog.title'])
         expect(dialog.textContent).toContain(english ? 'First run on the road; the journey begins.' : '第一次上路，旅程正式开始。')
       })
