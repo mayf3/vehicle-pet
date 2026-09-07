@@ -76,3 +76,26 @@ corrected to 青色饰条 for art/copy consistency under the same principle DEC-
   baked into art (count labels are locally typeset, as accepted in V3).
 - Old master bytes remain recoverable via git history; PROVENANCE-v2-identity.json
   documents the new chain and supersedes the old provenance for current files.
+
+## Correction (2026-09-08, Owner review)
+
+Deployed result reviewed by the Owner in the real client: "这不是我做的效果".
+Owner direction: the material is the final images referenced by the absolute
+paths inside `superseded-round-prompts.json` (pony-v1-scale-v2 round), i.e. the
+blue-white SUV set the Owner produced — not the Astra-mockup-derived identity
+this round shipped.
+
+Implemented correction:
+- L6–L12: restored the accepted c3d1d4e masters (built from those exact exec
+  images with the local count-label typesetting).
+- L1–L5: Owner `l1.png`–`l5.png` (1024×1024 RGBA, same directory) committed as
+  `master-l1.png`–`master-l5.png`; pipeline now derives every level from its
+  own per-level master (family-cut path removed).
+- Expressions restored to the accepted NAVY-recipe overlays (light car face);
+  L1–L5 anchors re-measured for the SUV face ([8,43,28] [12,42,32] [9,42,28]
+  [12,44,32] [10,53,30]); L6–L12 anchors restored to accepted values.
+- unit-car recipe and the L3 manifest color word restored to the accepted
+  c3d1d4e state.
+- The Astra-reference round remains fully documented above and in git
+  (2049fd8) as superseded history; its provenance record is marked
+  SUPERSEDED_BY_OWNER_MATERIAL_20260908.
