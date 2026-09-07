@@ -8,4 +8,11 @@
 import type { PackBundleInput } from '../../engine';
 export declare const dshPackBundles: PackBundleInput[];
 export declare const dshDefaultPackId = "autonomous-fleet";
+/**
+ * CTR-OVERLAY-006 (V2): the DSH surface presents `autonomous-fleet` as the
+ * only user-selectable product Pack. Stored Engine state naming a non-product
+ * Pack resolves to the product Pack on this surface; the standalone prototype
+ * keeps both Packs selectable. Pure so the resolution stays unit-testable.
+ */
+export declare function resolveDshProductPackId(packId: string | undefined): string;
 //# sourceMappingURL=engine-bundles.d.ts.map

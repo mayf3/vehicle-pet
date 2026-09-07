@@ -7,8 +7,8 @@
  *    host-provided identity; no createRoot/hydrateRoot ever appears;
  * 4. no DSH value imports leak into the browser artifact (type-only only);
  * 5. no import.meta.glob / Vite dev-server dependency;
- * 6. every Pack asset is inlined as a data URL and the counts match the
- *    generated asset map and both manifests exactly;
+ * 6. every Pack asset and every expression asset is inlined as a data URL and
+ *    the counts match both generated maps exactly;
  * 7. no pet network path (fetch/XHR/WebSocket/EventSource), no iframe,
  *    no localhost:5199;
  * 8. the emitted bundle is byte-reproducible (rebuild + compare);
@@ -84,9 +84,12 @@ if (/import\.meta/.test(codeOnly)) {
   failures.push('import.meta (glob or url) leaked into the client bundle')
 }
 
-// 6. Data URL coverage matches the generated asset map exactly.
+// 6. Data URL coverage matches the generated maps exactly: the Pack asset map
+//    plus the V2 expression-asset map (CTR-OVERLAY-014 bundled presentation).
 const generated = await readFile(path.join(repoRoot, 'src/dsh/client/asset-bundles.generated.ts'), 'utf8')
+const expressionGenerated = await readFile(path.join(repoRoot, 'src/dsh/client/expression-assets.generated.ts'), 'utf8')
 const generatedCount = (generated.match(/^import /gm) ?? []).length
+  + (expressionGenerated.match(/^import /gm) ?? []).length
 const dataUrlCount = (bundle.match(/data:image\/(?:webp|png);base64,/g) ?? []).length
 if (generatedCount === 0) {
   failures.push('generated asset map is empty')

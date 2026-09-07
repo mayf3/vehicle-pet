@@ -1,15 +1,17 @@
 /**
- * VehiclePetPanel: the 320px compact panel (CTR-OVERLAY-005). Contains
- * exactly the eight authorized items: Pack name, stage/level, progress plus
- * next threshold, latest keepsake, Pack switch, Reduced Motion control,
- * Collapse, and "View full journey". No mock controls, no exact-points input,
- * no fault injection, no diagnostics, no dev console. Escape closes the panel
- * and returns focus to the pet.
+ * VehiclePetPanel: the 264px low-frequency compact panel (DSH_PET_OVERLAY_ADAPTER_V2
+ * CTR-OVERLAY-005). Contains exactly the five authorized §8.2 items: stage/level,
+ * progress plus next threshold, "View full journey", one "More" disclosure holding
+ * the Reduced Motion control, and Collapse. The header keeps only the title and the
+ * close action. No Pack switch (the DSH surface exposes `autonomous-fleet` as the
+ * only user-selectable product Pack, CTR-OVERLAY-006), no keepsake row, no pack
+ * name row, no mock controls, no dev console. Escape closes the panel and returns
+ * focus to the pet.
  */
 
 import { type KeyboardEvent as ReactKeyboardEvent, type ReactElement, type RefObject } from 'react'
 import { usePetEngine } from '../../react'
-import type { VehiclePetOverlayPreferences } from './types'
+import { OVERLAY_GEOMETRY, type VehiclePetOverlayPreferences } from './types'
 import { useOverlayChrome } from './VehiclePetOverlay'
 
 export interface VehiclePetPanelProps {
@@ -24,23 +26,16 @@ export interface VehiclePetPanelProps {
 }
 
 export function VehiclePetPanel(props: VehiclePetPanelProps): ReactElement {
-  const { snapshot, resolveText, switchPack, setReducedMotion } = usePetEngine()
+  const { snapshot, resolveText, setReducedMotion } = usePetEngine()
   const { t, commitPreferences } = useOverlayChrome()
   const viewModel = snapshot.viewModel
-  const activePack = snapshot.activePack
-  const manifest = activePack?.manifest ?? null
+  const manifest = snapshot.activePack?.manifest ?? null
   const level = viewModel === null || manifest === null
     ? null
     : manifest.levels.find(candidate => candidate.levelId === viewModel.derivedLevelId) ?? null
   const nextLevel = viewModel === null || manifest === null
     ? null
     : manifest.levels.find(candidate => candidate.threshold > viewModel.progressPoints) ?? null
-  const unlockedIds = new Set(snapshot.unlockedKeepsakes.map(key => key.keepsakeId))
-  const keepsake = manifest === null
-    ? null
-    : [...(manifest.keepsakes ?? [])]
-      .filter(item => unlockedIds.has(item.keepsakeId))
-      .at(-1) ?? null
   const progressText = viewModel === null
     ? '—'
     : `${Math.floor(viewModel.progressPoints).toLocaleString()}${manifest?.displayConversion
@@ -62,7 +57,7 @@ export function VehiclePetPanel(props: VehiclePetPanelProps): ReactElement {
   return (
     <section
       ref={props.panelRef}
-      style={{ width: '320px', maxWidth: 'calc(100vw - 32px)' }}
+      style={{ width: `${OVERLAY_GEOMETRY.compactPanelWidthPx}px`, maxWidth: 'calc(100vw - 32px)' }}
       className="vpo-panel"
       role="group"
       aria-label={t('panel.title')}
@@ -85,8 +80,6 @@ export function VehiclePetPanel(props: VehiclePetPanelProps): ReactElement {
       </header>
 
       <dl className="vpo-meta">
-        <dt>{t('panel.pack')}</dt>
-        <dd data-vehicle-pet-pack-name="true">{manifest === null ? '—' : resolveText(manifest.name)}</dd>
         <dt>{t('panel.stage')}</dt>
         <dd data-vehicle-pet-stage="true">{level === null ? '—' : `${resolveText(level.stageName)} · ${viewModel?.derivedLevelIndex ?? '—'}`}</dd>
         <dt>{t('panel.progress')}</dt>
@@ -103,65 +96,7 @@ export function VehiclePetPanel(props: VehiclePetPanelProps): ReactElement {
               </span>
             )}
         </dd>
-        <dt>{t('panel.keepsake')}</dt>
-        <dd data-vehicle-pet-keepsake="true">
-          {keepsake === null ? t('panel.keepsake.none') : resolveText(keepsake.title)}
-        </dd>
       </dl>
-
-      <div className="vpo-actions" role="group" aria-label={t('panel.packSwitch')} data-vehicle-pet-pack-switch="true">
-        {snapshot.availablePacks.map(pack => (
-          <span key={pack.manifest.packId} className="vpo-packRow">
-            <button
-              type="button"
-              className="vpo-control"
-              aria-pressed={pack.manifest.packId === manifest?.packId ? 'true' : 'false'}
-              data-vehicle-pet-pack-option={pack.manifest.packId}
-              onClick={() => {
-                switchPack(pack.manifest.packId)
-              }}
-            >
-              {resolveText(pack.manifest.name)}
-            </button>
-          </span>
-        ))}
-      </div>
-
-      <div className="vpo-actions" role="group" aria-label={t('panel.reducedMotion')} data-vehicle-pet-reduced-motion="true">
-        <button
-          type="button"
-          className="vpo-control"
-          aria-pressed={props.preferences.reducedMotion === undefined ? 'true' : 'false'}
-          data-vehicle-pet-reduced-motion-option="system"
-          onClick={() => {
-            commitReducedMotion(undefined)
-          }}
-        >
-          {t('panel.reducedMotion.system')}
-        </button>
-        <button
-          type="button"
-          className="vpo-control"
-          aria-pressed={props.preferences.reducedMotion === true ? 'true' : 'false'}
-          data-vehicle-pet-reduced-motion-option="on"
-          onClick={() => {
-            commitReducedMotion(true)
-          }}
-        >
-          {t('panel.reducedMotion')} · ON
-        </button>
-        <button
-          type="button"
-          className="vpo-control"
-          aria-pressed={props.preferences.reducedMotion === false ? 'true' : 'false'}
-          data-vehicle-pet-reduced-motion-option="off"
-          onClick={() => {
-            commitReducedMotion(false)
-          }}
-        >
-          {t('panel.reducedMotion')} · OFF
-        </button>
-      </div>
 
       <div className="vpo-actions">
         <button
@@ -173,6 +108,48 @@ export function VehiclePetPanel(props: VehiclePetPanelProps): ReactElement {
         >
           {t('panel.viewJourney')}
         </button>
+      </div>
+
+      <details className="vpo-more" data-vehicle-pet-more="true">
+        <summary className="vpo-control vpo-moreSummary">{t('panel.more')}</summary>
+        <div className="vpo-moreContent" role="group" aria-label={t('panel.reducedMotion')} data-vehicle-pet-reduced-motion="true">
+          <button
+            type="button"
+            className="vpo-control"
+            aria-pressed={props.preferences.reducedMotion === undefined ? 'true' : 'false'}
+            data-vehicle-pet-reduced-motion-option="system"
+            onClick={() => {
+              commitReducedMotion(undefined)
+            }}
+          >
+            {t('panel.reducedMotion.system')}
+          </button>
+          <button
+            type="button"
+            className="vpo-control"
+            aria-pressed={props.preferences.reducedMotion === true ? 'true' : 'false'}
+            data-vehicle-pet-reduced-motion-option="on"
+            onClick={() => {
+              commitReducedMotion(true)
+            }}
+          >
+            {t('panel.reducedMotion')} · ON
+          </button>
+          <button
+            type="button"
+            className="vpo-control"
+            aria-pressed={props.preferences.reducedMotion === false ? 'true' : 'false'}
+            data-vehicle-pet-reduced-motion-option="off"
+            onClick={() => {
+              commitReducedMotion(false)
+            }}
+          >
+            {t('panel.reducedMotion')} · OFF
+          </button>
+        </div>
+      </details>
+
+      <div className="vpo-actions">
         <button
           type="button"
           className="vpo-control"

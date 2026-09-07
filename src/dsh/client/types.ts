@@ -38,7 +38,7 @@ export type VehiclePetInteractionState = 'VISIBLE' | 'PANEL_OPEN'
 export const OVERLAY_GEOMETRY = {
   visibleSizePx: 112,
   collapsedLauncherSizePx: 36,
-  compactPanelWidthPx: 320,
+  compactPanelWidthPx: 264,
   viewportMarginPx: 16,
   /** Deterministic composer-safe default; customized ratios do not use it. */
   defaultBottomSafeInsetPx: 176,
