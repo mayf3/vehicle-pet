@@ -47,7 +47,8 @@ NEXT_AUTHORITY_ACTION = Owner merge decision for the exact accepted overlay revi
 
 | Spec ID | Status | Active authority | Kind | Implementation authority | Scope | Supersedes |
 |---|---|---|---|---|---|---|
-| `VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V1` | accepted | yes on designated branch/base | invariant | none | `mayf3/vehicle-pet` | none |
+| `VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V1` | superseded | no (superseded by `VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V2`) | invariant | none | `mayf3/vehicle-pet` | none |
+| `VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V2` | accepted | yes once the exact accepted revision is reachable from `mayf3/vehicle-pet:main` (accepted candidate on its adoption branch until merge) | invariant | none | `mayf3/vehicle-pet` | `VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V1` |
 | `VEHICLE_PET_PRODUCT_DIRECTION_V1` | accepted | yes on designated branch/base | invariant | none | `mayf3/vehicle-pet` | none |
 | `CONFIGURABLE_PET_ENGINE_V1` | superseded | no (superseded by `CONFIGURABLE_PET_ENGINE_V2`) | implementation | contracts | `pet-engine`, `bundled-pet-packs`, `prototype-shell` | `CONFIGURABLE_PET_ENGINE_V2` |
 | `CONFIGURABLE_PET_ENGINE_V2` | superseded | no (superseded by `CONFIGURABLE_PET_ENGINE_V3`) | implementation | contracts | `pet-engine`, `bundled-pet-packs`, `prototype-shell` | `CONFIGURABLE_PET_ENGINE_V1` |

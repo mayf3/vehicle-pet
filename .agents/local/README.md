@@ -7,25 +7,26 @@ This file is owned by `mayf3/vehicle-pet` and is not overwritten by governance u
 ```text
 CONSUMER_REPOSITORY = mayf3/vehicle-pet
 DESIGNATED_AUTHORITY_BRANCH = mayf3/vehicle-pet:main
-GOVERNANCE_ADOPTION_CLASS = PILOT_OF_DRAFT_DISTRIBUTION
-CLAIM_UPSTREAM_STABLE_RELEASE = NO
+GOVERNANCE_ADOPTION_CLASS = STABLE_RELEASE_GOVERNANCE_V1
+CLAIM_UPSTREAM_STABLE_RELEASE = YES
+UPSTREAM_ADOPTED_RELEASE = agent-development-governance v1.0.3 (source commit 0d61433339ef563f82307b70120d9fcee168cdab)
 LOCAL_ADOPTION_MAY_BECOME_ACCEPTED = YES
 LOCAL_ADOPTION_LIFECYCLE = accepted
+ADOPTION_AUTHORITY = VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V2 (supersedes VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V1)
 AUTHORITY_ACTIVATION_RULE = the accepted governance is active only when its accepted revision is reachable from mayf3/vehicle-pet:main or from an implementation base derived from that designated authority branch
 ACTIVATION_STATUS_SOURCE = derived from Git branch and base coordinates; not hard-coded in this file
 GOVERNANCE_LOCK = .agents/governance.lock.json
 ```
 
-The vendored distribution is a draft pilot, and its lock state is `accepted`. On a feature branch before the accepted revision enters `mayf3/vehicle-pet:main`, it remains an accepted candidate. After that revision enters `main`, it is active local authority there, and an implementation base derived from a `main` revision containing that active authority is also governed by it. This file therefore does not hard-code an activation `YES` or `NO` that changes at merge time. The distribution does not claim upstream stability.
+The vendored distribution is the upstream stable Governance V1 release, and its lock state is `accepted` (the predecessor draft-pilot adoption remains in history as `superseded`). On a feature branch before the accepted revision enters `mayf3/vehicle-pet:main`, it remains an accepted candidate. After that revision enters `main`, it is active local authority there, and an implementation base derived from a `main` revision containing that active authority is also governed by it. This file therefore does not hard-code an activation `YES` or `NO` that changes at merge time.
 
 ## Authority precedence
 
 ```text
-PRODUCT_DIRECTION_AUTHORITY = NONE_YET
-FUTURE_PRODUCT_DIRECTION_LOCATION = docs/specs/VEHICLE_PET_PRODUCT_DIRECTION_V1.md
-ARCHITECTURE_AUTHORITY = NONE_YET
-CURRENT_PRODUCT_IMPLEMENTATION = NONE
-CURRENT_GOVERNING_PRODUCT_SPECS = NONE
+PRODUCT_DIRECTION_AUTHORITY = docs/specs/VEHICLE_PET_PRODUCT_DIRECTION_V1.md (accepted)
+ARCHITECTURE_AND_INVARIANT_AUTHORITY = docs/specs/CONFIGURABLE_PET_ENGINE_V3.md and docs/specs/DSH_PET_OVERLAY_ADAPTER_V2.md (accepted, implementation authority)
+CURRENT_PRODUCT_IMPLEMENTATION = PRESENT (web app and DSH bundle plugin)
+CURRENT_GOVERNING_PRODUCT_SPECS = VEHICLE_PET_PRODUCT_DIRECTION_V1, CONFIGURABLE_PET_ENGINE_V3, DSH_PET_OVERLAY_ADAPTER_V2, VEHICLE_PET_PROGRESS_SOURCE_V2, DSH_USAGE_PROGRESS_SOURCE_V1, VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V2
 GOVERNING_SPEC_LOCATION = docs/specs/
 ```
 
@@ -48,24 +49,22 @@ The independent Reviewer role means an Agent that did not participate in authori
 ```text
 INVESTIGATION_PERSISTENCE = docs/investigations/
 CONFORMANCE_PERSISTENCE = docs/conformance/ and the corresponding future implementation PR
-ENFORCEMENT_LEVEL = MANUAL_POLICY
+ENFORCEMENT_LEVEL = MANUAL_POLICY_PLUS_DETERMINISTIC_INTEGRITY
+DISTRIBUTION_INTEGRITY_CHECK = AVAILABLE (.agents/tools/verify_governance.py, validate_spec_transition.py, validate_governance_route.py)
 BRANCH_PROTECTION_CHANGE_IN_THIS_ADOPTION = NO
 REQUIRED_CHECK_CHANGE_IN_THIS_ADOPTION = NO
 ```
 
-Repository enforcement observed at `2026-08-21T12:55:14Z`:
+Repository enforcement observed at `2026-09-07T15:19:30Z`:
 
 - repository visibility: private;
 - default branch: `main`;
 - `main` protected: no;
 - required checks: none;
-- active rulesets: unavailable on the repository's current GitHub plan; the API returned HTTP 403 and no ruleset is claimed active;
 - pull-request/review requirement: none enforced by branch protection;
-- Actions workflows: 0;
-- branches: 1;
-- commits: 1.
+- no ruleset is claimed active.
 
-These are observations, not settings changes. This adoption does not modify GitHub enforcement.
+These are observations, not settings changes. This adoption does not modify GitHub enforcement. Integrity verification is deterministic and local (the vendored tools above); semantic review remains a manual independent-review policy.
 
 ## Local extensions
 
