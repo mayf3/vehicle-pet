@@ -60,8 +60,6 @@ const css = `
 .vpo-moreContent{display:grid;gap:6px;margin-top:6px}
 .vpo-control{font:inherit;min-height:30px;padding:5px 10px;border-radius:8px;border:1px solid color-mix(in srgb,var(--color-border,#a8bdcc) 72%,transparent);background:color-mix(in srgb,var(--color-surface,#fff) 84%,transparent);color:inherit;cursor:pointer;text-align:start}
 .vpo-control[aria-pressed="true"]{border-color:var(--color-accent,#2f80ed)}
-.vpo-packRow{display:flex;gap:6px;flex-wrap:wrap}
-.vpo-packRow .vpo-control{flex:1 1 auto}
 .vpo-dialogBackdrop{position:fixed;inset:0;pointer-events:auto;background:var(--dsw-alias-bg-mask-3,rgba(13,18,32,.46));display:grid;place-items:center;padding:24px;z-index:4}
 .vpo-dialog{--vpo-dialog-surface:var(--dsw-alias-bg-layer-2,var(--color-surface,#fff));--vpo-dialog-panel:var(--dsw-alias-bg-layer-1,#f5f7fa);--vpo-dialog-text:var(--dsw-alias-label-primary,var(--color-text,#17324d));--vpo-dialog-muted:var(--dsw-alias-label-secondary,#43566f);--vpo-dialog-border:var(--dsw-alias-border-l2,#8291a3);--vpo-dialog-focus:var(--dsw-alias-state-business-primary,#1d63c4);position:relative;pointer-events:auto;width:min(860px,calc(100vw - 48px));max-height:min(82vh,760px);overflow:auto;border-radius:16px;background:var(--vpo-dialog-surface);color:var(--vpo-dialog-text);box-shadow:0 24px 80px rgba(6,20,34,.45);padding:16px 18px 22px}
 .vpo-dialogHeader{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--vpo-dialog-surface);padding-bottom:8px;margin-bottom:8px;border-bottom:1px solid var(--vpo-dialog-border)}

@@ -271,7 +271,8 @@ function systemPrefersReducedMotion(): boolean {
 }
 
 /**
- * The visible overlay: pet (112px), launcher (36px), compact panel (320px),
+ * The visible overlay: pet (112px), launcher (36px), compact panel
+ * (OVERLAY_GEOMETRY.compactPanelWidthPx),
  * engine feedback surfaces, and the in-Harness full journey dialog.
  */
 function OverlaySurface({

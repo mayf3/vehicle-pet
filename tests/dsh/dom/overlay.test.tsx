@@ -230,9 +230,25 @@ describe('VehiclePetOverlay session reactions', () => {
     await expectState({ live: 'idle', terminal: { identity: 's1#1#2', status: 'failed' } }, 'failed')
     await expectState({ live: 'idle', terminal: { identity: 's1#1#3', status: 'cancelled' } }, 'failed')
     await expectState(IDLE_VIEW, 'idle')
-    // Static readability under reduced motion: the layer persists with motion
-    // suppressed (CTR-OVERLAY-015).
-    expect(document.querySelector('[data-vehicle-pet-expression]')).not.toBeNull()
+    view.unmount()
+  })
+
+  it('keeps the static expression layer rendered under reduced motion (CTR-OVERLAY-015)', async () => {
+    window.localStorage.setItem(OVERLAY_PREFERENCES_KEY, JSON.stringify({
+      schemaVersion: 1,
+      position: { xRatio: 0.9, yRatio: 0.9 },
+      collapsed: false,
+      reducedMotion: true,
+    }))
+    const source: Source = { view: { live: 'running', terminal: null }, sessions: SESSIONS_ON, locale: 'zh' }
+    const view = render(<VehiclePetOverlay {...stubProps(source)} />)
+    const expr = await waitFor(() => {
+      const node = document.querySelector('[data-vehicle-pet-expression]')
+      expect(node).not.toBeNull()
+      return node
+    }, { timeout: 3000 })
+    expect(expr).toHaveAttribute('data-vehicle-pet-expression', 'working')
+    expect(expr?.querySelectorAll('button, [tabindex], input')).toHaveLength(0)
     view.unmount()
   })
 })
