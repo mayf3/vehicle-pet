@@ -27,3 +27,13 @@ export const dshPackBundles: PackBundleInput[] = [
 ]
 
 export const dshDefaultPackId = 'autonomous-fleet'
+
+/**
+ * CTR-OVERLAY-006 (V2): the DSH surface presents `autonomous-fleet` as the
+ * only user-selectable product Pack. Stored Engine state naming a non-product
+ * Pack resolves to the product Pack on this surface; the standalone prototype
+ * keeps both Packs selectable. Pure so the resolution stays unit-testable.
+ */
+export function resolveDshProductPackId(packId: string | undefined): string {
+  return packId === dshDefaultPackId ? dshDefaultPackId : dshDefaultPackId
+}

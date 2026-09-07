@@ -15,13 +15,10 @@ export declare const zh: {
     readonly 'state.cancelled': "任务已取消";
     readonly 'launcher.restore': "展开成长伙伴";
     readonly 'panel.title': "成长伙伴";
-    readonly 'panel.pack': "当前伙伴";
     readonly 'panel.stage': "当前阶段";
     readonly 'panel.progress': "成长进度";
     readonly 'panel.nextThreshold': "下一目标 {points}";
-    readonly 'panel.keepsake': "最近纪念品";
-    readonly 'panel.keepsake.none': "还没有纪念品";
-    readonly 'panel.packSwitch': "切换伙伴";
+    readonly 'panel.more': "更多设置";
     readonly 'panel.reducedMotion': "减少动效";
     readonly 'panel.reducedMotion.system': "跟随系统";
     readonly 'panel.collapse': "收起挂件";

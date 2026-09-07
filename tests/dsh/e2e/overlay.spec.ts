@@ -19,7 +19,6 @@ interface MatrixManifest {
 }
 
 const fleetManifest = JSON.parse(readFileSync(new URL('../../../src/packs/autonomous-fleet/manifest.json', import.meta.url), 'utf8')) as MatrixManifest
-const seedlingManifest = JSON.parse(readFileSync(new URL('../../../src/packs/seedling-fixture/manifest.json', import.meta.url), 'utf8')) as MatrixManifest
 
 const ARTIFACTS = 'tests/dsh/e2e/.artifacts'
 const PET = '[data-vehicle-pet-pet="true"]'
@@ -259,6 +258,18 @@ async function sendPrompt(page: Page, text: string): Promise<void> {
   await expect(send).toBeEnabled({ timeout: 20_000 })
   await send.click()
   await expect(composer).toHaveValue('', { timeout: 20_000 })
+}
+
+/**
+ * Idempotently opens the panel's low-frequency "More" disclosure. Clicking
+ * the summary toggles, so an already-open disclosure must not be clicked.
+ */
+async function openMoreDisclosure(page: Page): Promise<void> {
+  const more = page.locator('[data-vehicle-pet-more]')
+  if (await more.getAttribute('open') === null) {
+    await page.locator('[data-vehicle-pet-more] summary').click()
+  }
+  await page.locator('[data-vehicle-pet-reduced-motion-option]').first().waitFor({ state: 'visible' })
 }
 
 async function petBox(page: Page) {
@@ -546,36 +557,36 @@ test('SCENE_COMPACT_GEOMETRY_TEST. Fleet and Seedling subjects remain centred an
   }
   await assertSubject()
   await page.screenshot({ path: `${ARTIFACTS}/fleet-visible-r2.png` })
-  await page.locator(PET).click()
-  await page.locator('[data-vehicle-pet-pack-option="seedling-fixture"]').click()
-  await expect(page.locator('[data-vehicle-pet-pack-name]')).not.toHaveText('无人车队')
-  await page.locator(PET).click()
-  await assertSubject()
-  await page.screenshot({ path: `${ARTIFACTS}/seedling-visible-r2.png` })
+  // V2: no Pack switch exists on the DSH surface, so no second-Pack subject
+  // can appear here; the seedling fixture stays an internal conformance Pack.
+  await expect(page.locator('[data-vehicle-pet-pack-option]')).toHaveCount(0)
 })
 
-test('4 + 5 + 6. click toggles the 320px panel whose content is exactly the authorized items', async ({ page }) => {
+test('4 + 5 + 6. click toggles the 264px panel whose content is exactly the authorized five items', async ({ page }) => {
   await openOverlay(page)
   await page.locator(PET).click()
   const panel = page.locator(PANEL)
   await panel.waitFor()
   const box = await panel.boundingBox()
-  expect(box!.width).toBe(320)
+  expect(box!.width).toBe(264)
   for (const selector of [
-    '[data-vehicle-pet-pack-name]',
     '[data-vehicle-pet-stage]',
     '[data-vehicle-pet-progress]',
-    '[data-vehicle-pet-keepsake]',
-    '[data-vehicle-pet-pack-switch]',
+    '[data-vehicle-pet-more]',
     '[data-vehicle-pet-reduced-motion]',
     '[data-vehicle-pet-collapse]',
     '[data-vehicle-pet-open-journey]',
   ]) {
     expect(await panel.locator(selector).count()).toBe(1)
   }
+  // V2 removals: no pack name row, no keepsake row, no Pack switch.
+  for (const selector of ['[data-vehicle-pet-pack-name]', '[data-vehicle-pet-keepsake]', '[data-vehicle-pet-pack-switch]', '[data-vehicle-pet-pack-option]']) {
+    expect(await panel.locator(selector).count()).toBe(0)
+  }
   const text = await panel.textContent()
   expect(text).not.toContain('Mock')
   expect(text).not.toContain('诊断')
+  expect(text).not.toContain('种子伙伴')
   await page.screenshot({ path: `${ARTIFACTS}/panel-open.png` })
   await page.locator(PET).click()
   await expect.poll(() => page.locator(PANEL).count()).toBe(0)
@@ -858,22 +869,141 @@ test('11 + 12. collapse to the 36px launcher and restore', async ({ page }) => {
   await expect.poll(async () => (await petBox(page))?.width).toBe(112)
 })
 
-test('13. pack switching works both ways and keeps progress points identical', async ({ page }) => {
+test('13. the DSH surface exposes only the product Pack and no Pack switch (seedling stays internal)', async ({ page }) => {
   await openOverlay(page)
   await page.locator(PET).click()
   await page.locator(PANEL).waitFor()
-  const progressText = async () => {
-    const text = await page.locator('[data-vehicle-pet-progress]').textContent()
-    return /^([0-9,.]+)/.exec((text ?? '').replace(/\s/g, ''))?.[1] ?? ''
+  await expect(page.locator(PET)).toHaveAttribute('data-vehicle-pet-pack', 'autonomous-fleet')
+  expect(await page.locator('[data-vehicle-pet-pack-option]').count()).toBe(0)
+  const text = await page.locator(PANEL).textContent()
+  expect(text).not.toContain('种子伙伴')
+  expect(text).not.toContain('Seedling')
+  await page.screenshot({ path: `${ARTIFACTS}/panel-product-pack-only.png` })
+})
+
+test('EXPRESSION_STATIC_DISTINCTION_TEST. the resident pet shows a distinct static expression per session state', async ({ page }) => {
+  await openOverlay(page)
+  // The number of mock script slots a turn consumes varies (title generation),
+  // so the walk below is state-driven: send prompts, classify what the
+  // structured session mapping shows, and continue until every state has been
+  // observed. The mock sequence (slow, slow, tool, invalid, stall, slow×∞)
+  // guarantees a bounded walk.
+  const reset = await fetch('http://127.0.0.1:8902/reset', { method: 'POST' })
+  if (!reset.ok) throw new Error(`mock supervisor reset failed: ${reset.status}`)
+  // Let the bootstrap turn's own terminal pill appear and clear first.
+  await expect.poll(async () => (await page.locator(PILL).count()), { timeout: 30_000 }).toBe(0)
+  const pills = await installPillRecorder(page)
+  await page.waitForTimeout(600)
+  expect(await pills.read()).toEqual([])
+  const expr = page.locator('[data-vehicle-pet-expression]')
+
+  await expect(expr).toHaveAttribute('data-vehicle-pet-expression', 'idle')
+  await expect(expr).toHaveAttribute('aria-hidden', 'true')
+  expect(await expr.locator('button, [tabindex], input').count()).toBe(0)
+  const idleSrc = await expr.locator('img').getAttribute('src')
+  expect(idleSrc).not.toBe('')
+  await expect(page.locator(PET)).toHaveAttribute('data-live', 'idle')
+  await page.screenshot({ path: `${ARTIFACTS}/expression-idle-112.png` })
+
+  type Outcome = 'needs-input' | 'running' | 'completed' | 'failed' | 'cancelled'
+  const classify = async (): Promise<Outcome> => {
+    const deadline = Date.now() + 90_000
+    while (Date.now() < deadline) {
+      const live = await page.locator(PET).getAttribute('data-live')
+      if (live === 'needs-input' || live === 'running') return live
+      const recorded = await pills.read()
+      const last = recorded[recorded.length - 1]
+      if (last === 'completed' || last === 'failed' || last === 'cancelled') return last
+      await page.waitForTimeout(250)
+    }
+    throw new Error('turn produced no observable structured state within 90s')
   }
-  const fleetName = await page.locator('[data-vehicle-pet-pack-name]').textContent()
-  const before = await progressText()
-  await page.locator('[data-vehicle-pet-pack-option="seedling-fixture"]').click()
-  await expect.poll(async () => await page.locator('[data-vehicle-pet-pack-name]').textContent()).not.toBe(fleetName)
-  expect(await progressText()).toBe(before)
-  await page.locator('[data-vehicle-pet-pack-option="autonomous-fleet"]').click()
-  await expect.poll(async () => await page.locator('[data-vehicle-pet-pack-name]').textContent()).toBe(fleetName)
-  expect(await progressText()).toBe(before)
+  const waitPillClear = async () => {
+    await expect.poll(async () => (await page.locator(PILL).count()), { timeout: 30_000 }).toBe(0)
+  }
+
+  // needs-input: the tool slot. Prompts before it land on slow slots.
+  let needsInputSrc: string | null = null
+  for (let attempt = 0; attempt < 5 && needsInputSrc === null; attempt += 1) {
+    await sendPrompt(page, `e2e-expression: probe ${attempt}`)
+    const outcome = await classify()
+    if (outcome === 'needs-input') {
+      await expect(expr).toHaveAttribute('data-vehicle-pet-expression', 'needs-input')
+      needsInputSrc = await expr.locator('img').getAttribute('src')
+      expect(needsInputSrc).not.toBe(idleSrc)
+      await page.screenshot({ path: `${ARTIFACTS}/expression-needs-input-112.png` })
+      // Answering continues the turn into invalid_request: the failed terminal.
+      const question = page.locator('[data-question-key]')
+      await question.waitFor({ timeout: 20_000 })
+      await question.getByText('Yes, continue', { exact: true }).click()
+      await question.getByRole('textbox').press('Enter')
+      await expect.poll(async () => (await pills.read()).includes('failed'), { timeout: 90_000 }).toBe(true)
+      await expect(expr).toHaveAttribute('data-vehicle-pet-expression', 'failed')
+      const failedSrc = await expr.locator('img').getAttribute('src')
+      expect(failedSrc).not.toBe(idleSrc)
+      expect(failedSrc).not.toBe(needsInputSrc)
+      await page.screenshot({ path: `${ARTIFACTS}/expression-failed-112.png` })
+      await waitPillClear()
+    } else if (outcome === 'running') {
+      // A slow slot streamed: wait for it to finish, then probe again.
+      await expect.poll(async () => (await pills.read()).includes('completed'), { timeout: 90_000 }).toBe(true)
+      await waitPillClear()
+    } else {
+      await waitPillClear()
+    }
+  }
+  expect(needsInputSrc, 'the scripted ask_user_question slot never surfaced needs-input').not.toBeNull()
+
+  // working: once past the tool slot every turn streams (stall slot first:
+  // running until Stop; later slots: slow streams). Observe running, then stop
+  // the turn for the cancelled terminal, which shares the failed expression.
+  let workingSrc: string | null = null
+  for (let attempt = 0; attempt < 5 && workingSrc === null; attempt += 1) {
+    await sendPrompt(page, `e2e-expression: drive ${attempt}`)
+    const outcome = await classify()
+    if (outcome === 'running') {
+      await expect(expr).toHaveAttribute('data-vehicle-pet-expression', 'working')
+      workingSrc = await expr.locator('img').getAttribute('src')
+      expect(workingSrc).not.toBe(idleSrc)
+      expect(workingSrc).not.toBe(needsInputSrc)
+      await page.screenshot({ path: `${ARTIFACTS}/expression-working-112.png` })
+      const stop = page.getByRole('button', { name: 'Stop generating' })
+      await stop.waitFor({ timeout: 30_000 })
+      await stop.click()
+      await expect.poll(async () => (await pills.read()).includes('cancelled'), { timeout: 60_000 }).toBe(true)
+      await expect(expr).toHaveAttribute('data-vehicle-pet-expression', 'failed')
+      await waitPillClear()
+    } else {
+      await waitPillClear()
+    }
+  }
+  expect(workingSrc, 'no streaming turn produced the working expression').not.toBeNull()
+
+  // completed: a further slow slot streams to success. The completed
+  // expression is captured inside the terminal pill window (before the
+  // transient pill clears and the calm baseline returns), so the settle loop
+  // watches the live pill instead of the appended recorder history.
+  let completedSrc: string | null = null
+  for (let attempt = 0; attempt < 5 && completedSrc === null; attempt += 1) {
+    await sendPrompt(page, `e2e-expression: final ${attempt}`)
+    const deadline = Date.now() + 120_000
+    while (Date.now() < deadline && completedSrc === null) {
+      const pill = page.locator(PILL).first()
+      if (await pill.count() > 0 && await pill.getAttribute('data-pet-host-feedback') === 'completed') {
+        await expect(expr).toHaveAttribute('data-vehicle-pet-expression', 'completed')
+        completedSrc = await expr.locator('img').getAttribute('src')
+        expect(completedSrc).not.toBe(idleSrc)
+        expect(completedSrc).not.toBe(needsInputSrc)
+        expect(completedSrc).not.toBe(workingSrc)
+        await page.screenshot({ path: `${ARTIFACTS}/expression-completed-112.png` })
+        break
+      }
+      await page.waitForTimeout(250)
+    }
+    await waitPillClear()
+  }
+  expect(completedSrc, 'no turn reached the completed terminal').not.toBeNull()
+  await expect(expr).toHaveAttribute('data-vehicle-pet-expression', 'idle')
 })
 
 test('SCENE_FULL_JOURNEY_GEOMETRY_TEST. Fleet and Seedling journey layers stay in scene bounds', async ({ page }) => {
@@ -923,9 +1053,8 @@ test('SCENE_FULL_JOURNEY_GEOMETRY_TEST. Fleet and Seedling journey layers stay i
   }
 
   await assertJourney('fleet-journey-r2.png')
-  await page.locator('[data-vehicle-pet-pack-option="seedling-fixture"]').click()
-  await expect(page.locator('[data-vehicle-pet-pack-name]')).toHaveText(/种子伙伴|Seedling/)
-  await assertJourney('seedling-journey-r2.png')
+  // V2: the journey dialog renders the product Pack only; no seedling switch.
+  expect(await page.locator('[data-vehicle-pet-pack-option]').count()).toBe(0)
   await page.locator(PET).click({ position: { x: 4, y: 4 } })
 })
 
@@ -934,9 +1063,14 @@ test('REDUCED_MOTION_STATIC_GEOMETRY_TEST. reduced motion preserves compact subj
   const subject = page.locator(`${PET} [data-pet-subject="true"]`)
   const before = await subject.boundingBox()
   await page.locator(PET).click()
+  await openMoreDisclosure(page)
   await page.locator('[data-vehicle-pet-reduced-motion-option="on"]').click()
   await page.locator(PET).click()
   await expect(page.locator(`${PET} .vp-scene`)).toHaveAttribute('data-reduced-motion', 'true')
+  // The shell's 200ms position transition is independent of the plugin
+  // reduced-motion preference; let the panel-close restore settle before
+  // measuring so the assertion compares settled geometry, not mid-flight.
+  await page.waitForTimeout(350)
   const after = await subject.boundingBox()
   expect(before).not.toBeNull()
   expect(after).not.toBeNull()
@@ -1003,10 +1137,10 @@ test('HARNESS_LOCALE_LIVE_SYNC_TEST. zh-CN → en → zh-CN updates Pack, stage,
     await ensurePanel()
   }
   const assertCopy = async (english: boolean) => {
-    await expect(page.locator('[data-vehicle-pet-pack-name]')).toHaveText(english ? 'Autonomous Fleet' : '无人车队')
+    await expect(page.locator('[data-vehicle-pet-more] summary')).toHaveText(english ? 'More settings' : '更多设置')
     await expect(page.locator('[data-vehicle-pet-stage]')).toContainText(english ? 'First Dispatch' : '首航出发')
     await expect(page.locator('[data-vehicle-pet-next-threshold]')).toContainText(english ? 'Next milestone' : '下一目标')
-    await expect(page.locator('[data-vehicle-pet-keepsake]')).toHaveText(english ? 'No keepsakes yet' : '还没有纪念品')
+    await expect(page.locator('[data-vehicle-pet-pack-option]')).toHaveCount(0)
     const trigger = page.locator('[data-vehicle-pet-open-journey]')
     await trigger.click()
     const dialog = page.locator('[data-vehicle-pet-dialog]')
@@ -1052,7 +1186,6 @@ test('CROSSTAB_COLLAPSE_RESTORE_VISIBLE_TEST. two tabs destroy stale Panel/Dialo
   await instrumentWrites(second)
 
   await page.locator(PET).click()
-  await page.locator('[data-vehicle-pet-pack-option="seedling-fixture"]').click()
   await page.locator('[data-vehicle-pet-open-journey]').click()
   await expect(page.locator('[data-vehicle-pet-dialog]')).toHaveCount(1)
 
@@ -1108,9 +1241,6 @@ test('FULL_JOURNEY_LIGHT_THEME_CONTRAST_TEST + FULL_JOURNEY_DARK_THEME_CONTRAST_
   const setPoints = async (points: number) => page.evaluate(value => {
     ;(window as unknown as { __vehiclePetE2E: { progress: { setPoints: (next: number) => void } } }).__vehiclePetE2E.progress.setPoints(value)
   }, points)
-  const resetSubject = async () => page.evaluate(() => {
-    ;(window as unknown as { __vehiclePetE2E: { progress: { resetSubject: () => void } } }).__vehiclePetE2E.progress.resetSubject()
-  })
   const setLocale = async (locale: 'zh-CN' | 'en') => {
     if (await page.evaluate(() => document.documentElement.lang) === locale) return
     const settings = page.getByRole('button', { name: /Settings|设置/i }).first()
@@ -1124,6 +1254,7 @@ test('FULL_JOURNEY_LIGHT_THEME_CONTRAST_TEST + FULL_JOURNEY_DARK_THEME_CONTRAST_
   }
   const setReduced = async (reduced: boolean) => {
     await ensurePanel()
+    await openMoreDisclosure(page)
     await page.locator(`[data-vehicle-pet-reduced-motion-option="${reduced ? 'on' : 'off'}"]`).click()
   }
   const sampleContrast = async (): Promise<{ min: number; samples: number }> => {
@@ -1206,15 +1337,8 @@ test('FULL_JOURNEY_LIGHT_THEME_CONTRAST_TEST + FULL_JOURNEY_DARK_THEME_CONTRAST_
     await setPoints(2_500_000)
     await expect(page.locator(PET)).toHaveAttribute('data-vehicle-pet-level', 'l12')
     await runVariants() // Fleet L12
-    await resetSubject()
-    await ensurePanel()
-    await page.locator('[data-vehicle-pet-pack-option="seedling-fixture"]').click()
-    await expect(page.locator(PET)).toHaveAttribute('data-vehicle-pet-pack', 'seedling-fixture')
-    await setPoints(0)
-    await runVariants() // Seedling seed
-    await setPoints(300_000)
-    await expect(page.locator(PET)).toHaveAttribute('data-vehicle-pet-level', 'forest')
-    await runVariants() // Seedling forest
+    // V2: the seedling Pack is not reachable from the DSH surface, so the
+    // contrast matrix covers the product Pack levels only.
 
     await page.evaluate(() => document.body.setAttribute('data-ds-dark-theme', ''))
     const darkResult = await sampleContrast()
@@ -1244,6 +1368,7 @@ test('COMPACT_ALL_LEVEL_PIXEL_MATRIX_TEST + COMPACT_MILESTONE_SUBJECT_OVERLAP_TE
   }
   const setReduced = async (enabled: boolean) => {
     await page.locator(PET).click()
+    await openMoreDisclosure(page)
     await page.locator(`[data-vehicle-pet-reduced-motion-option="${enabled ? 'on' : 'off'}"]`).click()
     await page.locator(PET).click()
     await expect(page.locator(`${PET} .vp-scene`)).toHaveAttribute('data-reduced-motion', enabled ? 'true' : 'false')
@@ -1306,16 +1431,7 @@ test('COMPACT_ALL_LEVEL_PIXEL_MATRIX_TEST + COMPACT_MILESTONE_SUBJECT_OVERLAP_TE
 
   try {
     await runLevels('autonomous-fleet', fleetManifest.levels)
-    await page.evaluate(() => {
-      const control = (window as unknown as {
-        __vehiclePetE2E: { progress: { resetSubject: () => void } }
-      }).__vehiclePetE2E.progress
-      control.resetSubject()
-    })
-    await page.locator(PET).click()
-    await page.locator('[data-vehicle-pet-pack-option="seedling-fixture"]').click()
-    await page.locator(PET).click()
-    await runLevels('seedling-fixture', seedlingManifest.levels)
+    // V2: the seedling fixture Pack is not reachable from the DSH surface.
   } finally {
     buildClientGeneration('production')
     await expect(page.locator('.vpo-root')).toHaveAttribute('data-client-generation', 'production', { timeout: 60_000 })

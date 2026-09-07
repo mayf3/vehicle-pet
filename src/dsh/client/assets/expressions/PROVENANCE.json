@@ -1,0 +1,102 @@
+{
+  "provenance_version": 1,
+  "generated_at_commit": "see git history of this file",
+  "route": "LOCAL_DETERMINISTIC_SVG_RECIPE",
+  "route_note": "Goal 常伴 authorized ChatGPT image route was probed first (2026-09-07, sanitized-brief constraint, CODEX_SIDEBAR_BROWSER-class surface): chatgpt.com reachable but unauthenticated, so the route was unavailable; per Goal §18 local bounded execution continued. Masters are drawn by the fixed inline SVG recipe in scripts/generate-expression-assets.mjs — no external images, no fonts, no randomness, no model call at build or runtime.",
+  "states": [
+    "idle",
+    "working",
+    "needs-input",
+    "completed",
+    "failed"
+  ],
+  "canvas": "256x256 transparent, drawn in face-rect-normalized coordinates",
+  "anchors_480x480_percent": {
+    "l1": [
+      5,
+      53,
+      28
+    ],
+    "l2": [
+      6,
+      52,
+      30
+    ],
+    "l3": [
+      5,
+      53,
+      28
+    ],
+    "l4": [
+      5,
+      53,
+      28
+    ],
+    "l5": [
+      2,
+      55,
+      28
+    ],
+    "l6": [
+      29,
+      53,
+      27
+    ],
+    "l7": [
+      43,
+      66,
+      23
+    ],
+    "l8": [
+      51,
+      67,
+      23
+    ],
+    "l9": [
+      26,
+      63,
+      27
+    ],
+    "l10": [
+      28,
+      62,
+      24
+    ],
+    "l11": [
+      22,
+      62,
+      24
+    ],
+    "l12": [
+      8,
+      59,
+      26
+    ]
+  },
+  "accepted_at": "2026-09-07",
+  "visual_review": {
+    "reviewer": "independent visual evaluation agent (Goal 常伴 internal; did not participate in generation)",
+    "result": "ACCEPT",
+    "revision_rounds_used": 1,
+    "criteria": {
+      "SAME_CHARACTER_IDENTITY": "PASS",
+      "STATIC_EXPRESSION_READABILITY": "PASS",
+      "112PX_EXPRESSION_READABILITY": "PASS",
+      "LEVEL_IDENTITY_PRESERVED": "PASS",
+      "COPY_OR_BRAND_RISK": "NONE"
+    },
+    "method": "112px contact sheet (all 12 levels x 5 states) rendered from the exact exported bytes, plus 256px masters; squint test at 1x and 50% downscale"
+  },
+  "sha256": {
+    "expr-idle.png": "e653974cb5b9e7ce4d76d4c2b6ea358e7896df4df682cdeb53a576a7cc267a09",
+    "expr-idle.webp": "be6a21d1ecc605c9331cea09b03f197205b4a7def90757bb7ebef879cd1b0b15",
+    "expr-working.png": "26bda615f4790b4afd4999445b1564c237973ee2e90f39a26bed3658a542d22d",
+    "expr-working.webp": "69a5fa3985a19d46240bb34b4193cd828de44bd9c5bab581009277978b61c510",
+    "expr-needs-input.png": "e7e291fd2171737ac6cbdf55c68b857468981b546b9b5ecbb3e61c793da574db",
+    "expr-needs-input.webp": "192ed32bab0a57c2dfea326b5f3f00a1cbb61019e45ebe97a3073315b6405269",
+    "expr-completed.png": "880d295517c189fd30b71fae3c9ca30e1e44334e0b47c98a0a79d74b2d6971b8",
+    "expr-completed.webp": "ea9187153245198dbd88612238ddb9bb635cb68a4ad4da18aa4827f1fd9920c4",
+    "expr-failed.png": "fd97e16c628fa9eb4746d1391726ae096795bdcb2fbe7850d7ab00a71c8f861c",
+    "expr-failed.webp": "86c3db63d6eebc44e02ff67c863ae51fd7897f8a70c5f76f31c80369aa157ea0"
+  }
+}
