@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "task_id": "GOAL-ZHILI-GOVERNANCE-V1-UPGRADE-R1",
+  "goal": "Upgrade mayf3/vehicle-pet governance adoption from the accepted draft V0 pilot (0.1.0-draft.1) to exact upstream stable Governance V1 v1.0.3, forward-only, with whole-authority supersession of the predecessor adoption and no product, production, or settings mutation.",
+  "current_gap": "The accepted adoption VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V1 pins the early draft distribution; Governance V1 routing (Authority/Plan/Assurance separation, affected-contract review, blocker discipline, Goal-lifecycle execution) is not yet the repository default for future work.",
+  "done_when": "Exact v1.0.3 vendored and locked at source commit 0d61433339ef563f82307b70120d9fcee168cdab; adoption successor V2 accepted and predecessor V1 superseded atomically; transition, route, and governance validators PASS; independent audit ACCEPT with 0 blockers; PR merged into mayf3/vehicle-pet:main; no production mutation.",
+  "route_stage": "AUTHORITY_AUTHORING",
+  "authority_accepted_in_base": "NO",
+  "owner_decision_required": false,
+  "authority": {
+    "declared_action": "SUPERSEDE",
+    "ownership_known": true,
+    "accepted_owner_exists": true,
+    "accepted_meaning_changed": true,
+    "accepted_strict_addition": false,
+    "proposed_target_named": true,
+    "proposal_scope_changed": false,
+    "proposal_ownership_changed": false,
+    "proposal_decision_identity_changed": false,
+    "implementation_authority": "none",
+    "atomic_spec_implementation_permitted": false
+  },
+  "plan": {
+    "complexity": "BOUNDED",
+    "level": "BRIEF",
+    "brief_location": "Owner Goal dispatch prompt plus docs/specs/VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V2.md"
+  },
+  "assurance": {
+    "failure_consequence": "DURABLE_STATE",
+    "level": "DURABLE",
+    "controlled_runbook_present": false,
+    "rationale": "durable governance authority change; no production, permission, or Secret surface; independent audit required"
+  },
+  "execution_mandate": {
+    "status": "NOT_APPLICABLE",
+    "attributable": true,
+    "target_bound": true,
+    "actor_bound": true,
+    "environment_bound": true,
+    "scope_bound": true,
+    "allowed_effects_bound": true,
+    "forbidden_effects_bound": true,
+    "exact_operation_bound": true,
+    "done_when_bound": true,
+    "abort_conditions_bound": true,
+    "secret_handling_bound": true,
+    "receipt_bound": true,
+    "attempt_bounds_bound": true,
+    "self_issued": false,
+    "source": "Owner Goal dispatch (OWNER_DISPATCH_UNIT = GOAL, OWNER_ACCEPTANCE = PREAUTHORIZED)"
+  },
+  "write_surface": {
+    "mutation_planned": false,
+    "isolated": true,
+    "note": "docs-only authority authoring in the exclusive worktree vehicle-pet-wt-governance-v1-r1; no implementation or operation mutation is permitted at this stage"
+  },
+  "spec_gap_dependency": "NONE",
+  "evidence": {
+    "load_bearing_required": true,
+    "reviewability": "PASS",
+    "fabrication_observed": false,
+    "failure_class": "NONE"
+  },
+  "live_authority_gap": {
+    "state": "NONE",
+    "expansion_frozen": true,
+    "auto_delete": false,
+    "permanent_grandfather": false,
+    "owner_disposition_present": false
+  },
+  "emergency": {
+    "state": "NONE",
+    "action_kind": "NONE",
+    "owner_authorized": false,
+    "incident_reference_present": false,
+    "durable_new_behavior": false,
+    "normal_authority_reconciliation_required": false
+  },
+  "review": {
+    "review_target_head": "7f58f5a5d7ea2df076c513432e666f9abfcfacf0",
+    "base_head": "c3d1d4e7f5697a0dd53f8d4a9d6996e7bdde2cac",
+    "current_base_head": "c3d1d4e7f5697a0dd53f8d4a9d6996e7bdde2cac",
+    "target_head_changed": false,
+    "relevant_base_impact": false,
+    "full_rereview_required": false,
+    "review_scope": "independent audit reviews this exact proposed Head against the exact Base; the only pre-declared post-review delta is the atomic acceptance transition, which receives an independent final-head delta recheck per CTR-UPG-010"
+  },
+  "readiness": {
+    "implementation_allowed": "NO",
+    "merge_ready": "NO",
+    "operation_allowed": "NOT_APPLICABLE"
+  },
+  "stop": {
+    "done_when_met": false,
+    "expansion_triggered": false,
+    "next_action": "CONTINUE"
+  },
+  "findings": []
+}
