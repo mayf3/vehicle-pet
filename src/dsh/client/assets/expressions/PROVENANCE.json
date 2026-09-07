@@ -14,63 +14,63 @@
   "anchors_480x480_percent": {
     "l1": [
       8,
-      37,
-      45
+      43,
+      28
     ],
     "l2": [
-      8,
-      37,
-      45
+      12,
+      42,
+      32
     ],
     "l3": [
-      8,
-      37,
-      45
+      9,
+      42,
+      28
     ],
     "l4": [
-      7,
-      45,
-      40
+      12,
+      44,
+      32
     ],
     "l5": [
-      8,
-      38,
-      45
+      10,
+      53,
+      30
     ],
     "l6": [
-      32,
-      61,
-      22
+      29,
+      53,
+      27
     ],
     "l7": [
-      36,
-      70,
-      13
+      43,
+      66,
+      23
     ],
     "l8": [
-      36,
-      66,
-      14
+      51,
+      67,
+      23
     ],
     "l9": [
-      36,
-      67,
-      14
+      26,
+      63,
+      27
     ],
     "l10": [
-      41,
-      68,
-      11
+      28,
+      62,
+      24
     ],
     "l11": [
-      35,
-      63,
-      15
+      22,
+      62,
+      24
     ],
     "l12": [
-      16,
-      65,
-      22
+      8,
+      59,
+      26
     ]
   },
   "accepted_at": "2026-09-07",
@@ -88,15 +88,15 @@
     "method": "112px contact sheet (all 12 levels x 5 states) rendered from the exact exported bytes, plus 256px masters; squint test at 1x and 50% downscale"
   },
   "sha256": {
-    "expr-idle.png": "a188b8b8c83751eef73d0f00475311799f3cffed48c1a5f8f8141b9ed99e8652",
-    "expr-idle.webp": "1de23c0c42fc2af96f2b1085a077087ecd070b877a872c525723edda8694eeaa",
-    "expr-working.png": "87f9e9dcf85477a4b3022e7c68f00905656ff6ab6b617170ec199b21242bb96e",
-    "expr-working.webp": "4f9b7bd11165211ecaa0405cbec097daf003d0e49c101e019ef76e1b32f87cae",
-    "expr-needs-input.png": "046fb2da18c85320d0bbef1133f7281ed054505e9fd0d2bbc7715e9ced95d841",
-    "expr-needs-input.webp": "89b8190edf5601acc82d800eb359f283523ebea7ea168e6694484ea71a760cc2",
-    "expr-completed.png": "5ed9cd5836de8a28f19bc62163dcb82501fc988e3ea2b8ee01d0cdf403b0c426",
-    "expr-completed.webp": "006e4c466345646f6eb7d8d5f5013aca525ea34f6d46feda9b2753fbd1ddb962",
-    "expr-failed.png": "efa141d17855128ab9cd3853a8289415a9521bcdbe02aa1ca4c6863ec14f2f51",
-    "expr-failed.webp": "08f2cdcc1b5589e609e6662ceeda5e6f009eb45d6d7731d8d7d100c6b04f6466"
+    "expr-idle.png": "e653974cb5b9e7ce4d76d4c2b6ea358e7896df4df682cdeb53a576a7cc267a09",
+    "expr-idle.webp": "be6a21d1ecc605c9331cea09b03f197205b4a7def90757bb7ebef879cd1b0b15",
+    "expr-working.png": "26bda615f4790b4afd4999445b1564c237973ee2e90f39a26bed3658a542d22d",
+    "expr-working.webp": "69a5fa3985a19d46240bb34b4193cd828de44bd9c5bab581009277978b61c510",
+    "expr-needs-input.png": "e7e291fd2171737ac6cbdf55c68b857468981b546b9b5ecbb3e61c793da574db",
+    "expr-needs-input.webp": "192ed32bab0a57c2dfea326b5f3f00a1cbb61019e45ebe97a3073315b6405269",
+    "expr-completed.png": "880d295517c189fd30b71fae3c9ca30e1e44334e0b47c98a0a79d74b2d6971b8",
+    "expr-completed.webp": "ea9187153245198dbd88612238ddb9bb635cb68a4ad4da18aa4827f1fd9920c4",
+    "expr-failed.png": "fd97e16c628fa9eb4746d1391726ae096795bdcb2fbe7850d7ab00a71c8f861c",
+    "expr-failed.webp": "86c3db63d6eebc44e02ff67c863ae51fd7897f8a70c5f76f31c80369aa157ea0"
   }
 }

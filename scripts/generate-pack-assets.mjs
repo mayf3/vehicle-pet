@@ -304,23 +304,13 @@ const RECIPES = {
     'sprite-unit-car': {
       width: 240,
       height: 240,
-      // V2 identity fleet unit (GOAL 换图): white capsule body, dark navy
-      // face-display band with tiny cyan eyes, dome pod, glowing cyan rims.
-      svg: svgWrap(240, 240, `<defs>
-        <linearGradient id="unitBody" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#dbeefc"/>
-        </linearGradient></defs>
-        <ellipse cx="120" cy="212" rx="78" ry="12" fill="#0d1220" opacity="0.28"/>
-        <path d="M38,150 Q42,96 96,86 L148,86 Q200,96 202,150 L202,166 Q202,180 188,180 L52,180 Q38,180 38,166 Z"
-          fill="url(#unitBody)" stroke="#9db4d6" stroke-width="5"/>
-        <rect x="58" y="106" width="112" height="48" rx="24" fill="#1b2740"/>
-        <circle cx="92" cy="130" r="9" fill="#7fd8ff"/><circle cx="92" cy="130" r="4" fill="#e8f7ff"/>
-        <circle cx="136" cy="130" r="9" fill="#7fd8ff"/><circle cx="136" cy="130" r="4" fill="#e8f7ff"/>
-        <ellipse cx="120" cy="74" rx="26" ry="12" fill="#f4faff" stroke="#9db4d6" stroke-width="4"/>
-        <circle cx="120" cy="74" r="4.5" fill="#39c1ff"/>
-        <path d="M46,166 Q120,158 196,166" stroke="#7fd8ff" stroke-width="4" fill="none" opacity="0.9"/>
-        <circle cx="82" cy="182" r="17" fill="#232f47"/><circle cx="82" cy="182" r="8" fill="#57c9ff"/>
-        <circle cx="160" cy="182" r="17" fill="#232f47"/><circle cx="160" cy="182" r="8" fill="#57c9ff"/>`),
+      svg: svgWrap(240, 240, `<ellipse cx="120" cy="208" rx="74" ry="12" fill="#0d1220" opacity="0.3"/>
+        <path d="M42,140 Q46,96 84,88 L156,88 Q196,96 198,140 L198,164 Q198,176 186,176 L54,176 Q42,176 42,164 Z"
+          fill="#67c7f5" stroke="#3f9ccf" stroke-width="5"/>
+        <path d="M84,104 L120,100 L120,132 L74,132 Z" fill="#dff2ff"/>
+        <path d="M128,100 L158,104 L168,132 L128,132 Z" fill="#dff2ff"/>
+        <circle cx="82" cy="178" r="17" fill="#26314a"/>
+        <circle cx="158" cy="178" r="17" fill="#26314a"/>`),
     },
     'overlay-lane-lines': {
       width: W,
@@ -502,73 +492,26 @@ fleetRecipes['sprite-subject-pod--l3'] = withProtectionVehicle(fleetRecipes['spr
 fleetRecipes['sprite-subject-pod--l4'] = fleetRecipes['sprite-cabin-safety']
 
 // ---------------------------------------------------------------------------
-// Master-image-driven subject sprites. L1–L5 (GOAL 换图 · V2 identity, 2026-09):
-// the committed V2 family master is cut at measured group boundaries and
+// Master-image-driven subject sprites. L1–L5 (GOAL 陪伴 R1 · 12 级方案):
+// the committed L1–L6 family master is cut at measured group boundaries and
 // deterministically post-processed (fragment cleanup); no image model runs at
-// build time. L6–L12 (V3 DEC-PET-032 semantics on V2 identity bytes;
-// provenance in assets/masters/PROVENANCE-l6-l12-evolution.json): each level
-// derives from its own committed scale-evolution master (supervision-count
-// label, remote operator, and scale outline already composed in the approved
-// art), so no fragment cleanup or escort restoration applies there.
+// build time. L6–L12 (GOAL 进化 · V3 DEC-PET-032; provenance in
+// assets/masters/PROVENANCE-l6-l12-evolution.json): each level derives from
+// its own committed scale-evolution master (supervision-count label, remote
+// operator, and scale outline already composed in the approved art), so no
+// fragment cleanup or escort restoration applies there.
 // ---------------------------------------------------------------------------
-const FAMILY_MASTER = { master: 'master-v2-l1-l5-family.png', cuts: [0, 440, 848, 1258, 1727, 2172] }
 const MASTER_SPRITE_STEMS = Array.from({ length: 12 }, (_, i) => `sprite-subject-pod--l${i + 1}`)
 
-async function sliceFamilyCell(levelIndex) {
-  const raw = await sharp(path.join(PACKS_DIR, 'autonomous-fleet/assets/masters', FAMILY_MASTER.master))
-    .extract({ left: FAMILY_MASTER.cuts[levelIndex], top: 0, width: FAMILY_MASTER.cuts[levelIndex + 1] - FAMILY_MASTER.cuts[levelIndex], height: 724 })
-    .png()
-    .toBuffer()
-  return sharp(raw).trim({ threshold: 12 }).png().toBuffer()
-}
-
 function evolutionMasterPath(levelIndex) {
-  return path.join(PACKS_DIR, 'autonomous-fleet/assets/masters', `master-v2-l${levelIndex + 1}.png`)
-}
-
-function columnStats(data, info) {
-  const W = info.width, H = info.height, CH = info.channels
-  const cov = new Array(W).fill(0)
-  const colHeight = new Array(W).fill(0)
-  for (let x = 0; x < W; x++) {
-    let top = H, bottom = 0
-    for (let y = 0; y < H; y++) if (data[(y * W + x) * CH + 3] > 16) { cov[x]++; if (y < top) top = y; if (y > bottom) bottom = y }
-    colHeight[x] = bottom - top + 1
-  }
-  return { cov, colHeight, maxH: Math.max(...colHeight) }
-}
-
-async function edgeFragmentCrop(cellBuffer, side) {
-    // Crop a thin leftover next-car fragment (≤26px wide, ≤60% cell height)
-  // from the given edge, cutting at the nearest low-coverage valley.
-  const sideHoriz = side === 'right' || side === 'left'
-  const { data, info } = await (sideHoriz
-    ? sharp(cellBuffer).raw()
-    : sharp(cellBuffer).rotate(90).raw()).toBuffer({ resolveWithObject: true })
-  const W = info.width, H = info.height, CH = info.channels
-  const { cov, colHeight, maxH } = columnStats(data, info)
-  let valley = -1
-  if (side === 'right') {
-    for (let x = W - 2; x >= Math.floor(W * 0.5); x--) if (cov[x] < 12) { valley = x; break }
-    if (valley < 0 || W - valley - 1 > 26) return cellBuffer
-    if (Math.max(...colHeight.slice(valley + 1)) > maxH * 0.6) return cellBuffer
-    return sharp(cellBuffer).extract({ left: 0, top: 0, width: valley + 1, height: H }).png().toBuffer()
-  }
-  for (let x = 1; x <= Math.floor(W * 0.5); x++) if (cov[x] < 12) { valley = x; break }
-  if (valley < 0 || valley > 26) return cellBuffer
-  if (Math.max(...colHeight.slice(0, valley)) > maxH * 0.6) return cellBuffer
-  return sharp(cellBuffer).extract({ left: valley, top: 0, width: W - valley, height: H }).png().toBuffer()
+  // Goal 换图 correction (2026-09-08): every level derives from the Owner's
+  // per-level master (pony-v1-scale-v2 material for L1-L5, the accepted
+  // L6-L12 scale-evolution masters) — no family-cut path.
+  return path.join(PACKS_DIR, 'autonomous-fleet/assets/masters', `master-l${levelIndex + 1}.png`)
 }
 
 async function renderMasterSprite(levelIndex) {
-  let cell
-  if (levelIndex < 5) {
-    cell = await sliceFamilyCell(levelIndex)
-    cell = await edgeFragmentCrop(cell, 'right')
-    cell = await edgeFragmentCrop(cell, 'left')
-  } else {
-    cell = await sharp(evolutionMasterPath(levelIndex)).png().toBuffer()
-  }
+  const cell = await sharp(evolutionMasterPath(levelIndex)).png().toBuffer()
   const MARGIN = 14
   const inner = 480 - MARGIN * 2
   const m = await sharp(cell).metadata()
