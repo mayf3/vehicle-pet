@@ -19,6 +19,7 @@ import {
 const MOUNT = 1000000
 const cadence = (overrides: Partial<SpeechCadenceState> = {}): SpeechCadenceState => ({
   mountedAt: MOUNT,
+  sessionState: 'idle',
   lastSpokenAt: null,
   lastInputAt: null,
   lastAmbientAt: null,
@@ -111,6 +112,29 @@ describe('speech cadence matrix (CTR-OVERLAY-019)', () => {
     expect(evaluateCadence({ kind: 'click', category: 'idle' }, recent)).toEqual({ allowed: false, reason: 'click-throttle' })
     const stale = cadence({ lastClickSpokenAt: MOUNT + SPEECH_LOAD_QUIET_MS - SPEECH_CLICK_THROTTLE_MS - 1 })
     expect(evaluateCadence({ kind: 'click', category: 'idle' }, stale)).toEqual({ allowed: true })
+  })
+
+  it('ambient is idle-state gated (CTR-OVERLAY-019(3))', () => {
+    for (const state of ['working', 'needs-input', 'terminal'] as const) {
+      const duringWork = cadence({ sessionState: state })
+      expect(evaluateCadence({ kind: 'ambient' }, duringWork)).toEqual({ allowed: false, reason: 'not-idle' })
+    }
+    expect(evaluateCadence({ kind: 'ambient' }, cadence({ sessionState: 'idle' }))).toEqual({ allowed: true })
+  })
+
+  it('working rotation is typing-suppressed (CTR-OVERLAY-019(4))', () => {
+    const underCap = cadence({
+      sessionState: 'working',
+      workingLinesThisPeriod: SPEECH_WORKING_MAX_PER_PERIOD - 1,
+      lastInputAt: MOUNT + SPEECH_LOAD_QUIET_MS - SPEECH_TYPING_SUPPRESSION_MS + 1000,
+    })
+    expect(evaluateCadence({ kind: 'session-edge', category: 'working' }, underCap)).toEqual({ allowed: false, reason: 'typing' })
+    const quietHands = cadence({
+      sessionState: 'working',
+      workingLinesThisPeriod: SPEECH_WORKING_MAX_PER_PERIOD - 1,
+      lastInputAt: MOUNT + SPEECH_LOAD_QUIET_MS - SPEECH_TYPING_SUPPRESSION_MS - 1,
+    })
+    expect(evaluateCadence({ kind: 'session-edge', category: 'working' }, quietHands)).toEqual({ allowed: true })
   })
 
   it('working rotation caps lines per running period but edges still fire', () => {

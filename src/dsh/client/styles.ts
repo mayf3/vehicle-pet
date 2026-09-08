@@ -28,6 +28,14 @@ const css = `
 .vpo-scene .vp-scene{aspect-ratio:auto;width:100%;height:100%}
 .vpo-scene .vp-scene[data-presentation-mode="compact-overlay"]{background:radial-gradient(circle at 45% 38%,color-mix(in srgb,var(--color-surface,#fff) 94%,#dcecff) 0%,color-mix(in srgb,var(--color-accent,#2f80ed) 12%,var(--color-surface,#fff)) 100%)}
 .vpo-scene .vp-scene[data-presentation-mode="compact-overlay"] .vp-subject-btn{animation:none!important}
+/* LARGE presence boost: the variable is computed by the overlay (capped to
+   the shell) and scales the subject button together with its expression
+   layer, so the face stays registered with the art (audit craft round). */
+.vpo-root[data-vehicle-pet-size="large"] .vpo-scene .vp-scene[data-presentation-mode="compact-overlay"] .vp-subject-btn{transform:translate(-50%,-50%) scale(var(--vp-subject-boost,1))!important}
+/* A user-opened menu must stay readable above a co-installed pet plugin's
+   default app layer; the pet card itself keeps its default placement
+   (CTR-OVERLAY-003). */
+.vpo-root[data-menu-open="true"]{z-index:5}
 .vpo-scene .vp-scene[data-presentation-mode="compact-overlay"] .vp-subject-btn::after{display:none!important}
 .vpo-scene .vp-scene[data-presentation-mode="compact-overlay"][data-reduced-motion="false"] .vp-subject-btn>.vp-node-img{animation:vp-idle-float 3.6s ease-in-out infinite}
 .vpo-scene .vp-scene[data-presentation-mode="compact-overlay"][data-reduced-motion="false"] .vpo-expr{animation:vp-idle-float 3.6s ease-in-out infinite}
@@ -41,7 +49,9 @@ const css = `
 .vpo-exprImg{display:block;width:100%;height:100%}
 /* Speech bubble (V3 CTR-OVERLAY-017): single polite surface above (or below)
    the pet; auto-dismissed by the scheduler; never focusable. */
-.vpo-bubble{position:absolute;z-index:6;left:50%;transform:translateX(-50%);width:max-content;max-width:min(260px,calc(100vw - 32px));box-sizing:border-box;padding:9px 13px;border-radius:14px;background:color-mix(in srgb,var(--color-surface,#fff) 96%,transparent);border:1px solid color-mix(in srgb,var(--color-border,#a8bdcc) 72%,transparent);box-shadow:0 10px 28px rgba(10,37,57,.2);font-size:12px;line-height:1.45;color:var(--color-text,#17324d);pointer-events:none;text-align:center}
+// F2: the anchor is clamped so even a max-width bubble stays inside the
+// viewport when the shell parks at a margin (CTR-OVERLAY-017).
+.vpo-bubble{position:absolute;z-index:6;left:clamp(146px,50%,calc(100% - 146px));transform:translateX(-50%);width:max-content;max-width:min(260px,calc(100vw - 32px));box-sizing:border-box;padding:9px 13px;border-radius:14px;background:color-mix(in srgb,var(--color-surface,#fff) 96%,transparent);border:1px solid color-mix(in srgb,var(--color-border,#a8bdcc) 72%,transparent);box-shadow:0 10px 28px rgba(10,37,57,.2);font-size:12px;line-height:1.45;color:var(--color-text,#17324d);pointer-events:none;text-align:center}
 .vpo-bubble[data-placement="above"]{bottom:calc(100% + 8px)}
 .vpo-bubble[data-placement="below"]{top:calc(100% + 8px)}
 /* Secondary settings affordance (V3 CTR-OVERLAY-005): the trigger row is

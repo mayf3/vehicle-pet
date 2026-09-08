@@ -17,7 +17,7 @@ import {
 import type { VehiclePetSessionView } from './types'
 import {
   evaluateCadence, idleBucketFor, selectSpeechLine, SPEECH_AUTO_DISMISS_MS,
-  SPEECH_WORKING_ROTATION_MS,
+  SPEECH_TYPING_SUPPRESSION_MS, SPEECH_WORKING_ROTATION_MS,
   type SpeechCadenceState, type SpeechTriggerSource,
 } from './speech-rules'
 import type { SpeechCategory } from './speech-catalog'
@@ -76,22 +76,31 @@ export function useVehiclePetSpeech(options: SchedulerOptions): VehiclePetSpeech
     }
   }
   const refs = startRef.current
+  const sessionViewRef = useRef(sessionView)
+  sessionViewRef.current = sessionView
   const [bubble, setBubble] = useState<{ text: string; key: number } | null>(null)
   const [idleBucket, setIdleBucket] = useState<0 | 1 | 2>(0)
   const [milestoneActive, setMilestoneActive] = useState(false)
   const dismissTimerRef = useRef<ReturnType<typeof globalThis.setTimeout> | undefined>(undefined)
+  const milestoneTimerRef = useRef<ReturnType<typeof globalThis.setTimeout> | undefined>(undefined)
   const bubbleKeyRef = useRef(0)
 
-  const cadenceState = useCallback((): SpeechCadenceState => ({
-    mountedAt: refs.mountedAt,
-    lastSpokenAt: refs.lastSpokenAt,
-    lastInputAt: refs.lastInputAt,
-    lastAmbientAt: refs.lastAmbientAt,
-    lastClickSpokenAt: refs.lastClickSpokenAt,
-    runningPeriodStartedAt: refs.runningPeriodStartedAt,
-    workingLinesThisPeriod: refs.workingLinesThisPeriod,
-    now: Date.now(),
-  }), [refs])
+  const cadenceState = useCallback((): SpeechCadenceState => {
+    const view = sessionViewRef.current
+    return {
+      mountedAt: refs.mountedAt,
+      lastSpokenAt: refs.lastSpokenAt,
+      lastInputAt: refs.lastInputAt,
+      lastAmbientAt: refs.lastAmbientAt,
+      lastClickSpokenAt: refs.lastClickSpokenAt,
+      runningPeriodStartedAt: refs.runningPeriodStartedAt,
+      workingLinesThisPeriod: refs.workingLinesThisPeriod,
+      sessionState: view.terminal !== null
+        ? 'terminal'
+        : view.live === 'running' ? 'working' : view.live === 'needs-input' ? 'needs-input' : 'idle',
+      now: Date.now(),
+    }
+  }, [refs])
 
   const showLine = useCallback((category: SpeechCategory): void => {
     const selection = selectSpeechLine(category, locale, {
@@ -130,11 +139,7 @@ export function useVehiclePetSpeech(options: SchedulerOptions): VehiclePetSpeech
 
   const speakForClick = useCallback((category: SpeechCategory): void => {
     trySpeak({ kind: 'click', category })
-    // A click line is also an ordinary line for repeat-guard purposes.
-    if (refs.lastClickSpokenAt !== null && Date.now() - refs.lastClickSpokenAt < 50) {
-      refs.lastClickSpokenAt = Date.now()
-    }
-  }, [refs, trySpeak])
+  }, [trySpeak])
 
   // Payload-ignored input recency: only the timestamp is recorded. Never the
   // key value, target, or any host content (CTR-OVERLAY-008/019(3)).
@@ -184,18 +189,28 @@ export function useVehiclePetSpeech(options: SchedulerOptions): VehiclePetSpeech
   }, [enabled, refs, sessionView, trySpeak])
 
   // Working rotation + ambient tick + idle bucket, on one bounded interval.
+  // CTR-OVERLAY-019(3): ambient lines are attempted only in the idle state.
+  // CTR-OVERLAY-019(4): working rotation additionally respects the typing
+  // suppression window (enforced inside evaluateCadence; the rotation attempt
+  // is skipped entirely when typing to keep the interval side-effect free).
   useEffect(() => {
     if (!enabled) return
     const handle = globalThis.setInterval(() => {
       const now = Date.now()
       setIdleBucket(idleBucketFor(refs.lastInputAt, now))
-      if (refs.runningPeriodStartedAt !== null
+      const rotationDue = refs.runningPeriodStartedAt !== null
         && refs.lastSpokenAt !== null
-        && now - refs.lastSpokenAt >= SPEECH_WORKING_ROTATION_MS) {
-        trySpeak({ kind: 'session-edge', category: 'working' })
+        && now - refs.lastSpokenAt >= SPEECH_WORKING_ROTATION_MS
+      if (rotationDue) {
+        const typing = refs.lastInputAt !== null
+          && now - refs.lastInputAt < SPEECH_TYPING_SUPPRESSION_MS
+        if (!typing) trySpeak({ kind: 'session-edge', category: 'working' })
         return
       }
-      trySpeak({ kind: 'ambient' })
+      const view = sessionViewRef.current
+      if (view.terminal === null && view.live === 'idle') {
+        trySpeak({ kind: 'ambient' })
+      }
     }, 30000)
     return () => {
       globalThis.clearInterval(handle)
@@ -206,13 +221,14 @@ export function useVehiclePetSpeech(options: SchedulerOptions): VehiclePetSpeech
   // the scheduler only receives the resulting flag through speakMilestone.
   useEffect(() => () => {
     globalThis.clearTimeout(dismissTimerRef.current)
+    globalThis.clearTimeout(milestoneTimerRef.current)
   }, [])
 
   const speakMilestone = useCallback((): void => {
     setMilestoneActive(true)
     trySpeak({ kind: 'milestone', category: 'milestone' })
-    const milestoneWindow = globalThis.setTimeout(() => setMilestoneActive(false), 6000)
-    void milestoneWindow
+    globalThis.clearTimeout(milestoneTimerRef.current)
+    milestoneTimerRef.current = globalThis.setTimeout(() => setMilestoneActive(false), 6000)
   }, [trySpeak])
 
   return { bubble, speakForClick, speakMilestone, idleBucket, milestoneActive }
