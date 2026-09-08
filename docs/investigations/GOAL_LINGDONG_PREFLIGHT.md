@@ -7,7 +7,7 @@ RECORD_KIND = investigation (non-authoritative) + PREFLIGHT decision record
 TARGET_REPOSITORY = mayf3/vehicle-pet
 BASE_VERIFIED = origin/main cce0e9d24907e7c17e42fd2b310a68a98860d5cf (fresh-fetched 2026-09-08, matches EXPECTED_CURRENT_MAIN_AT_DISPATCH)
 PRODUCTION_APPLY_ALLOWED = NO
-OBSERVED_AT = 2026-09-08 (evening, local)
+OBSERVED_AT = 2026-09-08 (morning, UTC+8; ~2026-09-07T24:00Z–2026-09-08T00:00Z window)
 CENSUS_ENVIRONMENT = production DSH web profile, http://127.0.0.1:3080, separate controlled browser (fresh profile, user browser untouched); deepseek-pet 0.1.0 installed and active in profile bundles; @mayf3/vehicle-pet pinned #cce0e9d in the same profile
 VIEWPORT = 1280x720, dpr 1
 ```
@@ -189,7 +189,7 @@ REVIEW_TARGET_HEAD = NOT_APPLICABLE (no candidate yet)
 BASE_HEAD = cce0e9d24907e7c17e42fd2b310a68a98860d5cf
 CURRENT_BASE_HEAD = cce0e9d24907e7c17e42fd2b310a68a98860d5cf
 ROUTE_STAGE = AUTHORITY_AUTHORING
-AUTHORITY_ACCEPTED_IN_BASE = YES (all authorities below are accepted and reachable from main)
+AUTHORITY_ACCEPTED_IN_BASE = YES for the parent authorities listed below (all accepted and reachable from main); the proposed successor V3 itself is NOT accepted in base, which is the route-record field referent (see GOAL_LINGDONG_ROUTE_R1.json)
 GOAL_OR_TARGET = Resident Vehicle Pet becomes a two-size (SMALL/LARGE) pet-first
   companion: no resident progress bar, no daily panel on normal click, >=8
   expression variants, >=30 curated speech lines with a non-modal auto-dismiss

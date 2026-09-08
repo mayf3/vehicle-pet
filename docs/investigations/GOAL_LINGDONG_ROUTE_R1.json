@@ -77,13 +77,13 @@
     "normal_authority_reconciliation_required": false
   },
   "review": {
-    "review_target_head": "PENDING_COMMIT",
+    "review_target_head": "b62befc",
     "base_head": "cce0e9d24907e7c17e42fd2b310a68a98860d5cf",
     "current_base_head": "cce0e9d24907e7c17e42fd2b310a68a98860d5cf",
     "target_head_changed": false,
     "relevant_base_impact": false,
     "full_rereview_required": false,
-    "review_scope": "independent spec audit of the exact proposed Head once committed; the only post-review delta is the pre-declared atomic acceptance transition (lifecycle fields, V2 flip, README index rows), which receives an independent final-head delta recheck"
+    "review_scope": "independent spec audit ACCEPT (0 blockers, seven documentary findings) at exact Base cce0e9d24907e7c17e42fd2b310a68a98860d5cf and exact proposed Head b62befc; the pre-declared post-review delta is the atomic acceptance transition (lifecycle fields, V2 flip, README index rows) plus the documentary reconciliation enumerated in V3 §14 (coverage-table/body alignment, exception-list itemization, constant echoes, wording, dispatch persistence), which receives an independent final-head delta recheck by the same reviewer"
   },
   "readiness": {
     "implementation_allowed": "NO",
