@@ -1,5 +1,5 @@
 /**
- * Shared DSH adapter types (CTR-OVERLAY-002..013).
+ * Shared DSH adapter types (DSH_PET_OVERLAY_ADAPTER_V3).
  * Only `src/dsh/**` may import DeepSeek Harness contracts; these local
  * structural types keep the adapter testable without any DSH value import.
  */
@@ -16,7 +16,9 @@ export interface VehiclePetSessionView {
     readonly live: VehiclePetLiveState;
     readonly terminal: VehiclePetTerminalReaction | null;
 }
-/** Versioned browser-local overlay preference record (CTR-OVERLAY-010). */
+/** The two resident sizes (V3 CTR-OVERLAY-020); absent choice resolves LARGE. */
+export type VehiclePetSize = 'small' | 'large';
+/** Versioned browser-local overlay preference record (V3 CTR-OVERLAY-010). */
 export interface VehiclePetOverlayPreferences {
     readonly schemaVersion: 1;
     readonly position: {
@@ -28,16 +30,35 @@ export interface VehiclePetOverlayPreferences {
     readonly collapsed: boolean;
     /** Explicit reduced-motion choice; absent means "follow the system". */
     readonly reducedMotion: boolean | undefined;
+    /** Explicit size choice; absent resolves to LARGE (V3 DEC-OVERLAY-005). */
+    readonly size: VehiclePetSize | undefined;
 }
-/** The three persisted interaction states of the overlay (CTR-OVERLAY-004). */
-export type VehiclePetInteractionState = 'VISIBLE' | 'PANEL_OPEN';
-/** Fixed overlay geometry (CTR-OVERLAY-003, CTR-OVERLAY-004, CTR-OVERLAY-005). */
+/**
+ * The persisted interaction machine is exactly VISIBLE with a collapsed
+ * browser-local preference (V3 CTR-OVERLAY-004): PANEL_OPEN no longer exists.
+ * The value names the rendered resident surface for tests and a11y tooling.
+ */
+export type VehiclePetInteractionState = 'VISIBLE';
+/** Fixed overlay geometry (V3 CTR-OVERLAY-003/004/005/016/020). */
 export declare const OVERLAY_GEOMETRY: {
-    readonly visibleSizePx: 112;
+    readonly smallSurfaceHeightPx: 112;
+    readonly largeSurfaceHeightPx: 216;
     readonly collapsedLauncherSizePx: 36;
-    readonly compactPanelWidthPx: 264;
+    readonly secondaryMenuWidthPx: 216;
     readonly viewportMarginPx: 16;
-    /** Deterministic composer-safe default; customized ratios do not use it. */
-    readonly defaultBottomSafeInsetPx: 176;
+    /** Deterministic composer-safe default for SMALL; customized ratios do not use it. */
+    readonly smallDefaultBottomSafeInsetPx: 176;
+    /**
+     * LARGE default clears the recorded coexistence footprint of a co-installed
+     * deepseek-pet overlay in its default bottom-right region (census-measured
+     * 306x372 root + margin; no runtime DOM reading of any other plugin).
+     */
+    readonly largeDefaultBottomSafeInsetPx: 392;
+    /** Pointer/focus hitboxes hug the visible sprite within this tolerance. */
+    readonly hitboxTolerancePx: 8;
 };
+/** Effective size for a preference record: absent choice resolves LARGE. */
+export declare function effectiveSize(preferences: Pick<VehiclePetOverlayPreferences, 'size'>): VehiclePetSize;
+/** Rendered surface edge length for the effective interaction state. */
+export declare function residentSurfaceSizePx(collapsed: boolean, size: VehiclePetSize): number;
 //# sourceMappingURL=types.d.ts.map

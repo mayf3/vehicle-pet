@@ -58,6 +58,7 @@
     "check:dsh-lifecycle": "node scripts/check-dsh-lifecycle.mjs",
     "test:dsh": "vitest run --project dsh-unit --project dsh-dom",
     "test:dsh:e2e": "playwright test -c playwright.dsh.config.ts",
+    "test:dsh:e2e:coexistence": "playwright test -c playwright.dsh.coexistence.config.ts",
     "verify": "pnpm typecheck && pnpm lint && pnpm test && pnpm test:e2e && pnpm build && pnpm check:contracts && pnpm assets:check && pnpm assets:expression-check",
     "verify:dsh": "pnpm typecheck && pnpm lint && pnpm check:contracts && pnpm assets:dsh-check && pnpm assets:expression-check && pnpm build:dsh && pnpm check:dsh-bundle && pnpm check:dsh-package && pnpm check:dsh-lifecycle && pnpm test:dsh && pnpm test:dsh:e2e"
   },
