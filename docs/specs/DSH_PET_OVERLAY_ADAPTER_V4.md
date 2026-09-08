@@ -1,6 +1,6 @@
 ---
 spec_id: DSH_PET_OVERLAY_ADAPTER_V4
-status: proposed
+status: accepted
 spec_kind: implementation
 authority_level: governing_spec
 implementation_authority: contracts
@@ -1314,7 +1314,7 @@ The Owner dispatch in `docs/investigations/GOAL_CHARACTER_OWNER_DISPATCH.md`, up
 ```text
 SPEC_GOVERNANCE_MODE = AUTHOR
 SPEC_ID = DSH_PET_OVERLAY_ADAPTER_V4
-STATUS = proposed
+STATUS = accepted
 AUTHORITY_ACTION = SUPERSEDE
 IMPLEMENTATION_AUTHORITY = contracts
 PRIMARY_PARENT_AUTHORITY = VEHICLE_PET_PRODUCT_DIRECTION_V1 and CONFIGURABLE_PET_ENGINE_V4
@@ -1327,6 +1327,21 @@ OPEN_OWNER_DECISIONS = NONE
 NORMATIVE_TBD = NONE
 PARTIAL_SUPERSESSION = NONE
 AUTHORING_READY_FOR_REVIEW = YES
-INDEPENDENT_REVIEW_RESULT = PENDING
-NEXT_ACTION = REVIEW
+INDEPENDENT_REVIEW_RESULT = ACCEPT
+NEXT_ACTION = IMPLEMENTATION_AFTER_MERGE
+```
+
+## 14. Acceptance record
+
+```text
+ACCEPTED_BY = mayf3 (original Goal authorization; latest approved integration direction)
+ACCEPTED_AT = 2026-09-08T23:41:13.532800+00:00
+REVIEWED_BASE_COMMIT = 8fc429a7c86d61819014c5e51933adc05b9be1e5
+REVIEWED_PROPOSED_HEAD = d442aebaa9a186a77c2b9c0dc6422431d46f9947
+INDEPENDENT_REVIEWER = authority_preflight_review (no author/implementation participation)
+REVIEW_RESULT = ACCEPT; zero blockers and zero load-bearing gaps
+SEMANTIC_DELTA = lifecycle and atomic predecessor/index backlinks only
+ACTIVATION = only when accepted revision is reachable from main and implementation base
+MERGE_AUTHORIZED = YES (original Goal DONE_WHEN includes merged authority/implementation)
+PRODUCTION_APPLY_ALLOWED = NO
 ```
