@@ -1,6 +1,6 @@
 ---
 spec_id: CONFIGURABLE_PET_ENGINE_V3
-status: accepted
+status: superseded
 spec_kind: implementation
 authority_level: governing_spec
 implementation_authority: contracts
@@ -14,7 +14,7 @@ governed_by:
 external_authorities: []
 supersedes:
   - CONFIGURABLE_PET_ENGINE_V2
-superseded_by: null
+superseded_by: CONFIGURABLE_PET_ENGINE_V4
 owners:
   - mayf3
 ---

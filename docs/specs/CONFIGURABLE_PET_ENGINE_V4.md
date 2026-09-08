@@ -1,6 +1,6 @@
 ---
 spec_id: CONFIGURABLE_PET_ENGINE_V4
-status: proposed
+status: accepted
 spec_kind: implementation
 authority_level: governing_spec
 implementation_authority: contracts
@@ -1391,7 +1391,7 @@ separately for product rollback. No production application in this Goal.
 ## 16. Open questions and activation
 
 ```text
-STATUS = proposed
+STATUS = accepted
 AUTHORITY_ACTION = SUPERSEDE
 IMPLEMENTATION_AUTHORITY = contracts
 PLAN_LEVEL = EXEC_PLAN
@@ -1403,7 +1403,7 @@ PARTIAL_SUPERSESSION = NONE
 CONTRACT_COUNT = 31
 CONTRACTS_WITH_ACCEPTANCE = 31
 AUTHORING_READY_FOR_REVIEW = YES
-READY_TO_MARK_ACCEPTED = NO (independent exact-Head review pending)
+READY_TO_MARK_ACCEPTED = YES (independent exact-Head review ACCEPT, zero blockers/gaps)
 ```
 
 Acceptance and merge follow the Owner Goal dispatch and subsequent explicit
@@ -1413,4 +1413,18 @@ this Spec accepted, V3 superseded with backlink, and update active indexes.
 
 ## 17. Acceptance record
 
-Pending. No implementation or merge-readiness claim is made by this proposal.
+```text
+ACCEPTED_BY = mayf3 (Owner Goal dispatch and explicit continue authorization)
+ACCEPTED_AT = 2026-09-08T15:17:22.189609+00:00
+REVIEWED_PROPOSED_HEAD = bea280fd01bd2e74cb00514b14a77e3c0564b66a
+BASE_HEAD = b64e2d0dbadaa9ee1b7eb9814703568021adc58a
+INDEPENDENT_REVIEWER = authority_preflight_review
+INDEPENDENT_REVIEW_RESULT = ACCEPT
+BLOCKERS = 0
+SPEC_GAPS = 0
+SEMANTIC_DELTA_AFTER_REVIEW = NONE
+PRODUCTION_APPLY_ALLOWED = NO
+```
+
+This acceptance is active only when reachable from main or a main-derived
+implementation base. Final lifecycle delta recheck precedes authority merge.
