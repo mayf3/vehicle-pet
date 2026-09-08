@@ -1,6 +1,6 @@
 ---
 spec_id: DSH_USAGE_PROGRESS_SOURCE_V1
-status: accepted
+status: superseded
 spec_kind: implementation
 authority_level: governing_spec
 implementation_authority: contracts
@@ -20,7 +20,7 @@ external_authorities:
     revision: 419ee11c9bd5d01b206c8660762525d151bc4b4b
     relation: interoperates_with
 supersedes: []
-superseded_by: null
+superseded_by: DSH_USAGE_PROGRESS_SOURCE_V2
 owners:
   - mayf3
 ---
