@@ -2,14 +2,14 @@
   "schemaVersion": 1,
   "tool": {
     "name": "vehicle-pet-release",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "nodeVersion": "v26.7.0",
     "pnpmVersion": "10.28.1"
   },
-  "receiptId": "2026-09-08T17-14-57-682Z-plan-a81809c3-285335",
+  "receiptId": "2026-09-08T17-28-49-933Z-plan-a81809c3-39bffd",
   "host": {
     "hostname": "MacBook-Pro.local",
-    "capturedAt": "2026-09-08T17:15:24.292Z"
+    "capturedAt": "2026-09-08T17:29:27.525Z"
   },
   "mode": "plan",
   "targetRef": "a81809c3fbcc2b5b4b97917463bf75f862aeaee9",
@@ -52,7 +52,7 @@
     },
     "WEB_HEALTH": {
       "verdict": "PASS",
-      "detail": "{\"status\":200,\"ok\":true,\"ms\":18}"
+      "detail": "{\"status\":200,\"ok\":true,\"ms\":13}"
     },
     "OTHER_PLUGINS_PRESERVED": {
       "verdict": "PASS",
@@ -74,5 +74,5 @@
   "result": "NO_OP_ALREADY_AT_TARGET",
   "exitCode": 0,
   "note": "production is already at a81809c3fbcc2b5b4b97917463bf75f862aeaee9; nothing to do",
-  "finishedAt": "2026-09-08T17:15:24.292Z"
+  "finishedAt": "2026-09-08T17:29:27.525Z"
 }

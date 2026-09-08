@@ -12,7 +12,7 @@ import { createHash } from 'node:crypto'
 import { readFile, writeFile, rename } from 'node:fs/promises'
 
 export const TOOL_NAME = 'vehicle-pet-release'
-export const TOOL_VERSION = '1.0.0'
+export const TOOL_VERSION = '1.0.1'
 
 /**
  * Run one command to completion.
