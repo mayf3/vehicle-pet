@@ -41,6 +41,8 @@ export interface EngineSnapshot {
     stageLevelId: string | null;
     pendingReceipts: UpgradeReceipt[];
     unlockedKeepsakes: UnlockedKeepsakeKey[];
+    /** Read-only earned records across versions for the current source/subject. */
+    keepsakeHistory: UnlockedKeepsakeKey[];
     hostFeedback: HostFeedbackPresentation | null;
     diagnostics: EngineDiagnostic[];
     locale: Locale;
@@ -65,6 +67,7 @@ export declare class PetEngine {
     private boundSourceId;
     private presentationEpoch;
     private pendingReceipts;
+    private keepsakeHistory;
     private unlockedKeepsakes;
     private hostFeedback;
     private diagnostics;

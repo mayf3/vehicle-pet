@@ -27,10 +27,10 @@ describe('X02 Fleet L1-L4 frozen visual states', () => {
       'sprite-subject-pod--l4',
     ])
     expect(new Set(subjects.map((subject) => subject.assetId)).size).toBe(4)
-    expect(subjects[0]!.altText).toMatch(/unmanned car at level 1.*escort car in trail/)
-    expect(subjects[1]!.altText).toMatch(/unmanned car at level 2.*escort car in trail/)
-    expect(subjects[2]!.altText).toMatch(/unmanned car at level 3.*escort car in trail/)
-    expect(subjects[3]!.altText).toMatch(/unmanned car at level 4.*escort car in trail/)
+    expect(subjects[0]!.altText).toMatch(/driver occupied, copilot empty, rear escort present/)
+    expect(subjects[1]!.altText).toMatch(/driver occupied, copilot empty, no rear escort/)
+    expect(subjects[2]!.altText).toMatch(/driver empty, safety operator in the copilot seat, rear escort present/)
+    expect(subjects[3]!.altText).toMatch(/driver empty, safety operator in the copilot seat, no rear escort/)
   })
 
   it('uses the scene asset unless subject-swap resolves a keepsake asset', () => {

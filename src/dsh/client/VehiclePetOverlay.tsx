@@ -1,3 +1,4 @@
+import keepsakeVersionAliases from '../../packs/keepsake-compatibility.json'
 /**
  * VehiclePetOverlay: the `shell.overlay` entry (DSH_PET_OVERLAY_ADAPTER_V3).
  * Root layer is click-through; the pet hitbox, launcher, secondary menu, and
@@ -220,6 +221,7 @@ function OverlayEngineGate({
   if (storage === null) return null
   return (
     <PetEngineProvider
+      keepsakeVersionAliases={keepsakeVersionAliases}
       bundles={dshPackBundles}
       defaultPackId={dshDefaultPackId}
       storage={storage}

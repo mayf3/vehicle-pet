@@ -95,7 +95,7 @@ describe('snapshot ingestion and ordering (CTR-PET-002, CTR-PET-026, ACC-PET-002
     engine.ingestSnapshot(snapshot(10_000, 1))
     let receipts = engine.getSnapshot().pendingReceipts
     expect(receipts).toHaveLength(1)
-    expect(receipts[0]!.receiptId).toBe('mock-progress|subject-1|autonomous-fleet|2.0.0|l2')
+    expect(receipts[0]!.receiptId).toBe('mock-progress|subject-1|autonomous-fleet|2.0.1|l2')
 
     expect(await engine.claimPendingCeremony()).not.toBeNull()
     engine.completeCeremony()
