@@ -57,6 +57,7 @@ NEXT_AUTHORITY_ACTION = Owner merge decision for the exact accepted overlay revi
 | `DSH_PET_OVERLAY_ADAPTER_V1` | superseded | no (superseded by `DSH_PET_OVERLAY_ADAPTER_V2`) | implementation | contracts | `dsh-bundle-plugin`, `shell-overlay`, `compact-pet-surface`, `session-visual-reactions` | `DSH_PET_OVERLAY_ADAPTER_V2` |
 | `DSH_PET_OVERLAY_ADAPTER_V2` | superseded | no (superseded by `DSH_PET_OVERLAY_ADAPTER_V3`) | implementation | contracts | `dsh-bundle-plugin`, `shell-overlay`, `compact-pet-surface`, `session-visual-reactions` | `DSH_PET_OVERLAY_ADAPTER_V1` |
 | `DSH_PET_OVERLAY_ADAPTER_V3` | superseded | no (superseded by DSH_PET_OVERLAY_ADAPTER_V4) | implementation | contracts | `dsh-bundle-plugin`, `shell-overlay`, `resident-pet-surface`, `session-visual-reactions`, `pet-speech-presentation` | `DSH_PET_OVERLAY_ADAPTER_V2` |
+| `DSH_PET_OVERLAY_ADAPTER_V4` | accepted | active when accepted revision is reachable from main | implementation | contracts | exclusive characters, descriptive grade labels, wearable insignia, shared speech/prefs; whole V3 carry-forward | DSH_PET_OVERLAY_ADAPTER_V3 |
 | `VEHICLE_PET_PROGRESS_SOURCE_V2` | accepted | not yet; accepted candidate until the exact accepted revision is reachable from `mayf3/vehicle-pet:main` or a main-derived implementation base | implementation | none | `progress-source-registration`, `post-v1-external-progress-sources`, `token-usage-consumption-boundary` | none |
 | `DSH_USAGE_PROGRESS_SOURCE_V1` | superseded | no (superseded by `DSH_USAGE_PROGRESS_SOURCE_V2`) | implementation | contracts | `dsh-usage-progress-source`, `counts-only-token-economy`, `usage-ledger-persistence` | none |
 | `DSH_USAGE_PROGRESS_SOURCE_V2` | accepted | yes once the exact accepted revision is reachable from `mayf3/vehicle-pet:main` (accepted candidate on its branch until merge) | implementation | contracts | `dsh-usage-progress-source`, `counts-only-token-economy`, `usage-ledger-persistence` | `DSH_USAGE_PROGRESS_SOURCE_V1` |
@@ -65,5 +66,3 @@ NEXT_AUTHORITY_ACTION = Owner merge decision for the exact accepted overlay revi
 
 
 Current Engine authority is CONFIGURABLE_PET_ENGINE_V4 after acceptance reaches main. L1–L5 operational occupancy/escort semantics supersede the erroneous V2/V3 decorative narrative. L6–L12 unchanged.
-
-| `DSH_PET_OVERLAY_ADAPTER_V4` | accepted | active when accepted revision is reachable from main | implementation | contracts | exclusive characters, descriptive grade labels, wearable insignia, shared speech/prefs; whole V3 carry-forward | DSH_PET_OVERLAY_ADAPTER_V3 |
