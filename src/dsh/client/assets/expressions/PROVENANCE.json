@@ -1,83 +1,100 @@
 {
-  "provenance_version": 1,
+  "provenance_version": 2,
   "generated_at_commit": "see git history of this file",
   "route": "LOCAL_DETERMINISTIC_SVG_RECIPE",
-  "route_note": "Goal 常伴 authorized ChatGPT image route was probed first (2026-09-07, sanitized-brief constraint, CODEX_SIDEBAR_BROWSER-class surface): chatgpt.com reachable but unauthenticated, so the route was unavailable; per Goal §18 local bounded execution continued. Masters are drawn by the fixed inline SVG recipe in scripts/generate-expression-assets.mjs — no external images, no fonts, no randomness, no model call at build or runtime.",
+  "route_note": "Goal 换图 authorized ChatGPT image route was probed first (2026-09-07, sanitized-brief constraint, CODEX_SIDEBAR_BROWSER-class surface): chatgpt.com reachable but unauthenticated, so the route was unavailable; per Goal §18 local bounded execution continued. Goal 灵动 V3 variants reuse the same fixed local recipe approach: masters are drawn by the fixed inline SVG recipes in scripts/generate-expression-assets.mjs — no external images, no fonts, no randomness, no model call at build or runtime.",
   "states": [
     "idle",
+    "idle-happy",
+    "idle-curious",
+    "idle-sleepy",
     "working",
     "needs-input",
     "completed",
-    "failed"
+    "completed-proud",
+    "failed",
+    "cancelled"
   ],
   "canvas": "256x256 transparent, drawn in face-rect-normalized coordinates",
   "anchors_480x480_percent": {
     "l1": [
       8,
-      43,
-      28
+      37,
+      45
     ],
     "l2": [
-      12,
-      42,
-      32
+      8,
+      37,
+      45
     ],
     "l3": [
-      9,
-      42,
-      28
+      8,
+      37,
+      45
     ],
     "l4": [
-      12,
-      44,
-      32
+      7,
+      45,
+      40
     ],
     "l5": [
-      10,
-      53,
-      30
+      8,
+      38,
+      45
     ],
     "l6": [
-      29,
-      53,
-      27
+      32,
+      61,
+      22
     ],
     "l7": [
-      43,
-      66,
-      23
+      36,
+      70,
+      13
     ],
     "l8": [
-      51,
-      67,
-      23
+      36,
+      66,
+      14
     ],
     "l9": [
-      26,
-      63,
-      27
+      36,
+      67,
+      14
     ],
     "l10": [
-      28,
-      62,
-      24
+      41,
+      68,
+      11
     ],
     "l11": [
-      22,
-      62,
-      24
+      35,
+      63,
+      15
     ],
     "l12": [
-      8,
-      59,
-      26
+      16,
+      65,
+      22
     ]
   },
-  "accepted_at": "2026-09-07",
+  "accepted_at": "2026-09-08",
   "visual_review": {
-    "reviewer": "independent visual evaluation agent (Goal 常伴 internal; did not participate in generation)",
+    "reviewer": "independent visual evaluation agent (Goal 灵动 internal; did not participate in generation)",
     "result": "ACCEPT",
-    "revision_rounds_used": 1,
+    "revision_rounds_used": 2,
+    "rounds": [
+      {
+        "round": "R1",
+        "result": "REJECT",
+        "key_finding": "the corrected V2 sprites present a white face plate at the l1-l5 anchors (not the dark navy display the original recipes assumed), so light/white features were invisible; seven revision requests (contrast, safe area, bubble clip, cancelled identity, proud/completed separation, sleepy cleanup, blush position)"
+      },
+      {
+        "round": "R2",
+        "result": "ACCEPT",
+        "revision_requests": "NONE"
+      }
+    ],
     "criteria": {
       "SAME_CHARACTER_IDENTITY": "PASS",
       "STATIC_EXPRESSION_READABILITY": "PASS",
@@ -85,18 +102,29 @@
       "LEVEL_IDENTITY_PRESERVED": "PASS",
       "COPY_OR_BRAND_RISK": "NONE"
     },
-    "method": "112px contact sheet (all 12 levels x 5 states) rendered from the exact exported bytes, plus 256px masters; squint test at 1x and 50% downscale"
+    "method": "112px contact sheet (all 12 levels x 10 variants) rendered from the exact exported bytes, plus 256px masters and a 50% squint variant; per-variant face-region zooms",
+    "note": "R1 also surfaced a pre-existing latent regression from the Goal 换图 sprite correction (the five V2-era masters were reviewed against the pre-correction sprites); the V3 regeneration re-reviewed all ten masters against the corrected sprites."
   },
   "sha256": {
-    "expr-idle.png": "e653974cb5b9e7ce4d76d4c2b6ea358e7896df4df682cdeb53a576a7cc267a09",
-    "expr-idle.webp": "be6a21d1ecc605c9331cea09b03f197205b4a7def90757bb7ebef879cd1b0b15",
-    "expr-working.png": "26bda615f4790b4afd4999445b1564c237973ee2e90f39a26bed3658a542d22d",
-    "expr-working.webp": "69a5fa3985a19d46240bb34b4193cd828de44bd9c5bab581009277978b61c510",
-    "expr-needs-input.png": "e7e291fd2171737ac6cbdf55c68b857468981b546b9b5ecbb3e61c793da574db",
-    "expr-needs-input.webp": "192ed32bab0a57c2dfea326b5f3f00a1cbb61019e45ebe97a3073315b6405269",
-    "expr-completed.png": "880d295517c189fd30b71fae3c9ca30e1e44334e0b47c98a0a79d74b2d6971b8",
-    "expr-completed.webp": "ea9187153245198dbd88612238ddb9bb635cb68a4ad4da18aa4827f1fd9920c4",
-    "expr-failed.png": "fd97e16c628fa9eb4746d1391726ae096795bdcb2fbe7850d7ab00a71c8f861c",
-    "expr-failed.webp": "86c3db63d6eebc44e02ff67c863ae51fd7897f8a70c5f76f31c80369aa157ea0"
+    "expr-idle.png": "397cf7c6305f71a1e23a8ecc9039dccbd814f0dd2a94f77512a9de7dac0afcd9",
+    "expr-idle.webp": "3026bd39acbcc65ae54f52009dc10d93da03cfb6d765ac3809ef68123b26ddf3",
+    "expr-idle-happy.png": "9bbdf4c8bc40bc78093676e7efb4ff8073543546e233f06e56b0cd93be6f02d2",
+    "expr-idle-happy.webp": "c1dc04b5d724d7e39f780cc01d54cc5850f21640ee514f4768fa673e93376d90",
+    "expr-idle-curious.png": "a73755cdd735603a58343b2848fd0111649a1bfe400f430765b6d07396372b15",
+    "expr-idle-curious.webp": "fe3e3dd346479efcd1594296560996cbf45793d936beb1ef8671600116afe8aa",
+    "expr-idle-sleepy.png": "fb3d5d24fdc6f5d146fc9e0fe10ff0dfe56ab90f5d726d1537bec654195d3d74",
+    "expr-idle-sleepy.webp": "0d9c442f18705dec357eb5f8ee057ef6c41f07e9e2fb9fb2db3a427f832df3ea",
+    "expr-working.png": "0a17245328dfb22300b92c9101ec680f35c7d8590743e66dca82508d2a56e683",
+    "expr-working.webp": "c29e5a9e6a0e298109f61e61c4563e294d60e7040a413c20e47b201a667f050b",
+    "expr-needs-input.png": "d9c5b2460d1c5ebeccf9b52a350203f061f93c19b43f09065fdb495edfb8f2f1",
+    "expr-needs-input.webp": "359294c3d3051dc7f6694a0846f62ae794aff8a9174e645c49552861ea439841",
+    "expr-completed.png": "7baf9a4d23fe572ba8d87119eb162d17a4f22c3541314570591d1404af2812fd",
+    "expr-completed.webp": "6c98656780e11ac60c019cdf48f279c0455d017762927b25650adfdc6d7a94ed",
+    "expr-completed-proud.png": "d8321104e62a4b56076622bb15c70047fda124cd2b14993d9aa531f99c78ad98",
+    "expr-completed-proud.webp": "fa1da3113bc75244b60267b23bb78aca19913ce71c9de7746632c6277ec40d7b",
+    "expr-failed.png": "1b8291f974821e1f77a16e36a4fbc98050e28c2684164bfebdb13c4110c24aae",
+    "expr-failed.webp": "aec70086086237cb087303818f416d011a13774213045db853dc7cfee121359a",
+    "expr-cancelled.png": "85bc213997d4a7355ce9532f09c441c5b10f50ebcbbb679a4c39463c064daa67",
+    "expr-cancelled.webp": "4f09b10375a446f7b0e50357e689615b5532e4f6145d592a49921855219b127d"
   }
 }

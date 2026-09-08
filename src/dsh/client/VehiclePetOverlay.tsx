@@ -1,17 +1,21 @@
 /**
- * VehiclePetOverlay: the `shell.overlay` entry (CTR-OVERLAY-002..013).
- * Root layer is click-through; the pet, launcher, compact panel, and full
- * journey dialog re-enable pointer events. Exactly three persisted
- * interaction states (VISIBLE / PANEL_OPEN / COLLAPSED, default VISIBLE,
- * no full hide). During structured onboarding no surface is rendered, and the
- * exact pre-suppression state returns when onboarding ends in the same mount.
- * One Engine instance backs the overlay, panel, and dialog; structured
- * session state drives transient visuals only and never progression.
+ * VehiclePetOverlay: the `shell.overlay` entry (DSH_PET_OVERLAY_ADAPTER_V3).
+ * Root layer is click-through; the pet hitbox, launcher, secondary menu, and
+ * full journey dialog re-enable pointer events. The persisted interaction
+ * machine is exactly VISIBLE with a collapsed browser-local preference — no
+ * PANEL_OPEN, no full hide (CTR-OVERLAY-004). A normal pet click is a pet
+ * reaction (expression variant + light motion + throttled line), never a
+ * settings surface (CTR-OVERLAY-021). The resident hitbox hugs the visible
+ * sprite within the recorded tolerance (CTR-OVERLAY-003). During structured
+ * onboarding no surface is rendered, and the exact pre-suppression state
+ * returns when onboarding ends in the same mount (CTR-OVERLAY-011). One
+ * Engine instance backs the overlay, menu, and dialog; structured session
+ * state drives transient visuals only and never progression.
  */
 
 import {
   createContext, useCallback, useContext, useEffect, useMemo, useRef, useState,
-  type KeyboardEvent as ReactKeyboardEvent, type ReactElement,
+  type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type ReactElement,
 } from 'react'
 import type { HostObservable, InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type {} from '@deepseek-ai/dsh-client-ui-layout/client'
@@ -25,13 +29,20 @@ import { createOverlayProgressSource } from './OverlayProgressSource'
 import type { VehiclePetBindingInfo } from './session-state-adapter'
 import type { UsageSessionsSource } from './usage-progress-source'
 import { adoptStorageEvent, loadOverlayPreferences, saveOverlayPreferences, subscribeStorageEvents } from './preferences'
-import type {
-  VehiclePetInteractionState, VehiclePetOverlayPreferences, VehiclePetSessionView,
+import {
+  OVERLAY_GEOMETRY, effectiveSize, residentSurfaceSizePx,
+  type VehiclePetOverlayPreferences, type VehiclePetSessionView,
 } from './types'
 import { OVERLAY_KEYBOARD_STEPS, useOverlayDrag } from './useOverlayDrag'
+import { levelVisibleBbox } from './level-bbox.generated'
+import {
+  expressionStateFromSession, selectExpressionVariant,
+  type VehiclePetExpressionVariant,
+} from './expressions'
 import { ExpressionLayer } from './ExpressionLayer'
 import { VehiclePetDialog } from './VehiclePetDialog'
-import { VehiclePetPanel } from './VehiclePetPanel'
+import { VehiclePetSecondaryMenu } from './VehiclePetSecondaryMenu'
+import { useVehiclePetSpeech, VehiclePetBubble } from './VehiclePetSpeech'
 
 /** The injected hooks share the renderer binds from the `hooks` compartment. */
 export interface VehiclePetInjected {
@@ -50,10 +61,11 @@ export type VehiclePetOverlayProps = PropsRuntime<'shell.overlay'>
   & InjectFace<VehiclePetInjected>
   & PropsLocale<'vehicle-pet'>
 
-/** Overlay chrome shared with the panel/dialog: translate + pref commit. */
+/** Overlay chrome shared with the menu/dialog: translate + pref commit. */
 interface OverlayChrome {
   t: PropsLocale<'vehicle-pet'>['t']
   commitPreferences: (update: (current: VehiclePetOverlayPreferences) => VehiclePetOverlayPreferences) => void
+  engineLocale: Locale
 }
 
 const OverlayChromeContext = createContext<OverlayChrome | null>(null)
@@ -64,7 +76,7 @@ export function useOverlayChrome(): OverlayChrome {
   return value
 }
 
-/** Test/localization seam for panel copy: translate through the entry locale seat. */
+/** Test/localization seam for menu copy: translate through the entry locale seat. */
 export function useOverlayT(): PropsLocale<'vehicle-pet'>['t'] {
   return useOverlayChrome().t
 }
@@ -108,38 +120,11 @@ export function VehiclePetOverlay(props: VehiclePetOverlayProps): ReactElement |
     })
   }, [])
 
-  const chrome = useMemo<OverlayChrome>(() => ({ t, commitPreferences }), [t, commitPreferences])
+  const chrome = useMemo<OverlayChrome>(() => ({ t, commitPreferences, engineLocale }), [t, commitPreferences, engineLocale])
 
-  // CTR-OVERLAY-004/011: the interaction state lives above the onboarding
-  // gate. Suppression is an ephemeral host-visibility gate, not a fourth
-  // persisted state: when it ends in the same mount, the exact
-  // pre-suppression interaction state returns.
-  const [interaction, setInteraction] = useState<VehiclePetInteractionState>('VISIBLE')
-  const interactionRef = useRef(interaction)
-  interactionRef.current = interaction
-  const preSuppressionRef = useRef<VehiclePetInteractionState | null>(null)
-
-  // R4-B2 invariant: every collapsed preference source (local action,
-  // storage adoption, reload, migration, or fallback) destroys transient open
-  // state. A later launcher restore therefore always starts from VISIBLE.
-  useEffect(() => {
-    if (!preferences.collapsed) return
-    preSuppressionRef.current = 'VISIBLE'
-    setInteraction('VISIBLE')
-  }, [preferences.collapsed])
-
-  useEffect(() => {
-    if (onboarding) {
-      preSuppressionRef.current ??= interactionRef.current
-    } else if (preSuppressionRef.current !== null) {
-      const restore = preferences.collapsed ? 'VISIBLE' : preSuppressionRef.current
-      preSuppressionRef.current = null
-      setInteraction(restore)
-    }
-  }, [onboarding, preferences.collapsed])
-
-  // CTR-OVERLAY-011: onboarding renders no pet DOM, launcher, panel, dialog,
-  // or pointer/focus target at all.
+  // CTR-OVERLAY-011: onboarding renders no pet DOM, launcher, menu, dialog,
+  // bubble, or pointer/focus target at all. The gate is ephemeral, not a
+  // persisted state; nothing to restore but the ordinary render.
   if (onboarding) return null
   return (
     <OverlayChromeContext.Provider value={chrome}>
@@ -147,8 +132,6 @@ export function VehiclePetOverlay(props: VehiclePetOverlayProps): ReactElement |
         preferences={preferences}
         sessionView={sessionView}
         engineLocale={engineLocale}
-        interaction={interaction}
-        onInteractionChange={setInteraction}
         sessionListCurrent={sessionListCurrent}
         sessionListContainsCurrent={sessionListContainsCurrent}
         bindingInfo={bindingInfo}
@@ -209,8 +192,6 @@ function OverlayEngineGate({
   preferences,
   sessionView,
   engineLocale,
-  interaction,
-  onInteractionChange,
   sessionListCurrent,
   sessionListContainsCurrent,
   bindingInfo,
@@ -220,8 +201,6 @@ function OverlayEngineGate({
   preferences: VehiclePetOverlayPreferences
   sessionView: VehiclePetSessionView
   engineLocale: Locale
-  interaction: VehiclePetInteractionState
-  onInteractionChange: (next: VehiclePetInteractionState) => void
   sessionListCurrent: string | undefined
   sessionListContainsCurrent: boolean
   bindingInfo: VehiclePetBindingInfo | undefined
@@ -252,8 +231,6 @@ function OverlayEngineGate({
       <OverlaySurface
         preferences={preferences}
         sessionView={sessionView}
-        interaction={interaction}
-        onInteractionChange={onInteractionChange}
         sessionListCurrent={sessionListCurrent}
         sessionListContainsCurrent={sessionListContainsCurrent}
         bindingInfo={bindingInfo}
@@ -271,15 +248,14 @@ function systemPrefersReducedMotion(): boolean {
 }
 
 /**
- * The visible overlay: pet (112px), launcher (36px), compact panel
- * (OVERLAY_GEOMETRY.compactPanelWidthPx),
- * engine feedback surfaces, and the in-Harness full journey dialog.
+ * The visible overlay: resident pet (SMALL 112 / LARGE 216), launcher (36px),
+ * hover-revealed secondary menu, engine feedback surfaces, the speech bubble,
+ * and the in-Harness full journey dialog. No panel, no resident progress
+ * presentation (V3 CTR-OVERLAY-004/005/016).
  */
 function OverlaySurface({
   preferences,
   sessionView,
-  interaction,
-  onInteractionChange,
   sessionListCurrent,
   sessionListContainsCurrent,
   bindingInfo,
@@ -287,32 +263,22 @@ function OverlaySurface({
 }: {
   preferences: VehiclePetOverlayPreferences
   sessionView: VehiclePetSessionView
-  interaction: VehiclePetInteractionState
-  onInteractionChange: (next: VehiclePetInteractionState) => void
   sessionListCurrent: string | undefined
   sessionListContainsCurrent: boolean
   bindingInfo: VehiclePetBindingInfo | undefined
   clientGeneration: string | undefined
 }): ReactElement {
-  const setInteraction = onInteractionChange
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
   const [petInteractionCount, setPetInteractionCount] = useState(0)
   const collapsed = preferences.collapsed
-  const effectiveInteraction: VehiclePetInteractionState = collapsed ? 'VISIBLE' : interaction
-  // Same effective-preference computation as the Engine provider: an explicit
-  // user choice always wins over the OS setting (Owner direction R1_CONT).
-  const reducedMotion = preferences.reducedMotion ?? systemPrefersReducedMotion()
   const { t, commitPreferences } = useOverlayChrome()
   const { snapshot, switchPack } = usePetEngine()
-  const petButtonRef = useRef<HTMLButtonElement | null>(null)
   const journeyTriggerRef = useRef<HTMLButtonElement | null>(null)
 
-  // CTR-OVERLAY-006 (V2): the DSH surface presents `autonomous-fleet` as the
-  // only user-selectable product Pack. Stored Engine state naming a
-  // non-product Pack (e.g. a pre-V2 seedling selection) resolves to the
-  // product Pack through the ordinary Engine `activePackId` mechanism; this
-  // repoints the displayed Pack only and deletes or rewrites no stored
-  // progression, keepsakes, or receipts.
+  // CTR-OVERLAY-006: the DSH surface presents `autonomous-fleet` as the only
+  // user-selectable product Pack; legacy non-product stored state resolves
+  // through the ordinary Engine `activePackId` mechanism without data loss.
   const activePackId = snapshot.activePack?.manifest.packId
   useEffect(() => {
     if (!snapshot.initialized) return
@@ -323,37 +289,38 @@ function OverlaySurface({
   }, [snapshot.initialized, activePackId, switchPack])
   const drag = useOverlayDrag({
     preferences,
-    panelOpen: effectiveInteraction === 'PANEL_OPEN',
+    menuOpen,
     commitPreferences,
   })
 
+  const closeMenu = useCallback(() => {
+    setMenuOpen(false)
+  }, [])
+
+  // R4-B2 invariant carried to V3: every collapsed preference source (local
+  // action, storage adoption, reload, or fallback) destroys transient open
+  // state. A later restore therefore always starts from a clean VISIBLE.
   useEffect(() => {
     if (!collapsed) return
-    setInteraction('VISIBLE')
+    setMenuOpen(false)
     setDialogOpen(false)
-  }, [collapsed, setInteraction])
+  }, [collapsed])
 
   const collapse = useCallback(() => {
-    setInteraction('VISIBLE')
+    setMenuOpen(false)
     setDialogOpen(false)
     commitPreferences(current => ({ ...current, collapsed: true }))
-  }, [commitPreferences, setInteraction])
+  }, [commitPreferences])
 
   const restore = useCallback(() => {
-    setInteraction('VISIBLE')
     setDialogOpen(false)
     commitPreferences(current => ({ ...current, collapsed: false }))
-  }, [commitPreferences, setInteraction])
-
-  const closePanelToPet = useCallback(() => {
-    setInteraction('VISIBLE')
-    petButtonRef.current?.focus()
-  }, [])
+  }, [commitPreferences])
 
   const handleSurfaceKeyDown = (event: ReactKeyboardEvent<HTMLElement>): void => {
     if (event.key === 'Escape') {
       if (dialogOpen) return // the dialog owns Escape while open
-      if (effectiveInteraction === 'PANEL_OPEN') closePanelToPet()
+      if (menuOpen) closeMenu()
       return
     }
     const step = event.shiftKey ? OVERLAY_KEYBOARD_STEPS.large : OVERLAY_KEYBOARD_STEPS.normal
@@ -369,15 +336,13 @@ function OverlaySurface({
     drag.moveByKeyboard(delta.x, delta.y)
   }
 
-  const stateKey: VehiclePetLocaleKey = sessionView.terminal !== null
-    ? `state.${sessionView.terminal.status}`
-    : `state.${sessionView.live}`
-
   return (
     <div
       className="vpo-root"
       ref={drag.rootRef}
-      data-vehicle-pet={collapsed ? 'collapsed' : effectiveInteraction}
+      data-vehicle-pet={collapsed ? 'COLLAPSED' : 'VISIBLE'}
+      data-vehicle-pet-size={collapsed ? undefined : effectiveSize(preferences)}
+      data-menu-open={menuOpen && !collapsed ? 'true' : 'false'}
       data-active-surface-left={drag.activeBounds.left}
       data-active-surface-top={drag.activeBounds.top}
       data-active-surface-right={drag.activeBounds.right}
@@ -389,7 +354,14 @@ function OverlaySurface({
       data-adapter-generation={bindingInfo?.generation}
       data-client-generation={clientGeneration}
     >
-      <div className="vpo-shell" style={drag.shellStyle} data-dragging={drag.isDragging}>
+      <div
+        className="vpo-shell"
+        style={{ ...drag.shellStyle, '--vp-subject-boost': subjectBoostFor(snapshot.plan, residentSurfaceSizePx(false, effectiveSize(preferences))) } as CSSProperties}
+        data-dragging={drag.isDragging}
+        data-menu-open={menuOpen ? 'true' : 'false'}
+        data-live={sessionView.terminal !== null ? 'terminal' : sessionView.live}
+        data-terminal={sessionView.terminal?.status}
+      >
         {collapsed ? (
           <button
             type="button"
@@ -402,54 +374,29 @@ function OverlaySurface({
             <span className="vpo-launcherDot" aria-hidden="true" />
           </button>
         ) : (
-          <button
-            ref={petButtonRef}
-            type="button"
-            className="vpo-surface vpo-pet"
-            aria-label={t('overlay.label', { state: t(stateKey) })}
-            aria-expanded={effectiveInteraction === 'PANEL_OPEN'}
-            data-vehicle-pet-pet="true"
-            data-vehicle-pet-pack={snapshot.activePack?.manifest.packId}
-            data-vehicle-pet-level={snapshot.viewModel?.derivedLevelId}
-            data-live={sessionView.terminal !== null ? 'terminal' : sessionView.live}
-            data-terminal={sessionView.terminal?.status}
+          <ResidentPet
+            sessionView={sessionView}
+            surfaceSize={residentSurfaceSizePx(false, effectiveSize(preferences))}
+            menuOpen={menuOpen}
+            onOpenMenu={() => setMenuOpen(true)}
+            bubblePlacement={drag.point.y < 72 ? 'below' : 'above'}
+            petInteractionCount={petInteractionCount}
+            onPetClick={() => setPetInteractionCount(count => count + 1)}
+            dragHandlers={drag}
             onKeyDown={handleSurfaceKeyDown}
-            onClick={() => {
-              if (drag.consumeSuppressedClick()) return
-              setPetInteractionCount(count => count + 1)
-              setInteraction(effectiveInteraction === 'PANEL_OPEN' ? 'VISIBLE' : 'PANEL_OPEN')
-            }}
-            onPointerDown={drag.onPointerDown}
-            onPointerMove={drag.onPointerMove}
-            onPointerUp={drag.onPointerUp}
-            onPointerCancel={drag.onPointerCancel}
-          >
-            <span className="vpo-scene">
-              <PetSceneRenderer
-                subjectInteractive={false}
-                interactionCount={petInteractionCount}
-                presentationMode="compact-overlay"
-                subjectOverlay={
-                  <ExpressionLayer
-                    sessionView={sessionView}
-                    derivedLevelId={snapshot.viewModel?.derivedLevelId}
-                  />
-                }
-              />
-            </span>
-            <WithinLevelMicroProgress viewModel={snapshot.viewModel} reducedMotion={reducedMotion} />
-            {sessionView.live === 'needs-input' ? <span className="vpo-badge" aria-hidden="true" /> : null}
-          </button>
+          />
         )}
 
-        {!collapsed && effectiveInteraction === 'PANEL_OPEN' ? (
-          <VehiclePetPanel
-            panelRef={drag.panelRef}
-            horizontal={drag.panelPlacement.horizontal}
-            vertical={drag.panelPlacement.vertical}
+        {!collapsed && menuOpen ? (
+          <VehiclePetSecondaryMenu
+            menuRef={drag.menuRef}
+            placement={drag.panelPlacement}
             preferences={preferences}
+            onCommitSize={next => {
+              commitPreferences(current => ({ ...current, size: next }))
+            }}
             onCollapse={collapse}
-            onRequestClose={closePanelToPet}
+            onRequestClose={closeMenu}
             onOpenJourney={() => {
               setDialogOpen(true)
             }}
@@ -480,26 +427,206 @@ function OverlaySurface({
 }
 
 /**
- * Resident within-level micro progress: a non-interactive, aria-hidden sliver
- * under the pet so stage-internal progress is perceivable without opening the
- * panel. It renders from the derived view model only, adds no pointer/focus
- * target, and therefore does not alter the CTR-OVERLAY-004 click contract.
- * The width transition is gated by the overlay's effective reduced-motion
- * preference (explicit plugin preference first, OS setting as fallback), so an
- * explicit ON silences it regardless of the OS report.
+ * The resident pet surface (V3): the full-canvas scene renders the level
+ * visual (pointer-events none, aria-hidden); one transparent hit button
+ * overlays the visible sprite bbox within the recorded tolerance and carries
+ * the pointer/focus/keyboard surface (CTR-OVERLAY-003 hitbox honesty, V3
+ * CTR-OVERLAY-021 click reaction). The speech bubble and the hover-revealed
+ * menu trigger live here.
  */
-function WithinLevelMicroProgress({ viewModel, reducedMotion }: {
-  viewModel: { withinLevelEarned: number; withinLevelSpan: number; capped: boolean } | null | undefined
-  reducedMotion: boolean
-}): ReactElement | null {
-  if (!viewModel || viewModel.withinLevelSpan <= 0 || viewModel.capped) return null
-  const percent = Math.max(0, Math.min(100, Math.round((viewModel.withinLevelEarned / viewModel.withinLevelSpan) * 100)))
+/**
+ * LARGE presence boost (V3 audit craft round): the compact renderer sizes the
+ * subject with the SMALL-era `max(42, planned)%` box, which leaves a LARGE
+ * card mostly empty. The overlay scales the LARGE subject up (never beyond
+ * the shell) through the `--vp-subject-boost` variable; the hitbox math uses
+ * the same factor so pointer/focus honesty is preserved.
+ */
+export function subjectBoostFor(plan: ReturnType<typeof usePetEngine>['snapshot']['plan'], surfaceSize: number): number {
+  if (plan === null || surfaceSize <= OVERLAY_GEOMETRY.smallSurfaceHeightPx) return 1
+  const subject = plan.nodes.find(node => node.kind === 'subject')
+  if (subject === undefined) return 1
+  const camera = plan.cameraZoomPermille / 1000
+  const subjectScale = plan.subjectScalePermille / 1000
+  const planned = (SUBJECT_BASE_WIDTH_PERCENT * subject.placement.scalePermille * camera * subjectScale) / 1000
+  const side = (Math.max(42, planned) / 100) * surfaceSize
+  if (side <= 0) return 1
+  return Math.min(SUBJECT_LARGE_SCALE_MAX, (surfaceSize * 0.94) / side)
+}
+
+const SUBJECT_LARGE_SCALE_MAX = 1.6
+
+function levelIndex(levelId: string): number {
+  const match = /(\d+)$/.exec(levelId)
+  return match === null ? 0 : Number(match[1])
+}
+
+function ResidentPet({
+  sessionView,
+  surfaceSize,
+  menuOpen,
+  onOpenMenu,
+  bubblePlacement,
+  petInteractionCount,
+  onPetClick,
+  dragHandlers,
+  onKeyDown,
+}: {
+  sessionView: VehiclePetSessionView
+  surfaceSize: number
+  menuOpen: boolean
+  onOpenMenu: () => void
+  bubblePlacement: 'above' | 'below'
+  petInteractionCount: number
+  onPetClick: () => void
+  dragHandlers: ReturnType<typeof useOverlayDrag>
+  onKeyDown: (event: ReactKeyboardEvent<HTMLElement>) => void
+}): ReactElement {
+  const { t, engineLocale } = useOverlayChrome()
+  const { snapshot } = usePetEngine()
+
+  const speech = useVehiclePetSpeech({
+    sessionView,
+    locale: engineLocale,
+    enabled: true,
+  })
+
+  // Level-up milestone: a derived-level increase announces a milestone line
+  // and presents proudly (CTR-OVERLAY-018/019 event edge; deduplicated by the
+  // level identity itself).
+  const levelId = snapshot.viewModel?.derivedLevelId
+  const lastLevelRef = useRef<string | null>(null)
+  const lastVariantRef = useRef<VehiclePetExpressionVariant | undefined>(undefined)
+  useEffect(() => {
+    if (!snapshot.initialized) return
+    if (levelId === undefined) return
+    const previous = lastLevelRef.current
+    lastLevelRef.current = levelId
+    if (previous !== null && levelIndex(previous) < levelIndex(levelId)) {
+      speech.speakMilestone()
+    }
+  }, [levelId, snapshot.initialized, speech])
+
+  const state = expressionStateFromSession(sessionView)
+  const variant = selectExpressionVariant({
+    state,
+    terminalStatus: sessionView.terminal?.status ?? null,
+    milestoneActive: speech.milestoneActive,
+    clickCount: petInteractionCount,
+    idleBucket: speech.idleBucket,
+    lastVariantForState: lastVariantRef.current,
+  })
+  lastVariantRef.current = variant
+
+  const stateKey: VehiclePetLocaleKey = sessionView.terminal !== null
+    ? `state.${sessionView.terminal.status}`
+    : `state.${sessionView.live}`
+
+  const hitStyle = visibleHitStyle(snapshot, surfaceSize, levelId)
+
   return (
-    <span className="vpo-progress" aria-hidden="true" data-reduced-motion={reducedMotion ? 'true' : 'false'} data-within-level-percent={percent}>
-      <span className="vpo-progressFill" style={{ width: `${percent}%` }} />
-    </span>
+    <>
+      <span className="vpo-scene" aria-hidden="true">
+        <PetSceneRenderer
+          subjectInteractive={false}
+          interactionCount={petInteractionCount}
+          presentationMode="compact-overlay"
+          subjectOverlay={
+            <ExpressionLayer
+              variant={variant}
+              derivedLevelId={levelId}
+            />
+          }
+        />
+      </span>
+      <button
+        type="button"
+        className="vpo-surface vpo-petHit"
+        style={hitStyle}
+        aria-label={t('overlay.label', { state: t(stateKey) })}
+        data-vehicle-pet-pet="true"
+        data-vehicle-pet-expression={variant}
+        data-vehicle-pet-pack={snapshot.activePack?.manifest.packId}
+        data-vehicle-pet-level={levelId}
+        data-live={sessionView.terminal !== null ? 'terminal' : sessionView.live}
+        data-terminal={sessionView.terminal?.status}
+        onKeyDown={onKeyDown}
+        onClick={() => {
+          if (dragHandlers.consumeSuppressedClick()) return
+          onPetClick()
+          speech.speakForClick(state)
+        }}
+        onPointerDown={dragHandlers.onPointerDown}
+        onPointerMove={dragHandlers.onPointerMove}
+        onPointerUp={dragHandlers.onPointerUp}
+        onPointerCancel={dragHandlers.onPointerCancel}
+      />
+      {sessionView.live === 'needs-input' ? <span className="vpo-badge" aria-hidden="true" /> : null}
+      <VehiclePetBubble bubble={speech.bubble} placement={bubblePlacement} />
+      <div className={`vpo-tools${menuOpen ? ' vpo-tools-open' : ''}`}>
+        <button
+          type="button"
+          className="vpo-control vpo-toolsTrigger"
+          aria-label={t('menu.open')}
+          aria-expanded={menuOpen}
+          data-vehicle-pet-menu-trigger="true"
+          onClick={onOpenMenu}
+          onKeyDown={onKeyDown}
+        >
+          ⋯
+        </button>
+      </div>
+    </>
   )
 }
+
+/**
+ * Visible-sprite hitbox geometry (V3 CTR-OVERLAY-003): mirror of the
+ * renderer's compact-overlay subject math (NODE_BASE_WIDTH_PERCENT.subject =
+ * 60, `max(42, planned)` square, plan-centred) intersected with the
+ * generated per-level alpha bounding box, expanded by at most the recorded
+ * tolerance. Falls back to the full canvas when the plan is not ready; a
+ * contract test pins the mirror to the renderer's real subject rect.
+ */
+function visibleHitStyle(
+  snapshot: ReturnType<typeof usePetEngine>['snapshot'],
+  surfaceSize: number,
+  levelId: string | undefined,
+): CSSProperties {
+  const plan = snapshot.plan
+  if (plan === null || levelId === undefined) {
+    return { left: 0, top: 0, width: '100%', height: '100%' }
+  }
+  const subject = plan.nodes.find(node => node.kind === 'subject')
+  if (subject === undefined) {
+    return { left: 0, top: 0, width: '100%', height: '100%' }
+  }
+  const boost = subjectBoostFor(plan, surfaceSize)
+  const camera = plan.cameraZoomPermille / 1000
+  const subjectScale = plan.subjectScalePermille / 1000
+  const planned = (SUBJECT_BASE_WIDTH_PERCENT * subject.placement.scalePermille * camera * subjectScale) / 1000
+  const sidePct = Math.max(42, planned)
+  const centerX = 50 + (subject.placement.x / 100 - 50) * camera
+  const centerY = 50 + (subject.placement.y / 100 - 50) * camera
+  const side = (sidePct / 100) * surfaceSize * boost
+  const packId = snapshot.activePack?.manifest.packId
+  const bbox = packId === undefined ? undefined : levelVisibleBbox[`${packId}/${levelId}`]
+  const boxLeft = (centerX / 100) * surfaceSize - side / 2
+  const boxTop = (centerY / 100) * surfaceSize - side / 2
+  const tolerance = Math.min(OVERLAY_GEOMETRY.hitboxTolerancePx, side / 8)
+  const left = bbox === undefined ? boxLeft : boxLeft + (side * bbox.leftPct) / 100
+  const top = bbox === undefined ? boxTop : boxTop + (side * bbox.topPct) / 100
+  const width = bbox === undefined ? side : (side * bbox.widthPct) / 100
+  const height = bbox === undefined ? side : (side * bbox.heightPct) / 100
+  return {
+    left: Math.max(0, left - tolerance),
+    top: Math.max(0, top - tolerance),
+    width: Math.min(surfaceSize, width + tolerance * 2),
+    height: Math.min(surfaceSize, height + tolerance * 2),
+  }
+}
+
+/** Mirrors PetSceneRenderer NODE_BASE_WIDTH_PERCENT.subject (pinned by contract test). */
+const SUBJECT_BASE_WIDTH_PERCENT = 60
 
 /**
  * Terminal turns dispatch one short HostActivityEventV1 each. EventIds derive

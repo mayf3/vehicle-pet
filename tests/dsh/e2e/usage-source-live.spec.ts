@@ -70,11 +70,12 @@ async function connectWorkspace(page: Page): Promise<void> {
 async function petState(page: Page) {
   return page.evaluate(() => {
     const pet = document.querySelector('[data-vehicle-pet-pet="true"]')
-    const progress = document.querySelector('.vpo-progress')
     return {
       visible: document.querySelector('[data-vehicle-pet]') !== null,
       level: pet?.getAttribute('data-vehicle-pet-level') ?? null,
-      percent: progress?.getAttribute('data-within-level-percent') ?? null,
+      pack: pet?.getAttribute('data-vehicle-pet-pack') ?? null,
+      // V3 CTR-OVERLAY-016: the resident surface renders no progress bar; the
+      // usage seam is observed through the ledger record below instead.
       ledgerRaw: window.localStorage.getItem('vehicle-pet/usage-ledger/v1'),
     }
   })
