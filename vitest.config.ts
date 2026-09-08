@@ -42,6 +42,14 @@ export default defineConfig({
           setupFiles: ['tests/dsh/dom/setup.ts'],
         },
       },
+      {
+        test: {
+          name: 'release',
+          environment: 'node',
+          include: ['tests/release/**/*.test.ts'],
+          testTimeout: 120_000,
+        },
+      },
     ],
   },
 })
