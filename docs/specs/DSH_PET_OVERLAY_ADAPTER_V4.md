@@ -1,6 +1,6 @@
 ---
-spec_id: DSH_PET_OVERLAY_ADAPTER_V3
-status: superseded
+spec_id: DSH_PET_OVERLAY_ADAPTER_V4
+status: accepted
 spec_kind: implementation
 authority_level: governing_spec
 implementation_authority: contracts
@@ -12,7 +12,7 @@ scope:
   - pet-speech-presentation
 governed_by:
   - VEHICLE_PET_PRODUCT_DIRECTION_V1
-  - CONFIGURABLE_PET_ENGINE_V3
+  - CONFIGURABLE_PET_ENGINE_V4
   - VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V2
 external_authorities:
   - repository: mayf3/deepseek-harness
@@ -20,17 +20,17 @@ external_authorities:
     revision: f77b5a2fcebc2d9138f6608a60636f2294868d42
     relation: interoperates_with
 supersedes:
-  - DSH_PET_OVERLAY_ADAPTER_V2
-superseded_by: DSH_PET_OVERLAY_ADAPTER_V4
+  - DSH_PET_OVERLAY_ADAPTER_V3
+superseded_by: null
 owners:
   - mayf3
 ---
 
-# DSH_PET_OVERLAY_ADAPTER_V3
+# DSH_PET_OVERLAY_ADAPTER_V4
 
 ## 1. Goal
 
-This V3 supersedes `DSH_PET_OVERLAY_ADAPTER_V2` and carries every V2 Decision
+This V4 supersedes `DSH_PET_OVERLAY_ADAPTER_V3` and carries every V3 Decision
 and Contract forward unchanged except the items listed below. The carried
 forward surface — one external DSH bundle plugin, exactly one additive
 `shell.overlay` entry, the active Configurable Pet Engine authority as the only
@@ -38,6 +38,8 @@ owner of progression, Packs, keepsakes, receipts, and product rendering, the
 structured six-state session mapping, local tolerant preferences, onboarding
 hiding, complete disposal, host React identity, and the token/progress deferral
 boundary — is restated here with unchanged meaning.
+
+V4 exceptions: exactly two mutually exclusive character presentations, persisted character choice, character-specific expressions and speech catalogs, Pony.ai branding, on-body grade insignia and a descriptive grade label are authorized by §12.1–§12.4. Vehicle art stays intact; the new companion uses original transparent pose sprites. These changes replace the prior vehicle-only rendering restriction and add Character as the fifth secondary setting. All unchanged V3 obligations are restated below. Historical observations retain their original coordinates and are not V4 execution evidence.
 
 Motivation: the Owner-frozen direction of Goal 灵动 (MORE_PET / LESS_UI). The
 resident Vehicle Pet becomes a two-size (SMALL / LARGE) pet-first companion:
@@ -56,13 +58,12 @@ resident Vehicle Pet becomes a two-size (SMALL / LARGE) pet-first companion:
 - a non-modal **speech bubble** adds liveness: a curated original line catalog
   (≥30 lines per supported locale) driven only by structured state, with
   strict anti-harassment cadence;
-- the static expression layer grows from 5 to **at least 8 visible variants**
-  without changing the Art V2 level identity and without regenerating level
-  art.
+- the static expression layer grows from 5 to **at least 10 visible variants**
+  while preserving vehicle Art V2 and adding the original companion pose art of §12.1.
 
 ```text
 GOAL = MORE_PET / LESS_UI: the resident pet behaves like a long-term companion, not a plugin button.
-SUCCESS_OUTCOME = SMALL and LARGE resident modes with pet-click reactions, no resident progress bar, no daily panel, >=8 expression variants, and a restrained original speech bubble system, verified in an isolated fixed-ref DSH acceptance.
+SUCCESS_OUTCOME = SMALL and LARGE resident modes with pet-click reactions, no resident progress bar, no daily panel, >=10 expression variants, and a restrained original speech bubble system, verified in an isolated fixed-ref DSH acceptance.
 DELIVERY_FORM = DSH_BUNDLE_PLUGIN (unchanged)
 OWNING_REPOSITORY = mayf3/vehicle-pet (unchanged)
 RUNTIME = Harness Web profile (unchanged)
@@ -89,8 +90,8 @@ accepts it.
 - removal of the compact panel and of `PANEL_OPEN` from the persisted
   interaction machine; pet-first click reactions instead;
 - one secondary settings affordance (small, low-distraction, non-modal)
-  owning size, Reduced Motion, Full Journey entry, and collapse;
-- a static-plus-small-motion expression layer with at least 8 visible
+  owning Character, size, Reduced Motion, Full Journey entry, and collapse;
+- a static-plus-small-motion expression layer with at least 10 visible
   variants over the existing level visuals, produced by the repository
   deterministic asset pipeline;
 - a text speech bubble: presentation, positioning, lifecycle, content
@@ -110,7 +111,7 @@ accepts it.
   token economy, keepsakes, Upgrade Receipts, Pack manifests, or Pack trust;
 - speech audio, text-to-speech, speech input, Live2D or any runtime model
   animation, multi-pet, shops, currencies, mini-games;
-- re-deriving the Art V2 character or regenerating L1–L12 level art;
+- re-deriving the existing vehicle Art V2 identity or regenerating its L1–L12 art; original companion art is in scope;
 - copying the deepseek-pet / whale character, art, Live2D model, animation
   data, copy strings, brand, or precise likeness (interaction principles
   only, per V2 §3 and the Goal census boundary);
@@ -121,9 +122,9 @@ accepts it.
 
 ```text
 PRIMARY_PARENT_AUTHORITY = VEHICLE_PET_PRODUCT_DIRECTION_V1
-ENGINE_PARENT_AUTHORITY = CONFIGURABLE_PET_ENGINE_V3
+ENGINE_PARENT_AUTHORITY = CONFIGURABLE_PET_ENGINE_V4
 PROGRESS_SOURCE_PARENT = VEHICLE_PET_PROGRESS_SOURCE_V2
-USAGE_SOURCE_PARENT = DSH_USAGE_PROGRESS_SOURCE_V1
+USAGE_SOURCE_PARENT = DSH_USAGE_PROGRESS_SOURCE_V2
 GOVERNANCE_PARENT = VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V2
 IMPLEMENTATION_AUTHORITY = contracts
 EXTERNAL_AUTHORITIES = mayf3/deepseek-harness@f77b5a2fcebc2d9138f6608a60636f2294868d42 interoperates_with (carried forward unchanged from V2)
@@ -137,10 +138,10 @@ satisfied: V3 changes where and how the resident surface presents these, not
 whether the pet provides them — within-level progress stays available through
 the retained Full Journey surface, and the daily greeting plus completion
 feedback are delivered through the speech bubble presentation defined here.
-`CONFIGURABLE_PET_ENGINE_V3` remains the only authority for progression,
+`CONFIGURABLE_PET_ENGINE_V4` remains the only authority for progression,
 Packs, keepsakes, receipts, journal, and ceremony; this Spec reinterprets no
 Engine Contract. `VEHICLE_PET_PROGRESS_SOURCE_V2` and
-`DSH_USAGE_PROGRESS_SOURCE_V1` own the counts-only usage seam; V3 changes no
+`DSH_USAGE_PROGRESS_SOURCE_V2` own the counts-only usage seam; V3 changes no
  seam behavior and removes only a resident presentation of its derived view
 model.
 
@@ -330,7 +331,7 @@ are unchanged.
 - Decision: the one versioned tolerant browser-local preference record
   continues to own normalized position, collapsed state, and the explicit
   Reduced Motion choice, and additionally owns the `SMALL`/`LARGE` size
-  choice. The preference evolves compatibly: a record without an explicit
+  choice and a bundled character ID. Missing or unknown character IDs resolve to vehicle. The preference evolves compatibly: a record without an explicit
   size choice — including every pre-V3 record — resolves to `LARGE`. The
   choice survives reload, new sessions, and DSH restarts because it is
   browser-local and versioned. Active Pack remains Engine `activePackId`.
@@ -348,13 +349,10 @@ Carried forward unchanged from V2.
 
 - Decision owner: `mayf3` (Goal 灵动 frozen direction).
 - Decision: the static per-state expression layer is extended from five
-  masters to **at least eight visible variants** while keeping the five
+  masters to **at least ten visible variants** while keeping the five
   structured session states as the mandatory mapping core. The variant set
   MUST cover daily, happy, curious, resting, working, waiting-for-user,
-  completed, and soft-failure semantics. Variants are reusable overlay
-  recipes (eyes, mouth, brow, cheek, symbol, small pose accents) over the
-  current `LEVEL_BASE_VISUAL`; Art V2 level art is never regenerated or
-  replaced. Selection among same-state variants (for example idle calm /
+  completed, and soft-failure semantics. Vehicle variants are reusable overlay recipes over the current `LEVEL_BASE_VISUAL`; companion variants are original full-body pose sprites with declarative on-body grade marks. Only the selected character is rendered. Vehicle Art V2 is preserved. Selection among same-state variants (for example idle calm /
   happy / curious / sleepy) is deterministic-enough: a pure, unit-testable
   selection over structured context (state, engine events, bounded idle
   bucket, click count, recent-variant history) with no immediate repetition.
@@ -374,7 +372,7 @@ Carried forward unchanged from V2.
 - Decision: the capabilities of the removed panel move into one small,
   non-modal secondary affordance revealed from the resident pet on hover /
   focus / long-press-equivalent keyboard path, containing exactly:
-  size (SMALL / LARGE), the Reduced Motion control with unchanged
+  Character (vehicle / companion), size (SMALL / LARGE), the Reduced Motion control with unchanged
   system/on/off semantics, the Full Journey entry, and collapse. The
   affordance carries no progression numbers, level names, Pack names, or
   keepsake content — product data remains in the Full Journey dialog. It is
@@ -391,7 +389,7 @@ Carried forward unchanged from V2.
 
 - Decision owner: `mayf3` (Goal 灵动 frozen direction).
 - Decision: one text speech bubble system, UI-only. Lines come from a
-  curated original catalog of at least 30 lines per supported locale
+  curated original catalog of for each of the two characters, at least 30 lines per supported locale
   (`zh-CN`, `en`), distributed across idle, working, needs-input,
   completed, failed/cancelled, and level-up/milestone. Triggers are only:
   structured session state edges, Engine progress/level/keepsake events,
@@ -456,8 +454,8 @@ COLLAPSED_PERSISTENCE = browser local preference
 REDUCED_MOTION_PERSISTENCE = browser local preference (semantics unchanged)
 ACTIVE_PACK_PERSISTENCE = existing Engine activePackId
 EXPRESSION_STATE_CORE = IDLE, WORKING, NEEDS_INPUT, COMPLETED, FAILED_OR_CANCELLED (unchanged mapping duty)
-EXPRESSION_VARIANT_COUNT_MIN = 8 (statically distinguishable, level identity preserved)
-EXPRESSION_ARCHITECTURE = LEVEL_BASE_VISUAL + EXPRESSION_LAYER overlay recipes + SMALL_MOTION
+EXPRESSION_VARIANT_COUNT_MIN = 10 (statically distinguishable, level identity preserved)
+EXPRESSION_ARCHITECTURE = vehicle preserved level base + expression recipes; companion pose sprite + declarative grade insignia; bounded small motion for either
 EXPRESSION_ASSETS = BUNDLED_WEBP_PRIMARY_PNG_FALLBACK_DETERMINISTIC
 SPEECH_BUBBLE = YES (text only)
 SPEECH_CATALOG_MIN_LINES_PER_LOCALE = 30 across >=6 categories
@@ -509,13 +507,13 @@ ART_V2_LEVEL_BASE = PRESERVED (no L1-L12 regeneration)
 
 The secondary affordance contains exactly:
 
-1. Size: SMALL / LARGE choice;
-2. Reduced Motion control (system/on/off semantics unchanged from V2);
-3. “View full journey” action;
-4. Collapse action.
+1. Character: vehicle / companion choice;
+2. Size: SMALL / LARGE choice;
+3. Reduced Motion control (system/on/off semantics unchanged from V2);
+4. “View full journey” action;
+5. Collapse action.
 
-No fifth item is required; at most one auxiliary item (for example an
-explicit close) is permitted. The affordance MUST NOT contain progression
+No sixth item is permitted; Escape and outside press close the affordance. The affordance MUST NOT contain progression
 numbers, within-level progress, next thresholds, stage or level names, Pack
 names, keepsakes, or any engineering/system readout — those remain in the
 Full Journey dialog, which keeps its V2 accessible in-Harness Overlay/Dialog
@@ -676,7 +674,7 @@ packed-artifact gates.
 
 One versioned browser-local preference record MUST own normalized position,
 `collapsed`, the explicit Reduced Motion choice, and the `SMALL`/`LARGE` size
-choice. Missing, malformed, wrong-version, out-of-range, quota-failed, or
+choice and the character ID (`vehicle` or `companion`). Missing or unknown character IDs resolve to `vehicle`, independently of other valid fields. Missing, malformed, wrong-version, out-of-range, quota-failed, or
 unavailable storage MUST fall back safely without blocking the pet. A record
 lacking an explicit size choice MUST resolve to `LARGE` (this migrates every
 pre-V3 record without rewriting it). Relevant same-origin `storage` events
@@ -711,9 +709,9 @@ Unchanged from V2: no real token usage reads, no token/turn/tool/task to
 no remote progress API; display of the Engine's existing current snapshot
 only.
 
-### CTR-OVERLAY-014 — At least eight statically distinct expression variants over preserved level identity
+### CTR-OVERLAY-014 — At least ten statically distinct expression variants over preserved level identity
 
-The resident surface MUST present at least eight expression variants that are
+The resident surface MUST present at least ten expression variants that are
 visibly different in still screenshots at the SMALL size for the bundled
 level visuals, including when all motion is suppressed. The five structured
 session states of §8.3 MUST remain distinguishable and keep their mapping
@@ -721,9 +719,7 @@ duty; the variant set MUST additionally cover, at minimum, the semantics:
 daily idle, happy, curious, resting/sleepy, working, waiting-for-user,
 completed (at least two completed-family variants, e.g. happy and proud),
 and soft failure/cancelled (at least two failed/cancelled-family variants,
-e.g. soft and relaxed). Variants are overlay recipes over the current
-`LEVEL_BASE_VISUAL`: eyes, mouth, brow, cheek, symbol, and small pose
-accents; the level visual MUST stay recognizable, expression art MUST NOT
+e.g. soft and relaxed). Vehicle variants are overlay recipes over the current `LEVEL_BASE_VISUAL`; companion variants use original full-body poses with grade marks; the level visual MUST stay recognizable, expression art MUST NOT
 replace or obscure level-critical identity, and the same character identity
 is kept across variants. Art V2 level base art MUST NOT be regenerated.
 Variant selection MUST be a pure, unit-testable function over structured
@@ -751,8 +747,8 @@ persisted preference semantics.
 ### CTR-OVERLAY-016 — Resident progress presentation is absent; growth systems preserved
 
 Neither resident size MAY render a within-level progress bar, sliver, gauge,
-percentage text, or any always-mounted progression readout on or under the
-pet. The usage progress source, `progressPoints`, derived level, usage
+percentage text, token totals or within-level numeric readouts on or under the
+pet. The sole persistent grade exception is the exact grade, localized operational description and clothing insignia required by CTR-023; it adds no gauge or within-level progress readout. The usage progress source, `progressPoints`, derived level, usage
 ledger, token economy, level-up, keepsakes, and Upgrade Receipts continue to
 function unchanged, and within-level progress remains visible inside the
 Full Journey dialog. A session-state reaction, bubble line, or ceremony
@@ -776,7 +772,7 @@ dismiss timer rather than stacking.
 ### CTR-OVERLAY-018 — Speech content boundary and catalog floor
 
 Speech lines come exclusively from a bundled, versioned, curated catalog:
-at least 30 lines per supported locale (`zh-CN` and `en`), distributed with
+for each of the two characters, at least 30 lines per supported locale (`zh-CN` and `en`), distributed with
 at least 5 lines in each of: idle, working, needs-input, completed,
 failed/cancelled, and level-up/milestone. All copy is original to this
 repository; deepseek-pet strings and translations of them are forbidden;
@@ -852,7 +848,7 @@ fixed-ref DSH.
 - Contracts: `CTR-OVERLAY-001`.
 - Method and evidence: V2 `ACC-OVERLAY-001` unchanged (diff, packed file
   list, manifest, exports, patch row, clean DSH/profile status), executed at
-  the V3 implementation commit.
+  the V4 implementation commit.
 - Expected result: one external package ships all required surfaces; DSH
   checkout and production profile are unchanged by source implementation.
 - Failure condition: missing declaration/export, Core/profile source edit, or
@@ -924,7 +920,7 @@ fixed-ref DSH.
 - Contracts: `CTR-OVERLAY-006`.
 - Method and evidence: V2 `ACC-OVERLAY-006` unchanged (seeded snapshot,
   both-direction switch, reload, owned-fact equality, dependency graph,
-  boundary scan), executed at the V3 implementation commit.
+  boundary scan), executed at the V4 implementation commit.
 - Expected result: identical owned Engine facts across switches; DSH overlay
   renders only the product Pack; DSH imports only under `src/dsh/**`.
 - Failure condition: points reset/change, forked Pack/Engine, duplicate
@@ -1051,7 +1047,7 @@ fixed-ref DSH.
 ### ACC-OVERLAY-117 — Expression variant contact sheet and static parity
 
 - Contracts: `CTR-OVERLAY-014`, `CTR-OVERLAY-015`, `CTR-OVERLAY-020`.
-- Method: drive every implemented variant (at least eight) at representative
+- Method: drive every implemented variant (at least ten) at representative
   levels in SMALL and LARGE; capture stills with motion on and reduced motion
   on; assemble contact sheets; assert distinct rendered assets per variant;
   run the variant-selection unit matrix (no immediate repeats, correct
@@ -1059,10 +1055,10 @@ fixed-ref DSH.
 - Required evidence: SMALL and LARGE contact sheets, reduced-motion variants,
   per-variant asset assertions, selection-matrix results, and exact
   before/after Engine snapshots.
-- Expected result: ≥8 statically distinct variants in both sizes including
+- Expected result: ≥10 statically distinct variants in both sizes including
   under reduced motion; level identity recognizable; selection rules hold;
   progression byte-equivalent.
-- Failure condition: fewer than 8 distinguishable variants, level identity
+- Failure condition: fewer than 10 distinguishable variants, level identity
   obscured, selection rule violation, added pointer/focus targets, or growth
   mutation.
 
@@ -1075,7 +1071,7 @@ fixed-ref DSH.
   available there; usage-source regression run.
 - Required evidence: DOM inventory report, static scan, journey screenshot,
   and usage/progression regression transcript.
-- Expected result: no resident progress presentation in either size; journey
+- Expected result: no resident gauge, token total or within-level progress readout in either size; the CTR-023 descriptive grade label and insignia remain visible; journey
   progress intact; usage source behavior unchanged.
 - Failure condition: any resident gauge/sliver/percentage, or journey/usage
   regression.
@@ -1219,7 +1215,7 @@ fixed-ref DSH.
 
 - Disposition: rejected.
 - Reason: violates the Art V2 boundary and multiplies assets 12×N;
-  overlay recipes reach ≥8 variants deterministically.
+  overlay recipes reach ≥10 variants deterministically.
 - Evidence/claims: Goal §8/§19; V2 `DEC-OVERLAY-007` rationale.
 - What would reopen: an accepted authority change to the Art boundary.
 
@@ -1236,9 +1232,9 @@ fixed-ref DSH.
 ## 12. Migration, compatibility, and rollback
 
 ```text
-MIGRATION = forward-only: the V3 client replaces the V2 client through the normal plugin update path; preferences evolve compatibly (absent size resolves LARGE; all other fields carried).
+MIGRATION = forward-only: the V4 client replaces the V3 client through the normal plugin update path; preferences evolve compatibly (absent size resolves LARGE; absent/unknown character resolves vehicle; all other fields carried).
 COMPATIBILITY = pinned to mayf3/deepseek-harness@f77b5a2fcebc2d9138f6608a60636f2294868d42 and its Harness Web React major (carried from V2); future Harness pins require compatibility review.
-ROLLBACK = dsh plugin --profile web update to the prior ref, or remove + reinstall the prior ref; restart Web profile; repository rollback is revert of the V3 implementation commit.
+ROLLBACK = dsh plugin --profile web update to the prior ref, or remove + reinstall the prior ref; restart Web profile; repository rollback is revert of the V4 implementation commit.
 EMERGENCY_CONTAINMENT = stop/remove the bundle and restart the Web profile; no DSH Core rollback involved.
 DATA_MIGRATION = NONE destructive: the versioned browser-local preference record gains a size field with LARGE-on-absence; Engine storage remains canonical and untouched.
 PRODUCTION_APPLICATION = OUT OF SCOPE for this Spec's rounds; the Goal stops at READY_FOR_PRODUCTION_APPLY and the production profile is applied only by a separate Owner gate.
@@ -1248,99 +1244,104 @@ Installation acceptance targets are unchanged from V2 (local add, remote
 candidate from a fixed ref, restart after add/update/remove, no
 `pnpm dev`).
 
-## 13. Authorization gate and open questions
+## 12.1 Character presentation decisions
+
+### DEC-OVERLAY-012 — Exactly two presentations of one journey
+
+Owner mayf3 approved the wearable prototype and directed integration on 2026-09-09, including descriptive labels. The presentation choices are existing blue-white vehicle and the approved original half-chibi female AI companion. Both show Pony.ai. Exactly one is visible: vehicle mode retains its required driver, safety operator, escort and remote supervisor; companion mode contains no actual vehicle, escort or second person. Symbols embroidered on clothing are not additional subjects. No new Pack, Engine, ledger, thresholds, receipts or journey is created. Declarative bundled character definitions own visual mappings and speech catalogs; generic rendering consumes those definitions. No girl-specific Engine branch or second scheduler is permitted.
+
+### DEC-OVERLAY-013 — Grade and expression are independent presentation axes
+
+One locked companion identity persists across all twelve levels. Each of its ten or more static expressions composes with each level's on-body insignia. The numeric grade can remain, but the label below the subject MUST include a meaningful localized operational description. For example L2 is “有人驾驶，无保护车” / “Driver aboard, no escort”. A bare L number is insufficient. The exact grade remains accessible and visually legible at SMALL. Insignia are symbolic; their fine detail need not be readable at SMALL if their silhouette and descriptive label remain recognizable.
+
+Level meanings are exclusively Engine V4 §11.1: L1 driver + escort; L2 driver without escort; L3 copilot safety operator + escort; L4 copilot safety operator without escort; L5 unoccupied car with one-to-one remote supervision. L6–L12 preserve one remote operator supervising 3/10/100/1,000/10,000/100,000/1,000,000 cars and the existing fleet/city/multi-city/region/global progression. L1 and L3 wear a shield border, L2 and L4 a circular border, L5 a flat-bottom terminal card, L6 three nodes, L7 ten nodes, L8 a representative dense array, L9 city, L10 multiple cities, L11 regions, L12 globe. These are presentation data, never a new progression authority. Equipment-based L1–L5 narratives are forbidden.
+
+### DEC-OVERLAY-014 — Shared cadence, stable preferences and failure behavior
+
+Character selection updates immediately and persists in the existing tolerant preference record. Selection does not remount Engine or speech scheduling, reset cooldowns, create a milestone, alter progress or receipts, or revive a terminal event. Each character has an original bilingual catalog under the same timing and content boundaries. Failed/cancelled lines must be semantically appropriate to the actual state (either neutral for both or filtered by state). On asset failure use the same character's bundled PNG fallback; if that also fails display its accessible description, not a second pet or silent switch to another identity. Unknown stored IDs resolve to vehicle without mutating progress. Rollback to V3 may ignore the additional preference field and must preserve all growth data.
+
+## 12.2 Additional contracts
+
+### CTR-OVERLAY-022 — Declarative exclusive character selection
+
+The secondary selector MUST offer exactly `vehicle` and `companion`, localized and keyboard operable, with selected state exposed. A selection MUST immediately replace the visible pet, persist across reload/session/restart and synchronize via the existing storage event path without write loops. Engine instance, active Pack, progress, level, token totals, keepsakes and receipts MUST remain identical. Character mappings MUST be bundled declarative data consumed by generic presentation infrastructure; Engine source/schema and counts-only source MUST NOT gain character semantics. Exactly one resident pet subject MUST exist while the resident is visible, including switches, errors and reduced motion; collapsed and onboarding-suppressed states MUST contain zero resident pet subjects. At most one speech bubble may exist, with zero during quiet or suppressed states. The existing Full Journey dialog is a separately scoped Engine view, not a second resident pet; its preserved scene and focus lifecycle do not authorize a second floating pet. Vehicle mode preserves actual operational configuration; companion mode contains only the companion.
+
+### CTR-OVERLAY-023 — Branded identity, descriptive grades and wearables
+
+Both characters MUST visibly show Pony.ai. Companion identity MUST remain the approved gray-teal bob, teal eyes, square mint clip, ivory jacket, cyan shirt, blue-gray shorts and white boots across L1–L12 and all expressions. Every level MUST have a declarative clothing-attached insignia with pose-aware placement, and both characters MUST show a localized descriptive grade label (not only L1/L2). Level mapping and values MUST conform to DEC-OVERLAY-013 and Engine V4; decorative art MUST NOT invent level meanings. Label and insignia MUST neither obscure the face/brand nor overlap the composer/send button/whale in default placements. SMALL and LARGE MUST remain within the sizing bands; label geometry and bubble placement MUST be included in viewport clamping and hit-area checks. No additional focus target is created by label or insignia.
+
+### CTR-OVERLAY-024 — Expression assets and speech share the existing state machine
+
+Each character MUST have at least ten statically distinguishable expressions, including all six session states with failed/cancelled distinct, and idle/happy/curious/sleepy/proud semantics. All 12×10 companion grade/expression combinations MUST render without switching identity or detaching insignia from the body. Original transparent raster art MUST be bundled WebP with PNG fallback and deterministic conversion/provenance; flat SVG clothing insignia may be bundled vector assets. Art production is offline through the Owner-designated ChatGPT sidebar browser; no runtime/build model calls. Both catalogs MUST meet CTR-018 independently and use the same CTR-019 scheduler, preserved across switches. No forced speech on selection, no cooldown reset, immediate repetition, terminal replay, or failed wording on a cancelled state. Asset error fallback MUST obey DEC-014.
+
+## 12.3 Acceptance for new contracts
+
+### ACC-OVERLAY-122 — Character persistence and unchanged journey
+
+- Contracts: `CTR-OVERLAY-022`, `CTR-OVERLAY-010`, `CTR-OVERLAY-006`
+- Method: with real stored growth, toggle both directions, reload, change session, restart isolated DSH; deliver same-origin storage event; try missing/invalid ID and quota failure. Compare Engine/ledger/receipt snapshots and count visible subjects.
+- Environment: unit/DOM tests and isolated pinned DSH, SMALL/LARGE and reduced motion.
+- Required evidence: exact revision tests, before/after persistent snapshots, runtime selector screenshots and keyboard traversal.
+- Expected result: immediate one-subject swap, preference survival, fallback vehicle only for unknown ID, no growth mutation or duplicate scheduler.
+- Failure condition: reset/forked growth, more than two choices, duplicate subjects, unusable keyboard control, storage loop or lost valid preference fields.
+
+### ACC-OVERLAY-123 — Twelve readable levels
+
+- Contracts: `CTR-OVERLAY-023`, `CTR-OVERLAY-020`
+- Method: inspect 12-level contact sheets for both characters and representative SMALL/LARGE screenshots; verify semantic mapping against Engine V4, descriptive labels, brand and pose-specific clothing attachments. Inspect default DSH positions with whale and composer/send visible.
+- Environment: deterministic asset checks, independent visual review and isolated pinned DSH.
+- Required evidence: character bible, expression sheet, level sheet, size comparison, asset hashes, mapping tests and screenshots.
+- Expected result: approved identity, correct grade meaning, description beyond L number, readable exact grade and visible insignia silhouette; no obstructed UI.
+- Failure condition: equipment-based L1–L5, incorrect occupancy/escort, bare grade, mixed vehicle+companion, identity drift, clipped label or body mark.
+
+### ACC-OVERLAY-124 — Expression/catalog/scheduler matrix
+
+- Contracts: `CTR-OVERLAY-024`, `CTR-OVERLAY-014`, `CTR-OVERLAY-018`, `CTR-OVERLAY-019`
+- Method: drive 120 combinations; test all six states and idle variants, each catalog count/localization and failure/cancellation wording; switch at cooldown/terminal edges; force WebP then PNG failures. Validate real alpha channel and output reproduction.
+- Environment: unit/DOM, assets checks, independent visual review and isolated pinned DSH.
+- Required evidence: matrix results, captured SMALL reduced-motion variants, deterministic asset manifest, timing tests and failure screenshots.
+- Expected result: ten distinct poses, correct on-body mapping, alpha transparent background, catalog floors per character, unchanged scheduler and same-identity fallback; no runtime generation.
+- Failure condition: opaque image rectangles, wrong pose/grade, switch resets cadence, duplicate bubble/terminal replay, inappropriate cancellation copy or asset failure changes character.
+
+Coverage extension: CTR-022 → ACC-122; CTR-023 → ACC-123; CTR-024 → ACC-124. Existing CTR-001–021 and their acceptance mappings remain binding, evaluated with both characters wherever presentation or preferences are affected. Historical pre-V4 observation and acceptance records do not establish V4 implementation conformance.
+
+## 12.4 Execution and delivery boundary
+
+The Owner dispatch in `docs/investigations/GOAL_CHARACTER_OWNER_DISPATCH.md`, updated by the approved wearable preview and 2026-09-09 integration request, authorizes documentation, independent review, acceptance and merge, then implementation from that accepted base. The four sheets and original art provenance are required delivery evidence. Run pnpm verify, pnpm verify:dsh, relevant asset checks, isolated pinned DSH lifecycle/coexistence checks, independent code audit and independent visual review. Merge only after required checks. Stop at READY_FOR_PRODUCTION_APPLY; this task does not authorize production profile mutation or deployment. No spec acceptance alone establishes runtime readiness.
+
+## 13. Authorization gate
 
 ```text
 SPEC_GOVERNANCE_MODE = AUTHOR
-SPEC_ID = DSH_PET_OVERLAY_ADAPTER_V3
-SPEC_KIND = implementation
+SPEC_ID = DSH_PET_OVERLAY_ADAPTER_V4
 STATUS = accepted
-AUTHORITY_LEVEL = governing_spec
+AUTHORITY_ACTION = SUPERSEDE
 IMPLEMENTATION_AUTHORITY = contracts
-PRIMARY_PARENT_AUTHORITY = VEHICLE_PET_PRODUCT_DIRECTION_V1
-EXTERNAL_AUTHORITIES = mayf3/deepseek-harness@f77b5a2fcebc2d9138f6608a60636f2294868d42
-SUPERSEDES = DSH_PET_OVERLAY_ADAPTER_V2
-SUPERSESSION_MODE = WHOLE_AUTHORITY_ATOMIC
+PRIMARY_PARENT_AUTHORITY = VEHICLE_PET_PRODUCT_DIRECTION_V1 and CONFIGURABLE_PET_ENGINE_V4
+PLAN_LEVEL = EXEC_PLAN
+ASSURANCE_LEVEL = DURABLE
+DOCS_FIRST_REQUIRED = YES
+CONTRACT_COUNT = 24
+CONTRACTS_WITH_ACCEPTANCE = 24
 OPEN_OWNER_DECISIONS = NONE
 NORMATIVE_TBD = NONE
-UNRESOLVED_AUTHORITY_CONFLICT = NONE
 PARTIAL_SUPERSESSION = NONE
-CONTRACT_COUNT = 21
-CONTRACTS_WITH_ACCEPTANCE = 21
-ACCEPTANCE_COUNT = 21
-REAL_TOKEN_INTEGRATION_AUTHORIZED = NO
-DSH_TOKEN_TO_PROGRESS_AUTHORIZED = NO
-DEEPSEEK_HARNESS_CORE_CHANGE_AUTHORIZED = NO
-REMOTE_PACK_AUTHORIZED = NO
-AUDIO_AUTHORIZED = NO
-TTS_AUTHORIZED = NO
-MULTI_PET_AUTHORIZED = NO
-CONTENT_AWARE_SPEECH_AUTHORIZED = NO
-ART_V2_REGENERATION_AUTHORIZED = NO
 AUTHORING_READY_FOR_REVIEW = YES
 INDEPENDENT_REVIEW_RESULT = ACCEPT
-READY_TO_MARK_ACCEPTED = YES
-READY_TO_MARK_ACCEPTED_REASON = the exact proposed Head b62befc passed the independent review (ACCEPT, zero blockers; findings documentary only), the authorized acceptance transition applied this flip plus the pre-declared documentary reconciliation enumerated in §14, and the same independent reviewer performed the final-head delta recheck
-NEXT_ACTION = COMPLIANCE (implementation round routes as REUSE after this revision is reachable from main)
+NEXT_ACTION = IMPLEMENTATION_AFTER_MERGE
 ```
 
 ## 14. Acceptance record
 
 ```text
-SPEC_LIFECYCLE = proposed → accepted candidate
-DSH_OVERLAY_ADAPTER_SPEC_ACCEPTANCE_RECORD_V3 = YES
-ACCEPTED_BY = mayf3
-ACCEPTANCE_ACTOR = mayf3 (Goal 灵动 Owner preauthorization; GOAL_MODE=NEW_GOAL with DONE_WHEN binding ALL_GATES/INDEPENDENT_AUDITS/MERGED and PRODUCTION_APPLY_ALLOWED=NO, matching the Goal-internal acceptance pattern of the accepted V2 record)
-ACCEPTED_AT = 2026-09-08T00:08:30Z
-OWNER_ACCEPTANCE_DECISION = ACCEPT
-INDEPENDENT_REVIEW_RESULT = ACCEPT (zero blockers; seven documentary findings)
-REVIEWED_BASE_COMMIT = cce0e9d24907e7c17e42fd2b310a68a98860d5cf
-REVIEWED_PROPOSED_HEAD = b62befc
-ACCEPTANCE_COMMIT_PARENT = b62befc
-SEMANTIC_DELTA_AFTER_REVIEW = NONE (lifecycle transition plus the pre-declared documentary reconciliation only, enumerated below)
-DOCUMENTARY_RECONCILIATION_IN_THIS_COMMIT = §1 exception list itemizes the replaced V2 bottom-right anchor; §8 adds the working-rotation and click-throttle constants and aligns the repeat-guard referent to "category"; ACC-104/109/119/120 Contracts lines and the §10.1/§10.2 tables reconciled to the already-reviewed contract/acceptance bodies (no obligation added or removed); preflight OBSERVED_AT wording and route-record review coordinates refreshed; Goal dispatch persisted as an investigation record
-FINAL_HEAD_DELTA_RECHECK = ACCEPT (same independent reviewer, exact acceptance Head)
-BLOCKERS = 0
-CONTRACT_COUNT = 21
-CONTRACTS_WITH_ACCEPTANCE = 21
-ACCEPTANCE_COUNT = 21
-OPEN_OWNER_DECISIONS = NONE
-NORMATIVE_TBD = NONE
-SUPERSEDES = DSH_PET_OVERLAY_ADAPTER_V2
-SUPERSESSION_ATOMIC_IN_ACCEPTANCE_COMMIT = YES
-REAL_TOKEN_INTEGRATION_AUTHORIZED = NO
-DSH_TOKEN_TO_PROGRESS_AUTHORIZED = NO
-DEEPSEEK_HARNESS_CORE_CHANGE_AUTHORIZED = NO
-REMOTE_PACK_AUTHORIZED = NO
-AUDIO_AUTHORIZED = NO
-TTS_AUTHORIZED = NO
-MULTI_PET_AUTHORIZED = NO
-CONTENT_AWARE_SPEECH_AUTHORIZED = NO
-ART_V2_REGENERATION_AUTHORIZED = NO
-MERGE_AUTHORIZED = YES (Goal 灵动 DONE_WHEN binds MERGED = YES without per-item Owner approval, matching the accepted V2 §14 pattern)
-CARRY_FORWARD_FINDINGS = R1 audit FINDINGS 3 (seedling legacy-coercion probe not restated in an acceptance item), 4 (stale usage-source acceptance method referencing the removed micro bar), and 5 (preflight field-referent wording) are binding on the implementation/acceptance rounds and MUST be closed there or in a later docs round before final conformance
+ACCEPTED_BY = mayf3 (original Goal authorization; latest approved integration direction)
+ACCEPTED_AT = 2026-09-08T23:41:13.532800+00:00
+REVIEWED_BASE_COMMIT = 8fc429a7c86d61819014c5e51933adc05b9be1e5
+REVIEWED_PROPOSED_HEAD = d442aebaa9a186a77c2b9c0dc6422431d46f9947
+INDEPENDENT_REVIEWER = authority_preflight_review (no author/implementation participation)
+REVIEW_RESULT = ACCEPT; zero blockers and zero load-bearing gaps
+SEMANTIC_DELTA = lifecycle and atomic predecessor/index backlinks only
+ACTIVATION = only when accepted revision is reachable from main and implementation base
+MERGE_AUTHORIZED = YES (original Goal DONE_WHEN includes merged authority/implementation)
+PRODUCTION_APPLY_ALLOWED = NO
 ```
-
-Binding facts:
-
-- The independent review bound the reviewed Base
-  `cce0e9d24907e7c17e42fd2b310a68a98860d5cf` and the reviewed proposed Head
-  `b62befc` and returned `ACCEPT` with zero blockers; all findings were
-  classified documentary (coverage-table/body alignment, exception-list
-  itemization, constant echoes, wording, dispatch persistence) and none
-  added or removed an obligation.
-- This acceptance commit's parent is exactly `b62befc`. Its content changes
-  from the reviewed Head are: this §13/§14 lifecycle record, the frontmatter
-  lifecycle flip of this Spec to `status: accepted`, the atomic flip of
-  `DSH_PET_OVERLAY_ADAPTER_V2` to `status: superseded` with
-  `superseded_by: DSH_PET_OVERLAY_ADAPTER_V3`, the
-  `docs/specs/README.md` index rows, and the enumerated documentary
-  reconciliation — no Goal, Decision, Contract, Acceptance item, coverage
-  relation, or frozen-model value changed meaning.
-- With this commit, `DSH_PET_OVERLAY_ADAPTER_V2` is superseded and
-  `DSH_PET_OVERLAY_ADAPTER_V3` is accepted in the same atomic docs-only
-  change; no partial supersession.
-- Activation is a reachability rule: this Spec is active repository authority
-  when the exact accepted revision is reachable from `mayf3/vehicle-pet:main`
-  or an implementation base derived from it. DSH overlay implementation
-  against V3 MUST NOT begin until then.
