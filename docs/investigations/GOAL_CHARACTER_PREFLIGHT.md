@@ -59,3 +59,7 @@ The later role capability still needs an Overlay whole successor: persisted pres
 6. Merge authorized implementation only after required gates; re-pin final merged ref and validate affected isolated preview. All Done When true -> READY_FOR_PRODUCTION_APPLY -> STOP.
 
 Rollback: isolated candidate changes can be reverted. Character defaults to existing vehicle when absent/invalid; production rollback not performed in this Goal. No reset/clean/stash on shared checkout; no clearing storage or historical usage backfill.
+
+## Independent proposal review closure
+
+Reviewer at 2fc22f7c1260e183f0c0521f5b3d88011b261e0d identified one load-bearing ambiguity: preserving existing artwork versus repairing escort imagery. Closed in DEC-PET-031 by explicitly preserving historical illustration bytes for this bounded copy release, recording the mismatch, and applying corrected operational art requirements to all new/repaired art. No change to L6–L12. Exact-head recheck required.
