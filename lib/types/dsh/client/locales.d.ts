@@ -23,6 +23,8 @@ export declare const zh: {
     readonly 'menu.size.large': "大";
     readonly 'menu.reducedMotion': "减少动效";
     readonly 'menu.reducedMotion.system': "跟随系统";
+    readonly 'menu.reducedMotion.on': "开";
+    readonly 'menu.reducedMotion.off': "关";
     readonly 'menu.collapse': "收起挂件";
     readonly 'menu.viewJourney': "查看完整旅程";
     readonly 'dialog.title': "成长旅程";

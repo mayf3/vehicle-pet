@@ -41,6 +41,11 @@ export type SpeechTriggerSource = {
 export interface SpeechCadenceState {
     /** Epoch ms of surface mount. */
     readonly mountedAt: number;
+    /**
+     * Current mapped session state, driving the ambient idle-state gate of
+     * CTR-OVERLAY-019(3) ('terminal' covers an active terminal reaction).
+     */
+    readonly sessionState: 'idle' | 'working' | 'needs-input' | 'terminal';
     /** Epoch ms of the last shown line (any category), or null. */
     readonly lastSpokenAt: number | null;
     /** Epoch ms of the last payload-ignored user input signal, or null. */
@@ -60,7 +65,7 @@ export type SpeechVerdict = {
     readonly allowed: true;
 } | {
     readonly allowed: false;
-    readonly reason: 'load-quiet' | 'typing' | 'ambient-interval' | 'click-throttle' | 'working-cap';
+    readonly reason: 'load-quiet' | 'typing' | 'not-idle' | 'ambient-interval' | 'click-throttle' | 'working-cap';
 };
 /** CTR-OVERLAY-019 cadence matrix. Ambient uses only the `ambient` source. */
 export declare function evaluateCadence(source: SpeechTriggerSource, cadence: SpeechCadenceState): SpeechVerdict;

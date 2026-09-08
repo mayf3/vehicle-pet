@@ -107,7 +107,7 @@ export function VehiclePetSecondaryMenu(props: VehiclePetSecondaryMenuProps): Re
           data-vehicle-pet-reduced-motion-option="on"
           onClick={() => commitReducedMotion(true)}
         >
-          ON
+          {t('menu.reducedMotion.on')}
         </button>
         <button
           type="button"
@@ -116,7 +116,7 @@ export function VehiclePetSecondaryMenu(props: VehiclePetSecondaryMenuProps): Re
           data-vehicle-pet-reduced-motion-option="off"
           onClick={() => commitReducedMotion(false)}
         >
-          OFF
+          {t('menu.reducedMotion.off')}
         </button>
       </div>
 

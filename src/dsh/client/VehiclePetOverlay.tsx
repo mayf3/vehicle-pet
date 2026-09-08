@@ -342,6 +342,7 @@ function OverlaySurface({
       ref={drag.rootRef}
       data-vehicle-pet={collapsed ? 'COLLAPSED' : 'VISIBLE'}
       data-vehicle-pet-size={collapsed ? undefined : effectiveSize(preferences)}
+      data-menu-open={menuOpen && !collapsed ? 'true' : 'false'}
       data-active-surface-left={drag.activeBounds.left}
       data-active-surface-top={drag.activeBounds.top}
       data-active-surface-right={drag.activeBounds.right}
@@ -355,8 +356,9 @@ function OverlaySurface({
     >
       <div
         className="vpo-shell"
-        style={drag.shellStyle}
+        style={{ ...drag.shellStyle, '--vp-subject-boost': subjectBoostFor(snapshot.plan, residentSurfaceSizePx(false, effectiveSize(preferences))) } as CSSProperties}
         data-dragging={drag.isDragging}
+        data-menu-open={menuOpen ? 'true' : 'false'}
         data-live={sessionView.terminal !== null ? 'terminal' : sessionView.live}
         data-terminal={sessionView.terminal?.status}
       >
@@ -432,6 +434,27 @@ function OverlaySurface({
  * CTR-OVERLAY-021 click reaction). The speech bubble and the hover-revealed
  * menu trigger live here.
  */
+/**
+ * LARGE presence boost (V3 audit craft round): the compact renderer sizes the
+ * subject with the SMALL-era `max(42, planned)%` box, which leaves a LARGE
+ * card mostly empty. The overlay scales the LARGE subject up (never beyond
+ * the shell) through the `--vp-subject-boost` variable; the hitbox math uses
+ * the same factor so pointer/focus honesty is preserved.
+ */
+export function subjectBoostFor(plan: ReturnType<typeof usePetEngine>['snapshot']['plan'], surfaceSize: number): number {
+  if (plan === null || surfaceSize <= OVERLAY_GEOMETRY.smallSurfaceHeightPx) return 1
+  const subject = plan.nodes.find(node => node.kind === 'subject')
+  if (subject === undefined) return 1
+  const camera = plan.cameraZoomPermille / 1000
+  const subjectScale = plan.subjectScalePermille / 1000
+  const planned = (SUBJECT_BASE_WIDTH_PERCENT * subject.placement.scalePermille * camera * subjectScale) / 1000
+  const side = (Math.max(42, planned) / 100) * surfaceSize
+  if (side <= 0) return 1
+  return Math.min(SUBJECT_LARGE_SCALE_MAX, (surfaceSize * 0.94) / side)
+}
+
+const SUBJECT_LARGE_SCALE_MAX = 1.6
+
 function levelIndex(levelId: string): number {
   const match = /(\d+)$/.exec(levelId)
   return match === null ? 0 : Number(match[1])
@@ -577,13 +600,14 @@ function visibleHitStyle(
   if (subject === undefined) {
     return { left: 0, top: 0, width: '100%', height: '100%' }
   }
+  const boost = subjectBoostFor(plan, surfaceSize)
   const camera = plan.cameraZoomPermille / 1000
   const subjectScale = plan.subjectScalePermille / 1000
   const planned = (SUBJECT_BASE_WIDTH_PERCENT * subject.placement.scalePermille * camera * subjectScale) / 1000
   const sidePct = Math.max(42, planned)
   const centerX = 50 + (subject.placement.x / 100 - 50) * camera
   const centerY = 50 + (subject.placement.y / 100 - 50) * camera
-  const side = (sidePct / 100) * surfaceSize
+  const side = (sidePct / 100) * surfaceSize * boost
   const packId = snapshot.activePack?.manifest.packId
   const bbox = packId === undefined ? undefined : levelVisibleBbox[`${packId}/${levelId}`]
   const boxLeft = (centerX / 100) * surfaceSize - side / 2

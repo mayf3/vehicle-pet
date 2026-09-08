@@ -81,7 +81,10 @@ export interface OverlayDragController {
 const DRAG_THRESHOLD_PX = 4
 const KEYBOARD_STEP_PX = 8
 const KEYBOARD_LARGE_STEP_PX = 32
-const PANEL_GAP_PX = 8
+// The menu hangs below/above the shell clearing the hover-revealed tools
+// trigger row; the modeled gap must equal the CSS offset (styles.ts) so the
+// complete-active-surface union is honest (V3 audit F1).
+const PANEL_GAP_PX = 26
 const PANEL_FALLBACK_HEIGHT_PX = 240
 
 const clamp = (value: number, min: number, max: number): number => Math.min(max, Math.max(min, value))

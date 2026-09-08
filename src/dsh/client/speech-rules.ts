@@ -39,6 +39,11 @@ export type SpeechTriggerSource =
 export interface SpeechCadenceState {
   /** Epoch ms of surface mount. */
   readonly mountedAt: number
+  /**
+   * Current mapped session state, driving the ambient idle-state gate of
+   * CTR-OVERLAY-019(3) ('terminal' covers an active terminal reaction).
+   */
+  readonly sessionState: 'idle' | 'working' | 'needs-input' | 'terminal'
   /** Epoch ms of the last shown line (any category), or null. */
   readonly lastSpokenAt: number | null
   /** Epoch ms of the last payload-ignored user input signal, or null. */
@@ -60,6 +65,7 @@ export type SpeechVerdict =
   | { readonly allowed: false; readonly reason:
       | 'load-quiet'
       | 'typing'
+      | 'not-idle'
       | 'ambient-interval'
       | 'click-throttle'
       | 'working-cap' }
@@ -76,6 +82,9 @@ export function evaluateCadence(
     return { allowed: false, reason: 'load-quiet' }
   }
   if (source.kind === 'ambient') {
+    if (cadence.sessionState !== 'idle') {
+      return { allowed: false, reason: 'not-idle' }
+    }
     if (cadence.lastInputAt !== null
       && cadence.now - cadence.lastInputAt < SPEECH_TYPING_SUPPRESSION_MS) {
       return { allowed: false, reason: 'typing' }
@@ -96,6 +105,11 @@ export function evaluateCadence(
   if (source.kind === 'session-edge' && source.category === 'working') {
     if (cadence.workingLinesThisPeriod >= SPEECH_WORKING_MAX_PER_PERIOD) {
       return { allowed: false, reason: 'working-cap' }
+    }
+    // CTR-OVERLAY-019(4): rotation never interrupts recent user input.
+    if (cadence.lastInputAt !== null
+      && cadence.now - cadence.lastInputAt < SPEECH_TYPING_SUPPRESSION_MS) {
+      return { allowed: false, reason: 'typing' }
     }
     return { allowed: true }
   }

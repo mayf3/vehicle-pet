@@ -34,9 +34,12 @@ export interface VehiclePetOverlayPreferences {
     readonly size: VehiclePetSize | undefined;
 }
 /**
- * The persisted interaction machine is exactly VISIBLE with a collapsed
- * browser-local preference (V3 CTR-OVERLAY-004): PANEL_OPEN no longer exists.
- * The value names the rendered resident surface for tests and a11y tooling.
+ * The persisted interaction machine (V3 CTR-OVERLAY-004) has exactly two
+ * observable surfaces: `VISIBLE` and `COLLAPSED`. `COLLAPSED` is carried by
+ * the collapsed browser-local preference rather than this state value, so
+ * the persisted interaction state is the constant 'VISIBLE' and the root
+ * element renders data-vehicle-pet = 'VISIBLE' | 'COLLAPSED' from
+ * (state, collapsed). PANEL_OPEN no longer exists.
  */
 export type VehiclePetInteractionState = 'VISIBLE';
 /** Fixed overlay geometry (V3 CTR-OVERLAY-003/004/005/016/020). */

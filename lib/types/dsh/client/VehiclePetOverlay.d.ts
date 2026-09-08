@@ -15,6 +15,7 @@
 import { type ReactElement } from 'react';
 import type { HostObservable, InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots';
 import { type Locale, type PetStorageAdapter } from '../../engine';
+import { usePetEngine } from '../../react';
 import type { VehiclePetBindingInfo } from './session-state-adapter';
 import type { UsageSessionsSource } from './usage-progress-source';
 import { type VehiclePetOverlayPreferences, type VehiclePetSessionView } from './types';
@@ -60,5 +61,21 @@ export interface OwnedOverlayStorageLifecycleOptions {
  * is closed immediately and is never published into the unmounted tree.
  */
 export declare function acquireOwnedOverlayStorage({ create, onReady, fallback, }: OwnedOverlayStorageLifecycleOptions): () => void;
+/**
+ * The resident pet surface (V3): the full-canvas scene renders the level
+ * visual (pointer-events none, aria-hidden); one transparent hit button
+ * overlays the visible sprite bbox within the recorded tolerance and carries
+ * the pointer/focus/keyboard surface (CTR-OVERLAY-003 hitbox honesty, V3
+ * CTR-OVERLAY-021 click reaction). The speech bubble and the hover-revealed
+ * menu trigger live here.
+ */
+/**
+ * LARGE presence boost (V3 audit craft round): the compact renderer sizes the
+ * subject with the SMALL-era `max(42, planned)%` box, which leaves a LARGE
+ * card mostly empty. The overlay scales the LARGE subject up (never beyond
+ * the shell) through the `--vp-subject-boost` variable; the hitbox math uses
+ * the same factor so pointer/focus honesty is preserved.
+ */
+export declare function subjectBoostFor(plan: ReturnType<typeof usePetEngine>['snapshot']['plan'], surfaceSize: number): number;
 export {};
 //# sourceMappingURL=VehiclePetOverlay.d.ts.map
