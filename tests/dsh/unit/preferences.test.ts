@@ -16,7 +16,7 @@ import {
   saveOverlayPreferences,
   subscribeStorageEvents,
 } from '../../../src/dsh/client/preferences'
-import { OVERLAY_GEOMETRY } from '../../../src/dsh/client/types'
+import { OVERLAY_GEOMETRY, effectiveSize } from '../../../src/dsh/client/types'
 import { moveCompleteActiveSurface, pointFromRatios, resolveCompleteActiveSurfaceLayout } from '../../../src/dsh/client/useOverlayDrag'
 
 function memoryStorage(initial: Record<string, string> = {}) {
@@ -75,17 +75,17 @@ describe('safe bottom-right placement', () => {
   it('reserves the deterministic bottom inset only until the user customizes position', () => {
     const bounds = { width: 1440, height: 900 }
     const defaults = copyOverlayDefaults()
-    const safe = pointFromRatios(defaults, bounds, OVERLAY_GEOMETRY.visibleSizePx)
-    expect(safe.x).toBe(1440 - OVERLAY_GEOMETRY.visibleSizePx - OVERLAY_GEOMETRY.viewportMarginPx)
-    expect(safe.y).toBe(900 - OVERLAY_GEOMETRY.visibleSizePx - OVERLAY_GEOMETRY.viewportMarginPx - OVERLAY_GEOMETRY.defaultBottomSafeInsetPx)
+    const safe = pointFromRatios(defaults, bounds, OVERLAY_GEOMETRY.smallSurfaceHeightPx)
+    expect(safe.x).toBe(1440 - OVERLAY_GEOMETRY.smallSurfaceHeightPx - OVERLAY_GEOMETRY.viewportMarginPx)
+    expect(safe.y).toBe(900 - OVERLAY_GEOMETRY.smallSurfaceHeightPx - OVERLAY_GEOMETRY.viewportMarginPx - OVERLAY_GEOMETRY.smallDefaultBottomSafeInsetPx)
 
     const customized = { ...defaults, positionCustomized: true }
-    const restored = pointFromRatios(customized, bounds, OVERLAY_GEOMETRY.visibleSizePx)
-    expect(restored.y).toBe(900 - OVERLAY_GEOMETRY.visibleSizePx - OVERLAY_GEOMETRY.viewportMarginPx)
+    const restored = pointFromRatios(customized, bounds, OVERLAY_GEOMETRY.smallSurfaceHeightPx)
+    expect(restored.y).toBe(900 - OVERLAY_GEOMETRY.smallSurfaceHeightPx - OVERLAY_GEOMETRY.viewportMarginPx)
   })
 
   it('keeps the default visible and collapsed surfaces inside a 390px viewport', () => {
-    for (const size of [OVERLAY_GEOMETRY.visibleSizePx, OVERLAY_GEOMETRY.collapsedLauncherSizePx]) {
+    for (const size of [OVERLAY_GEOMETRY.smallSurfaceHeightPx, OVERLAY_GEOMETRY.collapsedLauncherSizePx]) {
       const point = pointFromRatios(copyOverlayDefaults(), { width: 390, height: 844 }, size)
       expect(point.x).toBeGreaterThanOrEqual(0)
       expect(point.y).toBeGreaterThanOrEqual(0)
@@ -95,7 +95,7 @@ describe('safe bottom-right placement', () => {
   })
 })
 
-describe('PANEL_COMPLETE_ACTIVE_SURFACE_CLAMP_TEST', () => {
+describe('MENU_COMPLETE_ACTIVE_SURFACE_CLAMP_TEST', () => {
   const viewports = [
     { width: 390, height: 844 },
     { width: 768, height: 720 },
@@ -115,14 +115,14 @@ describe('PANEL_COMPLETE_ACTIVE_SURFACE_CLAMP_TEST', () => {
             position: { xRatio, yRatio },
             positionCustomized: true,
           }
-          const anchor = pointFromRatios(preferences, viewport, OVERLAY_GEOMETRY.visibleSizePx)
+          const anchor = pointFromRatios(preferences, viewport, OVERLAY_GEOMETRY.smallSurfaceHeightPx)
           const original = { ...anchor }
           const layout = resolveCompleteActiveSurfaceLayout(
             anchor,
             viewport,
-            OVERLAY_GEOMETRY.visibleSizePx,
+            OVERLAY_GEOMETRY.smallSurfaceHeightPx,
             true,
-            { width: OVERLAY_GEOMETRY.compactPanelWidthPx, height: 500 },
+            { width: OVERLAY_GEOMETRY.secondaryMenuWidthPx, height: 500 },
             { horizontal: xRatio > 0.5 ? 'right' : 'left', vertical: yRatio > 0.5 ? 'above' : 'below' },
           )
           expect(layout.activeBounds.left, `${viewport.width}x${viewport.height} x=${xRatio} y=${yRatio} left`).toBeGreaterThanOrEqual(margin)
@@ -176,7 +176,7 @@ describe('PANEL_COMPLETE_ACTIVE_SURFACE_CLAMP_TEST', () => {
         for (const yRatio of yRatios) {
           const anchor = pointFromRatios({
             ...copyOverlayDefaults(), position: { xRatio, yRatio }, positionCustomized: true,
-          }, viewport, OVERLAY_GEOMETRY.visibleSizePx)
+          }, viewport, OVERLAY_GEOMETRY.smallSurfaceHeightPx)
           const initial = resolveCompleteActiveSurfaceLayout(
             anchor, viewport, 112, true, panelSize,
             { horizontal: xRatio > 0.5 ? 'right' : 'left', vertical: yRatio > 0.5 ? 'above' : 'below' },
@@ -238,6 +238,58 @@ describe('PANEL_COMPLETE_ACTIVE_SURFACE_CLAMP_TEST', () => {
   })
 })
 
+
+describe('SIZE_PERSISTENCE_PREFERENCES (V3 CTR-OVERLAY-010/020)', () => {
+  it('resolves an absent size choice to LARGE without rewriting stored bytes', () => {
+    const stored = JSON.stringify({ schemaVersion: 1, position: { xRatio: 1, yRatio: 1 }, positionCustomized: false, collapsed: false, reducedMotion: undefined })
+    const storage = memoryStorage({ [OVERLAY_PREFERENCES_KEY]: stored })
+    const loaded = loadOverlayPreferences(storage)
+    expect(loaded.size).toBeUndefined()
+    expect(effectiveSize(loaded)).toBe('large')
+    expect(storage.getItem(OVERLAY_PREFERENCES_KEY)).toBe(stored)
+  })
+
+  it('preserves an explicit SMALL choice across load/save', () => {
+    const storage = memoryStorage()
+    saveOverlayPreferences({ ...copyOverlayDefaults(), size: 'small' }, storage)
+    expect(loadOverlayPreferences(storage).size).toBe('small')
+    expect(effectiveSize(loadOverlayPreferences(storage))).toBe('small')
+  })
+
+  it('normalizes junk size values to undefined (LARGE effective)', () => {
+    expect(normalizeOverlayPreferences({ schemaVersion: 1, size: 'huge' }).size).toBeUndefined()
+    expect(normalizeOverlayPreferences({ schemaVersion: 1, size: 42 }).size).toBeUndefined()
+    expect(effectiveSize(normalizeOverlayPreferences({ schemaVersion: 1, size: 'huge' }))).toBe('large')
+  })
+
+  it('propagates size through storage-event adoption', () => {
+    const current = copyOverlayDefaults()
+    const next = JSON.stringify({ schemaVersion: 1, position: { xRatio: 1, yRatio: 1 }, positionCustomized: false, collapsed: false, reducedMotion: undefined, size: 'small' })
+    const adopted = adoptStorageEvent({ key: OVERLAY_PREFERENCES_KEY, newValue: next }, current)
+    expect(adopted?.size).toBe('small')
+    const same = JSON.stringify(normalizeOverlayPreferences({ ...copyOverlayDefaults(), size: 'small' }))
+    expect(adoptStorageEvent({ key: OVERLAY_PREFERENCES_KEY, newValue: same }, { ...copyOverlayDefaults(), size: 'small' })).toBeNull()
+  })
+
+  it('LARGE default placement reserves the recorded coexistence inset; SMALL keeps the composer-safe inset', () => {
+    const bounds = { width: 1440, height: 900 }
+    const large = pointFromRatios(copyOverlayDefaults(), bounds, OVERLAY_GEOMETRY.largeSurfaceHeightPx)
+    expect(large.y).toBe(900 - OVERLAY_GEOMETRY.largeSurfaceHeightPx - OVERLAY_GEOMETRY.viewportMarginPx - OVERLAY_GEOMETRY.largeDefaultBottomSafeInsetPx)
+    const small = pointFromRatios(copyOverlayDefaults(), bounds, OVERLAY_GEOMETRY.smallSurfaceHeightPx)
+    expect(small.y).toBe(900 - OVERLAY_GEOMETRY.smallSurfaceHeightPx - OVERLAY_GEOMETRY.viewportMarginPx - OVERLAY_GEOMETRY.smallDefaultBottomSafeInsetPx)
+  })
+
+  it('SIZE_MODE bands: LARGE 1.6x-2.2x SMALL with both within their nominal bands', () => {
+    expect(OVERLAY_GEOMETRY.smallSurfaceHeightPx).toBeGreaterThanOrEqual(104)
+    expect(OVERLAY_GEOMETRY.smallSurfaceHeightPx).toBeLessThanOrEqual(120)
+    expect(OVERLAY_GEOMETRY.largeSurfaceHeightPx).toBeGreaterThanOrEqual(190)
+    expect(OVERLAY_GEOMETRY.largeSurfaceHeightPx).toBeLessThanOrEqual(240)
+    const ratio = OVERLAY_GEOMETRY.largeSurfaceHeightPx / OVERLAY_GEOMETRY.smallSurfaceHeightPx
+    expect(ratio).toBeGreaterThanOrEqual(1.6)
+    expect(ratio).toBeLessThanOrEqual(2.2)
+  })
+})
+
 describe('loadOverlayPreferences', () => {
   it('returns defaults when storage is unavailable or empty', () => {
     expect(loadOverlayPreferences(undefined)).toEqual(copyOverlayDefaults())
@@ -280,6 +332,7 @@ describe('saveOverlayPreferences', () => {
       positionCustomized: false,
       collapsed: false,
       reducedMotion: undefined,
+      size: 'small',
     }, storage)
     expect(JSON.parse(store.get(OVERLAY_PREFERENCES_KEY) ?? '')).toEqual({
       schemaVersion: 1,
@@ -287,6 +340,7 @@ describe('saveOverlayPreferences', () => {
       positionCustomized: false,
       collapsed: false,
       reducedMotion: undefined,
+      size: 'small',
     })
   })
 

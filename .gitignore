@@ -8,3 +8,4 @@ playwright-report/
 test-results-dsh/
 tests/dsh/e2e/.artifacts/
 .art-candidates/
+test-results-dsh-coexistence/

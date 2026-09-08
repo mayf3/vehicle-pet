@@ -3,6 +3,8 @@
  * (`ctx.locale.register`). The engine keeps its own zh-CN/en copy for Pack
  * text; these keys cover only the adapter-owned overlay chrome. Harness
  * locale switches re-render the entry without a second page-level authority.
+ * Speech lines are NOT locale keys: they live in the bundled speech catalog
+ * (speech-catalog.ts, V3 CTR-OVERLAY-018).
  */
 export declare const NS = "vehicle-pet";
 export declare const zh: {
@@ -14,16 +16,15 @@ export declare const zh: {
     readonly 'state.failed': "任务遇到问题";
     readonly 'state.cancelled': "任务已取消";
     readonly 'launcher.restore': "展开成长伙伴";
-    readonly 'panel.title': "成长伙伴";
-    readonly 'panel.stage': "当前阶段";
-    readonly 'panel.progress': "成长进度";
-    readonly 'panel.nextThreshold': "下一目标 {points}";
-    readonly 'panel.more': "更多设置";
-    readonly 'panel.reducedMotion': "减少动效";
-    readonly 'panel.reducedMotion.system': "跟随系统";
-    readonly 'panel.collapse': "收起挂件";
-    readonly 'panel.viewJourney': "查看完整旅程";
-    readonly 'panel.close': "关闭面板";
+    readonly 'menu.open': "打开设置";
+    readonly 'menu.title': "成长伙伴设置";
+    readonly 'menu.size': "大小";
+    readonly 'menu.size.small': "小";
+    readonly 'menu.size.large': "大";
+    readonly 'menu.reducedMotion': "减少动效";
+    readonly 'menu.reducedMotion.system': "跟随系统";
+    readonly 'menu.collapse': "收起挂件";
+    readonly 'menu.viewJourney': "查看完整旅程";
     readonly 'dialog.title': "成长旅程";
     readonly 'dialog.close': "关闭旅程";
 };

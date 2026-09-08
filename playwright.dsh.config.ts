@@ -23,6 +23,10 @@ const MOCK_LLM_PORT = 8901
 
 export default defineConfig({
   testDir: 'tests/dsh/e2e',
+  // The coexistence acceptance runs in its own config (separate disposable
+  // home with both plugins installed); it must not run against this
+  // single-plugin home.
+  testIgnore: /coexistence\.spec\.ts$/,
   timeout: 300_000,
   fullyParallel: false,
   workers: 1,

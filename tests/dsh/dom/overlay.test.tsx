@@ -1,11 +1,12 @@
 /**
- * Overlay DOM behavior (DSH_PET_OVERLAY_ADAPTER_V2 CTR-OVERLAY-003..007,
- * 010, 011, 014, 015; ACC-OVERLAY-004/005/008/011/012/017/019/020): three-state
- * machine and sizes, exact five-item compact-panel inventory, the product-Pack
- * only DSH surface (no seedling option), static five-state expression layers,
- * dialog accessibility and focus restore, onboarding suppression with exact
- * same-mount restoration, session reactions that never touch progressPoints,
- * keyboard movement, and multi-tab preference adoption.
+ * Overlay DOM behavior (DSH_PET_OVERLAY_ADAPTER_V3 CTR-OVERLAY-003..007,
+ * 010, 011, 014-021; ACC-OVERLAY-104/105/117/118/120/121): VISIBLE/COLLAPSED
+ * machine with no PANEL_OPEN, SMALL/LARGE sizes with LARGE-on-absence, the
+ * exact four-item secondary menu reached only through its trigger, resident
+ * progress absence, the product-Pack-only DSH surface, static expression
+ * variants, dialog accessibility and focus restore, onboarding suppression,
+ * session reactions that never touch progressPoints, keyboard movement, and
+ * multi-tab preference adoption.
  */
 
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
@@ -14,6 +15,7 @@ import { VehiclePetOverlay } from '../../../src/dsh/client/VehiclePetOverlay'
 import type { VehiclePetOverlayProps } from '../../../src/dsh/client/VehiclePetOverlay'
 import { en, zh, type VehiclePetLocaleKey } from '../../../src/dsh/client/locales'
 import { OVERLAY_PREFERENCES_KEY } from '../../../src/dsh/client/preferences'
+import { OVERLAY_GEOMETRY } from '../../../src/dsh/client/types'
 import type { VehiclePetSessionView } from '../../../src/dsh/client/types'
 
 const IDLE_VIEW: VehiclePetSessionView = Object.freeze({ live: 'idle', terminal: null })
@@ -61,6 +63,15 @@ async function renderOverlay(source: Source) {
   return view
 }
 
+function petButton(): HTMLElement {
+  return screen.getByRole('button', { name: t('overlay.label', { state: t('state.idle') }) })
+}
+
+function openMenu(): HTMLElement {
+  fireEvent.click(screen.getByRole('button', { name: t('menu.open') }))
+  return screen.getByRole('group', { name: t('menu.title') })
+}
+
 beforeEach(() => {
   window.localStorage.clear()
 })
@@ -69,104 +80,189 @@ afterEach(() => {
   cleanup()
 })
 
-describe('VehiclePetOverlay states', () => {
-  it('renders the default VISIBLE pet at 112px and toggles the 264px panel', async () => {
+describe('NO_NORMAL_CLICK_PANEL + two-state machine (V3 CTR-OVERLAY-004/021)', () => {
+  it('normal clicks never open any panel, menu, or dialog; the machine is VISIBLE/COLLAPSED only', async () => {
     const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
-    await renderOverlay(source)
-    const pet = screen.getByRole('button', { name: t('overlay.label', { state: t('state.idle') }) })
-    expect(pet).toHaveAttribute('data-vehicle-pet-pet', 'true')
-    expect(pet.querySelector('button')).toBeNull()
-    const shell = pet.closest('.vpo-shell') as HTMLElement
-    expect(shell.style.width).toBe('112px')
-    expect(shell.style.height).toBe('112px')
+    const view = await renderOverlay(source)
+    expect(document.querySelector('[data-vehicle-pet="VISIBLE"]')).not.toBeNull()
+    expect(document.querySelector('[data-vehicle-pet="PANEL_OPEN"]')).toBeNull()
 
-    fireEvent.click(pet)
-    const panel = screen.getByRole('group', { name: t('panel.title') })
-    expect(panel).toHaveAttribute('data-vehicle-pet-panel', 'true')
-    expect(panel.style.width).toBe('264px')
-
-    fireEvent.click(pet)
-    expect(screen.queryByRole('group', { name: t('panel.title') })).toBeNull()
-  })
-
-  it('contains exactly the five authorized compact items and no dev surfaces', async () => {
-    const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
-    await renderOverlay(source)
-    fireEvent.click(screen.getByRole('button', { name: t('overlay.label', { state: t('state.idle') }) }))
-    const panel = screen.getByRole('group', { name: t('panel.title') })
-
-    const authorized = [
-      panel.querySelector('[data-vehicle-pet-stage]'),
-      panel.querySelector('[data-vehicle-pet-progress]'),
-      panel.querySelector('[data-vehicle-pet-next-threshold]'),
-      panel.querySelector('[data-vehicle-pet-open-journey]'),
-      panel.querySelector('[data-vehicle-pet-more]'),
-      panel.querySelector('[data-vehicle-pet-reduced-motion]'),
-      panel.querySelector('[data-vehicle-pet-collapse]'),
-    ]
-    // 1 stage, 2 progress+next, 3 view journey, 4 "More" disclosure holding
-    // the reduced-motion control, 5 collapse (close is chrome, not content).
-    expect(authorized.every(node => node !== null)).toBe(true)
-
-    // V2 removals: no pack name row, no keepsake row, no Pack switch.
-    for (const removed of ['[data-vehicle-pet-pack-name]', '[data-vehicle-pet-keepsake]', '[data-vehicle-pet-pack-switch]', '[data-vehicle-pet-pack-option]']) {
-      expect(panel.querySelector(removed)).toBeNull()
+    const pet = petButton()
+    for (let click = 0; click < 3; click += 1) {
+      fireEvent.click(pet)
     }
-    expect(panel.querySelectorAll('button').length).toBe(
-      3 /* reduced-motion options inside More */ + 1 /* journey */ + 1 /* collapse */ + 1 /* close chrome */,
-    )
-
-    const panelText = panel.textContent ?? ''
-    for (const forbidden of ['MockProgressSource', '精确输入', '故障', 'diagnostics', '开发控制台', '+100', '种子伙伴', 'seedling']) {
-      expect(panelText).not.toContain(forbidden)
-    }
-    expect(document.querySelector('[data-prototype-controls]')).toBeNull()
+    expect(screen.queryByRole('group', { name: t('menu.title') })).toBeNull()
+    expect(document.querySelector('[data-vehicle-pet-panel]')).toBeNull()
+    expect(document.querySelector('[data-vehicle-pet-menu]')).toBeNull()
+    expect(screen.queryByRole('dialog')).toBeNull()
+    // The state machine never leaves VISIBLE on pet clicks.
+    expect(document.querySelector('[data-vehicle-pet="VISIBLE"]')).not.toBeNull()
+    view.unmount()
   })
 
-  it('offers no Pack switch anywhere: autonomous-fleet is the only product Pack (seedling stays internal)', async () => {
+  it('click gives a pet reaction: the idle expression variant changes without any surface', async () => {
     const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
-    await renderOverlay(source)
-    const pet = screen.getByRole('button', { name: t('overlay.label', { state: t('state.idle') }) })
-    await waitFor(() => {
-      expect(pet.getAttribute('data-vehicle-pet-pack')).toBe('autonomous-fleet')
-    })
+    const view = await renderOverlay(source)
+    const pet = petButton()
+    const before = pet.getAttribute('data-vehicle-pet-expression')
     fireEvent.click(pet)
-    // Panel and whole overlay surface expose no Pack option and no seedling copy.
-    expect(document.querySelector('[data-vehicle-pet-pack-option]')).toBeNull()
-    expect(document.body.textContent).not.toContain('种子伙伴')
-    fireEvent.click(screen.getByRole('button', { name: t('panel.viewJourney') }))
-    await screen.findByRole('dialog', { name: t('dialog.title') })
-    expect(document.querySelector('[data-vehicle-pet-pack-option]')).toBeNull()
-  })
-
-  it('Escape closes the panel and returns focus to the pet', async () => {
-    const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
-    await renderOverlay(source)
-    const pet = screen.getByRole('button', { name: t('overlay.label', { state: t('state.idle') }) })
-    fireEvent.click(pet)
-    expect(screen.queryByRole('group', { name: t('panel.title') })).not.toBeNull()
-    fireEvent.keyDown(pet, { key: 'Escape' })
-    expect(screen.queryByRole('group', { name: t('panel.title') })).toBeNull()
-    expect(document.activeElement).toBe(pet)
+    const after = pet.getAttribute('data-vehicle-pet-expression')
+    expect(after).toBe('idle-happy') // clickCount=1 selects the second idle pool entry
+    expect(before).toBe('idle')
+    expect(screen.queryByRole('group', { name: t('menu.title') })).toBeNull()
+    view.unmount()
   })
 
   it('collapses to the 36px launcher and restores on activation', async () => {
     const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
-    await renderOverlay(source)
-    const pet = screen.getByRole('button', { name: t('overlay.label', { state: t('state.idle') }) })
-    fireEvent.click(pet)
-    fireEvent.click(screen.getByRole('button', { name: t('panel.collapse') }))
+    const view = await renderOverlay(source)
+    await openMenu()
+    fireEvent.click(screen.getByRole('button', { name: t('menu.collapse') }))
 
     const launcher = await screen.findByRole('button', { name: t('launcher.restore') })
     expect(launcher).toHaveAttribute('data-vehicle-pet-launcher', 'true')
     const shell = launcher.closest('.vpo-shell') as HTMLElement
-    expect(shell.style.width).toBe('36px')
-    expect(shell.style.height).toBe('36px')
+    expect(shell.style.width).toBe(`${OVERLAY_GEOMETRY.collapsedLauncherSizePx}px`)
+    expect(shell.style.height).toBe(`${OVERLAY_GEOMETRY.collapsedLauncherSizePx}px`)
     expect(JSON.parse(window.localStorage.getItem(OVERLAY_PREFERENCES_KEY) ?? '{}').collapsed).toBe(true)
+    expect(document.querySelector('[data-vehicle-pet="COLLAPSED"]')).not.toBeNull()
 
     fireEvent.click(launcher)
     await screen.findByRole('button', { name: t('overlay.label', { state: t('state.idle') }) })
     expect(JSON.parse(window.localStorage.getItem(OVERLAY_PREFERENCES_KEY) ?? '{}').collapsed).toBe(false)
+    view.unmount()
+  })
+})
+
+describe('SIZE_MODE_SMALL / SIZE_MODE_LARGE / LARGE default (V3 CTR-OVERLAY-010/020)', () => {
+  it('resolves an absent size choice to LARGE (216px shell)', async () => {
+    const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
+    const view = await renderOverlay(source)
+    const shell = document.querySelector('.vpo-shell') as HTMLElement
+    expect(shell.style.width).toBe(`${OVERLAY_GEOMETRY.largeSurfaceHeightPx}px`)
+    expect(shell.style.height).toBe(`${OVERLAY_GEOMETRY.largeSurfaceHeightPx}px`)
+    expect(document.querySelector('[data-vehicle-pet-size]')?.getAttribute('data-vehicle-pet-size')).toBe('large')
+    view.unmount()
+  })
+
+  it('renders an explicit SMALL choice at 112px', async () => {
+    window.localStorage.setItem(OVERLAY_PREFERENCES_KEY, JSON.stringify({
+      schemaVersion: 1,
+      position: { xRatio: 0.9, yRatio: 0.9 },
+      collapsed: false,
+      reducedMotion: undefined,
+      size: 'small',
+    }))
+    const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
+    const view = await renderOverlay(source)
+    const shell = document.querySelector('.vpo-shell') as HTMLElement
+    expect(shell.style.width).toBe(`${OVERLAY_GEOMETRY.smallSurfaceHeightPx}px`)
+    expect(shell.style.height).toBe(`${OVERLAY_GEOMETRY.smallSurfaceHeightPx}px`)
+    expect(document.querySelector('[data-vehicle-pet-size]')?.getAttribute('data-vehicle-pet-size')).toBe('small')
+    view.unmount()
+  })
+
+  it('the hitbox hugs the visible sprite instead of the square canvas', async () => {
+    const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
+    const view = await renderOverlay(source)
+    const pet = petButton()
+    const width = Number(pet.style.width.replace('px', ''))
+    const height = Number(pet.style.height.replace('px', ''))
+    const shellSide = OVERLAY_GEOMETRY.largeSurfaceHeightPx
+    // L1 car art: the visible bbox is wide and short, never the full square.
+    expect(width).toBeLessThanOrEqual(shellSide)
+    expect(height).toBeLessThan(shellSide * 0.9)
+    expect(width).toBeGreaterThan(shellSide * 0.3)
+    expect(height).toBeGreaterThan(shellSide * 0.2)
+    view.unmount()
+  })
+})
+
+describe('SECONDARY_SETTINGS_ACCESSIBLE (V3 CTR-OVERLAY-005, DEC-OVERLAY-008)', () => {
+  it('the menu opens only through its trigger and contains exactly the four contracted groups', async () => {
+    const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
+    const view = await renderOverlay(source)
+    // Not opened by a normal pet click (covered above); only the trigger opens it.
+    fireEvent.click(screen.getByRole('button', { name: t('menu.open') }))
+    const menu = screen.getByRole('group', { name: t('menu.title') })
+    expect(menu).toHaveAttribute('data-vehicle-pet-menu', 'true')
+    expect(menu.style.width).toBe(`${OVERLAY_GEOMETRY.secondaryMenuWidthPx}px`)
+
+    // Exactly: size, reduced motion, journey, collapse.
+    expect(menu.querySelector('[data-vehicle-pet-size-control]')).not.toBeNull()
+    expect(menu.querySelector('[data-vehicle-pet-reduced-motion]')).not.toBeNull()
+    expect(menu.querySelector('[data-vehicle-pet-open-journey]')).not.toBeNull()
+    expect(menu.querySelector('[data-vehicle-pet-collapse]')).not.toBeNull()
+    expect(menu.querySelectorAll('[data-vehicle-pet-size-option]')).toHaveLength(2)
+    expect(menu.querySelectorAll('[data-vehicle-pet-reduced-motion-option]')).toHaveLength(3)
+
+    // No progression content, no Pack name, no keepsake, no engineering readout.
+    for (const removed of ['[data-vehicle-pet-stage]', '[data-vehicle-pet-progress]', '[data-vehicle-pet-next-threshold]', '[data-vehicle-pet-pack-name]', '[data-vehicle-pet-keepsake]', '[data-vehicle-pet-pack-switch]', '[data-vehicle-pet-pack-option]']) {
+      expect(menu.querySelector(removed)).toBeNull()
+    }
+    const menuText = menu.textContent ?? ''
+    for (const forbidden of ['MockProgressSource', '精确输入', '故障', 'diagnostics', '开发控制台', '+100', '种子伙伴', 'seedling']) {
+      expect(menuText).not.toContain(forbidden)
+    }
+    view.unmount()
+  })
+
+  it('size options commit the persisted preference and resize the surface immediately', async () => {
+    const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
+    const view = await renderOverlay(source)
+    await openMenu()
+    fireEvent.click(screen.getByRole('button', { name: t('menu.size.small') }))
+    await waitFor(() => {
+      const stored = JSON.parse(window.localStorage.getItem(OVERLAY_PREFERENCES_KEY) ?? '{}')
+      expect(stored.size).toBe('small')
+    })
+    const shell = document.querySelector('.vpo-shell') as HTMLElement
+    expect(shell.style.width).toBe(`${OVERLAY_GEOMETRY.smallSurfaceHeightPx}px`)
+    expect(document.querySelector('[data-vehicle-pet-size]')?.getAttribute('data-vehicle-pet-size')).toBe('small')
+    view.unmount()
+  })
+
+  it('Escape closes the menu and offers no Pack switch anywhere (seedling stays internal)', async () => {
+    const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
+    const view = await renderOverlay(source)
+    const pet = petButton()
+    await waitFor(() => {
+      expect(pet.getAttribute('data-vehicle-pet-pack')).toBe('autonomous-fleet')
+    })
+    const menu = openMenu()
+    fireEvent.keyDown(menu, { key: 'Escape' })
+    expect(screen.queryByRole('group', { name: t('menu.title') })).toBeNull()
+    expect(document.querySelector('[data-vehicle-pet-pack-option]')).toBeNull()
+    expect(document.body.textContent).not.toContain('种子伙伴')
+
+    // The journey dialog opens from the menu and shows no Pack option either.
+    fireEvent.click(screen.getByRole('button', { name: t('menu.open') }))
+    fireEvent.click(screen.getByRole('button', { name: t('menu.viewJourney') }))
+    await screen.findByRole('dialog', { name: t('dialog.title') })
+    expect(document.querySelector('[data-vehicle-pet-pack-option]')).toBeNull()
+    view.unmount()
+  })
+})
+
+describe('NO_RESIDENT_PROGRESS_BAR (V3 CTR-OVERLAY-016)', () => {
+  it('renders no resident progress presentation in either size, collapsed state, or dialog', async () => {
+    const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
+    const view = await renderOverlay(source)
+    expect(document.querySelector('.vpo-progress')).toBeNull()
+    expect(document.querySelector('[data-vehicle-pet-progress]')).toBeNull()
+    expect(document.querySelector('[data-within-level-percent]')).toBeNull()
+
+    // LARGE explicit choice: still no gauge.
+    window.localStorage.setItem(OVERLAY_PREFERENCES_KEY, JSON.stringify({
+      schemaVersion: 1,
+      position: { xRatio: 0.9, yRatio: 0.9 },
+      collapsed: false,
+      reducedMotion: undefined,
+      size: 'large',
+    }))
+    view.rerender(<VehiclePetOverlay {...stubProps(source)} />)
+    expect(document.querySelector('.vpo-progress')).toBeNull()
+    view.unmount()
   })
 })
 
@@ -181,7 +277,7 @@ describe('VehiclePetOverlay session reactions', () => {
     view.rerender(<VehiclePetOverlay {...stubProps(source)} />)
     const updated = await view.findByRole('button', { name: t('overlay.label', { state: t('state.needs-input') }) })
     expect(updated).toHaveAttribute('data-live', 'needs-input')
-    expect(updated.querySelector('.vpo-badge')).not.toBeNull()
+    expect(document.querySelector('.vpo-badge')).not.toBeNull()
     view.unmount()
   })
 
@@ -196,21 +292,21 @@ describe('VehiclePetOverlay session reactions', () => {
     const feedback = await screen.findByText(/dsh-session/, { exact: false })
     expect(feedbackStatus(feedback)).toBe('completed')
 
-    // The engine's points stay at the initial placeholder value (0): session
-    // reactions never feed progression (CTR-OVERLAY-007/013).
+    // Session reactions never feed progression (CTR-OVERLAY-007/013); the
+    // resident surface renders no progress readout at all (V3 CTR-OVERLAY-016).
+    expect(document.querySelector('[data-vehicle-pet-progress]')).toBeNull()
     const pet = screen.getByRole('button', { name: t('overlay.label', { state: t('state.completed') }) })
     fireEvent.click(pet)
-    const progress = await screen.findByText(/0/, { selector: '[data-vehicle-pet-progress]' })
-    expect(progress.textContent).toContain('0')
+    expect(JSON.parse(window.localStorage.getItem(OVERLAY_PREFERENCES_KEY) ?? '{}').size).toBeUndefined()
     view.unmount()
   })
 
-  it('shows the static expression layer for every session state without adding interaction targets', async () => {
+  it('shows a distinct static expression variant per session state without adding interaction targets', async () => {
     const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
     const view = await renderOverlay(source)
-    const exprState = () => document.querySelector('[data-vehicle-pet-expression]')?.getAttribute('data-vehicle-pet-expression')
+    const exprVariant = () => document.querySelector('[data-vehicle-pet-expression]')?.getAttribute('data-vehicle-pet-expression')
     await waitFor(() => {
-      expect(exprState()).toBe('idle')
+      expect(exprVariant()).toBe('idle')
     })
     const expr = document.querySelector('[data-vehicle-pet-expression]') as HTMLElement
     expect(expr).toHaveAttribute('aria-hidden', 'true')
@@ -221,19 +317,19 @@ describe('VehiclePetOverlay session reactions', () => {
       source.view = viewState
       view.rerender(<VehiclePetOverlay {...stubProps(source)} />)
       await waitFor(() => {
-        expect(exprState()).toBe(expected)
+        expect(exprVariant()).toBe(expected)
       })
     }
     await expectState({ live: 'running', terminal: null }, 'working')
     await expectState({ live: 'needs-input', terminal: null }, 'needs-input')
     await expectState({ live: 'idle', terminal: { identity: 's1#1#1', status: 'completed' } }, 'completed')
     await expectState({ live: 'idle', terminal: { identity: 's1#1#2', status: 'failed' } }, 'failed')
-    await expectState({ live: 'idle', terminal: { identity: 's1#1#3', status: 'cancelled' } }, 'failed')
+    await expectState({ live: 'idle', terminal: { identity: 's1#1#3', status: 'cancelled' } }, 'cancelled')
     await expectState(IDLE_VIEW, 'idle')
     view.unmount()
   })
 
-  it('keeps the static expression layer rendered under reduced motion (CTR-OVERLAY-015)', async () => {
+  it('keeps the static expression layer rendered under reduced motion (V3 CTR-OVERLAY-015)', async () => {
     window.localStorage.setItem(OVERLAY_PREFERENCES_KEY, JSON.stringify({
       schemaVersion: 1,
       position: { xRatio: 0.9, yRatio: 0.9 },
@@ -249,6 +345,8 @@ describe('VehiclePetOverlay session reactions', () => {
     }, { timeout: 3000 })
     expect(expr).toHaveAttribute('data-vehicle-pet-expression', 'working')
     expect(expr?.querySelectorAll('button, [tabindex], input')).toHaveLength(0)
+    // The effective preference wins over the OS report on the scene gate.
+    expect(document.querySelector('.vp-scene')).toHaveAttribute('data-reduced-motion', 'true')
     view.unmount()
   })
 })
@@ -265,9 +363,9 @@ describe('VehiclePetOverlay full journey dialog', () => {
     outside.textContent = 'background focus target'
     document.body.append(outside)
     const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
-    await renderOverlay(source)
-    fireEvent.click(screen.getByRole('button', { name: t('overlay.label', { state: t('state.idle') }) }))
-    const trigger = screen.getByRole('button', { name: t('panel.viewJourney') })
+    const view = await renderOverlay(source)
+    fireEvent.click(screen.getByRole('button', { name: t('menu.open') }))
+    const trigger = screen.getByRole('button', { name: t('menu.viewJourney') })
     fireEvent.click(trigger)
 
     const dialog = await screen.findByRole('dialog', { name: t('dialog.title') })
@@ -295,25 +393,24 @@ describe('VehiclePetOverlay full journey dialog', () => {
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
     expect(document.activeElement).toBe(trigger)
     outside.remove()
+    view.unmount()
   })
 })
 
 describe('VehiclePetOverlay live Harness locale', () => {
-  it('HARNESS_LOCALE_LIVE_SYNC_TEST updates chrome, Pack, stage, next target, keepsake, and journey zh-CN → en → zh-CN without remounting', async () => {
+  it('HARNESS_LOCALE_LIVE_SYNC_TEST updates chrome, Pack, stage, keepsake, and journey zh-CN → en → zh-CN without remounting', async () => {
     const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh-CN' }
     const view = await renderOverlay(source)
-    fireEvent.click(screen.getByRole('button', { name: t('overlay.label', { state: t('state.idle') }) }))
-    fireEvent.click(screen.getByRole('button', { name: zh['panel.viewJourney'] }))
+    fireEvent.click(screen.getByRole('button', { name: t('menu.open') }))
+    fireEvent.click(screen.getByRole('button', { name: zh['menu.viewJourney'] }))
 
     const assertLocale = async (locale: 'zh-CN' | 'en') => {
       const english = locale === 'en'
       await waitFor(() => {
-        const panel = document.querySelector<HTMLElement>('[data-vehicle-pet-panel]')!
+        const menu = document.querySelector<HTMLElement>('[data-vehicle-pet-menu]')!
         const dialog = document.querySelector<HTMLElement>('[data-vehicle-pet-dialog]')!
-        expect(panel.getAttribute('aria-label')).toBe(english ? en['panel.title'] : zh['panel.title'])
-        expect(panel.querySelector('[data-vehicle-pet-stage]')?.textContent).toContain(english ? 'First Dispatch' : '首航出发')
-        expect(panel.querySelector('[data-vehicle-pet-next-threshold]')?.textContent).toContain(english ? 'Next milestone' : '下一目标')
-        expect(panel.querySelector('[data-vehicle-pet-more] summary')?.textContent).toBe(english ? en['panel.more'] : zh['panel.more'])
+        expect(menu.getAttribute('aria-label')).toBe(english ? en['menu.title'] : zh['menu.title'])
+        expect(menu.querySelector('[data-vehicle-pet-size-control]')?.textContent).toContain(english ? 'Size' : '大小')
         expect(dialog.getAttribute('aria-label')).toBe(english ? en['dialog.title'] : zh['dialog.title'])
         expect(dialog.textContent).toContain(english ? 'First run on the road; the journey begins.' : '第一次上路，旅程正式开始。')
       })
@@ -327,6 +424,7 @@ describe('VehiclePetOverlay live Harness locale', () => {
     view.rerender(<VehiclePetOverlay {...stubProps(source)} />)
     await assertLocale('zh-CN')
     expect(document.querySelectorAll('[data-vehicle-pet]')).toHaveLength(1)
+    view.unmount()
   })
 })
 
@@ -335,9 +433,10 @@ describe('VehiclePetOverlay onboarding suppression matrix', () => {
     expect(document.querySelector('[data-vehicle-pet]')).toBeNull()
     expect(document.querySelector('[data-vehicle-pet-pet]')).toBeNull()
     expect(document.querySelector('[data-vehicle-pet-launcher]')).toBeNull()
-    expect(document.querySelector('[data-vehicle-pet-panel]')).toBeNull()
+    expect(document.querySelector('[data-vehicle-pet-menu]')).toBeNull()
     expect(document.querySelector('[data-vehicle-pet-dialog]')).toBeNull()
     expect(document.querySelector('[data-vehicle-pet-dialog-backdrop]')).toBeNull()
+    expect(document.querySelector('[data-vehicle-pet-bubble]')).toBeNull()
     expect(document.querySelector('[data-vehicle-pet] button, [data-vehicle-pet] [tabindex]')).toBeNull()
   }
 
@@ -353,35 +452,35 @@ describe('VehiclePetOverlay onboarding suppression matrix', () => {
     expect(document.querySelector('[data-vehicle-pet="VISIBLE"]')).not.toBeNull()
   })
 
-  it('removes pet, panel, dialog, and focus targets then restores PANEL_OPEN', async () => {
+  it('removes pet, menu, dialog, and focus targets then restores VISIBLE', async () => {
     const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
     const view = await renderOverlay(source)
-    fireEvent.click(screen.getByRole('button', { name: t('overlay.label', { state: t('state.idle') }) }))
-    fireEvent.click(screen.getByRole('button', { name: t('panel.viewJourney') }))
+    fireEvent.click(screen.getByRole('button', { name: t('menu.open') }))
+    fireEvent.click(screen.getByRole('button', { name: t('menu.viewJourney') }))
     expect(screen.queryByRole('dialog', { name: t('dialog.title') })).not.toBeNull()
 
     view.rerender(<VehiclePetOverlay {...stubProps({ ...source, sessions: SESSIONS_ONBOARDING })} />)
     await waitFor(expectSuppressed)
     view.rerender(<VehiclePetOverlay {...stubProps(source)} />)
     await waitFor(() => {
-      expect(screen.queryByRole('group', { name: t('panel.title') })).not.toBeNull()
+      expect(screen.queryByRole('button', { name: t('overlay.label', { state: t('state.idle') }) })).not.toBeNull()
       expect(screen.queryByRole('dialog')).toBeNull()
     })
-    expect(document.querySelector('[data-vehicle-pet="PANEL_OPEN"]')).not.toBeNull()
+    expect(document.querySelector('[data-vehicle-pet="VISIBLE"]')).not.toBeNull()
   })
 
   it('removes the launcher and focus target then restores COLLAPSED', async () => {
     const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
     const view = await renderOverlay(source)
-    fireEvent.click(screen.getByRole('button', { name: t('overlay.label', { state: t('state.idle') }) }))
-    fireEvent.click(screen.getByRole('button', { name: t('panel.collapse') }))
+    await openMenu()
+    fireEvent.click(screen.getByRole('button', { name: t('menu.collapse') }))
     await screen.findByRole('button', { name: t('launcher.restore') })
 
     view.rerender(<VehiclePetOverlay {...stubProps({ ...source, sessions: SESSIONS_ONBOARDING })} />)
     await waitFor(expectSuppressed)
     view.rerender(<VehiclePetOverlay {...stubProps(source)} />)
     await screen.findByRole('button', { name: t('launcher.restore') })
-    expect(document.querySelector('[data-vehicle-pet="collapsed"]')).not.toBeNull()
+    expect(document.querySelector('[data-vehicle-pet="COLLAPSED"]')).not.toBeNull()
   })
 
   it('restores persisted COLLAPSED after a reload that starts in onboarding', async () => {
@@ -397,7 +496,7 @@ describe('VehiclePetOverlay onboarding suppression matrix', () => {
     source.sessions = SESSIONS_ON
     view.rerender(<VehiclePetOverlay {...stubProps(source)} />)
     await screen.findByRole('button', { name: t('launcher.restore') })
-    expect(document.querySelector('[data-vehicle-pet="collapsed"]')).not.toBeNull()
+    expect(document.querySelector('[data-vehicle-pet="COLLAPSED"]')).not.toBeNull()
   })
 
   it('stays available on ordinary typed conversation/settings/workspace and non-ready no-current states', async () => {
@@ -444,7 +543,7 @@ describe('VehiclePetOverlay movement and multi-tab sync', () => {
   it('moves by keyboard arrows and persists normalized ratios', async () => {
     const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
     await renderOverlay(source)
-    const pet = screen.getByRole('button', { name: t('overlay.label', { state: t('state.idle') }) })
+    const pet = petButton()
     Object.defineProperty(window, 'innerWidth', { value: 1280, configurable: true, writable: true })
     Object.defineProperty(window, 'innerHeight', { value: 800, configurable: true, writable: true })
     fireEvent.keyDown(pet, { key: 'ArrowLeft' })
@@ -462,11 +561,11 @@ describe('VehiclePetOverlay movement and multi-tab sync', () => {
     })
   })
 
-  it('CROSSTAB_COLLAPSE_RESTORE_VISIBLE_TEST destroys stale Panel and Dialog without writes', async () => {
+  it('CROSSTAB_COLLAPSE_RESTORE_VISIBLE_TEST destroys stale Menu and Dialog without writes', async () => {
     const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
     await renderOverlay(source)
-    fireEvent.click(screen.getByRole('button', { name: t('overlay.label', { state: t('state.idle') }) }))
-    fireEvent.click(screen.getByRole('button', { name: t('panel.viewJourney') }))
+    fireEvent.click(screen.getByRole('button', { name: t('menu.open') }))
+    fireEvent.click(screen.getByRole('button', { name: t('menu.viewJourney') }))
     await screen.findByRole('dialog', { name: t('dialog.title') })
 
     const setItem = vi.spyOn(Storage.prototype, 'setItem')
@@ -482,7 +581,7 @@ describe('VehiclePetOverlay movement and multi-tab sync', () => {
       newValue: record(true),
     }))
     await screen.findByRole('button', { name: t('launcher.restore') })
-    expect(document.querySelector('[data-vehicle-pet-panel]')).toBeNull()
+    expect(document.querySelector('[data-vehicle-pet-menu]')).toBeNull()
     expect(document.querySelector('[data-vehicle-pet-dialog]')).toBeNull()
     expect(document.querySelector('[data-vehicle-pet-pet]')).toBeNull()
 
@@ -492,7 +591,7 @@ describe('VehiclePetOverlay movement and multi-tab sync', () => {
       newValue: record(false),
     }))
     await waitFor(() => expect(document.querySelector('[data-vehicle-pet="VISIBLE"]')).not.toBeNull())
-    expect(document.querySelector('[data-vehicle-pet-panel]')).toBeNull()
+    expect(document.querySelector('[data-vehicle-pet-menu]')).toBeNull()
     expect(document.querySelector('[data-vehicle-pet-dialog]')).toBeNull()
     expect(setItem).not.toHaveBeenCalled()
     setItem.mockRestore()
@@ -513,96 +612,5 @@ describe('VehiclePetOverlay movement and multi-tab sync', () => {
     // Adoption itself performs no write (no write loop).
     expect(setItem).not.toHaveBeenCalled()
     setItem.mockRestore()
-  })
-})
-
-describe('resident within-level micro progress', () => {
-  const prefRecord = (overrides: { collapsed?: boolean; reducedMotion?: boolean | undefined }) =>
-    JSON.stringify({
-      schemaVersion: 1,
-      position: { xRatio: 0.9, yRatio: 0.9 },
-      collapsed: false,
-      reducedMotion: undefined,
-      ...overrides,
-    })
-
-  function stubOsReduce(matches: boolean): () => void {
-    const descriptor = Object.getOwnPropertyDescriptor(window, 'matchMedia')
-    Object.defineProperty(window, 'matchMedia', {
-      configurable: true,
-      writable: true,
-      value: (query: string) => ({
-        matches: query.includes('prefers-reduced-motion') ? matches : false,
-        media: query,
-        addEventListener: () => {},
-        removeEventListener: () => {},
-        addListener: () => {},
-        removeListener: () => {},
-      }),
-    })
-    return () => {
-      if (descriptor) Object.defineProperty(window, 'matchMedia', descriptor)
-      else delete (window as { matchMedia?: unknown }).matchMedia
-    }
-  }
-
-  it('renders an aria-hidden, non-interactive micro bar inside the pet button', async () => {
-    const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
-    await renderOverlay(source)
-    const pet = screen.getByRole('button', { name: t('overlay.label', { state: t('state.idle') }) })
-    const micro = pet.querySelector('.vpo-progress')
-    expect(micro).not.toBeNull()
-    expect(micro).toHaveAttribute('aria-hidden', 'true')
-    expect(micro?.querySelectorAll('button, [tabindex], input')).toHaveLength(0)
-    expect(micro).toHaveAttribute('data-within-level-percent')
-    const fill = micro?.querySelector('.vpo-progressFill') as HTMLElement
-    expect(fill).not.toBeNull()
-    expect(fill.style.width).toMatch(/%$/)
-  })
-
-  it('renders no micro bar in the collapsed launcher state', async () => {
-    window.localStorage.setItem(OVERLAY_PREFERENCES_KEY, prefRecord({ collapsed: true }))
-    const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
-    render(<VehiclePetOverlay {...stubProps(source)} />)
-    await waitFor(() => {
-      expect(screen.queryByRole('button', { name: t('launcher.restore') })).not.toBeNull()
-    })
-    expect(document.querySelector('[data-vehicle-pet-pet]')).toBeNull()
-    expect(document.querySelector('.vpo-progress')).toBeNull()
-  })
-
-  it('explicit reduced-motion ON silences the width transition even when the OS reports no preference', async () => {
-    const restoreOs = stubOsReduce(false)
-    window.localStorage.setItem(OVERLAY_PREFERENCES_KEY, prefRecord({ reducedMotion: true }))
-    const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
-    try {
-      await renderOverlay(source)
-      expect(document.querySelector('.vpo-progress')).toHaveAttribute('data-reduced-motion', 'true')
-    } finally {
-      restoreOs()
-    }
-  })
-
-  it('explicit reduced-motion OFF follows the effective preference over the OS reduce report', async () => {
-    const restoreOs = stubOsReduce(true)
-    window.localStorage.setItem(OVERLAY_PREFERENCES_KEY, prefRecord({ reducedMotion: false }))
-    const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
-    try {
-      await renderOverlay(source)
-      expect(document.querySelector('.vpo-progress')).toHaveAttribute('data-reduced-motion', 'false')
-    } finally {
-      restoreOs()
-    }
-  })
-
-  it('without an explicit preference the OS reduce report drives the transition gate', async () => {
-    const restoreOs = stubOsReduce(true)
-    const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
-    try {
-      await renderOverlay(source)
-      expect(document.querySelector('.vpo-progress')).toHaveAttribute('data-reduced-motion', 'true')
-    } finally {
-      restoreOs()
-    }
   })
 })

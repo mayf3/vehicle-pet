@@ -1,11 +1,11 @@
 /**
  * Overlay drag / keyboard movement / viewport clamping controller
- * (CTR-OVERLAY-003). Ratios always describe the user's pet/launcher anchor.
- * PANEL_OPEN temporarily projects that anchor through the complete active
- * Pet + gap + Panel surface, flips the Panel, and clamps the final union.
+ * (V3 CTR-OVERLAY-003). Ratios always describe the user's pet/launcher anchor.
+ * An open secondary menu temporarily projects that anchor through the complete
+ * active Pet + gap + Menu surface, flips the Menu, and clamps the final union.
  */
 import { type CSSProperties, type PointerEvent as ReactPointerEvent, type RefObject } from 'react';
-import { type VehiclePetOverlayPreferences } from './types';
+import { type VehiclePetOverlayPreferences, type VehiclePetSize } from './types';
 export interface OverlayBounds {
     readonly width: number;
     readonly height: number;
@@ -31,14 +31,14 @@ export interface CompleteActiveSurfaceLayout {
 }
 export interface UseOverlayDragOptions {
     readonly preferences: VehiclePetOverlayPreferences;
-    readonly panelOpen: boolean;
+    readonly menuOpen: boolean;
     readonly commitPreferences: (update: (current: VehiclePetOverlayPreferences) => VehiclePetOverlayPreferences) => void;
     /** Called after a real drag ended (never for a suppressed click). */
     readonly onDragEnd?: () => void;
 }
 export interface OverlayDragController {
     readonly rootRef: RefObject<HTMLDivElement>;
-    readonly panelRef: RefObject<HTMLElement>;
+    readonly menuRef: RefObject<HTMLElement | null>;
     readonly bounds: OverlayBounds;
     readonly point: OverlayPoint;
     readonly panelPlacement: PanelPlacement;
@@ -53,21 +53,28 @@ export interface OverlayDragController {
     readonly onPointerUp: (event: ReactPointerEvent<HTMLElement>) => void;
     readonly onPointerCancel: (event: ReactPointerEvent<HTMLElement>) => void;
 }
+/**
+ * Deterministic composer- and coexistence-safe default (V3 CTR-OVERLAY-003).
+ * No Harness DOM, route, copy, CSS-class, or other-plugin inspection
+ * participates in production placement: the LARGE default reserves the
+ * recorded coexistence footprint constant from OVERLAY_GEOMETRY.
+ */
+export declare function defaultBottomSafeInsetPx(size: VehiclePetSize): number;
 export declare function pointFromRatios(preferences: VehiclePetOverlayPreferences, bounds: OverlayBounds, size: number): OverlayPoint;
 /**
  * Resolve and clamp the complete active surface without mutating the persisted
- * anchor. `horizontal=left` means the Panel grows right from the Pet's left;
+ * anchor. `horizontal=left` means the Menu grows right from the Pet's left;
  * `horizontal=right` means it grows left from the Pet's right.
  */
-export declare function resolveCompleteActiveSurfaceLayout(anchor: OverlayPoint, viewport: OverlayBounds, surfaceSize: number, panelOpen: boolean, panelSize: OverlayBounds, preferred: PanelPlacement): CompleteActiveSurfaceLayout;
+export declare function resolveCompleteActiveSurfaceLayout(anchor: OverlayPoint, viewport: OverlayBounds, surfaceSize: number, menuOpen: boolean, menuSize: OverlayBounds, preferred: PanelPlacement): CompleteActiveSurfaceLayout;
 /**
  * Apply one pointer/keyboard delta from the currently rendered Pet anchor.
- * This is deliberately distinct from the latent preference anchor: PANEL_OPEN
- * may project that preference to keep the full Pet + Panel union visible, and
- * the first real input must start from that projected on-screen position.
+ * This is deliberately distinct from the latent preference anchor: an open
+ * menu may project that preference to keep the full Pet + Menu union visible,
+ * and the first real input must start from that projected on-screen position.
  */
-export declare function moveCompleteActiveSurface(renderedPoint: OverlayPoint, delta: OverlayPoint, viewport: OverlayBounds, surfaceSize: number, panelOpen: boolean, panelSize: OverlayBounds, currentPlacement: PanelPlacement): CompleteActiveSurfaceLayout;
-export declare function useOverlayDrag({ preferences, panelOpen, commitPreferences, onDragEnd, }: UseOverlayDragOptions): OverlayDragController;
+export declare function moveCompleteActiveSurface(renderedPoint: OverlayPoint, delta: OverlayPoint, viewport: OverlayBounds, surfaceSize: number, menuOpen: boolean, menuSize: OverlayBounds, currentPlacement: PanelPlacement): CompleteActiveSurfaceLayout;
+export declare function useOverlayDrag({ preferences, menuOpen, commitPreferences, onDragEnd, }: UseOverlayDragOptions): OverlayDragController;
 export declare const OVERLAY_KEYBOARD_STEPS: {
     readonly normal: 8;
     readonly large: 32;
