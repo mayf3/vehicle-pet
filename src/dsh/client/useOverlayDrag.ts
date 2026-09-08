@@ -1,15 +1,18 @@
 /**
  * Overlay drag / keyboard movement / viewport clamping controller
- * (CTR-OVERLAY-003). Ratios always describe the user's pet/launcher anchor.
- * PANEL_OPEN temporarily projects that anchor through the complete active
- * Pet + gap + Panel surface, flips the Panel, and clamps the final union.
+ * (V3 CTR-OVERLAY-003). Ratios always describe the user's pet/launcher anchor.
+ * An open secondary menu temporarily projects that anchor through the complete
+ * active Pet + gap + Menu surface, flips the Menu, and clamps the final union.
  */
 
 import {
   useCallback, useEffect, useMemo, useRef, useState,
   type CSSProperties, type PointerEvent as ReactPointerEvent, type RefObject,
 } from 'react'
-import { OVERLAY_GEOMETRY, type VehiclePetOverlayPreferences } from './types'
+import {
+  OVERLAY_GEOMETRY, effectiveSize, residentSurfaceSizePx,
+  type VehiclePetOverlayPreferences, type VehiclePetSize,
+} from './types'
 
 export interface OverlayBounds {
   readonly width: number
@@ -51,7 +54,7 @@ interface DragState {
 
 export interface UseOverlayDragOptions {
   readonly preferences: VehiclePetOverlayPreferences
-  readonly panelOpen: boolean
+  readonly menuOpen: boolean
   readonly commitPreferences: (update: (current: VehiclePetOverlayPreferences) => VehiclePetOverlayPreferences) => void
   /** Called after a real drag ended (never for a suppressed click). */
   readonly onDragEnd?: () => void
@@ -59,7 +62,7 @@ export interface UseOverlayDragOptions {
 
 export interface OverlayDragController {
   readonly rootRef: RefObject<HTMLDivElement>
-  readonly panelRef: RefObject<HTMLElement>
+  readonly menuRef: RefObject<HTMLElement | null>
   readonly bounds: OverlayBounds
   readonly point: OverlayPoint
   readonly panelPlacement: PanelPlacement
@@ -78,13 +81,24 @@ export interface OverlayDragController {
 const DRAG_THRESHOLD_PX = 4
 const KEYBOARD_STEP_PX = 8
 const KEYBOARD_LARGE_STEP_PX = 32
-const PANEL_GAP_PX = 8
-const PANEL_FALLBACK_HEIGHT_PX = 440
+// The menu hangs below/above the shell clearing the hover-revealed tools
+// trigger row; the modeled gap must equal the CSS offset (styles.ts) so the
+// complete-active-surface union is honest (V3 audit F1).
+const PANEL_GAP_PX = 26
+const PANEL_FALLBACK_HEIGHT_PX = 240
 
 const clamp = (value: number, min: number, max: number): number => Math.min(max, Math.max(min, value))
 
-function activeSurfaceSize(collapsed: boolean): number {
-  return collapsed ? OVERLAY_GEOMETRY.collapsedLauncherSizePx : OVERLAY_GEOMETRY.visibleSizePx
+/**
+ * Deterministic composer- and coexistence-safe default (V3 CTR-OVERLAY-003).
+ * No Harness DOM, route, copy, CSS-class, or other-plugin inspection
+ * participates in production placement: the LARGE default reserves the
+ * recorded coexistence footprint constant from OVERLAY_GEOMETRY.
+ */
+export function defaultBottomSafeInsetPx(size: VehiclePetSize): number {
+  return size === 'small'
+    ? OVERLAY_GEOMETRY.smallDefaultBottomSafeInsetPx
+    : OVERLAY_GEOMETRY.largeDefaultBottomSafeInsetPx
 }
 
 export function pointFromRatios(
@@ -100,15 +114,15 @@ export function pointFromRatios(
     y: margin + availableY * preferences.position.yRatio,
   }
   if (preferences.positionCustomized) return ratioPoint
-
-  // Pinned Harness exposes panel actions but no typed composer/safe-area
-  // geometry. Keep the uncustomized default in the right/lower region while
-  // reserving a deterministic bottom work-entry inset. No Harness DOM, route,
-  // copy, or CSS-class inspection participates in production placement.
   return {
     x: ratioPoint.x,
-    y: Math.max(margin, ratioPoint.y - OVERLAY_GEOMETRY.defaultBottomSafeInsetPx),
+    y: Math.max(margin, ratioPoint.y - defaultBottomSafeInsetPx(sizeToVehiclePetSize(size))),
   }
+}
+
+/** The rendered surface edge resolves to its size mode for the safe inset. */
+function sizeToVehiclePetSize(size: number): VehiclePetSize {
+  return size <= OVERLAY_GEOMETRY.smallSurfaceHeightPx ? 'small' : 'large'
 }
 
 function ratiosFromPoint(point: OverlayPoint, bounds: OverlayBounds, size: number): { xRatio: number; yRatio: number } {
@@ -129,19 +143,19 @@ function overflowForAxis(anchor: number, minOffset: number, maxOffset: number, v
 
 /**
  * Resolve and clamp the complete active surface without mutating the persisted
- * anchor. `horizontal=left` means the Panel grows right from the Pet's left;
+ * anchor. `horizontal=left` means the Menu grows right from the Pet's left;
  * `horizontal=right` means it grows left from the Pet's right.
  */
 export function resolveCompleteActiveSurfaceLayout(
   anchor: OverlayPoint,
   viewport: OverlayBounds,
   surfaceSize: number,
-  panelOpen: boolean,
-  panelSize: OverlayBounds,
+  menuOpen: boolean,
+  menuSize: OverlayBounds,
   preferred: PanelPlacement,
 ): CompleteActiveSurfaceLayout {
   const margin = OVERLAY_GEOMETRY.viewportMarginPx
-  if (!panelOpen) {
+  if (!menuOpen) {
     const point = {
       x: clamp(anchor.x, margin, Math.max(margin, viewport.width - surfaceSize - margin)),
       y: clamp(anchor.y, margin, Math.max(margin, viewport.height - surfaceSize - margin)),
@@ -154,12 +168,12 @@ export function resolveCompleteActiveSurfaceLayout(
   }
 
   const horizontalOffsets = {
-    left: { min: 0, max: Math.max(surfaceSize, panelSize.width) },
-    right: { min: Math.min(0, surfaceSize - panelSize.width), max: surfaceSize },
+    left: { min: 0, max: Math.max(surfaceSize, menuSize.width) },
+    right: { min: Math.min(0, surfaceSize - menuSize.width), max: surfaceSize },
   } as const
   const verticalOffsets = {
-    below: { min: 0, max: Math.max(surfaceSize, surfaceSize + PANEL_GAP_PX + panelSize.height) },
-    above: { min: Math.min(0, -PANEL_GAP_PX - panelSize.height), max: surfaceSize },
+    below: { min: 0, max: Math.max(surfaceSize, surfaceSize + PANEL_GAP_PX + menuSize.height) },
+    above: { min: Math.min(0, -PANEL_GAP_PX - menuSize.height), max: surfaceSize },
   } as const
 
   const leftOverflow = overflowForAxis(anchor.x, horizontalOffsets.left.min, horizontalOffsets.left.max, viewport.width)
@@ -194,32 +208,32 @@ export function resolveCompleteActiveSurfaceLayout(
 
 /**
  * Apply one pointer/keyboard delta from the currently rendered Pet anchor.
- * This is deliberately distinct from the latent preference anchor: PANEL_OPEN
- * may project that preference to keep the full Pet + Panel union visible, and
- * the first real input must start from that projected on-screen position.
+ * This is deliberately distinct from the latent preference anchor: an open
+ * menu may project that preference to keep the full Pet + Menu union visible,
+ * and the first real input must start from that projected on-screen position.
  */
 export function moveCompleteActiveSurface(
   renderedPoint: OverlayPoint,
   delta: OverlayPoint,
   viewport: OverlayBounds,
   surfaceSize: number,
-  panelOpen: boolean,
-  panelSize: OverlayBounds,
+  menuOpen: boolean,
+  menuSize: OverlayBounds,
   currentPlacement: PanelPlacement,
 ): CompleteActiveSurfaceLayout {
   return resolveCompleteActiveSurfaceLayout(
     { x: renderedPoint.x + delta.x, y: renderedPoint.y + delta.y },
     viewport,
     surfaceSize,
-    panelOpen,
-    panelSize,
+    menuOpen,
+    menuSize,
     currentPlacement,
   )
 }
 
 export function useOverlayDrag({
   preferences,
-  panelOpen,
+  menuOpen,
   commitPreferences,
   onDragEnd,
 }: UseOverlayDragOptions): OverlayDragController {
@@ -227,20 +241,20 @@ export function useOverlayDrag({
     width: globalThis.innerWidth ?? 0,
     height: globalThis.innerHeight ?? 0,
   }))
-  const [panelSize, setPanelSize] = useState<OverlayBounds>({
-    width: OVERLAY_GEOMETRY.compactPanelWidthPx,
+  const [menuSize, setMenuSize] = useState<OverlayBounds>({
+    width: OVERLAY_GEOMETRY.secondaryMenuWidthPx,
     height: PANEL_FALLBACK_HEIGHT_PX,
   })
   const [dragAnchor, setDragAnchor] = useState<OverlayPoint | undefined>()
   const [isDragging, setIsDragging] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
-  const panelRef = useRef<HTMLElement>(null)
+  const menuRef = useRef<HTMLElement | null>(null)
   const dragRef = useRef<DragState | undefined>()
   const ignoreClickRef = useRef(false)
   const onDragEndRef = useRef(onDragEnd)
   onDragEndRef.current = onDragEnd
 
-  const size = activeSurfaceSize(preferences.collapsed)
+  const size = residentSurfaceSizePx(preferences.collapsed, effectiveSize(preferences))
   const persistedAnchor = useMemo(() => pointFromRatios(preferences, bounds, size), [preferences, bounds, size])
   const anchor = dragAnchor ?? persistedAnchor
   const preferredPlacement = useMemo<PanelPlacement>(() => ({
@@ -251,10 +265,10 @@ export function useOverlayDrag({
     anchor,
     bounds,
     size,
-    panelOpen && !preferences.collapsed,
-    panelSize,
+    menuOpen && !preferences.collapsed,
+    menuSize,
     preferredPlacement,
-  ), [anchor, bounds, panelOpen, panelSize, preferences.collapsed, preferredPlacement, size])
+  ), [anchor, bounds, menuOpen, menuSize, preferences.collapsed, preferredPlacement, size])
 
   useEffect(() => {
     const element = rootRef.current
@@ -277,18 +291,18 @@ export function useOverlayDrag({
   }, [])
 
   useEffect(() => {
-    if (!panelOpen) return
-    const element = panelRef.current
+    if (!menuOpen) return
+    const element = menuRef.current
     if (element === null) return
     const update = (): void => {
       const rect = element.getBoundingClientRect()
-      if (rect.width > 0 && rect.height > 0) setPanelSize({ width: rect.width, height: rect.height })
+      if (rect.width > 0 && rect.height > 0) setMenuSize({ width: rect.width, height: rect.height })
     }
     const observer = typeof ResizeObserver === 'undefined' ? undefined : new ResizeObserver(update)
     observer?.observe(element)
     update()
     return () => observer?.disconnect()
-  }, [panelOpen])
+  }, [menuOpen])
 
   const finishDrag = useCallback((event: ReactPointerEvent<HTMLElement>): void => {
     const drag = dragRef.current
@@ -309,21 +323,21 @@ export function useOverlayDrag({
     }
   }, [bounds, commitPreferences, size])
 
-  const movementUsesPanel = panelOpen && !preferences.collapsed
+  const movementUsesMenu = menuOpen && !preferences.collapsed
   const moveByKeyboard = useCallback((dx: number, dy: number): void => {
     const next = moveCompleteActiveSurface(
       layout.point,
       { x: dx, y: dy },
       bounds,
       size,
-      movementUsesPanel,
-      panelSize,
+      movementUsesMenu,
+      menuSize,
       layout.panelPlacement,
     )
     if (next.point.x === layout.point.x && next.point.y === layout.point.y) return
     const position = ratiosFromPoint(next.point, bounds, size)
     commitPreferences(current => ({ ...current, position, positionCustomized: true }))
-  }, [bounds, commitPreferences, layout.panelPlacement, layout.point, movementUsesPanel, panelSize, size])
+  }, [bounds, commitPreferences, layout.panelPlacement, layout.point, movementUsesMenu, menuSize, size])
 
   const onPointerDown = useCallback((event: ReactPointerEvent<HTMLElement>): void => {
     if (event.button !== 0) return
@@ -352,19 +366,19 @@ export function useOverlayDrag({
       { x: dx, y: dy },
       bounds,
       size,
-      movementUsesPanel,
-      panelSize,
+      movementUsesMenu,
+      menuSize,
       drag.placement,
     )
     if (next.point.x !== drag.current.x || next.point.y !== drag.current.y) drag.visibleMoved = true
     drag.current = next.point
     drag.placement = next.panelPlacement
     setDragAnchor(next.point)
-  }, [bounds, movementUsesPanel, panelSize, size])
+  }, [bounds, movementUsesMenu, menuSize, size])
 
   return {
     rootRef,
-    panelRef,
+    menuRef,
     bounds,
     point: layout.point,
     panelPlacement: layout.panelPlacement,

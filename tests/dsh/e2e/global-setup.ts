@@ -20,8 +20,9 @@ import { createWriteStream } from 'node:fs'
 const DSH_ROOT = process.env.DSH_REFERENCE_WORKTREE
   ?? '/Users/yanfenma/workspace/github/deepseek-harness-wt-vehicle-pet-overlay-f77b5a2f'
 const DSH_HOME = process.env.DISPOSABLE_DSH_HOME ?? '/tmp/vehicle-pet-overlay-dsh-home-r1'
+// Must match launch-dsh-web.mjs: the implementation worktree under test.
 const PLUGIN_ROOT = process.env.VEHICLE_PET_PLUGIN_ROOT
-  ?? '/Users/yanfenma/workspace/project/vehicle-pet-wt-overlay-v1-5b9c6fa6'
+  ?? process.cwd()
 const MOCK_LLM_PORT = process.env.VEHICLE_PET_MOCK_LLM_PORT ?? '8901'
 
 export default async function globalSetup(): Promise<() => Promise<void>> {

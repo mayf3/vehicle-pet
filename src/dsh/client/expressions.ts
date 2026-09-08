@@ -1,10 +1,11 @@
 /**
  * Session-expression presentation for the resident pet
- * (DSH_PET_OVERLAY_ADAPTER_V2 DEC-OVERLAY-007 / CTR-OVERLAY-014/015).
+ * (DSH_PET_OVERLAY_ADAPTER_V3 DEC-OVERLAY-007 / CTR-OVERLAY-014/015).
  *
- * The layer is adapter-owned presentation: five transparent state masters
- * (bundled, deterministic, WebP primary + PNG fallback) are positioned over
- * the current level sprite through a per-level face anchor table. It is
+ * The layer is adapter-owned presentation: ten transparent variant masters —
+ * the five structured session states plus five companion sub-expression
+ * variants (bundled, deterministic, WebP primary + PNG fallback) — positioned
+ * over the current level sprite through a per-level face anchor table. It is
  * transient session presentation only — it never mutates progression, adds no
  * pointer/focus target, and stays readable with motion suppressed
  * (CTR-OVERLAY-015). Anchors mirror ANCHOR_PX in
@@ -14,7 +15,34 @@
 import { expressionAssets } from './expression-assets.generated'
 import type { VehiclePetSessionView } from './types'
 
-/** The five user-perceivable expression states (V2 §8 EXPRESSION_STATES). */
+/**
+ * The expression variants (V3 CTR-OVERLAY-014): the five structured states
+ * keep their mapping duty; the additional variants cover happy, curious,
+ * resting, a second completed family member, and a relaxed cancelled family
+ * member. Ten statically distinguishable masters exceed the eight floor.
+ */
+export type VehiclePetExpressionVariant =
+  | 'idle'
+  | 'idle-happy'
+  | 'idle-curious'
+  | 'idle-sleepy'
+  | 'working'
+  | 'needs-input'
+  | 'completed'
+  | 'completed-proud'
+  | 'failed'
+  | 'cancelled'
+
+/** Face anchor rects `[left, top, size]` in % of the 480x480 level sprite canvas. */
+export const EXPRESSION_LEVEL_ANCHORS: Readonly<
+  Record<string, readonly [number, number, number]>
+> = {
+  l1: [8, 37, 45], l2: [8, 37, 45], l3: [8, 37, 45], l4: [7, 45, 40],
+  l5: [8, 38, 45], l6: [32, 61, 22], l7: [36, 70, 13], l8: [36, 66, 14],
+  l9: [36, 67, 14], l10: [41, 68, 11], l11: [35, 63, 15], l12: [16, 65, 22],
+}
+
+/** The five user-perceivable session states (mapping core, unchanged from V2). */
 export type VehiclePetExpressionState =
   | 'idle'
   | 'working'
@@ -22,28 +50,10 @@ export type VehiclePetExpressionState =
   | 'completed'
   | 'failed'
 
-/** Face anchor rects `[left, top, size]` in % of the 480x480 level sprite canvas. */
-export const EXPRESSION_LEVEL_ANCHORS: Readonly<
-  Record<string, readonly [number, number, number]>
-> = {
-  l1: [8, 43, 28],
-  l2: [12, 42, 32],
-  l3: [9, 42, 28],
-  l4: [12, 44, 32],
-  l5: [10, 53, 30],
-  l6: [29, 53, 27],
-  l7: [43, 66, 23],
-  l8: [51, 67, 23],
-  l9: [26, 63, 27],
-  l10: [28, 62, 24],
-  l11: [22, 62, 24],
-  l12: [8, 59, 26],
-}
-
 /**
  * Structured session view → expression state. failed and cancelled share the
- * comforting failed presentation (V2 §8.3); completed, working, and
- * needs-input map one-to-one; idle is the calm baseline.
+ * comforting failed presentation (§8.3); completed, working, and needs-input
+ * map one-to-one; idle is the calm baseline.
  */
 export function expressionStateFromSession(
   session: VehiclePetSessionView,
@@ -64,7 +74,57 @@ export function expressionAnchor(
 }
 
 export function expressionAsset(
-  state: VehiclePetExpressionState,
+  variant: VehiclePetExpressionVariant,
 ): { webp: string; png: string } | null {
-  return expressionAssets[state] ?? null
+  return expressionAssets[variant] ?? null
+}
+
+/** Structured context driving the pure variant selection (unit-testable). */
+export interface ExpressionSelectionContext {
+  /** Mapped five-state session state. */
+  readonly state: VehiclePetExpressionState
+  /** Terminal status when a terminal reaction is active (cancelled → relaxed). */
+  readonly terminalStatus: 'completed' | 'failed' | 'cancelled' | null
+  /** True when a level-up / milestone event is currently being celebrated. */
+  readonly milestoneActive: boolean
+  /** Increments on each pet click; drives the idle variant cycle. */
+  readonly clickCount: number
+  /**
+   * Bounded idle bucket: 0 fresh (≤2 min), 1 mid (≤10 min), 2 long (>10 min).
+   * Derived from payload-ignored activity recency; deterministic input.
+   */
+  readonly idleBucket: 0 | 1 | 2
+  /** The most recently rendered variant for the same state (no-immediate-repeat). */
+  readonly lastVariantForState: VehiclePetExpressionVariant | undefined
+}
+
+const IDLE_POOL: readonly VehiclePetExpressionVariant[] = ['idle', 'idle-happy', 'idle-curious']
+
+/**
+ * Pure variant selection (V3 CTR-OVERLAY-014): deterministic over structured
+ * context, no immediate repetition of the same variant within the same state.
+ */
+export function selectExpressionVariant(context: ExpressionSelectionContext): VehiclePetExpressionVariant {
+  const { state } = context
+  if (state === 'working') return 'working'
+  if (state === 'needs-input') return 'needs-input'
+  if (state === 'completed') {
+    if (context.milestoneActive) return 'completed-proud'
+    return 'completed'
+  }
+  if (state === 'failed') {
+    return context.terminalStatus === 'cancelled' ? 'cancelled' : 'failed'
+  }
+  // idle: sleepy dominates only after a long quiet period; a fresh click
+  // cycles the friendly pool; otherwise keep the calm default and never
+  // repeat the previous idle variant back-to-back.
+  if (context.idleBucket === 2) return 'idle-sleepy'
+  const clickVariant = IDLE_POOL[context.clickCount % IDLE_POOL.length] ?? 'idle'
+  if (context.clickCount > 0 && clickVariant !== context.lastVariantForState) return clickVariant
+  if (context.idleBucket === 1) {
+    const midPool: readonly VehiclePetExpressionVariant[] = ['idle', 'idle-happy']
+    const candidate = midPool[(context.clickCount + 1) % midPool.length] ?? 'idle'
+    return candidate === context.lastVariantForState ? 'idle' : candidate
+  }
+  return 'idle'
 }

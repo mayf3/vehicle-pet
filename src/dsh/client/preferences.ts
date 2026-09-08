@@ -1,13 +1,15 @@
 /**
  * Overlay preferences: one versioned browser-local record owning normalized
- * position, collapsed state, and the explicit reduced-motion choice
- * (CTR-OVERLAY-010). Tolerant of missing, malformed, wrong-version,
- * out-of-range, NaN/Infinity, quota-failed, and unavailable storage; the pet
- * never blocks on preferences. Same-origin `storage` events sync another tab
- * without write loops; every listener is returned as a disposer.
+ * position, collapsed state, the explicit reduced-motion choice, and the
+ * SMALL/LARGE size choice (V3 CTR-OVERLAY-010). Tolerant of missing,
+ * malformed, wrong-version, out-of-range, NaN/Infinity, quota-failed, and
+ * unavailable storage; the pet never blocks on preferences. A record without
+ * an explicit size choice — including every pre-V3 record — resolves to LARGE
+ * without rewriting the stored bytes. Same-origin `storage` events sync
+ * another tab without write loops; every listener is returned as a disposer.
  */
 
-import type { VehiclePetOverlayPreferences } from './types'
+import type { VehiclePetOverlayPreferences, VehiclePetSize } from './types'
 
 export const OVERLAY_PREFERENCES_KEY = 'vehicle-pet/overlay-preferences/v1'
 
@@ -17,12 +19,16 @@ export const DEFAULT_OVERLAY_PREFERENCES: Readonly<VehiclePetOverlayPreferences>
   positionCustomized: false,
   collapsed: false,
   reducedMotion: undefined,
+  size: undefined,
 })
 
 const finiteRatio = (value: unknown, fallback: number): number =>
   typeof value === 'number' && Number.isFinite(value)
     ? Math.min(1, Math.max(0, value))
     : fallback
+
+const normalizeSize = (value: unknown): VehiclePetSize | undefined =>
+  value === 'small' || value === 'large' ? value : undefined
 
 /** Normalize any unknown stored value into valid preferences (or defaults). */
 export function normalizeOverlayPreferences(value: unknown): VehiclePetOverlayPreferences {
@@ -48,6 +54,7 @@ export function normalizeOverlayPreferences(value: unknown): VehiclePetOverlayPr
     positionCustomized,
     collapsed: typeof candidate.collapsed === 'boolean' ? candidate.collapsed : false,
     reducedMotion: typeof candidate.reducedMotion === 'boolean' ? candidate.reducedMotion : undefined,
+    size: normalizeSize(candidate.size),
   }
 }
 
@@ -108,7 +115,8 @@ export function adoptStorageEvent(
       || next.position.yRatio !== current.position.yRatio
       || next.positionCustomized !== current.positionCustomized
       || next.collapsed !== current.collapsed
-      || next.reducedMotion !== current.reducedMotion) {
+      || next.reducedMotion !== current.reducedMotion
+      || next.size !== current.size) {
       return next
     }
     return null

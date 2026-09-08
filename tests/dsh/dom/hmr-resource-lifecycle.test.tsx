@@ -259,7 +259,7 @@ describe('client HMR generation and complete resource disposal inventory', () =>
     apply(generation1.context() as Parameters<typeof apply>[0])
     const view1 = mountEntry(generation1, list)
     await act(async () => { await Promise.resolve(); await Promise.resolve() })
-    fireEvent.click(document.querySelector('[data-vehicle-pet-pet]') as HTMLElement)
+    fireEvent.click(document.querySelector('[data-vehicle-pet-menu-trigger]') as HTMLElement)
     fireEvent.click(document.querySelector('[data-vehicle-pet-open-journey]') as HTMLElement)
     // Let zero-duration React scheduling settle; only genuinely live plugin
     // timers belong in the ACTIVE inventory.
@@ -275,9 +275,11 @@ describe('client HMR generation and complete resource disposal inventory', () =>
       currentSessionSubscriptions: 1,
       storageListeners: 1,
       resizeListeners: 1,
-      // React's two host listeners plus the dialog's lifecycle-owned keydown
-      // and focusin containment listeners.
-      keyboardDocumentListeners: 4,
+      // React's two host listeners, the dialog's lifecycle-owned keydown and
+      // focusin containment listeners, the speech input-recency pair
+      // (payload-ignored keydown+pointerdown, V3 CTR-OVERLAY-019(3)), and the
+      // open menu's outside-press pointerdown — all disposed with the mount.
+      keyboardDocumentListeners: 7,
       pointerCaptureListeners: 4,
       // Root viewport + open Panel measurement; both must dispose at HMR.
       observers: 2,

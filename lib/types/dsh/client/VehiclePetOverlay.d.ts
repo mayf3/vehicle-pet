@@ -1,19 +1,24 @@
 /**
- * VehiclePetOverlay: the `shell.overlay` entry (CTR-OVERLAY-002..013).
- * Root layer is click-through; the pet, launcher, compact panel, and full
- * journey dialog re-enable pointer events. Exactly three persisted
- * interaction states (VISIBLE / PANEL_OPEN / COLLAPSED, default VISIBLE,
- * no full hide). During structured onboarding no surface is rendered, and the
- * exact pre-suppression state returns when onboarding ends in the same mount.
- * One Engine instance backs the overlay, panel, and dialog; structured
- * session state drives transient visuals only and never progression.
+ * VehiclePetOverlay: the `shell.overlay` entry (DSH_PET_OVERLAY_ADAPTER_V3).
+ * Root layer is click-through; the pet hitbox, launcher, secondary menu, and
+ * full journey dialog re-enable pointer events. The persisted interaction
+ * machine is exactly VISIBLE with a collapsed browser-local preference — no
+ * PANEL_OPEN, no full hide (CTR-OVERLAY-004). A normal pet click is a pet
+ * reaction (expression variant + light motion + throttled line), never a
+ * settings surface (CTR-OVERLAY-021). The resident hitbox hugs the visible
+ * sprite within the recorded tolerance (CTR-OVERLAY-003). During structured
+ * onboarding no surface is rendered, and the exact pre-suppression state
+ * returns when onboarding ends in the same mount (CTR-OVERLAY-011). One
+ * Engine instance backs the overlay, menu, and dialog; structured session
+ * state drives transient visuals only and never progression.
  */
 import { type ReactElement } from 'react';
 import type { HostObservable, InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots';
-import { type PetStorageAdapter } from '../../engine';
+import { type Locale, type PetStorageAdapter } from '../../engine';
+import { usePetEngine } from '../../react';
 import type { VehiclePetBindingInfo } from './session-state-adapter';
 import type { UsageSessionsSource } from './usage-progress-source';
-import type { VehiclePetOverlayPreferences, VehiclePetSessionView } from './types';
+import { type VehiclePetOverlayPreferences, type VehiclePetSessionView } from './types';
 /** The injected hooks share the renderer binds from the `hooks` compartment. */
 export interface VehiclePetInjected {
     hooks: {
@@ -30,13 +35,14 @@ export interface VehiclePetInjected {
     clientGeneration?: string;
 }
 export type VehiclePetOverlayProps = PropsRuntime<'shell.overlay'> & InjectFace<VehiclePetInjected> & PropsLocale<'vehicle-pet'>;
-/** Overlay chrome shared with the panel/dialog: translate + pref commit. */
+/** Overlay chrome shared with the menu/dialog: translate + pref commit. */
 interface OverlayChrome {
     t: PropsLocale<'vehicle-pet'>['t'];
     commitPreferences: (update: (current: VehiclePetOverlayPreferences) => VehiclePetOverlayPreferences) => void;
+    engineLocale: Locale;
 }
 export declare function useOverlayChrome(): OverlayChrome;
-/** Test/localization seam for panel copy: translate through the entry locale seat. */
+/** Test/localization seam for menu copy: translate through the entry locale seat. */
 export declare function useOverlayT(): PropsLocale<'vehicle-pet'>['t'];
 export declare function useOverlayCommitPreferences(): OverlayChrome['commitPreferences'];
 export declare function VehiclePetOverlay(props: VehiclePetOverlayProps): ReactElement | null;
@@ -55,5 +61,21 @@ export interface OwnedOverlayStorageLifecycleOptions {
  * is closed immediately and is never published into the unmounted tree.
  */
 export declare function acquireOwnedOverlayStorage({ create, onReady, fallback, }: OwnedOverlayStorageLifecycleOptions): () => void;
+/**
+ * The resident pet surface (V3): the full-canvas scene renders the level
+ * visual (pointer-events none, aria-hidden); one transparent hit button
+ * overlays the visible sprite bbox within the recorded tolerance and carries
+ * the pointer/focus/keyboard surface (CTR-OVERLAY-003 hitbox honesty, V3
+ * CTR-OVERLAY-021 click reaction). The speech bubble and the hover-revealed
+ * menu trigger live here.
+ */
+/**
+ * LARGE presence boost (V3 audit craft round): the compact renderer sizes the
+ * subject with the SMALL-era `max(42, planned)%` box, which leaves a LARGE
+ * card mostly empty. The overlay scales the LARGE subject up (never beyond
+ * the shell) through the `--vp-subject-boost` variable; the hitbox math uses
+ * the same factor so pointer/focus honesty is preserved.
+ */
+export declare function subjectBoostFor(plan: ReturnType<typeof usePetEngine>['snapshot']['plan'], surfaceSize: number): number;
 export {};
 //# sourceMappingURL=VehiclePetOverlay.d.ts.map

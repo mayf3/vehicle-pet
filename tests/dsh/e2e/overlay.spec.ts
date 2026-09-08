@@ -1,18 +1,23 @@
 /**
- * DSH overlay browser acceptance (ACC-OVERLAY-002..017) against the pinned
- * DeepSeek Harness Web in a disposable home. Serialized: the mock LLM serves
- * one scripted behavior per model request, so the session-driven states
- * (running / needs-input / completed / failed / cancelled) walk in order.
+ * DSH overlay browser acceptance (DSH_PET_OVERLAY_ADAPTER_V3,
+ * ACC-OVERLAY-103..119) against the pinned DeepSeek Harness Web in a
+ * disposable home. Serialized: the mock LLM serves one scripted behavior per
+ * model request, so the session-driven states (running / needs-input /
+ * completed / failed / cancelled) walk in order.
  *
- * Production-only: no Vite dev server, no port 5199, no iframe; every pet
- * asset is inlined. The standalone prototype regression is covered by the
- * repository's own `pnpm verify` (Playwright against the Vite app).
+ * V3 surface: resident pet is VISIBLE/COLLAPSED only (no panel; a normal pet
+ * click is a pet reaction), two sizes (SMALL 112 / LARGE 216) toggled and
+ * persisted through the hover-revealed secondary menu, no resident progress
+ * bar, and a single bounded speech bubble. Production-only: no Vite dev
+ * server, no port 5199, no iframe; every pet asset is inlined. The standalone
+ * prototype regression is covered by the repository's own Playwright run.
  */
 
 import { execFileSync } from 'node:child_process'
 import { mkdirSync, readFileSync } from 'node:fs'
 import { expect, test, type BrowserContext, type Page, type Request } from '@playwright/test'
 import sharp from 'sharp'
+import { speechCatalog } from '../../../src/dsh/client/speech-catalog'
 
 interface MatrixManifest {
   readonly levels: readonly { levelId: string; threshold: number }[]
@@ -22,10 +27,19 @@ const fleetManifest = JSON.parse(readFileSync(new URL('../../../src/packs/autono
 
 const ARTIFACTS = 'tests/dsh/e2e/.artifacts'
 const PET = '[data-vehicle-pet-pet="true"]'
+const SHELL = '.vpo-shell'
+const ROOT = '.vpo-root'
 const LAUNCHER = '[data-vehicle-pet-launcher="true"]'
-const PANEL = '[data-vehicle-pet-panel="true"]'
+const MENU = '[data-vehicle-pet-menu="true"]'
+const MENU_TRIGGER = '[data-vehicle-pet-menu-trigger="true"]'
+const DIALOG = '[data-vehicle-pet-dialog="true"]'
+const PANEL = '[data-vehicle-pet-panel="true"]' // V2 legacy surface: must never exist again.
 const PILL = '[data-pet-host-feedback]'
+const BUBBLE = '[data-vehicle-pet-bubble="true"]'
+const PREF_KEY = 'vehicle-pet/overlay-preferences/v1'
 const VIEWPORT = { width: 1440, height: 900 } as const
+/** CTR-OVERLAY-017: no speech within 30 s of surface mount; +1s slack. */
+const SPEECH_LOAD_QUIET_WAIT_MS = 31_000
 
 const seenRequests: Request[] = []
 const consoleErrors: string[] = []
@@ -261,19 +275,38 @@ async function sendPrompt(page: Page, text: string): Promise<void> {
 }
 
 /**
- * Idempotently opens the panel's low-frequency "More" disclosure. Clicking
- * the summary toggles, so an already-open disclosure must not be clicked.
+ * Opens the secondary settings menu through its trigger. Focus first: the
+ * trigger row is hover/focus-revealed (CTR-OVERLAY-005), and the focus path
+ * is deterministic for Playwright (no intermediate-pointer hover race).
  */
-async function openMoreDisclosure(page: Page): Promise<void> {
-  const more = page.locator('[data-vehicle-pet-more]')
-  if (await more.getAttribute('open') === null) {
-    await page.locator('[data-vehicle-pet-more] summary').click()
-  }
-  await page.locator('[data-vehicle-pet-reduced-motion-option]').first().waitFor({ state: 'visible' })
+async function openMenu(page: Page): Promise<void> {
+  const trigger = page.locator(MENU_TRIGGER)
+  await trigger.focus()
+  await trigger.click()
+  await page.locator(MENU).waitFor({ state: 'visible' })
+}
+
+/** Escape closes the menu (CTR-OVERLAY-004); focus rests inside the menu or its trigger. */
+async function closeMenu(page: Page): Promise<void> {
+  if (await page.locator(MENU).count() === 0) return
+  await page.keyboard.press('Escape')
+  await expect.poll(() => page.locator(MENU).count()).toBe(0)
+}
+
+async function seedPreferences(page: Page, record: Record<string, unknown>): Promise<void> {
+  await page.evaluate(({ key, value }) => {
+    window.localStorage.setItem(key, JSON.stringify(value))
+  }, { key: PREF_KEY, value: record })
 }
 
 async function petBox(page: Page) {
   return page.locator(PET).boundingBox()
+}
+
+async function shellBox(page: Page) {
+  const box = await page.locator(SHELL).boundingBox()
+  if (box === null) throw new Error('resident shell has no bounding box')
+  return box
 }
 
 function overlapArea(a: { x: number; y: number; width: number; height: number }, b: { x: number; y: number; width: number; height: number }): number {
@@ -362,6 +395,13 @@ async function installPillRecorder(page: Page): Promise<PillRecorder> {
   }
 }
 
+/** Wait until the resident pet presents the calm idle baseline (no terminal). */
+async function waitForIdleBaseline(page: Page): Promise<void> {
+  await expect.poll(() => page.locator(PET).getAttribute('data-live'), { timeout: 90_000 }).toBe('idle')
+  await expect.poll(() => page.locator(PET).getAttribute('data-terminal'), { timeout: 15_000 }).toBeNull()
+  await expect.poll(async () => (await page.locator(PILL).count()), { timeout: 30_000 }).toBe(0)
+}
+
 /** Fresh page bootstrap: load the app and wait for the mounted pet. */
 async function openOverlay(page: Page): Promise<void> {
   await page.goto('/')
@@ -376,14 +416,14 @@ async function openOverlay(page: Page): Promise<void> {
   await expect.poll(() => page.locator(PET).count(), { timeout: 30_000 }).toBe(1)
 }
 
-test('23. onboarding: fresh boot renders no pet, launcher, panel, or dialog DOM', async ({ page }) => {
+test('23. onboarding: fresh boot renders no pet, launcher, menu, or dialog DOM', async ({ page }) => {
   await page.goto('/')
   await dismissStartupDialogs(page)
   await page.getByRole('textbox', { name: /Choose workspace|选择工作区/ }).waitFor({ timeout: 30_000 })
   // Structured onboarding state (ready + no current session) suppresses every surface.
   await expect.poll(() => page.locator(PET).count()).toBe(0)
   await expect.poll(() => page.locator(LAUNCHER).count()).toBe(0)
-  await expect.poll(() => page.locator('.vpo-root').count()).toBe(0)
+  await expect.poll(() => page.locator(ROOT).count()).toBe(0)
 })
 
 test('24 + 16 + 18 + 21 + 17 + 19 + 20 + 22. structured session lifecycle drives the pet', async ({ page }) => {
@@ -393,7 +433,7 @@ test('24 + 16 + 18 + 21 + 17 + 19 + 20 + 22. structured session lifecycle drives
 
   // Onboarding ends with the first accepted prompt; exactly one entry mounts.
   await expect.poll(() => page.locator(PET).count(), { timeout: 30_000 }).toBe(1)
-  expect(await page.locator('.vpo-root').count()).toBe(1)
+  expect(await page.locator(ROOT).count()).toBe(1)
   // The turn streams slowly (mock chunk delay); the working state is visible
   // until the terminal edge lands. Screenshot as soon as running is observed.
   const pillsBeforeReload = await installPillRecorder(page)
@@ -454,7 +494,7 @@ test('24 + 16 + 18 + 21 + 17 + 19 + 20 + 22. structured session lifecycle drives
   await page.waitForTimeout(4200)
   expect(await page.locator(PILL).count()).toBe(0)
   expect(await pillsAfterSecondReload.read()).toEqual([])
-  const root = page.locator('.vpo-root')
+  const root = page.locator(ROOT)
   const previousSessionId = await root.getAttribute('data-session-list-current')
   const previousGeneration = Number(await root.getAttribute('data-adapter-generation'))
   expect(previousSessionId).toBeTruthy()
@@ -501,51 +541,144 @@ test('24 + 16 + 18 + 21 + 17 + 19 + 20 + 22. structured session lifecycle drives
   await expect.poll(async () => (await page.locator(PILL).count()), { timeout: 30_000 }).toBe(0)
 })
 
-test('2 + 3. default bottom-right placement and 112px visible size', async ({ page }) => {
+test('SIZE_MODE_LARGE. default load renders the 216px LARGE resident with the coexistence-safe placement', async ({ page }) => {
   await openOverlay(page)
-  const box = await petBox(page)
-  expect(box).not.toBeNull()
-  expect(box!.width).toBe(112)
-  expect(box!.height).toBe(112)
-  expect(box!.x).toBeGreaterThan(VIEWPORT.width / 2)
-  expect(box!.y).toBeGreaterThan(VIEWPORT.height / 2)
-  expect(VIEWPORT.width - (box!.x + box!.width)).toBeLessThanOrEqual(40)
-  const bottomGap = VIEWPORT.height - (box!.y + box!.height)
-  expect(bottomGap).toBeGreaterThanOrEqual(160)
-  expect(bottomGap).toBeLessThanOrEqual(220)
-  await page.screenshot({ path: `${ARTIFACTS}/visible.png` })
+  await page.waitForTimeout(350) // settle the 200ms shell transitions
+  const root = page.locator(ROOT)
+  await expect(root).toHaveAttribute('data-vehicle-pet', 'VISIBLE')
+  await expect(root).toHaveAttribute('data-vehicle-pet-size', 'large')
+
+  const box = await shellBox(page)
+  expect(box.width).toBe(216)
+  expect(box.height).toBe(216)
+  expect(box.x).toBeGreaterThan(VIEWPORT.width / 2)
+  // Default (never customized) anchor is bottom-right minus the LARGE
+  // coexistence-safe inset: 392px + the 16px viewport margin.
+  const bottomGap = VIEWPORT.height - (box.y + box.height)
+  expect(Math.abs(bottomGap - (392 + 16))).toBeLessThanOrEqual(2)
+  const rightGap = VIEWPORT.width - (box.x + box.width)
+  expect(rightGap).toBeGreaterThanOrEqual(14)
+  expect(rightGap).toBeLessThanOrEqual(20)
+
+  // Hitbox honesty (CTR-OVERLAY-003): the interactive hit button hugs the
+  // visible sprite bbox inside the square shell, never the full canvas. The
+  // pre-plan fallback renders the full canvas, so poll for the settled bbox.
+  await expect.poll(async () => {
+    const current = await petBox(page)
+    return current === null ? 0 : (current.width < 212 || current.height < 212 ? 1 : 0)
+  }, { timeout: 20_000 }).toBe(1)
+  const hit = await petBox(page)
+  expect(hit!.width).toBeLessThanOrEqual(216)
+  expect(hit!.height).toBeLessThanOrEqual(216)
+  // The L1 subject hugs well inside the canvas; the renderer's per-level bbox
+  // (with the 42% subject-width floor) yields ≈95x60 at LARGE.
+  expect(hit!.width).toBeGreaterThanOrEqual(60)
+  expect(hit!.height).toBeGreaterThanOrEqual(40)
+  expect(hit!.x).toBeGreaterThanOrEqual(box.x - 1)
+  expect(hit!.y).toBeGreaterThanOrEqual(box.y - 1)
+  expect(hit!.x + hit!.width).toBeLessThanOrEqual(box.x + box.width + 1)
+  expect(hit!.y + hit!.height).toBeLessThanOrEqual(box.y + box.height + 1)
+  await page.screenshot({ path: `${ARTIFACTS}/visible-large.png` })
+})
+
+test('SIZE_MODE_SMALL. stored size small renders the 112px resident with the composer-safe placement', async ({ page }) => {
+  await page.addInitScript(record => {
+    window.localStorage.setItem('vehicle-pet/overlay-preferences/v1', JSON.stringify(record))
+  }, {
+    schemaVersion: 1,
+    position: { xRatio: 1, yRatio: 1 },
+    positionCustomized: false,
+    collapsed: false,
+    reducedMotion: undefined,
+    size: 'small',
+  })
+  await openOverlay(page)
+  await page.waitForTimeout(350)
+  const root = page.locator(ROOT)
+  await expect(root).toHaveAttribute('data-vehicle-pet', 'VISIBLE')
+  await expect(root).toHaveAttribute('data-vehicle-pet-size', 'small')
+
+  const box = await shellBox(page)
+  expect(box.width).toBe(112)
+  expect(box.height).toBe(112)
+  expect(box.x).toBeGreaterThan(VIEWPORT.width / 2)
+  // SMALL default inset 176px + 16px margin.
+  const bottomGap = VIEWPORT.height - (box.y + box.height)
+  expect(Math.abs(bottomGap - (176 + 16))).toBeLessThanOrEqual(2)
+  await page.screenshot({ path: `${ARTIFACTS}/visible-small.png` })
+})
+
+test('SIZE_PERSISTENCE. menu size choice persists across reload in both directions', async ({ page }) => {
+  await openOverlay(page)
+  // LARGE is the default when the preference field is absent (DEC-OVERLAY-005).
+  await page.waitForTimeout(350)
+  await expect(page.locator(ROOT)).toHaveAttribute('data-vehicle-pet-size', 'large')
+  expect((await shellBox(page)).width).toBe(216)
+
+  // Toggle SMALL through the secondary menu only (CTR-OVERLAY-020).
+  await openMenu(page)
+  await page.locator('[data-vehicle-pet-size-option="small"]').click()
+  await page.waitForTimeout(350)
+  await expect(page.locator(ROOT)).toHaveAttribute('data-vehicle-pet-size', 'small')
+  expect((await shellBox(page)).width).toBe(112)
+  expect(await page.locator('[data-vehicle-pet-size-option="small"]').getAttribute('aria-pressed')).toBe('true')
+  await closeMenu(page)
+  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('vehicle-pet/overlay-preferences/v1') ?? '{}')) as { size?: string }
+  expect(stored.size).toBe('small')
+
+  await page.reload()
+  await expect.poll(() => page.locator(PET).count(), { timeout: 30_000 }).toBe(1)
+  await page.waitForTimeout(350)
+  await expect(page.locator(ROOT)).toHaveAttribute('data-vehicle-pet-size', 'small')
+  expect((await shellBox(page)).width).toBe(112)
+
+  // Toggle back to LARGE; the explicit choice persists as well.
+  await openMenu(page)
+  await page.locator('[data-vehicle-pet-size-option="large"]').click()
+  await page.waitForTimeout(350)
+  await expect(page.locator(ROOT)).toHaveAttribute('data-vehicle-pet-size', 'large')
+  expect((await shellBox(page)).width).toBe(216)
+  await closeMenu(page)
+  const storedLarge = await page.evaluate(() => JSON.parse(localStorage.getItem('vehicle-pet/overlay-preferences/v1') ?? '{}')) as { size?: string }
+  expect(storedLarge.size).toBe('large')
+
+  await page.reload()
+  await expect.poll(() => page.locator(PET).count(), { timeout: 30_000 }).toBe(1)
+  await page.waitForTimeout(350)
+  await expect(page.locator(ROOT)).toHaveAttribute('data-vehicle-pet-size', 'large')
+  expect((await shellBox(page)).width).toBe(216)
 })
 
 test('DEFAULT_COMPOSER_OVERLAP_TEST. safe bottom-right avoids composer and send button', async ({ page }) => {
   await openOverlay(page)
-  const pet = await petBox(page)
+  await page.waitForTimeout(350)
+  const pet = await shellBox(page)
   const composer = await composerBounds(page)
   const send = await page.getByRole('button', { name: /发送消息|Send message/ }).first().boundingBox()
-  expect(pet).not.toBeNull()
   expect(send).not.toBeNull()
-  expect(overlapArea(pet!, composer)).toBe(0)
-  expect(overlapArea(pet!, send!)).toBe(0)
+  expect(overlapArea(pet, composer)).toBe(0)
+  expect(overlapArea(pet, send!)).toBe(0)
 })
 
 test('MOBILE_COMPOSER_OVERLAP_TEST. 390px viewport keeps the pet on-screen and clear of composer', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await openOverlay(page)
-  const pet = await petBox(page)
+  await page.waitForTimeout(350)
+  const pet = await shellBox(page)
   const composer = await composerBounds(page)
-  expect(pet).not.toBeNull()
-  expect(overlapArea(pet!, composer)).toBe(0)
-  expect(pet!.x).toBeGreaterThanOrEqual(0)
-  expect(pet!.y).toBeGreaterThanOrEqual(0)
-  expect(pet!.x + pet!.width).toBeLessThanOrEqual(390)
-  expect(pet!.y + pet!.height).toBeLessThanOrEqual(844)
+  expect(overlapArea(pet, composer)).toBe(0)
+  expect(pet.x).toBeGreaterThanOrEqual(0)
+  expect(pet.y).toBeGreaterThanOrEqual(0)
+  expect(pet.x + pet.width).toBeLessThanOrEqual(390)
+  expect(pet.y + pet.height).toBeLessThanOrEqual(844)
   await page.screenshot({ path: `${ARTIFACTS}/mobile-safe-visible.png` })
 })
 
-test('SCENE_COMPACT_GEOMETRY_TEST. Fleet and Seedling subjects remain centred and visible in 112px', async ({ page }) => {
+test('SCENE_GEOMETRY_TEST. Fleet subject remains centred and visible in the 216px resident scene', async ({ page }) => {
   await openOverlay(page)
   const assertSubject = async () => {
-    const scene = await page.locator(`${PET} .vp-scene`).boundingBox()
-    const subject = await page.locator(`${PET} [data-pet-subject="true"]`).boundingBox()
+    const scene = await page.locator('.vpo-scene .vp-scene').boundingBox()
+    const subject = await page.locator('.vpo-scene [data-pet-subject="true"]').boundingBox()
     expect(scene).not.toBeNull()
     expect(subject).not.toBeNull()
     const ratio = overlapArea(subject!, scene!) / (subject!.width * subject!.height)
@@ -556,64 +689,143 @@ test('SCENE_COMPACT_GEOMETRY_TEST. Fleet and Seedling subjects remain centred an
     expect(subject!.y + subject!.height / 2).toBeLessThanOrEqual(scene!.y + scene!.height)
   }
   await assertSubject()
-  await page.screenshot({ path: `${ARTIFACTS}/fleet-visible-r2.png` })
-  // V2: no Pack switch exists on the DSH surface, so no second-Pack subject
+  await page.screenshot({ path: `${ARTIFACTS}/fleet-visible-v3.png` })
+  // V2/V3: no Pack switch exists on the DSH surface, so no second-Pack subject
   // can appear here; the seedling fixture stays an internal conformance Pack.
   await expect(page.locator('[data-vehicle-pet-pack-option]')).toHaveCount(0)
 })
 
-test('4 + 5 + 6. click toggles the 264px panel whose content is exactly the authorized five items', async ({ page }) => {
+test('NO_NORMAL_CLICK_PANEL_TEST + PET_CLICK_REACTION_TEST. a normal pet click is a pet reaction, never a surface', async ({ page }) => {
   await openOverlay(page)
+  await waitForIdleBaseline(page)
+  const expressionBefore = await page.locator(PET).getAttribute('data-vehicle-pet-expression')
+
   await page.locator(PET).click()
-  const panel = page.locator(PANEL)
-  await panel.waitFor()
-  const box = await panel.boundingBox()
-  expect(box!.width).toBe(264)
+  await page.waitForTimeout(400)
+  // No panel-shaped surface, no secondary menu, no dialog, no navigation.
+  await expect(page.locator(PANEL)).toHaveCount(0)
+  await expect(page.locator('.vpo-panel')).toHaveCount(0)
+  await expect(page.locator(MENU)).toHaveCount(0)
+  await expect(page.locator(DIALOG)).toHaveCount(0)
+  await expect(page.locator(ROOT)).toHaveAttribute('data-vehicle-pet', 'VISIBLE')
+  expect(page.url().replace(new RegExp('^https?://[^/]+'), '').split('?')[0]).toBe('/')
+
+  // CTR-OVERLAY-021: the reaction includes an expression variant change.
+  const expressionAfter = await page.locator(PET).getAttribute('data-vehicle-pet-expression')
+  expect(expressionAfter).not.toBe(expressionBefore)
+  expect(['idle', 'idle-happy', 'idle-curious']).toContain(expressionAfter)
+
+  // Escape never removes the pet itself.
+  await page.locator(PET).focus()
+  await page.keyboard.press('Escape')
+  await expect(page.locator(PET)).toHaveCount(1)
+})
+
+test('SECONDARY_SETTINGS_ACCESSIBLE_TEST. the trigger opens a 216px menu with exactly the authorized item set', async ({ page }) => {
+  await openOverlay(page)
+  // The pet click must not reveal the menu (only its hover/focus row shows,
+  // and only the trigger opens the menu itself).
+  await page.locator(PET).click()
+  await expect(page.locator(MENU)).toHaveCount(0)
+
+  // Keyboard-equivalent reveal path: the trigger is reachable by Tab from the
+  // pet hit surface, and its activation opens the menu.
+  await page.locator(PET).focus()
+  await page.keyboard.press('Tab')
+  const trigger = page.locator(MENU_TRIGGER)
+  expect(await trigger.evaluate(node => document.activeElement === node)).toBe(true)
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+  const triggerLabel = await trigger.getAttribute('aria-label')
+  expect(triggerLabel).toMatch(/打开设置|Open settings/)
+  await trigger.click()
+  await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+  const menu = page.locator(MENU)
+  await menu.waitFor()
+  await expect(menu).toHaveAttribute('role', 'group')
+
+  // Exactly the four V3 groups; no V2 panel-era content survives.
+  for (const selector of [
+    '[data-vehicle-pet-size-control]',
+    '[data-vehicle-pet-reduced-motion]',
+    '[data-vehicle-pet-open-journey]',
+    '[data-vehicle-pet-collapse]',
+  ]) {
+    expect(await menu.locator(selector).count()).toBe(1)
+  }
+  expect(await menu.locator('[data-vehicle-pet-size-option]').count()).toBe(2)
+  expect(await menu.locator('[data-vehicle-pet-size-option="small"]').count()).toBe(1)
+  expect(await menu.locator('[data-vehicle-pet-size-option="large"]').count()).toBe(1)
+  expect(await menu.locator('[data-vehicle-pet-reduced-motion-option]').count()).toBe(3)
+  expect(await menu.locator('[data-vehicle-pet-reduced-motion-option="system"]').count()).toBe(1)
+  expect(await menu.locator('[data-vehicle-pet-reduced-motion-option="on"]').count()).toBe(1)
+  expect(await menu.locator('[data-vehicle-pet-reduced-motion-option="off"]').count()).toBe(1)
+
+  // Narrow fixed width (≤224px contract bound; exactly secondaryMenuWidthPx).
+  const box = await menu.boundingBox()
+  expect(box).not.toBeNull()
+  expect(box!.width).toBe(216)
+  expect(box!.width).toBeLessThanOrEqual(224)
+
+  // No progression numbers, level/stage names, Pack names, keepsakes, or
+  // engineering readouts (CTR-OVERLAY-005).
   for (const selector of [
     '[data-vehicle-pet-stage]',
     '[data-vehicle-pet-progress]',
+    '[data-vehicle-pet-next-threshold]',
+    '[data-vehicle-pet-pack-name]',
+    '[data-vehicle-pet-keepsake]',
     '[data-vehicle-pet-more]',
-    '[data-vehicle-pet-reduced-motion]',
-    '[data-vehicle-pet-collapse]',
-    '[data-vehicle-pet-open-journey]',
+    '[data-vehicle-pet-pack-switch]',
+    '[data-vehicle-pet-pack-option]',
   ]) {
-    expect(await panel.locator(selector).count()).toBe(1)
+    expect(await menu.locator(selector).count()).toBe(0)
   }
-  // V2 removals: no pack name row, no keepsake row, no Pack switch.
-  for (const selector of ['[data-vehicle-pet-pack-name]', '[data-vehicle-pet-keepsake]', '[data-vehicle-pet-pack-switch]', '[data-vehicle-pet-pack-option]']) {
-    expect(await panel.locator(selector).count()).toBe(0)
-  }
-  const text = await panel.textContent()
+  const text = await menu.textContent()
   expect(text).not.toContain('Mock')
   expect(text).not.toContain('诊断')
   expect(text).not.toContain('种子伙伴')
-  await page.screenshot({ path: `${ARTIFACTS}/panel-open.png` })
-  await page.locator(PET).click()
-  await expect.poll(() => page.locator(PANEL).count()).toBe(0)
+  expect(text).not.toContain('首航出发')
+  expect(text).not.toContain('%')
+  await page.screenshot({ path: `${ARTIFACTS}/menu-open.png` })
+
+  // Outside press closes.
+  await page.mouse.click(30, 60)
+  await expect.poll(() => page.locator(MENU).count()).toBe(0)
+
+  // Escape closes too (focus on the trigger after mouse-open).
+  await trigger.focus()
+  await trigger.click()
+  await menu.waitFor()
+  await page.keyboard.press('Escape')
+  await expect.poll(() => page.locator(MENU).count()).toBe(0)
+  await expect(page.locator(PET)).toHaveCount(1)
 })
 
-test('7. drag moves the pet and does not toggle the panel', async ({ page }) => {
+test('7. drag moves the pet and does not open the menu', async ({ page }) => {
   await openOverlay(page)
-  const before = await petBox(page)
+  const before = await shellBox(page)
   const pet = page.locator(PET)
   await pet.hover()
   await page.mouse.down()
-  await page.mouse.move(before!.x - 120, before!.y - 40, { steps: 6 })
+  await page.mouse.move(before.x - 120, before.y - 40, { steps: 6 })
   await page.mouse.up()
-  const after = await petBox(page)
-  expect(after!.x).toBeLessThan(before!.x - 30)
-  expect(page.locator(PANEL)).toHaveCount(0)
+  await page.waitForTimeout(350)
+  const after = await shellBox(page)
+  expect(after.x).toBeLessThan(before.x - 30)
+  await expect(page.locator(MENU)).toHaveCount(0)
+  await expect(page.locator(PANEL)).toHaveCount(0)
 })
 
 test('USER_CUSTOM_POSITION_PRESERVATION_TEST. dragged ratios survive refresh without safe-default override', async ({ page }) => {
   await openOverlay(page)
   const pet = page.locator(PET)
-  const origin = await petBox(page)
+  const origin = await shellBox(page)
   await pet.hover()
   await page.mouse.down()
-  await page.mouse.move(origin!.x - 180, origin!.y - 100, { steps: 8 })
+  await page.mouse.move(origin.x - 180, origin.y - 100, { steps: 8 })
   await page.mouse.up()
-  const before = await petBox(page)
+  await page.waitForTimeout(350)
+  const before = await shellBox(page)
   const stored = await page.evaluate(() => localStorage.getItem('vehicle-pet/overlay-preferences/v1'))
   const record = JSON.parse(stored ?? '{}') as { position: { xRatio: number; yRatio: number }; positionCustomized: boolean }
   expect(record.positionCustomized).toBe(true)
@@ -621,39 +833,38 @@ test('USER_CUSTOM_POSITION_PRESERVATION_TEST. dragged ratios survive refresh wit
   expect(record.position.xRatio).toBeLessThan(0.95)
   await page.reload()
   await expect.poll(() => page.locator(PET).count(), { timeout: 30_000 }).toBe(1)
-  const after = await petBox(page)
-  expect(Math.abs(after!.x - before!.x)).toBeLessThan(4)
-  expect(Math.abs(after!.y - before!.y)).toBeLessThan(4)
+  await page.waitForTimeout(350)
+  const after = await shellBox(page)
+  expect(Math.abs(after.x - before.x)).toBeLessThan(4)
+  expect(Math.abs(after.y - before.y)).toBeLessThan(4)
 })
 
-test('PANEL_COMPLETE_ACTIVE_SURFACE_CLAMP_TEST. resize and xRatio 0.49 clamp the real Pet + Panel union', async ({ page }) => {
+test('MENU_OPEN_COMPLETE_ACTIVE_SURFACE_CLAMP_TEST. resize and xRatio 0.49 clamp the real Pet + Menu union', async ({ page }) => {
   await openOverlay(page)
-  await page.evaluate(() => localStorage.setItem('vehicle-pet/overlay-preferences/v1', JSON.stringify({
+  await seedPreferences(page, {
     schemaVersion: 1,
     position: { xRatio: 0.49, yRatio: 1 },
     positionCustomized: true,
     collapsed: false,
-  })))
+  })
   await page.setViewportSize({ width: 390, height: 844 })
   await page.reload()
   await expect.poll(() => page.locator(PET).count(), { timeout: 30_000 }).toBe(1)
   await page.waitForTimeout(300)
-  const anchorBeforeOpen = await page.locator(PET).boundingBox()
-  await page.locator(PET).click()
-  await page.locator(PANEL).waitFor()
+  const anchorBeforeOpen = await shellBox(page)
+  await openMenu(page)
 
   const assertCompleteSurface = async (viewport: { width: number; height: number }) => {
     await page.setViewportSize(viewport)
     await page.waitForTimeout(350)
-    const pet = await page.locator(PET).boundingBox()
-    const panel = await page.locator(PANEL).boundingBox()
-    expect(pet).not.toBeNull()
-    expect(panel).not.toBeNull()
+    const pet = await shellBox(page)
+    const menu = await page.locator(MENU).boundingBox()
+    expect(menu).not.toBeNull()
     const union = {
-      left: Math.min(pet!.x, panel!.x),
-      top: Math.min(pet!.y, panel!.y),
-      right: Math.max(pet!.x + pet!.width, panel!.x + panel!.width),
-      bottom: Math.max(pet!.y + pet!.height, panel!.y + panel!.height),
+      left: Math.min(pet.x, menu!.x),
+      top: Math.min(pet.y, menu!.y),
+      right: Math.max(pet.x + pet.width, menu!.x + menu!.width),
+      bottom: Math.max(pet.y + pet.height, menu!.y + menu!.height),
     }
     expect(union.left).toBeGreaterThanOrEqual(15.5)
     expect(union.top).toBeGreaterThanOrEqual(15.5)
@@ -672,30 +883,30 @@ test('PANEL_COMPLETE_ACTIVE_SURFACE_CLAMP_TEST. resize and xRatio 0.49 clamp the
   await page.locator(PET).focus()
   await page.keyboard.press('Shift+ArrowRight')
   await assertCompleteSurface({ width: 390, height: 844 })
-  await page.locator(PET).click()
+  await page.keyboard.press('Escape')
+  await expect.poll(() => page.locator(MENU).count()).toBe(0)
   await page.waitForTimeout(300)
-  const anchorAfterClose = await page.locator(PET).boundingBox()
-  expect(Math.abs(anchorAfterClose!.x - anchorBeforeOpen!.x)).toBeLessThanOrEqual(33)
-  expect(Math.abs(anchorAfterClose!.y - anchorBeforeOpen!.y)).toBeLessThanOrEqual(1)
+  const anchorAfterClose = await shellBox(page)
+  expect(Math.abs(anchorAfterClose.x - anchorBeforeOpen.x)).toBeLessThanOrEqual(33)
+  expect(Math.abs(anchorAfterClose.y - anchorBeforeOpen.y)).toBeLessThanOrEqual(1)
   const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('vehicle-pet/overlay-preferences/v1') ?? '{}')) as { position: { xRatio: number } }
   expect(stored.position.xRatio).toBeGreaterThanOrEqual(0)
   expect(stored.position.xRatio).toBeLessThanOrEqual(1)
   await page.setViewportSize(VIEWPORT)
 })
 
-test('PANEL_OPEN_FIRST_KEYBOARD_STEP_MOVES_TEST + PANEL_OPEN_FIRST_POINTER_DRAG_MOVES_TEST. PANEL_OPEN movement has no coordinate dead zone', async ({ page }) => {
+test('MENU_OPEN_FIRST_KEYBOARD_STEP_MOVES_TEST + MENU_OPEN_FIRST_POINTER_DRAG_MOVES_TEST. MENU_OPEN movement has no coordinate dead zone', async ({ page }) => {
   await openOverlay(page)
-  await page.evaluate(() => localStorage.setItem('vehicle-pet/overlay-preferences/v1', JSON.stringify({
+  await seedPreferences(page, {
     schemaVersion: 1,
     position: { xRatio: 0.49, yRatio: 1 },
     positionCustomized: true,
     collapsed: false,
-  })))
+  })
   await page.setViewportSize({ width: 390, height: 844 })
   await page.reload()
   await expect.poll(() => page.locator(PET).count(), { timeout: 30_000 }).toBe(1)
-  await page.locator(PET).click()
-  await page.locator(PANEL).waitFor()
+  await openMenu(page)
   await page.waitForTimeout(350)
 
   const preference = async () => page.evaluate(() => {
@@ -704,25 +915,25 @@ test('PANEL_OPEN_FIRST_KEYBOARD_STEP_MOVES_TEST + PANEL_OPEN_FIRST_POINTER_DRAG_
     }
     return value.position
   })
-  const keyboardBefore = await petBox(page)
+  const keyboardBefore = await shellBox(page)
   const keyboardRatioBefore = await preference()
   await page.locator(PET).focus()
   await page.keyboard.press('ArrowLeft')
   await page.waitForTimeout(350)
-  const keyboardAfter = await petBox(page)
+  const keyboardAfter = await shellBox(page)
   const keyboardRatioAfter = await preference()
-  const keyboardDelta = Math.abs(keyboardAfter!.x - keyboardBefore!.x) + Math.abs(keyboardAfter!.y - keyboardBefore!.y)
-  console.info('PANEL_OPEN_DEAD_ZONE_TRACE', {
+  const keyboardDelta = Math.abs(keyboardAfter.x - keyboardBefore.x) + Math.abs(keyboardAfter.y - keyboardBefore.y)
+  console.info('MENU_OPEN_DEAD_ZONE_TRACE', {
     inputType: 'keyboard', inputDirection: 'left', inputApplied: true,
-    movementSpaceRemaining: keyboardBefore!.x > 16,
+    movementSpaceRemaining: keyboardBefore.x > 16,
     persistedRatioBefore: keyboardRatioBefore, persistedRatioAfter: keyboardRatioAfter,
-    visiblePetPositionBefore: { x: keyboardBefore!.x, y: keyboardBefore!.y },
-    visiblePetPositionAfter: { x: keyboardAfter!.x, y: keyboardAfter!.y },
+    visiblePetPositionBefore: { x: keyboardBefore.x, y: keyboardBefore.y },
+    visiblePetPositionAfter: { x: keyboardAfter.x, y: keyboardAfter.y },
     visibleActiveSurfaceDeltaPx: keyboardDelta,
   })
-  expect(keyboardBefore!.x).toBeGreaterThan(16)
+  expect(keyboardBefore.x).toBeGreaterThan(16)
   expect(keyboardDelta).toBeGreaterThan(0)
-  expect(keyboardAfter!.x).toBeLessThan(keyboardBefore!.x)
+  expect(keyboardAfter.x).toBeLessThan(keyboardBefore.x)
 
   await page.evaluate(() => localStorage.setItem('vehicle-pet/overlay-preferences/v1', JSON.stringify({
     schemaVersion: 1,
@@ -732,92 +943,91 @@ test('PANEL_OPEN_FIRST_KEYBOARD_STEP_MOVES_TEST + PANEL_OPEN_FIRST_POINTER_DRAG_
   })))
   await page.reload()
   await expect.poll(() => page.locator(PET).count(), { timeout: 30_000 }).toBe(1)
-  await page.locator(PET).click()
-  await page.locator(PANEL).waitFor()
+  await openMenu(page)
   await page.waitForTimeout(350)
-  const pointerBefore = await petBox(page)
+  const pointerBefore = await shellBox(page)
   const pointerRatioBefore = await preference()
-  await page.mouse.move(pointerBefore!.x + pointerBefore!.width / 2, pointerBefore!.y + pointerBefore!.height / 2)
+  await page.mouse.move(pointerBefore.x + pointerBefore.width / 2, pointerBefore.y + pointerBefore.height / 2)
   await page.mouse.down()
-  await page.mouse.move(pointerBefore!.x + pointerBefore!.width / 2 - 20, pointerBefore!.y + pointerBefore!.height / 2, { steps: 2 })
+  await page.mouse.move(pointerBefore.x + pointerBefore.width / 2 - 20, pointerBefore.y + pointerBefore.height / 2, { steps: 2 })
   await page.mouse.up()
   await page.waitForTimeout(350)
-  const pointerAfter = await petBox(page)
+  const pointerAfter = await shellBox(page)
   const pointerRatioAfter = await preference()
-  const pointerDelta = Math.abs(pointerAfter!.x - pointerBefore!.x) + Math.abs(pointerAfter!.y - pointerBefore!.y)
-  console.info('PANEL_OPEN_DEAD_ZONE_TRACE', {
+  const pointerDelta = Math.abs(pointerAfter.x - pointerBefore.x) + Math.abs(pointerAfter.y - pointerBefore.y)
+  console.info('MENU_OPEN_DEAD_ZONE_TRACE', {
     inputType: 'pointer', inputDirection: 'left', inputApplied: true,
-    movementSpaceRemaining: pointerBefore!.x > 16,
+    movementSpaceRemaining: pointerBefore.x > 16,
     persistedRatioBefore: pointerRatioBefore, persistedRatioAfter: pointerRatioAfter,
-    visiblePetPositionBefore: { x: pointerBefore!.x, y: pointerBefore!.y },
-    visiblePetPositionAfter: { x: pointerAfter!.x, y: pointerAfter!.y },
+    visiblePetPositionBefore: { x: pointerBefore.x, y: pointerBefore.y },
+    visiblePetPositionAfter: { x: pointerAfter.x, y: pointerAfter.y },
     visibleActiveSurfaceDeltaPx: pointerDelta,
   })
-  expect(pointerBefore!.x).toBeGreaterThan(16)
+  expect(pointerBefore.x).toBeGreaterThan(16)
   expect(pointerDelta).toBeGreaterThan(0)
-  expect(pointerAfter!.x).toBeLessThan(pointerBefore!.x)
+  expect(pointerAfter.x).toBeLessThan(pointerBefore.x)
   await page.setViewportSize(VIEWPORT)
 })
 
-test('PANEL_OPEN_OPEN_CLOSE_WITHOUT_INPUT_PRESERVES_ANCHOR_TEST + PANEL_OPEN_MOVEMENT_COMMITS_CANONICAL_RATIO_TEST + PANEL_OPEN_REFRESH_RESTORES_MOVED_POSITION_TEST + PANEL_OPEN_RESIZE_HAS_NO_DEAD_ZONE_TEST + PANEL_OPEN_MULTITAB_MOVEMENT_SYNC_TEST', async ({ context, page }) => {
+test('MENU_OPEN_OPEN_CLOSE_WITHOUT_INPUT_PRESERVES_ANCHOR_TEST + MENU_OPEN_MOVEMENT_COMMITS_CANONICAL_RATIO_TEST + MENU_OPEN_REFRESH_RESTORES_MOVED_POSITION_TEST + MENU_OPEN_RESIZE_HAS_NO_DEAD_ZONE_TEST + MENU_OPEN_MULTITAB_MOVEMENT_SYNC_TEST', async ({ context, page }) => {
   await openOverlay(page)
-  await page.evaluate(() => localStorage.setItem('vehicle-pet/overlay-preferences/v1', JSON.stringify({
+  await seedPreferences(page, {
     schemaVersion: 1,
     position: { xRatio: 0.49, yRatio: 1 },
     positionCustomized: true,
     collapsed: false,
-  })))
+  })
   await page.setViewportSize({ width: 390, height: 844 })
   await page.reload()
   await expect.poll(() => page.locator(PET).count(), { timeout: 30_000 }).toBe(1)
-  const closedBefore = await petBox(page)
+  const closedBefore = await shellBox(page)
   const storedBeforeOpen = await page.evaluate(() => localStorage.getItem('vehicle-pet/overlay-preferences/v1'))
-  await page.locator(PET).click()
-  await page.locator(PANEL).waitFor()
+  await openMenu(page)
   await page.waitForTimeout(350)
   expect(await page.evaluate(() => localStorage.getItem('vehicle-pet/overlay-preferences/v1'))).toBe(storedBeforeOpen)
+  // A pet click is an outside press: it closes the menu (and only triggers the
+  // pet reaction, which writes nothing).
   await page.locator(PET).click()
-  await expect(page.locator(PANEL)).toHaveCount(0)
+  await expect(page.locator(MENU)).toHaveCount(0)
   await page.waitForTimeout(300)
-  const closedWithoutInput = await petBox(page)
-  expect(Math.abs(closedWithoutInput!.x - closedBefore!.x)).toBeLessThan(1)
-  expect(Math.abs(closedWithoutInput!.y - closedBefore!.y)).toBeLessThan(1)
+  const closedWithoutInput = await shellBox(page)
+  expect(Math.abs(closedWithoutInput.x - closedBefore.x)).toBeLessThan(1)
+  expect(Math.abs(closedWithoutInput.y - closedBefore.y)).toBeLessThan(1)
   expect(await page.evaluate(() => localStorage.getItem('vehicle-pet/overlay-preferences/v1'))).toBe(storedBeforeOpen)
 
-  await page.locator(PET).click()
-  await page.locator(PANEL).waitFor()
-  const projectedBeforeMove = await petBox(page)
+  await openMenu(page)
+  const projectedBeforeMove = await shellBox(page)
   await page.locator(PET).focus()
   await page.keyboard.press('Shift+ArrowLeft')
   await page.waitForTimeout(300)
-  const projectedAfterMove = await petBox(page)
-  expect(projectedAfterMove!.x).toBeLessThan(projectedBeforeMove!.x)
+  const projectedAfterMove = await shellBox(page)
+  expect(projectedAfterMove.x).toBeLessThan(projectedBeforeMove.x)
   const canonical = await page.evaluate(() => JSON.parse(localStorage.getItem('vehicle-pet/overlay-preferences/v1') ?? '{}')) as {
     position: { xRatio: number; yRatio: number }; positionCustomized: boolean
   }
   expect(canonical.positionCustomized).toBe(true)
   expect(canonical.position.xRatio).toBeGreaterThanOrEqual(0)
   expect(canonical.position.xRatio).toBeLessThanOrEqual(1)
-  await page.locator(PET).click()
-  await expect(page.locator(PANEL)).toHaveCount(0)
+  await page.keyboard.press('Escape')
+  await expect(page.locator(MENU)).toHaveCount(0)
   await page.waitForTimeout(300)
-  const closedAfterMove = await petBox(page)
-  expect(Math.abs(closedAfterMove!.x - projectedAfterMove!.x)).toBeLessThan(1)
+  const closedAfterMove = await shellBox(page)
+  expect(Math.abs(closedAfterMove.x - projectedAfterMove.x)).toBeLessThan(1)
 
   await page.reload()
   await expect.poll(() => page.locator(PET).count(), { timeout: 30_000 }).toBe(1)
-  const refreshed = await petBox(page)
-  expect(Math.abs(refreshed!.x - closedAfterMove!.x)).toBeLessThan(1)
-  await page.locator(PET).click()
-  await page.locator(PANEL).waitFor()
+  await page.waitForTimeout(350)
+  const refreshed = await shellBox(page)
+  expect(Math.abs(refreshed.x - closedAfterMove.x)).toBeLessThan(1)
+  await openMenu(page)
   await page.setViewportSize({ width: 768, height: 720 })
   await page.waitForTimeout(350)
-  const resizedBefore = await petBox(page)
+  const resizedBefore = await shellBox(page)
   await page.locator(PET).focus()
   await page.keyboard.press('ArrowRight')
   await page.waitForTimeout(300)
-  const resizedAfter = await petBox(page)
-  expect(resizedAfter!.x).toBeGreaterThan(resizedBefore!.x)
+  const resizedAfter = await shellBox(page)
+  expect(resizedAfter.x).toBeGreaterThan(resizedBefore.x)
 
   const second = await context.newPage()
   await second.setViewportSize({ width: 768, height: 720 })
@@ -825,13 +1035,14 @@ test('PANEL_OPEN_OPEN_CLOSE_WITHOUT_INPUT_PRESERVES_ANCHOR_TEST + PANEL_OPEN_MOV
   await expect.poll(() => second.locator(PET).count(), { timeout: 30_000 }).toBe(1)
   await expect.poll(async () => second.evaluate(() => localStorage.getItem('vehicle-pet/overlay-preferences/v1')))
     .toBe(await page.evaluate(() => localStorage.getItem('vehicle-pet/overlay-preferences/v1')))
-  await second.locator(PET).click()
-  await second.locator(PANEL).waitFor()
-  const secondBefore = await second.locator(PET).boundingBox()
+  await second.locator(MENU_TRIGGER).focus()
+  await second.locator(MENU_TRIGGER).click()
+  await second.locator(MENU).waitFor()
+  const secondBefore = await second.locator(SHELL).boundingBox()
   await second.locator(PET).focus()
   await second.keyboard.press('ArrowUp')
   await second.waitForTimeout(300)
-  const secondAfter = await second.locator(PET).boundingBox()
+  const secondAfter = await second.locator(SHELL).boundingBox()
   expect(secondAfter!.y).toBeLessThan(secondBefore!.y)
   await expect.poll(async () => page.evaluate(() => localStorage.getItem('vehicle-pet/overlay-preferences/v1')))
     .toBe(await second.evaluate(() => localStorage.getItem('vehicle-pet/overlay-preferences/v1')))
@@ -843,232 +1054,266 @@ test('10. keyboard movement moves and persists new ratios', async ({ page }) => 
   await openOverlay(page)
   const pet = page.locator(PET)
   await pet.focus()
-  const before = await petBox(page)
+  const before = await shellBox(page)
   await page.keyboard.press('ArrowLeft')
   await page.keyboard.press('ArrowLeft')
   await page.keyboard.press('Shift+ArrowUp')
   await page.waitForTimeout(300)
-  const after = await petBox(page)
-  expect(after!.x).toBeLessThan(before!.x - 10)
-  expect(after!.y).toBeLessThan(before!.y - 20)
+  const after = await shellBox(page)
+  expect(after.x).toBeLessThan(before.x - 10)
+  expect(after.y).toBeLessThan(before.y - 20)
+  const record = await page.evaluate(() => JSON.parse(localStorage.getItem('vehicle-pet/overlay-preferences/v1') ?? '{}')) as { positionCustomized: boolean }
+  expect(record.positionCustomized).toBe(true)
 })
 
 test('11 + 12. collapse to the 36px launcher and restore', async ({ page }) => {
   await openOverlay(page)
-  await page.locator(PET).click()
+  await openMenu(page)
   await page.locator('[data-vehicle-pet-collapse]').click()
   const launcher = page.locator(LAUNCHER)
   await launcher.waitFor()
+  await expect(page.locator(ROOT)).toHaveAttribute('data-vehicle-pet', 'COLLAPSED')
+  expect(await page.locator(ROOT).getAttribute('data-vehicle-pet-size')).toBeNull()
   await expect.poll(async () => (await launcher.boundingBox())?.width).toBe(36)
   const box = await launcher.boundingBox()
   expect(box!.height).toBe(36)
   expect(overlapArea(box!, await composerBounds(page))).toBe(0)
-  expect(await page.locator(PET).count()).toBe(0)
+  await expect(page.locator(PET)).toHaveCount(0)
+  await expect(page.locator(MENU)).toHaveCount(0)
+  await expect(page.locator(DIALOG)).toHaveCount(0)
   await page.screenshot({ path: `${ARTIFACTS}/collapsed.png` })
   await launcher.click()
-  await expect.poll(async () => (await petBox(page))?.width).toBe(112)
+  await expect(page.locator(ROOT)).toHaveAttribute('data-vehicle-pet', 'VISIBLE')
+  await expect.poll(async () => (await shellBox(page)).width).toBe(216)
 })
 
 test('13. the DSH surface exposes only the product Pack and no Pack switch (seedling stays internal)', async ({ page }) => {
   await openOverlay(page)
-  await page.locator(PET).click()
-  await page.locator(PANEL).waitFor()
   await expect(page.locator(PET)).toHaveAttribute('data-vehicle-pet-pack', 'autonomous-fleet')
-  expect(await page.locator('[data-vehicle-pet-pack-option]').count()).toBe(0)
-  const text = await page.locator(PANEL).textContent()
+  await expect(page.locator('[data-vehicle-pet-pack-option]')).toHaveCount(0)
+  await openMenu(page)
+  const text = await page.locator(MENU).textContent()
   expect(text).not.toContain('种子伙伴')
   expect(text).not.toContain('Seedling')
-  await page.screenshot({ path: `${ARTIFACTS}/panel-product-pack-only.png` })
+  await page.screenshot({ path: `${ARTIFACTS}/menu-product-pack-only.png` })
 })
 
-test('EXPRESSION_STATIC_DISTINCTION_TEST. the resident pet shows a distinct static expression per session state', async ({ page }) => {
+test('NO_RESIDENT_PROGRESS_BAR_TEST. no within-level gauge outside the full journey dialog (CTR-OVERLAY-016)', async ({ page }) => {
   await openOverlay(page)
-  // The number of mock script slots a turn consumes varies (title generation),
-  // so the walk below is state-driven: send prompts, classify what the
-  // structured session mapping shows, and continue until every state has been
-  // observed. The mock sequence (slow, slow, tool, invalid, stall, slow×∞)
-  // guarantees a bounded walk.
-  const reset = await fetch('http://127.0.0.1:8902/reset', { method: 'POST' })
-  if (!reset.ok) throw new Error(`mock supervisor reset failed: ${reset.status}`)
-  // Let the bootstrap turn's own terminal pill appear and clear first.
-  await expect.poll(async () => (await page.locator(PILL).count()), { timeout: 30_000 }).toBe(0)
-  const pills = await installPillRecorder(page)
-  await page.waitForTimeout(600)
-  expect(await pills.read()).toEqual([])
-  const expr = page.locator('[data-vehicle-pet-expression]')
+  const assertAbsent = async () => {
+    expect(await page.locator('.vpo-progress').count()).toBe(0)
+    expect(await page.locator('[data-vehicle-pet-progress]').count()).toBe(0)
+    expect(await page.locator('[data-within-level-percent]').count()).toBe(0)
+  }
+  await assertAbsent()
 
+  await openMenu(page)
+  await assertAbsent()
+
+  // Growth systems preserved: the full journey dialog keeps its within-level
+  // progress presentation; the resident surfaces still render none.
+  await page.locator('[data-vehicle-pet-open-journey]').click()
+  await page.locator(DIALOG).waitFor()
+  expect(await page.locator('[data-vehicle-pet-dialog] .vp-progressbar').count()).toBe(1)
+  await assertAbsent()
+  await page.keyboard.press('Escape')
+  await expect.poll(() => page.locator(DIALOG).count()).toBe(0)
+
+  await closeMenu(page)
+  await openMenu(page)
+  await page.locator('[data-vehicle-pet-collapse]').click()
+  await page.locator(LAUNCHER).waitFor()
+  await assertAbsent()
+})
+
+test('EXPRESSION_VARIANTS_TEST. the resident pet shows a distinct expression attr per session state incl. cancelled', async ({ page }) => {
+  await openOverlay(page)
+  await waitForIdleBaseline(page)
+  const expr = page.locator(PET)
+  const variantOf = () => page.locator(PET).getAttribute('data-vehicle-pet-expression')
+
+  // V3 CTR-OVERLAY-014: ten variants exist; the five structured states map
+  // per DEC-OVERLAY-007 and cancelled keeps its own relaxed variant. The
+  // contact-sheet pixel matrix for all ten masters is covered by the dsh-dom
+  // acceptance; here the live per-state attrs are pinned.
+  expect(await variantOf()).toBe('idle')
+  await expect(expr).toHaveAttribute('data-live', 'idle')
+  // The expression layer lives in the aria-hidden scene; the hit button is the
+  // only interactive surface and carries the attr + label.
+  const sceneLayer = page.locator('.vpo-scene')
+  await expect(sceneLayer).toHaveAttribute('aria-hidden', 'true')
+  expect(await sceneLayer.locator('button, [tabindex], input').count()).toBe(0)
+  const idleSrc = await sceneLayer.locator('.vpo-expr img').getAttribute('src')
+  expect(idleSrc ?? '').toContain('data:image')
+  await page.screenshot({ path: `${ARTIFACTS}/expression-idle-large.png` })
+
+  // Clicks cycle the friendly idle pool without repeating back-to-back.
+  await expr.click()
+  await expect(expr).toHaveAttribute('data-vehicle-pet-expression', 'idle-happy')
+  await expr.click()
+  await expect(expr).toHaveAttribute('data-vehicle-pet-expression', 'idle-curious')
+  await expr.click()
   await expect(expr).toHaveAttribute('data-vehicle-pet-expression', 'idle')
-  await expect(expr).toHaveAttribute('aria-hidden', 'true')
-  expect(await expr.locator('button, [tabindex], input').count()).toBe(0)
-  const idleSrc = await expr.locator('img').getAttribute('src')
-  expect(idleSrc).not.toBe('')
-  await expect(page.locator(PET)).toHaveAttribute('data-live', 'idle')
-  await page.screenshot({ path: `${ARTIFACTS}/expression-idle-112.png` })
 
-  type Outcome = 'needs-input' | 'running' | 'completed' | 'failed' | 'cancelled'
-  const classify = async (): Promise<Outcome> => {
-    const deadline = Date.now() + 90_000
-    while (Date.now() < deadline) {
-      const live = await page.locator(PET).getAttribute('data-live')
-      if (live === 'needs-input' || live === 'running') return live
-      const recorded = await pills.read()
-      const last = recorded[recorded.length - 1]
-      if (last === 'completed' || last === 'failed' || last === 'cancelled') return last
-      await page.waitForTimeout(250)
-    }
-    throw new Error('turn produced no observable structured state within 90s')
+  // needs-input: the mock's slot position can drift when dangling requests
+  // from earlier windows retry across a reset, so start from a clean script
+  // and drive the walk by state — probe until the structured pending question
+  // surfaces (bounded: slow slots stream to completed and retry).
+  const resetMockScript = async (): Promise<void> => {
+    const reset = await fetch('http://127.0.0.1:8902/reset', { method: 'POST' })
+    if (!reset.ok) throw new Error(`mock supervisor reset failed: ${reset.status}`)
+    await page.reload()
+    await expect.poll(() => page.locator(PET).count(), { timeout: 30_000 }).toBe(1)
+    await waitForIdleBaseline(page)
   }
-  const waitPillClear = async () => {
-    await expect.poll(async () => (await page.locator(PILL).count()), { timeout: 30_000 }).toBe(0)
-  }
-
-  // needs-input: the tool slot. Prompts before it land on slow slots.
-  let needsInputSrc: string | null = null
-  for (let attempt = 0; attempt < 5 && needsInputSrc === null; attempt += 1) {
-    await sendPrompt(page, `e2e-expression: probe ${attempt}`)
-    const outcome = await classify()
-    if (outcome === 'needs-input') {
-      await expect(expr).toHaveAttribute('data-vehicle-pet-expression', 'needs-input')
-      needsInputSrc = await expr.locator('img').getAttribute('src')
-      expect(needsInputSrc).not.toBe(idleSrc)
-      await page.screenshot({ path: `${ARTIFACTS}/expression-needs-input-112.png` })
-      // Answering continues the turn into invalid_request: the failed terminal.
-      const question = page.locator('[data-question-key]')
-      await question.waitFor({ timeout: 20_000 })
-      await question.getByText('Yes, continue', { exact: true }).click()
-      await question.getByRole('textbox').press('Enter')
-      await expect.poll(async () => (await pills.read()).includes('failed'), { timeout: 90_000 }).toBe(true)
-      await expect(expr).toHaveAttribute('data-vehicle-pet-expression', 'failed')
-      const failedSrc = await expr.locator('img').getAttribute('src')
-      expect(failedSrc).not.toBe(idleSrc)
-      expect(failedSrc).not.toBe(needsInputSrc)
-      await page.screenshot({ path: `${ARTIFACTS}/expression-failed-112.png` })
-      await waitPillClear()
-    } else if (outcome === 'running') {
-      // A slow slot streamed: wait for it to finish, then probe again.
-      await expect.poll(async () => (await pills.read()).includes('completed'), { timeout: 90_000 }).toBe(true)
-      await waitPillClear()
-    } else {
-      await waitPillClear()
-    }
-  }
-  expect(needsInputSrc, 'the scripted ask_user_question slot never surfaced needs-input').not.toBeNull()
-
-  // working: once past the tool slot every turn streams (stall slot first:
-  // running until Stop; later slots: slow streams). Observe running, then stop
-  // the turn for the cancelled terminal, which shares the failed expression.
-  let workingSrc: string | null = null
-  for (let attempt = 0; attempt < 5 && workingSrc === null; attempt += 1) {
-    await sendPrompt(page, `e2e-expression: drive ${attempt}`)
-    const outcome = await classify()
-    if (outcome === 'running') {
-      await expect(expr).toHaveAttribute('data-vehicle-pet-expression', 'working')
-      workingSrc = await expr.locator('img').getAttribute('src')
-      expect(workingSrc).not.toBe(idleSrc)
-      expect(workingSrc).not.toBe(needsInputSrc)
-      await page.screenshot({ path: `${ARTIFACTS}/expression-working-112.png` })
-      const stop = page.getByRole('button', { name: 'Stop generating' })
-      await stop.waitFor({ timeout: 30_000 })
-      await stop.click()
-      await expect.poll(async () => (await pills.read()).includes('cancelled'), { timeout: 60_000 }).toBe(true)
-      await expect(expr).toHaveAttribute('data-vehicle-pet-expression', 'failed')
-      await waitPillClear()
-    } else {
-      await waitPillClear()
-    }
-  }
-  expect(workingSrc, 'no streaming turn produced the working expression').not.toBeNull()
-
-  // completed: a further slow slot streams to success. The completed
-  // expression is captured inside the terminal pill window (before the
-  // transient pill clears and the calm baseline returns), so the settle loop
-  // watches the live pill instead of the appended recorder history.
-  let completedSrc: string | null = null
-  for (let attempt = 0; attempt < 5 && completedSrc === null; attempt += 1) {
-    await sendPrompt(page, `e2e-expression: final ${attempt}`)
-    const deadline = Date.now() + 120_000
-    while (Date.now() < deadline && completedSrc === null) {
-      const pill = page.locator(PILL).first()
-      if (await pill.count() > 0 && await pill.getAttribute('data-pet-host-feedback') === 'completed') {
-        await expect(expr).toHaveAttribute('data-vehicle-pet-expression', 'completed')
-        completedSrc = await expr.locator('img').getAttribute('src')
-        expect(completedSrc).not.toBe(idleSrc)
-        expect(completedSrc).not.toBe(needsInputSrc)
-        expect(completedSrc).not.toBe(workingSrc)
-        await page.screenshot({ path: `${ARTIFACTS}/expression-completed-112.png` })
-        break
+  await resetMockScript()
+  const driveToNeedsInput = async (): Promise<void> => {
+    for (let attempt = 0; attempt < 8; attempt += 1) {
+      if (attempt === 4) {
+        // Backstop self-heal: if the walk still has not surfaced needs-input,
+        // reset again mid-walk.
+        await resetMockScript()
       }
-      await page.waitForTimeout(250)
+      await sendPrompt(page, `e2e-expression: probe ${attempt}`)
+      const deadline = Date.now() + 120_000
+      let runningSince: number | null = null
+      while (Date.now() < deadline) {
+        const live = await page.locator(PET).getAttribute('data-live')
+        if (live === 'needs-input') return
+        if (live === 'running') {
+          // A drift onto the stall slot would hang without a Stop; bail out
+          // of the turn and retry on the next slot.
+          if (runningSince === null) runningSince = Date.now()
+          const stop = page.getByRole('button', { name: 'Stop generating' })
+          if (Date.now() - runningSince > 20_000 && await stop.count() > 0) {
+            await stop.click()
+            await expect.poll(() => page.locator(PET).getAttribute('data-terminal'), { timeout: 60_000 }).not.toBeNull()
+            break
+          }
+          await page.waitForTimeout(250)
+          continue
+        }
+        runningSince = null
+        if (await page.locator(PET).getAttribute('data-terminal') !== null) break
+        await page.waitForTimeout(250)
+      }
+      await waitForIdleBaseline(page)
     }
-    await waitPillClear()
+    throw new Error('the scripted ask_user_question slot never surfaced needs-input')
   }
-  expect(completedSrc, 'no turn reached the completed terminal').not.toBeNull()
+  await driveToNeedsInput()
+  await expect(expr).toHaveAttribute('data-vehicle-pet-expression', 'needs-input')
+  const needsInputSrc = await sceneLayer.locator('.vpo-expr img').getAttribute('src')
+  expect(needsInputSrc).not.toBe(idleSrc)
+  await page.screenshot({ path: `${ARTIFACTS}/expression-needs-input-large.png` })
+  // Answering continues the turn into invalid_request: the failed terminal.
+  const question = page.locator('[data-question-key]')
+  await question.waitFor({ timeout: 20_000 })
+  await question.getByText('Yes, continue', { exact: true }).click()
+  await question.getByRole('textbox').press('Enter')
+  await expect.poll(() => page.locator(PET).getAttribute('data-terminal'), { timeout: 90_000 }).toBe('failed')
+  await expect(expr).toHaveAttribute('data-vehicle-pet-expression', 'failed')
+  const failedSrc = await sceneLayer.locator('.vpo-expr img').getAttribute('src')
+  expect(failedSrc).not.toBe(idleSrc)
+  expect(failedSrc).not.toBe(needsInputSrc)
+  await page.screenshot({ path: `${ARTIFACTS}/expression-failed-large.png` })
+  await waitForIdleBaseline(page)
+
+  // working: once past the tool slot every turn streams; observe running, then
+  // stop the turn for the V3 cancelled variant (V2 collapsed it into failed).
+  await sendPrompt(page, 'e2e-expression: drive 0')
+  await expect.poll(() => page.locator(PET).getAttribute('data-live'), { timeout: 90_000 }).toBe('running')
+  await expect(expr).toHaveAttribute('data-vehicle-pet-expression', 'working')
+  const workingSrc = await sceneLayer.locator('.vpo-expr img').getAttribute('src')
+  expect(workingSrc).not.toBe(idleSrc)
+  expect(workingSrc).not.toBe(needsInputSrc)
+  await page.screenshot({ path: `${ARTIFACTS}/expression-working-large.png` })
+  const stop = page.getByRole('button', { name: 'Stop generating' })
+  await stop.waitFor({ timeout: 30_000 })
+  await stop.click()
+  await expect.poll(() => page.locator(PET).getAttribute('data-terminal'), { timeout: 60_000 }).toBe('cancelled')
+  await expect(expr).toHaveAttribute('data-vehicle-pet-expression', 'cancelled')
+  const cancelledSrc = await sceneLayer.locator('.vpo-expr img').getAttribute('src')
+  expect(cancelledSrc).not.toBe(failedSrc)
+  await page.screenshot({ path: `${ARTIFACTS}/expression-cancelled-large.png` })
+  await waitForIdleBaseline(page)
+
+  // completed: a later slow slot streams to success; capture inside the
+  // transient (2.4s) terminal window.
+  await sendPrompt(page, 'e2e-expression: final 0')
+  await expect.poll(async () => {
+    if (await page.locator(PET).getAttribute('data-terminal') !== 'completed') return false
+    return (await variantOf()) === 'completed'
+  }, { timeout: 120_000 }).toBe(true)
+  const completedSrc = await sceneLayer.locator('.vpo-expr img').getAttribute('src')
+  expect(completedSrc).not.toBe(idleSrc)
+  expect(completedSrc).not.toBe(workingSrc)
+  await page.screenshot({ path: `${ARTIFACTS}/expression-completed-large.png` })
+  await waitForIdleBaseline(page)
   await expect(expr).toHaveAttribute('data-vehicle-pet-expression', 'idle')
 })
 
-test('SCENE_FULL_JOURNEY_GEOMETRY_TEST. Fleet and Seedling journey layers stay in scene bounds', async ({ page }) => {
+test('SCENE_FULL_JOURNEY_GEOMETRY_TEST. Fleet journey layers stay in scene bounds', async ({ page }) => {
   await openOverlay(page)
-  await page.locator(PET).click()
-  await page.locator(PANEL).waitFor()
+  await openMenu(page)
   const trigger = page.locator('[data-vehicle-pet-open-journey]')
-  const dialog = page.locator('[data-vehicle-pet-dialog]')
+  const dialog = page.locator(DIALOG)
 
-  const assertJourney = async (screenshot: string) => {
-    await trigger.click()
-    await dialog.waitFor()
-    await expect(dialog).toHaveAttribute('role', 'dialog')
-    await expect(dialog).toHaveAttribute('aria-modal', 'true')
-    await expect(dialog.locator('.vp-keepsake-list')).toHaveCount(1)
-    const scene = await dialog.locator('.vp-scene').boundingBox()
-    const subject = await dialog.locator('[data-pet-subject="true"]').boundingBox()
-    const background = await dialog.locator('[data-node-kind="background"]').boundingBox()
-    expect(scene).not.toBeNull()
-    expect(subject).not.toBeNull()
-    expect(background).not.toBeNull()
-    expect(overlapArea(subject!, scene!) / (subject!.width * subject!.height)).toBeGreaterThanOrEqual(0.85)
-    expect(overlapArea(background!, scene!) / (background!.width * background!.height)).toBeGreaterThanOrEqual(0.85)
-    await page.screenshot({ path: `${ARTIFACTS}/${screenshot}` })
-    expect(await dialog.evaluate(node => node.contains(document.activeElement))).toBe(true)
-    expect(await page.locator('[data-vehicle-pet-dialog-close]').evaluate(node => document.activeElement === node)).toBe(true)
+  await trigger.click()
+  await dialog.waitFor()
+  await expect(dialog).toHaveAttribute('role', 'dialog')
+  await expect(dialog).toHaveAttribute('aria-modal', 'true')
+  await expect(dialog.locator('.vp-keepsake-list')).toHaveCount(1)
+  const scene = await dialog.locator('.vp-scene').boundingBox()
+  const subject = await dialog.locator('[data-pet-subject="true"]').boundingBox()
+  const background = await dialog.locator('[data-node-kind="background"]').boundingBox()
+  expect(scene).not.toBeNull()
+  expect(subject).not.toBeNull()
+  expect(background).not.toBeNull()
+  expect(overlapArea(subject!, scene!) / (subject!.width * subject!.height)).toBeGreaterThanOrEqual(0.85)
+  expect(overlapArea(background!, scene!) / (background!.width * background!.height)).toBeGreaterThanOrEqual(0.85)
+  await page.screenshot({ path: `${ARTIFACTS}/fleet-journey-v3.png` })
+  expect(await dialog.evaluate(node => node.contains(document.activeElement))).toBe(true)
+  expect(await page.locator('[data-vehicle-pet-dialog-close]').evaluate(node => document.activeElement === node)).toBe(true)
 
-    await page.keyboard.press('Shift+Tab')
-    expect(await dialog.evaluate(node => node.contains(document.activeElement))).toBe(true)
-    const tabbables = dialog.locator('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')
-    expect(await tabbables.last().evaluate(node => document.activeElement === node)).toBe(true)
-    await page.keyboard.press('Tab')
-    expect(await tabbables.first().evaluate(node => document.activeElement === node)).toBe(true)
+  await page.keyboard.press('Shift+Tab')
+  expect(await dialog.evaluate(node => node.contains(document.activeElement))).toBe(true)
+  const tabbables = dialog.locator('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')
+  expect(await tabbables.last().evaluate(node => document.activeElement === node)).toBe(true)
+  await page.keyboard.press('Tab')
+  expect(await tabbables.first().evaluate(node => document.activeElement === node)).toBe(true)
 
-    const backgroundTarget = page.locator('textarea').first()
-    await backgroundTarget.evaluate(node => (node as HTMLElement).focus())
-    expect(await dialog.evaluate(node => node.contains(document.activeElement))).toBe(true)
-    await page.keyboard.press('Escape')
-    await expect.poll(() => page.locator('[data-vehicle-pet-dialog]').count()).toBe(0)
-    expect(await trigger.evaluate(node => document.activeElement === node)).toBe(true)
+  const backgroundTarget = page.locator('textarea').first()
+  await backgroundTarget.evaluate(node => (node as HTMLElement).focus())
+  expect(await dialog.evaluate(node => node.contains(document.activeElement))).toBe(true)
+  // Keyboard close: Escape restores focus to the journey entry (the menu is
+  // still open — no outside press happened).
+  await page.keyboard.press('Escape')
+  await expect.poll(() => page.locator(DIALOG).count()).toBe(0)
+  expect(await trigger.evaluate(node => document.activeElement === node)).toBe(true)
 
-    await trigger.click()
-    await dialog.waitFor()
-    await page.locator('[data-vehicle-pet-dialog-close]').click()
-    await expect.poll(() => page.locator('[data-vehicle-pet-dialog]').count()).toBe(0)
-    expect(await trigger.evaluate(node => document.activeElement === node)).toBe(true)
-  }
-
-  await assertJourney('fleet-journey-r2.png')
-  // V2: the journey dialog renders the product Pack only; no seedling switch.
-  expect(await page.locator('[data-vehicle-pet-pack-option]').count()).toBe(0)
-  await page.locator(PET).click({ position: { x: 4, y: 4 } })
+  await trigger.click()
+  await dialog.waitFor()
+  // The dialog close button is an outside press for the secondary menu
+  // (CTR-OVERLAY-005), so the menu legitimately closes with it.
+  await page.locator('[data-vehicle-pet-dialog-close]').click()
+  await expect.poll(() => page.locator(DIALOG).count()).toBe(0)
+  await expect(page.locator(MENU)).toHaveCount(0)
+  // V3: the journey dialog renders the product Pack only; no seedling switch.
+  await expect(page.locator('[data-vehicle-pet-pack-option]')).toHaveCount(0)
 })
 
-test('REDUCED_MOTION_STATIC_GEOMETRY_TEST. reduced motion preserves compact subject bounds', async ({ page }) => {
+test('REDUCED_MOTION_STATIC_PARITY_TEST. reduced motion preserves resident subject bounds', async ({ page }) => {
   await openOverlay(page)
-  const subject = page.locator(`${PET} [data-pet-subject="true"]`)
+  const scene = page.locator('.vpo-scene .vp-scene')
+  const subject = page.locator('.vpo-scene [data-pet-subject="true"]')
   const before = await subject.boundingBox()
-  await page.locator(PET).click()
-  await openMoreDisclosure(page)
+  await openMenu(page)
   await page.locator('[data-vehicle-pet-reduced-motion-option="on"]').click()
-  await page.locator(PET).click()
-  await expect(page.locator(`${PET} .vp-scene`)).toHaveAttribute('data-reduced-motion', 'true')
+  await closeMenu(page)
+  await expect(scene).toHaveAttribute('data-reduced-motion', 'true')
   // The shell's 200ms position transition is independent of the plugin
-  // reduced-motion preference; let the panel-close restore settle before
+  // reduced-motion preference; let the menu-close restore settle before
   // measuring so the assertion compares settled geometry, not mid-flight.
   await page.waitForTimeout(350)
   const after = await subject.boundingBox()
@@ -1078,54 +1323,57 @@ test('REDUCED_MOTION_STATIC_GEOMETRY_TEST. reduced motion preserves compact subj
   expect(Math.abs(after!.y - before!.y)).toBeLessThan(1)
   expect(Math.abs(after!.width - before!.width)).toBeLessThan(1)
   expect(Math.abs(after!.height - before!.height)).toBeLessThan(1)
-  await page.screenshot({ path: `${ARTIFACTS}/reduced-motion-visible-r2.png` })
+  await page.screenshot({ path: `${ARTIFACTS}/reduced-motion-visible-v3.png` })
 })
 
-test('SETTINGS_PRIMARY_ACTION_OVERLAP_TEST measures Pet and open Panel against real Settings actions', async ({ page }) => {
+test('SETTINGS_PRIMARY_ACTION_OVERLAP_TEST measures Pet and open Menu against real Settings actions', async ({ page }) => {
   await openOverlay(page)
-  await page.locator(PET).click()
-  await expect(page.locator(PANEL)).toHaveCount(1)
   const settings = page.getByRole('button', { name: /Settings|设置/i }).first()
+  // The open menu must not cover the host Settings control itself.
+  await openMenu(page)
+  const menu = await page.locator(MENU).boundingBox()
+  const settingsBox = await settings.boundingBox()
+  expect(menu).not.toBeNull()
+  expect(settingsBox).not.toBeNull()
+  expect(overlapArea(menu!, settingsBox!)).toBe(0)
+  // CTR-OVERLAY-005: the Settings activation is an outside press, so the
+  // non-modal menu legitimately closes with it.
   await settings.click()
+  await expect(page.locator(MENU)).toHaveCount(0)
   const dialog = page.getByRole('dialog').filter({ has: page.getByRole('button', { name: /^(Close|关闭)$/ }) })
   await dialog.waitFor({ state: 'visible' })
   const actions = dialog.getByRole('button')
   const actionBoxes = (await Promise.all(Array.from({ length: await actions.count() }, async (_, index) => actions.nth(index).boundingBox()))).filter(box => box !== null)
   expect(actionBoxes.length).toBeGreaterThan(0)
-  const pet = await petBox(page)
-  expect(pet).not.toBeNull()
-  for (const action of actionBoxes) expect(overlapArea(pet!, action!)).toBe(0)
-
-  const panel = await page.locator(PANEL).boundingBox()
-  expect(panel).not.toBeNull()
-  for (const action of actionBoxes) expect(overlapArea(panel!, action!)).toBe(0)
-  await page.screenshot({ path: `${ARTIFACTS}/r3-settings-overlap.png` })
+  const pet = await shellBox(page)
+  for (const action of actionBoxes) expect(overlapArea(pet, action!)).toBe(0)
+  await page.screenshot({ path: `${ARTIFACTS}/v3-settings-overlap.png` })
   await page.keyboard.press('Escape')
 })
 
-test('WORKSPACE_PRIMARY_ACTION_OVERLAP_TEST measures Pet and open Panel against real Workspace controls', async ({ page }) => {
+test('WORKSPACE_PRIMARY_ACTION_OVERLAP_TEST measures Pet and open Menu against real Workspace controls', async ({ page }) => {
   await openOverlay(page)
   const actions = page.getByRole('button', { name: /Add workspace|添加工作区|Board|看板|Add group|添加分组/ })
   await expect(actions.first()).toBeVisible()
   const actionBoxes = (await Promise.all(Array.from({ length: await actions.count() }, async (_, index) => actions.nth(index).boundingBox()))).filter(box => box !== null)
   expect(actionBoxes.length).toBeGreaterThan(0)
-  const pet = await petBox(page)
-  expect(pet).not.toBeNull()
-  for (const action of actionBoxes) expect(overlapArea(pet!, action!)).toBe(0)
-  await page.locator(PET).click()
-  const panel = await page.locator(PANEL).boundingBox()
-  expect(panel).not.toBeNull()
-  for (const action of actionBoxes) expect(overlapArea(panel!, action!)).toBe(0)
-  await page.screenshot({ path: `${ARTIFACTS}/r3-workspace-overlap.png` })
+  const pet = await shellBox(page)
+  for (const action of actionBoxes) expect(overlapArea(pet, action!)).toBe(0)
+  await openMenu(page)
+  const menu = await page.locator(MENU).boundingBox()
+  expect(menu).not.toBeNull()
+  for (const action of actionBoxes) expect(overlapArea(menu!, action!)).toBe(0)
+  await page.screenshot({ path: `${ARTIFACTS}/v3-workspace-overlap.png` })
 })
 
-test('HARNESS_LOCALE_LIVE_SYNC_TEST. zh-CN → en → zh-CN updates Pack, stage, target, keepsake, and journey live', async ({ page }) => {
+test('HARNESS_LOCALE_LIVE_SYNC_TEST. zh-CN → en → zh-CN updates menu copy, pet label, and journey live', async ({ page }) => {
   await openOverlay(page)
-  const ensurePanel = async () => {
-    if (await page.locator(PANEL).count() === 0) await page.locator(PET).click()
-    await page.locator(PANEL).waitFor()
+  const ensureMenu = async () => {
+    if (await page.locator(MENU).count() === 0) await openMenu(page)
+    await page.locator(MENU).waitFor()
   }
   const switchHarnessLocale = async (option: 'English' | '中文') => {
+    await closeMenu(page)
     const settings = page.getByRole('button', { name: /Settings|设置/i }).first()
     await settings.click()
     const selector = page.getByRole('button', { name: /^(中文|English)$/ }).last()
@@ -1134,32 +1382,46 @@ test('HARNESS_LOCALE_LIVE_SYNC_TEST. zh-CN → en → zh-CN updates Pack, stage,
     await page.getByRole('menuitem', { name: option, exact: true }).click()
     await expect.poll(() => page.evaluate(() => document.documentElement.lang)).toBe(option === 'English' ? 'en' : 'zh-CN')
     await page.keyboard.press('Escape')
-    await ensurePanel()
+    await ensureMenu()
   }
   const assertCopy = async (english: boolean) => {
-    await expect(page.locator('[data-vehicle-pet-more] summary')).toHaveText(english ? 'More settings' : '更多设置')
-    await expect(page.locator('[data-vehicle-pet-stage]')).toContainText(english ? 'First Dispatch' : '首航出发')
-    await expect(page.locator('[data-vehicle-pet-next-threshold]')).toContainText(english ? 'Next milestone' : '下一目标')
+    await expect(page.locator(MENU_TRIGGER)).toHaveAttribute('aria-label', english ? 'Open settings' : '打开设置')
+    await expect(page.locator(MENU)).toHaveAttribute('aria-label', english ? 'Growth companion settings' : '成长伙伴设置')
+    await expect(page.locator('[data-vehicle-pet-size-control] .vpo-menuLabel')).toHaveText(english ? 'Size' : '大小')
+    await expect(page.locator('[data-vehicle-pet-open-journey]')).toHaveText(english ? 'View full journey' : '查看完整旅程')
+    await expect(page.locator('[data-vehicle-pet-collapse]')).toHaveText(english ? 'Collapse overlay' : '收起挂件')
     await expect(page.locator('[data-vehicle-pet-pack-option]')).toHaveCount(0)
+    // Pet a11y label rides the engine-mapped state text; the word must match
+    // whatever structured state the live session is currently presenting.
+    const stateWords = english
+      ? { idle: 'Idle', running: 'Working', 'needs-input': 'Needs your input', completed: 'Task completed', failed: 'Task hit a problem', cancelled: 'Task cancelled' }
+      : { idle: '待机', running: '工作中', 'needs-input': '等待你的操作', completed: '任务完成', failed: '任务遇到问题', cancelled: '任务已取消' }
+    const label = await page.locator(PET).getAttribute('aria-label')
+    const live = await page.locator(PET).getAttribute('data-live')
+    const terminal = await page.locator(PET).getAttribute('data-terminal')
+    const stateKey = (terminal ?? live ?? 'idle') as keyof typeof stateWords
+    expect(label ?? '').toContain(stateWords[stateKey])
     const trigger = page.locator('[data-vehicle-pet-open-journey]')
     await trigger.click()
-    const dialog = page.locator('[data-vehicle-pet-dialog]')
+    const dialog = page.locator(DIALOG)
     await expect(dialog).toHaveAttribute('aria-label', english ? 'Growth Journey' : '成长旅程')
     await expect(dialog).toContainText(english ? 'First run on the road; the journey begins.' : '第一次上路，旅程正式开始。')
+    await expect(dialog.locator('.vp-panel').first()).toContainText(english ? 'First Dispatch' : '首航出发')
     await page.keyboard.press('Escape')
+    await expect.poll(() => page.locator(DIALOG).count()).toBe(0)
   }
 
-  await ensurePanel()
+  await ensureMenu()
   await switchHarnessLocale('中文')
   await assertCopy(false)
   await switchHarnessLocale('English')
   await assertCopy(true)
   await switchHarnessLocale('中文')
   await assertCopy(false)
-  await expect(page.locator('.vpo-root')).toHaveCount(1)
+  await expect(page.locator(ROOT)).toHaveCount(1)
 })
 
-test('CROSSTAB_COLLAPSE_RESTORE_VISIBLE_TEST. two tabs destroy stale Panel/Dialog and never write-loop', async ({ context, page }) => {
+test('CROSSTAB_COLLAPSE_RESTORE_VISIBLE_TEST. two tabs destroy stale Menu/Dialog and never write-loop', async ({ context, page }) => {
   await openOverlay(page)
   const second = await context.newPage()
   await second.setViewportSize(VIEWPORT)
@@ -1185,17 +1447,18 @@ test('CROSSTAB_COLLAPSE_RESTORE_VISIBLE_TEST. two tabs destroy stale Panel/Dialo
   await instrumentWrites(page)
   await instrumentWrites(second)
 
-  await page.locator(PET).click()
+  await openMenu(page)
   await page.locator('[data-vehicle-pet-open-journey]').click()
-  await expect(page.locator('[data-vehicle-pet-dialog]')).toHaveCount(1)
+  await expect(page.locator(DIALOG)).toHaveCount(1)
 
-  await second.locator(PET).click()
+  await openMenu(second)
   await second.locator('[data-vehicle-pet-collapse]').click()
   for (const target of [page, second]) {
     await expect(target.locator(LAUNCHER)).toHaveCount(1)
     await expect(target.locator(PET)).toHaveCount(0)
-    await expect(target.locator(PANEL)).toHaveCount(0)
-    await expect(target.locator('[data-vehicle-pet-dialog]')).toHaveCount(0)
+    await expect(target.locator(MENU)).toHaveCount(0)
+    await expect(target.locator(DIALOG)).toHaveCount(0)
+    await expect(target.locator(ROOT)).toHaveAttribute('data-vehicle-pet', 'COLLAPSED')
   }
   expect(await writes(page)).toBe(0)
   expect(await writes(second)).toBe(1)
@@ -1206,22 +1469,23 @@ test('CROSSTAB_COLLAPSE_RESTORE_VISIBLE_TEST. two tabs destroy stale Panel/Dialo
   await second.locator(LAUNCHER).click()
   for (const target of [page, second]) {
     await expect(target.locator(PET)).toHaveCount(1)
-    await expect(target.locator(PANEL)).toHaveCount(0)
-    await expect(target.locator('[data-vehicle-pet-dialog]')).toHaveCount(0)
+    await expect(target.locator(MENU)).toHaveCount(0)
+    await expect(target.locator(DIALOG)).toHaveCount(0)
+    await expect(target.locator(ROOT)).toHaveAttribute('data-vehicle-pet', 'VISIBLE')
   }
   expect(await writes(page)).toBe(0)
   expect(await writes(second)).toBe(2)
 
   for (const target of [page, second]) {
-    await target.locator(PET).click()
+    await openMenu(target)
     await target.locator('[data-vehicle-pet-collapse]').click()
     await expect(page.locator(LAUNCHER)).toHaveCount(1)
     await expect(second.locator(LAUNCHER)).toHaveCount(1)
     await target.locator(LAUNCHER).click()
     await expect(page.locator(PET)).toHaveCount(1)
     await expect(second.locator(PET)).toHaveCount(1)
-    await expect(page.locator(PANEL)).toHaveCount(0)
-    await expect(second.locator(PANEL)).toHaveCount(0)
+    await expect(page.locator(MENU)).toHaveCount(0)
+    await expect(second.locator(MENU)).toHaveCount(0)
   }
   expect(await writes(page)).toBe(2)
   expect(await writes(second)).toBe(4)
@@ -1230,18 +1494,19 @@ test('CROSSTAB_COLLAPSE_RESTORE_VISIBLE_TEST. two tabs destroy stale Panel/Dialo
 
 test('FULL_JOURNEY_LIGHT_THEME_CONTRAST_TEST + FULL_JOURNEY_DARK_THEME_CONTRAST_TEST', async ({ page }) => {
   await openOverlay(page)
-  buildClientGeneration('e2e-r3-active-r4-contrast-matrix')
-  await expect(page.locator('.vpo-root')).toHaveAttribute('data-client-generation', 'e2e-r3-active-r4-contrast-matrix', { timeout: 60_000 })
+  buildClientGeneration('e2e-r3-active-v3-contrast-matrix')
+  await expect(page.locator(ROOT)).toHaveAttribute('data-client-generation', 'e2e-r3-active-v3-contrast-matrix', { timeout: 60_000 })
   await expect.poll(() => page.evaluate(() => Boolean((window as unknown as { __vehiclePetE2E?: { progress?: unknown } }).__vehiclePetE2E?.progress))).toBe(true)
 
-  const ensurePanel = async () => {
-    if (await page.locator(PANEL).count() === 0) await page.locator(PET).click()
-    await page.locator(PANEL).waitFor()
+  const ensureMenu = async () => {
+    if (await page.locator(MENU).count() === 0) await openMenu(page)
+    await page.locator(MENU).waitFor()
   }
   const setPoints = async (points: number) => page.evaluate(value => {
     ;(window as unknown as { __vehiclePetE2E: { progress: { setPoints: (next: number) => void } } }).__vehiclePetE2E.progress.setPoints(value)
   }, points)
   const setLocale = async (locale: 'zh-CN' | 'en') => {
+    await closeMenu(page)
     if (await page.evaluate(() => document.documentElement.lang) === locale) return
     const settings = page.getByRole('button', { name: /Settings|设置/i }).first()
     await settings.click()
@@ -1253,14 +1518,13 @@ test('FULL_JOURNEY_LIGHT_THEME_CONTRAST_TEST + FULL_JOURNEY_DARK_THEME_CONTRAST_
     await page.keyboard.press('Escape')
   }
   const setReduced = async (reduced: boolean) => {
-    await ensurePanel()
-    await openMoreDisclosure(page)
+    await ensureMenu()
     await page.locator(`[data-vehicle-pet-reduced-motion-option="${reduced ? 'on' : 'off'}"]`).click()
   }
   const sampleContrast = async (): Promise<{ min: number; samples: number }> => {
-    await ensurePanel()
+    await ensureMenu()
     await page.locator('[data-vehicle-pet-open-journey]').click()
-    const dialog = page.locator('[data-vehicle-pet-dialog]')
+    const dialog = page.locator(DIALOG)
     await dialog.waitFor()
     const result = await dialog.evaluate(root => {
       const parse = (value: string): [number, number, number, number] => {
@@ -1318,6 +1582,8 @@ test('FULL_JOURNEY_LIGHT_THEME_CONTRAST_TEST + FULL_JOURNEY_DARK_THEME_CONTRAST_
     })
     expect(result.samples).toBeGreaterThanOrEqual(10)
     await page.keyboard.press('Escape')
+    await expect.poll(() => page.locator(DIALOG).count()).toBe(0)
+    await closeMenu(page)
     return result
   }
 
@@ -1337,7 +1603,7 @@ test('FULL_JOURNEY_LIGHT_THEME_CONTRAST_TEST + FULL_JOURNEY_DARK_THEME_CONTRAST_
     await setPoints(2_500_000)
     await expect(page.locator(PET)).toHaveAttribute('data-vehicle-pet-level', 'l12')
     await runVariants() // Fleet L12
-    // V2: the seedling Pack is not reachable from the DSH surface, so the
+    // The seedling fixture Pack is not reachable from the DSH surface, so the
     // contrast matrix covers the product Pack levels only.
 
     await page.evaluate(() => document.body.setAttribute('data-ds-dark-theme', ''))
@@ -1347,15 +1613,18 @@ test('FULL_JOURNEY_LIGHT_THEME_CONTRAST_TEST + FULL_JOURNEY_DARK_THEME_CONTRAST_
     expect(minimum).toBeGreaterThanOrEqual(4.5)
   } finally {
     await page.evaluate(() => document.body.removeAttribute('data-ds-dark-theme'))
+    // Restore the host default locale: later locale-sensitive assertions in
+    // this suite assume the fresh-context zh-CN baseline.
+    await setLocale('zh-CN')
     buildClientGeneration('production')
-    await expect(page.locator('.vpo-root')).toHaveAttribute('data-client-generation', 'production', { timeout: 60_000 })
+    await expect(page.locator(ROOT)).toHaveAttribute('data-client-generation', 'production', { timeout: 60_000 })
   }
 })
 
 test('COMPACT_ALL_LEVEL_PIXEL_MATRIX_TEST + COMPACT_MILESTONE_SUBJECT_OVERLAP_TEST + COMPACT_BLACK_VOID_TEST', async ({ page }) => {
   await openOverlay(page)
   buildClientGeneration('e2e-r3-active-matrix')
-  await expect(page.locator('.vpo-root')).toHaveAttribute('data-client-generation', 'e2e-r3-active-matrix', { timeout: 60_000 })
+  await expect(page.locator(ROOT)).toHaveAttribute('data-client-generation', 'e2e-r3-active-matrix', { timeout: 60_000 })
   await expect.poll(() => page.evaluate(() => Boolean((window as unknown as { __vehiclePetE2E?: { progress?: unknown } }).__vehiclePetE2E?.progress))).toBe(true)
 
   const setPoints = async (points: number) => {
@@ -1367,11 +1636,10 @@ test('COMPACT_ALL_LEVEL_PIXEL_MATRIX_TEST + COMPACT_MILESTONE_SUBJECT_OVERLAP_TE
     }, points)
   }
   const setReduced = async (enabled: boolean) => {
-    await page.locator(PET).click()
-    await openMoreDisclosure(page)
+    await openMenu(page)
     await page.locator(`[data-vehicle-pet-reduced-motion-option="${enabled ? 'on' : 'off'}"]`).click()
-    await page.locator(PET).click()
-    await expect(page.locator(`${PET} .vp-scene`)).toHaveAttribute('data-reduced-motion', enabled ? 'true' : 'false')
+    await closeMenu(page)
+    await expect(page.locator('.vpo-scene .vp-scene')).toHaveAttribute('data-reduced-motion', enabled ? 'true' : 'false')
   }
   const runLevels = async (packId: string, levels: readonly { levelId: string; threshold: number }[]) => {
     for (const level of levels) {
@@ -1379,7 +1647,7 @@ test('COMPACT_ALL_LEVEL_PIXEL_MATRIX_TEST + COMPACT_MILESTONE_SUBJECT_OVERLAP_TE
       await expect(page.locator(PET)).toHaveAttribute('data-vehicle-pet-level', level.levelId)
       await expect(page.locator(PET)).toHaveAttribute('data-vehicle-pet-pack', packId)
       await page.waitForTimeout(500)
-      const scene = page.locator(`${PET} .vp-scene`)
+      const scene = page.locator('.vpo-scene .vp-scene')
       const subject = scene.locator('[data-pet-subject="true"]')
       const normalScene = await scene.boundingBox()
       const normalSubject = await subject.boundingBox()
@@ -1415,9 +1683,9 @@ test('COMPACT_ALL_LEVEL_PIXEL_MATRIX_TEST + COMPACT_MILESTONE_SUBJECT_OVERLAP_TE
       await freezeMotion.evaluate(node => { (node as Element).remove() })
       await setReduced(false)
 
-      await page.locator(PET).click()
+      await openMenu(page)
       await page.locator('[data-vehicle-pet-open-journey]').click()
-      const dialogScene = page.locator('[data-vehicle-pet-dialog] .vp-scene')
+      const dialogScene = page.locator(`${DIALOG} .vp-scene`)
       const dialogBounds = await dialogScene.boundingBox()
       const dialogSubject = await dialogScene.locator('[data-pet-subject="true"]').boundingBox()
       expect(dialogBounds).not.toBeNull()
@@ -1425,25 +1693,226 @@ test('COMPACT_ALL_LEVEL_PIXEL_MATRIX_TEST + COMPACT_MILESTONE_SUBJECT_OVERLAP_TE
       expect(overlapArea(dialogSubject!, dialogBounds!) / (dialogSubject!.width * dialogSubject!.height)).toBeGreaterThanOrEqual(0.85)
       await dialogScene.screenshot({ path: `${ARTIFACTS}/r3-${packId}-${level.levelId}-journey.png` })
       await page.keyboard.press('Escape')
-      await page.locator(PET).click()
+      await expect.poll(() => page.locator(DIALOG).count()).toBe(0)
+      await closeMenu(page)
     }
   }
 
   try {
     await runLevels('autonomous-fleet', fleetManifest.levels)
-    // V2: the seedling fixture Pack is not reachable from the DSH surface.
+    // The seedling fixture Pack is not reachable from the DSH surface.
   } finally {
     buildClientGeneration('production')
-    await expect(page.locator('.vpo-root')).toHaveAttribute('data-client-generation', 'production', { timeout: 60_000 })
+    await expect(page.locator(ROOT)).toHaveAttribute('data-client-generation', 'production', { timeout: 60_000 })
   }
+})
+
+test('SPEECH_BUBBLE_LIFECYCLE_TEST. one polite catalog line per click edge, auto-dismissed inside the bound', async ({ page }) => {
+  await openOverlay(page)
+  await waitForIdleBaseline(page)
+  // CTR-OVERLAY-019(1): load quiet period — no bubble within 30s of mount.
+  await expect.poll(() => page.locator(BUBBLE).count()).toBe(0)
+  await page.waitForTimeout(SPEECH_LOAD_QUIET_WAIT_MS)
+  // The harness locale may legitimately be zh-CN or en at this point (it is a
+  // host-level setting); the line must come from the active locale's bundled
+  // catalog, so accept either locale's entries.
+  const catalogTexts = new Set([...speechCatalog('zh-CN'), ...speechCatalog('en')].map(entry => entry.text))
+
+  await page.locator(PET).click()
+  const bubble = page.locator(BUBBLE)
+  await expect.poll(() => page.locator(BUBBLE).count(), { timeout: 5_000 }).toBe(1)
+  const appearedAt = Date.now()
+  await expect(bubble).toHaveAttribute('role', 'status')
+  await expect(bubble).toHaveAttribute('aria-live', 'polite')
+  await expect(bubble).toHaveAttribute('data-placement', 'above')
+  expect(await page.locator(BUBBLE).count()).toBe(1)
+  const text = (await bubble.textContent()) ?? ''
+  expect(text.trim().length).toBeGreaterThan(0)
+  expect(catalogTexts.has(text.trim()), `bubble text "${text}" is not a catalog line`).toBe(true)
+
+  // Auto-dismiss target 4s (hard bounds 3–6s, CTR-OVERLAY-017).
+  await expect.poll(() => page.locator(BUBBLE).count(), { timeout: 7_000 }).toBe(0)
+  expect(Date.now() - appearedAt).toBeGreaterThanOrEqual(2_500)
+
+  // CTR-OVERLAY-019(7): click lines throttle to one per 30s; a rapid second
+  // click changes the expression but never speaks.
+  await page.locator(PET).click()
+  await page.waitForTimeout(2_500)
+  await expect(page.locator(BUBBLE)).toHaveCount(0)
+})
+
+test('SPEECH_NO_FOCUS_STEAL_TEST. the visible bubble never takes or holds focus', async ({ page }) => {
+  await openOverlay(page)
+  await waitForIdleBaseline(page)
+  await page.waitForTimeout(SPEECH_LOAD_QUIET_WAIT_MS)
+
+  await page.locator(PET).focus()
+  await page.locator(PET).click()
+  await expect.poll(() => page.locator(BUBBLE).count(), { timeout: 5_000 }).toBe(1)
+  const activeDuring = () => page.evaluate(() => {
+    const element = document.activeElement
+    return element === null ? 'null' : `${element.tagName}:${(element as HTMLElement).dataset.vehiclePetPet ?? ''}`
+  })
+  const during = await activeDuring()
+  expect(during).toBe('BUTTON:true')
+  await page.waitForTimeout(800)
+  expect(await activeDuring()).toBe(during)
+  // The bubble surface is inert: not focusable and never intercepts pointers.
+  expect(await page.locator(BUBBLE).getAttribute('tabindex')).toBeNull()
+  expect(await page.locator(BUBBLE).evaluate(node => getComputedStyle(node).pointerEvents)).toBe('none')
+})
+
+test('SPEECH_NO_COMPOSER_OCCLUSION_TEST. the bubble stays clear of the composer and send control', async ({ page }) => {
+  await openOverlay(page)
+  await waitForIdleBaseline(page)
+  await page.waitForTimeout(SPEECH_LOAD_QUIET_WAIT_MS)
+
+  await page.locator(PET).click()
+  const bubble = page.locator(BUBBLE)
+  await expect.poll(() => page.locator(BUBBLE).count(), { timeout: 5_000 }).toBe(1)
+  const bubbleBox = await bubble.boundingBox()
+  const composer = await composerBounds(page)
+  const send = await page.getByRole('button', { name: /发送消息|Send message/ }).first().boundingBox()
+  expect(bubbleBox).not.toBeNull()
+  expect(send).not.toBeNull()
+  expect(overlapArea(bubbleBox!, composer)).toBe(0)
+  expect(overlapArea(bubbleBox!, send!)).toBe(0)
+  // Positioned fully inside the viewport (CTR-OVERLAY-017).
+  expect(bubbleBox!.x).toBeGreaterThanOrEqual(0)
+  expect(bubbleBox!.y).toBeGreaterThanOrEqual(0)
+  expect(bubbleBox!.x + bubbleBox!.width).toBeLessThanOrEqual(VIEWPORT.width)
+  expect(bubbleBox!.y + bubbleBox!.height).toBeLessThanOrEqual(VIEWPORT.height)
+  await page.screenshot({ path: `${ARTIFACTS}/speech-bubble.png` })
+})
+
+test('SEEDLING_COERCION_PROBE_TEST. a legacy non-product activePackId coerces without data loss (CTR-OVERLAY-006)', async ({ page }) => {
+  const pageErrors: string[] = []
+  page.on('console', message => {
+    if (message.type() === 'error') pageErrors.push(message.text())
+  })
+  page.on('pageerror', error => pageErrors.push(error.message))
+
+  await openOverlay(page)
+  // The engine DB exists now (the overlay mounted). Seed a legacy non-product
+  // activePackId plus surviving journal/keepsake records (store/key shape of
+  // IndexedDbPetStorage: journals | keepsakes | preferences, out-of-line keys).
+  // Each handler is self-contained and every failure path is captured so an
+  // IDB abort surfaces with its full context instead of an opaque error.
+  const readStorage = () => page.evaluate(async () => {
+    const fail = (step: string, error: unknown): never => {
+      const detail = error instanceof Error ? `${error.name}: ${error.message}` : String(error)
+      throw new Error(`pet-engine-v1 ${step} failed — ${detail}`)
+    }
+    const openDb = () => new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open('pet-engine-v1', 1)
+      request.onupgradeneeded = () => {
+        const db = request.result
+        if (!db.objectStoreNames.contains('journals')) db.createObjectStore('journals')
+        if (!db.objectStoreNames.contains('keepsakes')) db.createObjectStore('keepsakes')
+        if (!db.objectStoreNames.contains('preferences')) db.createObjectStore('preferences')
+      }
+      request.onsuccess = () => resolve(request.result)
+      request.onerror = () => reject(request.error ?? new Error('open error'))
+    })
+    const readStore = (db: IDBDatabase, store: string) => new Promise<Record<string, unknown>>((resolve, reject) => {
+      const out: Record<string, unknown> = {}
+      let keys: IDBValidKey[] = []
+      let values: unknown[] = []
+      const tx = db.transaction(store, 'readonly')
+      const keysRequest = tx.objectStore(store).getAllKeys()
+      const valuesRequest = tx.objectStore(store).getAll()
+      keysRequest.onsuccess = () => { keys = keysRequest.result }
+      valuesRequest.onsuccess = () => { values = valuesRequest.result }
+      tx.oncomplete = () => {
+        keys.forEach((key, index) => { out[String(key)] = values[index] })
+        resolve(out)
+      }
+      tx.onerror = () => reject(tx.error ?? new Error('read error'))
+      tx.onabort = () => reject(tx.error ?? new Error('read aborted'))
+    })
+    const db = await openDb()
+    try {
+      return {
+        preferences: await readStore(db, 'preferences'),
+        journals: await readStore(db, 'journals'),
+        keepsakes: await readStore(db, 'keepsakes'),
+      }
+    } catch (error) {
+      return fail('read', error)
+    } finally {
+      db.close()
+    }
+  })
+  const seedStorage = () => page.evaluate(async () => {
+    const fail = (step: string, error: unknown): never => {
+      const detail = error instanceof Error ? `${error.name}: ${error.message}` : String(error)
+      throw new Error(`pet-engine-v1 ${step} failed — ${detail}`)
+    }
+    const openDb = () => new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open('pet-engine-v1', 1)
+      request.onupgradeneeded = () => {
+        const db = request.result
+        if (!db.objectStoreNames.contains('journals')) db.createObjectStore('journals')
+        if (!db.objectStoreNames.contains('keepsakes')) db.createObjectStore('keepsakes')
+        if (!db.objectStoreNames.contains('preferences')) db.createObjectStore('preferences')
+      }
+      request.onsuccess = () => resolve(request.result)
+      request.onerror = () => reject(request.error ?? new Error('open error'))
+    })
+    const put = (db: IDBDatabase, store: string, key: string, value: unknown) => new Promise<void>((resolve, reject) => {
+      const tx = db.transaction(store, 'readwrite')
+      tx.objectStore(store).put(value, key)
+      tx.oncomplete = () => resolve()
+      tx.onerror = () => reject(tx.error ?? new Error('put error'))
+      tx.onabort = () => reject(tx.error ?? new Error('put aborted'))
+    })
+    const db = await openDb()
+    try {
+      await put(db, 'preferences', 'activePackId', 'seedling-fixture')
+      await put(db, 'journals', 'dsh-usage|companion', {
+        consumedReceiptIds: ['dsh-usage|companion|seedling-fixture|1.0.0|l2'],
+        greetedLocalDays: [],
+      })
+      await put(db, 'keepsakes', 'dsh-usage|companion|seedling-fixture|1.0.0|ks-seed', 'dsh-usage|companion|seedling-fixture|1.0.0|ks-seed')
+    } catch (error) {
+      return fail('seed', error)
+    } finally {
+      db.close()
+    }
+    return 'seeded'
+  })
+  expect(await seedStorage()).toBe('seeded')
+  const before = await readStorage()
+  expect(before.preferences?.activePackId).toBe('seedling-fixture')
+  expect(Object.keys(before.journals ?? {})).toHaveLength(1)
+  expect(Object.keys(before.keepsakes ?? {})).toHaveLength(1)
+
+  await page.reload()
+  await expect.poll(() => page.locator(PET).count(), { timeout: 30_000 }).toBe(1)
+  // The overlay renders the product Pack (no error, no seedling subject).
+  await expect(page.locator(PET)).toHaveAttribute('data-vehicle-pet-pack', 'autonomous-fleet')
+  await expect(page.locator(PET)).toHaveAttribute('data-vehicle-pet-level', /^l\d+$/)
+  await expect(page.locator(ROOT)).toHaveCount(1)
+
+  const after = await readStorage()
+  // Coerced + persisted product Pack; the seeded data survives. The journal
+  // may legitimately GROW (the engine's once-per-local-day greeting claim is
+  // an engine-authorized append) but never loses seeded entries, and the
+  // keepsakes store is untouched.
+  expect(after.preferences?.activePackId).toBe('autonomous-fleet')
+  const journalBefore = before.journals?.['dsh-usage|companion'] as { consumedReceiptIds: string[]; greetedLocalDays: string[] } | undefined
+  const journalAfter = after.journals?.['dsh-usage|companion'] as { consumedReceiptIds: string[]; greetedLocalDays: string[] } | undefined
+  expect(journalAfter?.consumedReceiptIds).toEqual(journalBefore?.consumedReceiptIds)
+  for (const day of journalBefore?.greetedLocalDays ?? []) {
+    expect(journalAfter?.greetedLocalDays).toContain(day)
+  }
+  expect(after.keepsakes).toEqual(before.keepsakes)
+  expect(pageErrors).toEqual([])
 })
 
 test('REAL_HARNESS_INDEXEDDB_DISPOSAL_TEST + REAL_HARNESS_HMR_RESOURCE_INVENTORY_TEST', async ({ page }) => {
   await openOverlay(page)
-  await expect.poll(() => page.locator(PET).getAttribute('data-live'), { timeout: 90_000 }).toBe('idle')
-  await expect.poll(() => page.locator(PET).getAttribute('data-terminal'), { timeout: 15_000 }).toBeNull()
-  await page.waitForTimeout(4200)
-  await expect(page.locator(PILL)).toHaveCount(0)
+  await waitForIdleBaseline(page)
   const recorder = await installPillRecorder(page)
   await page.evaluate(() => {
     const trace: { maxEntries: number; generations: string[]; observer: MutationObserver } = {
@@ -1467,7 +1936,7 @@ test('REAL_HARNESS_INDEXEDDB_DISPOSAL_TEST + REAL_HARNESS_HMR_RESOURCE_INVENTORY
     const root = (window as unknown as { __vehiclePetE2E?: { pluginResources?: { generation: string } } }).__vehiclePetE2E
     return root?.pluginResources?.generation
   }), { timeout: 60_000 }).toBe('e2e-r3-disabled-baseline')
-  await expect(page.locator('.vpo-root')).toHaveCount(0)
+  await expect(page.locator(ROOT)).toHaveCount(0)
   const RESOURCE_BASELINE = await resourceSnapshot(page)
   expect(RESOURCE_BASELINE.overlayDom).toBe(0)
   expect(RESOURCE_BASELINE.injectedStyle).toBe(0)
@@ -1479,13 +1948,13 @@ test('REAL_HARNESS_INDEXEDDB_DISPOSAL_TEST + REAL_HARNESS_HMR_RESOURCE_INVENTORY
     for (let round = 1; round <= 5; round += 1) {
       const activeGeneration = `e2e-r3-active-resource-${round}`
       buildClientGeneration(activeGeneration)
-      await expect(page.locator('.vpo-root')).toHaveAttribute('data-client-generation', activeGeneration, { timeout: 60_000 })
+      await expect(page.locator(ROOT)).toHaveAttribute('data-client-generation', activeGeneration, { timeout: 60_000 })
       await expect(page.locator(PET)).toHaveCount(1)
       await expect.poll(async () => (await resourceSnapshot(page)).indexedDbConnections).toBe(1)
 
-      await page.locator(PET).click()
+      await openMenu(page)
       await page.locator('[data-vehicle-pet-open-journey]').click()
-      await expect(page.locator('[data-vehicle-pet-dialog]')).toHaveCount(1)
+      await expect(page.locator(DIALOG)).toHaveCount(1)
       const RESOURCE_ACTIVE = await resourceSnapshot(page)
       expect(RESOURCE_ACTIVE.overlayDom).toBe(1)
       expect(RESOURCE_ACTIVE.dialogDom).toBe(1)
@@ -1505,8 +1974,8 @@ test('REAL_HARNESS_INDEXEDDB_DISPOSAL_TEST + REAL_HARNESS_HMR_RESOURCE_INVENTORY
         const root = (window as unknown as { __vehiclePetE2E?: { pluginResources?: { generation: string } } }).__vehiclePetE2E
         return root?.pluginResources?.generation
       }), { timeout: 60_000 }).toBe(disabledGeneration)
-      await expect(page.locator('.vpo-root')).toHaveCount(0)
-      await expect(page.locator('[data-vehicle-pet-dialog]')).toHaveCount(0)
+      await expect(page.locator(ROOT)).toHaveCount(0)
+      await expect(page.locator(DIALOG)).toHaveCount(0)
       const RESOURCE_DISPOSED = await resourceSnapshot(page)
       expect(RESOURCE_DISPOSED).toEqual(RESOURCE_BASELINE)
       expect(await deletePetDatabase(page)).toEqual({ blocked: false, success: true })
@@ -1525,7 +1994,7 @@ test('REAL_HARNESS_INDEXEDDB_DISPOSAL_TEST + REAL_HARNESS_HMR_RESOURCE_INVENTORY
     expect(trace.generations.filter(generation => generation.startsWith('e2e-r3-active-resource-'))).toHaveLength(5)
   } finally {
     buildClientGeneration('production')
-    await expect(page.locator('.vpo-root')).toHaveAttribute('data-client-generation', 'production', { timeout: 60_000 })
+    await expect(page.locator(ROOT)).toHaveAttribute('data-client-generation', 'production', { timeout: 60_000 })
   }
 })
 

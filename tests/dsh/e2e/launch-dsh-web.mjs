@@ -15,8 +15,11 @@ import { spawn, execFileSync } from 'node:child_process'
 const DSH_ROOT = process.env.DSH_REFERENCE_WORKTREE
   ?? '/Users/yanfenma/workspace/github/deepseek-harness-wt-vehicle-pet-overlay-f77b5a2f'
 const DSH_HOME = process.env.DISPOSABLE_DSH_HOME ?? '/tmp/vehicle-pet-overlay-dsh-home-r1'
+// VEHICLE_PET_PLUGIN_ROOT MUST point at the checked-out implementation
+// worktree whose lib/client.js should be exercised (the artifact is validated
+// below); there is no cross-worktree default on purpose.
 const PLUGIN_ROOT = process.env.VEHICLE_PET_PLUGIN_ROOT
-  ?? '/Users/yanfenma/workspace/project/vehicle-pet-wt-overlay-v1-5b9c6fa6'
+  ?? process.cwd()
 const PORT = process.env.VEHICLE_PET_DSH_WEB_PORT ?? '3081'
 const MOCK_LLM_PORT = process.env.VEHICLE_PET_MOCK_LLM_PORT ?? '8901'
 
