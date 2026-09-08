@@ -784,7 +784,7 @@ test('SECONDARY_SETTINGS_ACCESSIBLE_TEST. the trigger opens a 216px menu with ex
   expect(text).not.toContain('Mock')
   expect(text).not.toContain('诊断')
   expect(text).not.toContain('种子伙伴')
-  expect(text).not.toContain('首航出发')
+  expect(text).not.toContain('主驾有人 · 有保护车')
   expect(text).not.toContain('%')
   await page.screenshot({ path: `${ARTIFACTS}/menu-open.png` })
 
@@ -1405,8 +1405,8 @@ test('HARNESS_LOCALE_LIVE_SYNC_TEST. zh-CN → en → zh-CN updates menu copy, p
     await trigger.click()
     const dialog = page.locator(DIALOG)
     await expect(dialog).toHaveAttribute('aria-label', english ? 'Growth Journey' : '成长旅程')
-    await expect(dialog).toContainText(english ? 'First run on the road; the journey begins.' : '第一次上路，旅程正式开始。')
-    await expect(dialog.locator('.vp-panel').first()).toContainText(english ? 'First Dispatch' : '首航出发')
+    await expect(dialog).toContainText(english ? 'One car: driver occupied, copilot empty, rear escort present.' : '主驾有人，副驾无人，有后方保护车，1 辆车。')
+    await expect(dialog.locator('.vp-panel').first()).toContainText(english ? 'Driver with Escort' : '主驾有人 · 有保护车')
     await page.keyboard.press('Escape')
     await expect.poll(() => page.locator(DIALOG).count()).toBe(0)
   }

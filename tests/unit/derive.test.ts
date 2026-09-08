@@ -54,7 +54,7 @@ describe('pure level derivation (CTR-PET-002, ACC-PET-002)', () => {
     expect(viewModel).toMatchObject({
       schemaVersion: 1,
       activePackId: 'autonomous-fleet',
-      packVersion: '2.0.0',
+      packVersion: '2.0.1',
       derivedLevelId: 'l11',
       derivedLevelIndex: 11,
       capped: false,

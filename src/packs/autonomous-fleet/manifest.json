@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "packId": "autonomous-fleet",
-  "packVersion": "2.0.0",
+  "packVersion": "2.0.1",
   "name": {
     "zh-CN": "无人车队",
     "en": "Autonomous Fleet"
@@ -18,16 +18,16 @@
       "levelId": "l1",
       "threshold": 0,
       "stageName": {
-        "zh-CN": "首航出发",
-        "en": "First Dispatch"
+        "zh-CN": "主驾有人 · 有保护车",
+        "en": "Driver with Escort"
       },
       "summary": {
-        "zh-CN": "无人驾驶小车首航出发，车内无人，后方跟着 1 辆迷你保护车。",
-        "en": "An unmanned car sets out on its first run, a mini escort car following behind."
+        "zh-CN": "主驾有人，副驾无人，有后方保护车，1 辆车。",
+        "en": "One car: driver occupied, copilot empty, rear escort present."
       },
       "milestone": {
-        "zh-CN": "第一次上路，旅程正式开始。",
-        "en": "First run on the road; the journey begins."
+        "zh-CN": "主驾有人，副驾无人，有后方保护车，1 辆车。",
+        "en": "One car: driver occupied, copilot empty, rear escort present."
       },
       "sceneId": "road-test",
       "presentation": {
@@ -40,16 +40,16 @@
       "levelId": "l2",
       "threshold": 10000,
       "stageName": {
-        "zh-CN": "结伴巡航",
-        "en": "Companion Cruise"
+        "zh-CN": "主驾有人 · 无保护车",
+        "en": "Driver without Escort"
       },
       "summary": {
-        "zh-CN": "车顶立起天线，小车渐入佳境，迷你保护车紧随其后，车内无人。",
-        "en": "An antenna rises from the roof; the mini escort car follows closely behind."
+        "zh-CN": "主驾有人，副驾无人，无后方保护车，1 辆车。",
+        "en": "One car: driver occupied, copilot empty, no rear escort."
       },
       "milestone": {
-        "zh-CN": "天线立起来了，看得更远了。",
-        "en": "The antenna is up; the car sees further now."
+        "zh-CN": "主驾有人，副驾无人，无后方保护车，1 辆车。",
+        "en": "One car: driver occupied, copilot empty, no rear escort."
       },
       "sceneId": "road-test-l2",
       "presentation": {
@@ -68,16 +68,16 @@
       "levelId": "l3",
       "threshold": 30000,
       "stageName": {
-        "zh-CN": "饰条初亮",
-        "en": "First Trim of Light"
+        "zh-CN": "副驾安全员 · 有保护车",
+        "en": "Safety Operator with Escort"
       },
       "summary": {
-        "zh-CN": "第一条黄色饰条与小灯条点亮，保护车同行，车内无人。",
-        "en": "The first yellow trim and small light bar light up; the escort car rides along."
+        "zh-CN": "主驾无人，副驾有安全员，有后方保护车，1 辆车。",
+        "en": "One car: driver empty, safety operator in the copilot seat, rear escort present."
       },
       "milestone": {
-        "zh-CN": "第一条灯带亮了。",
-        "en": "The first light strip glows."
+        "zh-CN": "主驾无人，副驾有安全员，有后方保护车，1 辆车。",
+        "en": "One car: driver empty, safety operator in the copilot seat, rear escort present."
       },
       "sceneId": "road-test-l3",
       "presentation": {
@@ -96,16 +96,16 @@
       "levelId": "l4",
       "threshold": 60000,
       "stageName": {
-        "zh-CN": "传感升级",
-        "en": "Sensor Upgrade"
+        "zh-CN": "副驾安全员 · 无保护车",
+        "en": "Safety Operator without Escort"
       },
       "summary": {
-        "zh-CN": "方形传感盒装上车顶，车身略长，保护车随行，车内无人。",
-        "en": "A square sensor box mounts on the roof as the body stretches a little."
+        "zh-CN": "主驾无人，副驾有安全员，无后方保护车，1 辆车。",
+        "en": "One car: driver empty, safety operator in the copilot seat, no rear escort."
       },
       "milestone": {
-        "zh-CN": "方形传感盒装上车顶。",
-        "en": "The square sensor box is on the roof."
+        "zh-CN": "主驾无人，副驾有安全员，无后方保护车，1 辆车。",
+        "en": "One car: driver empty, safety operator in the copilot seat, no rear escort."
       },
       "sceneId": "road-test-l4",
       "presentation": {
@@ -124,16 +124,16 @@
       "levelId": "l5",
       "threshold": 100000,
       "stageName": {
-        "zh-CN": "传感环成型",
-        "en": "Ring Complete"
+        "zh-CN": "全无人 · 远程监管",
+        "en": "Unmanned Remote Supervision"
       },
       "summary": {
-        "zh-CN": "完整传感环绕上车顶，小车眼神更自信，1 名远程人员监管 1 辆无人车。",
-        "en": "A full sensor ring wraps the roof; one remote operator supervises one driverless car."
+        "zh-CN": "主驾、副驾均无人，无保护车，1 名远程人员监管 1 辆车。",
+        "en": "Both seats empty, no escort; one remote operator supervises one car."
       },
       "milestone": {
-        "zh-CN": "完整传感环绕上车顶。",
-        "en": "The full sensor ring wraps the roof."
+        "zh-CN": "主驾、副驾均无人，无保护车，1 名远程人员监管 1 辆车。",
+        "en": "Both seats empty, no escort; one remote operator supervises one car."
       },
       "sceneId": "road-test-l5",
       "presentation": {
@@ -970,8 +970,8 @@
       "height": 480,
       "byteSizeCompressed": 95778,
       "altText": {
-        "zh-CN": "你的 Pet：无人驾驶小车（L1 阶段），后方跟着迷你保护车",
-        "en": "Your pet: the unmanned car at level 1, mini escort car in trail"
+        "zh-CN": "L1 车宠历史插画。阶段含义：主驾有人，副驾无人，有后方保护车，1 辆车。",
+        "en": "Historical car illustration for L1. Operational stage: One car: driver occupied, copilot empty, rear escort present."
       }
     },
     {
@@ -983,8 +983,8 @@
       "height": 480,
       "byteSizeCompressed": 151494,
       "altText": {
-        "zh-CN": "你的 Pet：无人驾驶小车（L1 阶段），后方跟着迷你保护车",
-        "en": "Your pet: the unmanned car at level 1, mini escort car in trail"
+        "zh-CN": "L1 车宠历史插画。阶段含义：主驾有人，副驾无人，有后方保护车，1 辆车。",
+        "en": "Historical car illustration for L1. Operational stage: One car: driver occupied, copilot empty, rear escort present."
       }
     },
     {
@@ -996,8 +996,8 @@
       "height": 480,
       "byteSizeCompressed": 114652,
       "altText": {
-        "zh-CN": "你的 Pet：无人驾驶小车（L2 阶段），后方跟着迷你保护车",
-        "en": "Your pet: the unmanned car at level 2, mini escort car in trail"
+        "zh-CN": "L2 车宠历史插画。阶段含义：主驾有人，副驾无人，无后方保护车，1 辆车。",
+        "en": "Historical car illustration for L2. Operational stage: One car: driver occupied, copilot empty, no rear escort."
       }
     },
     {
@@ -1009,8 +1009,8 @@
       "height": 480,
       "byteSizeCompressed": 184932,
       "altText": {
-        "zh-CN": "你的 Pet：无人驾驶小车（L2 阶段），后方跟着迷你保护车",
-        "en": "Your pet: the unmanned car at level 2, mini escort car in trail"
+        "zh-CN": "L2 车宠历史插画。阶段含义：主驾有人，副驾无人，无后方保护车，1 辆车。",
+        "en": "Historical car illustration for L2. Operational stage: One car: driver occupied, copilot empty, no rear escort."
       }
     },
     {
@@ -1022,8 +1022,8 @@
       "height": 480,
       "byteSizeCompressed": 98898,
       "altText": {
-        "zh-CN": "你的 Pet：无人驾驶小车（L3 阶段），后方跟着迷你保护车",
-        "en": "Your pet: the unmanned car at level 3, mini escort car in trail"
+        "zh-CN": "L3 车宠历史插画。阶段含义：主驾无人，副驾有安全员，有后方保护车，1 辆车。",
+        "en": "Historical car illustration for L3. Operational stage: One car: driver empty, safety operator in the copilot seat, rear escort present."
       }
     },
     {
@@ -1035,8 +1035,8 @@
       "height": 480,
       "byteSizeCompressed": 152287,
       "altText": {
-        "zh-CN": "你的 Pet：无人驾驶小车（L3 阶段），后方跟着迷你保护车",
-        "en": "Your pet: the unmanned car at level 3, mini escort car in trail"
+        "zh-CN": "L3 车宠历史插画。阶段含义：主驾无人，副驾有安全员，有后方保护车，1 辆车。",
+        "en": "Historical car illustration for L3. Operational stage: One car: driver empty, safety operator in the copilot seat, rear escort present."
       }
     },
     {
@@ -1048,8 +1048,8 @@
       "height": 480,
       "byteSizeCompressed": 123736,
       "altText": {
-        "zh-CN": "你的 Pet：无人驾驶小车（L4 阶段），后方跟着迷你保护车",
-        "en": "Your pet: the unmanned car at level 4, mini escort car in trail"
+        "zh-CN": "L4 车宠历史插画。阶段含义：主驾无人，副驾有安全员，无后方保护车，1 辆车。",
+        "en": "Historical car illustration for L4. Operational stage: One car: driver empty, safety operator in the copilot seat, no rear escort."
       }
     },
     {
@@ -1061,8 +1061,8 @@
       "height": 480,
       "byteSizeCompressed": 197966,
       "altText": {
-        "zh-CN": "你的 Pet：无人驾驶小车（L4 阶段），后方跟着迷你保护车",
-        "en": "Your pet: the unmanned car at level 4, mini escort car in trail"
+        "zh-CN": "L4 车宠历史插画。阶段含义：主驾无人，副驾有安全员，无后方保护车，1 辆车。",
+        "en": "Historical car illustration for L4. Operational stage: One car: driver empty, safety operator in the copilot seat, no rear escort."
       }
     },
     {
@@ -1100,8 +1100,8 @@
       "height": 480,
       "byteSizeCompressed": 117084,
       "altText": {
-        "zh-CN": "你的 Pet：无人驾驶小车（L5 阶段），后方跟着迷你保护车",
-        "en": "Your pet: the unmanned car at level 5, mini escort car in trail"
+        "zh-CN": "L5 车宠历史插画。阶段含义：主驾、副驾均无人，无保护车，1 名远程人员监管 1 辆车。",
+        "en": "Historical car illustration for L5. Operational stage: Both seats empty, no escort; one remote operator supervises one car."
       }
     },
     {
@@ -1113,8 +1113,8 @@
       "height": 480,
       "byteSizeCompressed": 185267,
       "altText": {
-        "zh-CN": "你的 Pet：无人驾驶小车（L5 阶段），后方跟着迷你保护车",
-        "en": "Your pet: the unmanned car at level 5, mini escort car in trail"
+        "zh-CN": "L5 车宠历史插画。阶段含义：主驾、副驾均无人，无保护车，1 名远程人员监管 1 辆车。",
+        "en": "Historical car illustration for L5. Operational stage: Both seats empty, no escort; one remote operator supervises one car."
       }
     },
     {
@@ -1409,12 +1409,12 @@
       "keepsakeId": "ks-l2",
       "levelId": "l2",
       "title": {
-        "zh-CN": "巡航徽章",
-        "en": "Cruise Badge"
+        "zh-CN": "主驾有人 · 无保护车纪念",
+        "en": "Driver without Escort Memento"
       },
       "accessDescription": {
-        "zh-CN": "纪念车顶天线立起、看得更远的时刻。",
-        "en": "Marks the antenna rising for a longer view."
+        "zh-CN": "主驾有人，副驾无人，无后方保护车，1 辆车。",
+        "en": "One car: driver occupied, copilot empty, no rear escort."
       },
       "assetId": "sprite-subject-pod--l2"
     },
@@ -1422,12 +1422,12 @@
       "keepsakeId": "ks-l3",
       "levelId": "l3",
       "title": {
-        "zh-CN": "饰条初亮徽",
-        "en": "First Light Badge"
+        "zh-CN": "副驾安全员 · 有保护车纪念",
+        "en": "Safety Operator with Escort Memento"
       },
       "accessDescription": {
-        "zh-CN": "纪念第一条黄色饰条点亮的时刻。",
-        "en": "Marks the first yellow trim lighting up."
+        "zh-CN": "主驾无人，副驾有安全员，有后方保护车，1 辆车。",
+        "en": "One car: driver empty, safety operator in the copilot seat, rear escort present."
       },
       "assetId": "sprite-subject-pod--l3"
     },
@@ -1435,12 +1435,12 @@
       "keepsakeId": "ks-l4",
       "levelId": "l4",
       "title": {
-        "zh-CN": "传感盒徽",
-        "en": "Sensor Box Badge"
+        "zh-CN": "副驾安全员 · 无保护车纪念",
+        "en": "Safety Operator without Escort Memento"
       },
       "accessDescription": {
-        "zh-CN": "纪念方形传感盒装上车顶的时刻。",
-        "en": "Marks the square sensor box joining the roof."
+        "zh-CN": "主驾无人，副驾有安全员，无后方保护车，1 辆车。",
+        "en": "One car: driver empty, safety operator in the copilot seat, no rear escort."
       },
       "assetId": "sprite-subject-pod--l4"
     },
@@ -1448,12 +1448,12 @@
       "keepsakeId": "ks-l5",
       "levelId": "l5",
       "title": {
-        "zh-CN": "传感环徽",
-        "en": "Sensor Ring Badge"
+        "zh-CN": "全无人 · 远程监管纪念",
+        "en": "Unmanned Remote Supervision Memento"
       },
       "accessDescription": {
-        "zh-CN": "纪念完整传感环绕上车顶的时刻。",
-        "en": "Marks the full sensor ring wrapping the roof."
+        "zh-CN": "主驾、副驾均无人，无保护车，1 名远程人员监管 1 辆车。",
+        "en": "Both seats empty, no escort; one remote operator supervises one car."
       },
       "assetId": "sprite-subject-pod--l5"
     },

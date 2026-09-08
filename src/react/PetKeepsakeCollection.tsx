@@ -8,7 +8,7 @@ import { usePetEngine } from './PetEngineProvider'
 import { IconKeepsake, IconLock } from './icons'
 
 export function PetKeepsakeCollection() {
-  const { snapshot, copy, resolveText, assetUrl } = usePetEngine()
+  const { snapshot, copy, resolveText, assetUrl, keepsakeVersionAliases } = usePetEngine()
   const pack = snapshot.activePack
   const viewModel = snapshot.viewModel
 
@@ -22,12 +22,15 @@ export function PetKeepsakeCollection() {
 
   const keepsakes = pack.manifest.keepsakes ?? []
   const unlocked = new Set(
-    snapshot.unlockedKeepsakes
+    (snapshot.keepsakeHistory ?? snapshot.unlockedKeepsakes)
       .filter(
         (k) =>
+          k.sourceId === viewModel.sourceId &&
           k.subjectId === viewModel.subjectId &&
           k.packId === pack.manifest.packId &&
-          k.packVersion === pack.manifest.packVersion,
+          (k.packVersion === pack.manifest.packVersion ||
+            keepsakeVersionAliases?.[pack.manifest.packId]?.[pack.manifest.packVersion]?.includes(k.packVersion) === true) &&
+          keepsakes.some(keepsake => keepsake.keepsakeId === k.keepsakeId),
       )
       .map((k) => k.keepsakeId),
   )
