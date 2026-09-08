@@ -1,0 +1,142 @@
+e2e work: /var/folders/jh/5k4x44w12ps1kbrch8__f6b80000gp/T/vehicle-pet-release-e2e-EKEDrs
+web port: 3088  cdp port: 9233
+dsh root: /Users/yanfenma/workspace/github/deepseek-harness-wt-vehicle-pet-overlay-f77b5a2f
+vehicle-pet repo: /Users/yanfenma/workspace/project/vehicle-pet-release-impl
+installing plugin at BASE_REF (pnpm dsh plugin add git ref)…
+  [ok] plugin add at BASE_REF
+  [ok] spec normalization install
+  [ok] profile spec is production shape — git+https://github.com/mayf3/vehicle-pet.git#cce0e9d24907e7c17e42fd2b310a68a98860d5cf
+service spawned pid 74957
+  [ok] web service healthy before cases
+  [ok] plugin client served (HTTP 200) — HTTP 200
+  [diag] dom={"vpoRoot":0,"petAttr":0,"dialogs":[],"snippet":"DSH Local Build | f77b5a2 | 新会话 | 工作区 | workspace | 新会话 | 设置 | 探索未至之境 | 预览版 | workspace | 标准模式 | Read Only | DeepSeek-V4-Flash | High | 详情 | 点击消息流中的工具"}
+  [diag] pageErrors=[]
+  [diag] console=[]
+  [warn] pet not mounted on pinned harness (onboarding-gated); continuing — not a CASE assertion
+
+CASE_1: normal upgrade (plan + apply)
+  [ok] plan exits 0 — {
+  "schemaVersion": 1,
+  "tool": {
+    "name": "vehicle-pet-release",
+    "version": "1.0.0",
+    "nodeVersion": "v26.7.0",
+    "pnpmVersion": "10.28.1"
+  },
+  "receiptId": "2026-09-08T17-01-21-204Z-plan-a81809c3-36c07a",
+  "host": {
+    "hostname": "MacBook-Pro.local",
+    "capturedAt": "2026-09-08T17:02:10.445Z"
+  },
+  "mode": "plan",
+  "targetRef": "a81809c3fbcc2b5b4b97917463bf75f862aeaee9",
+ 
+  [ok] plan leaves profile bytes untouched
+  [ok] plan leaves service untouched
+  [ok] plan leaves served bytes untouched
+  [ok] apply exits 0 — exit 0 {
+  "schemaVersion": 1,
+  "tool": {
+    "name": "vehicle-pet-release",
+    "version": "1.0.0",
+    "nodeVersion": "v26.7.0",
+    "pnpmVersion": "10.28.1"
+  },
+  "receiptId": "2026-09-08T17-02-10-542Z-apply-a81809c3-5fe49f",
+  "host": {
+    "hostname": "MacBook-Pro.local",
+    "capturedAt": "2026-09-08T17:03:22.071Z"
+  },
+  "mode": "apply",
+  "targetRef": "a81809c3fbcc2b5b4b97917463bf75f862aeaee9",
+  "gitTruth": {
+    "method": "REMOTE_BARE_FETCH_BY_SHA",
+    "originUrl": "https://github.com/mayf
+  [ok] apply receipt present
+  [ok] served bytes changed by upgrade
+  [ok] service port stable after apply
+  [ok] RUNTIME_PROOF PASS — {"verdict":"PASS","detail":{"install":"lockfile resolution == a81809c3fbcc2b5b4b97917463bf75f862aeaee9","content":"installed tree == files-projection of git tree a81809c3fbcc2b5b4b97917463bf75f862aeaee9 (151 files compared)","served":"served == installed (43c9cf64e5ae…, 6857461 bytes)"}}
+  [ok] CONTROLLED_RESTART PASS — {"verdict":"PASS","detail":"port 3088 → 3088, health PASS"}
+  [ok] STATE POSITION preserved — {"verdict":"PASS"}
+  [ok] STATE reducedMotion preserved
+  [ok] STATE ledger preserved — {"verdict":"PASS","detail":"cumulativePoints 7 → 7, revision 3 → 3 (natural usage may advance)"}
+  [ok] STATE engine idb preserved
+  [ok] apply changed the pin to TARGET_REF
+  [warn] pet not mounted post-upgrade (onboarding-gated); runtime identity is proven by RUNTIME_PROOF
+  [ok] prefs survive reload post-upgrade — {"schemaVersion":1,"position":{"xRatio":0.42,"yRatio":0.36},"positionCustomized":true,"collapsed":false,"reducedMotion":"off"}
+
+CASE_2: already-at-target NO_OP
+  [ok] plan NO_OP exits 0 — {
+  "schemaVersion": 1,
+  "tool": {
+    "name": "vehicle-pet-release",
+    "version": "1.0.0",
+    "nodeVersion": "v26.7.0",
+    "pnpmVersion": "10.28.1"
+  },
+  "receiptId": "2026-09-08T17-04-03-716Z-
+  [ok] apply NO_OP exits 0
+  [ok] apply NO_OP ZERO_MUTATION=YES — {"verdict":"PASS","detail":"YES — no install, no restart, no preference write, no package/lock write"}
+  [ok] NO_OP left service untouched
+  [ok] NO_OP left bytes untouched
+
+CASE_4: rollback to preimage ref
+  [ok] case1 receipt id known — 2026-09-08T17-02-10-542Z-apply-a81809c3-5fe49f
+  [ok] rollback exits 0 — exit 0 {
+  "schemaVersion": 1,
+  "tool": {
+    "name": "vehicle-pet-release",
+    "version": "1.0.0",
+    "nodeVersion": "v26.7.0",
+    "pnpmVersion": "10.28.1"
+  },
+  "receiptId": "2026-09-08T17-10-12-451Z-rollback-cce0e9d2-b9809e",
+  "host": {
+    "hostname": "MacBook-Pro.local",
+    "capturedAt": "2026-09-08T17:10:44.443Z"
+  },
+  "mode": "rollback",
+  "targetRef": "cce0e9d24907e7c17e42fd2b310a68a98860
+  [ok] rollback restored BASE_REF pin
+  [ok] rollback restored BASE served bytes
+  [ok] rollback RUNTIME_PROOF PASS — {"verdict":"PASS"}
+  [warn] pet not mounted post-rollback (onboarding-gated); runtime identity is proven by RUNTIME_PROOF
+
+CASE_3: unrelated dependency drift stops before restart (profile back at BASE after rollback)
+  [ok] drift fixture edited
+  [ok] drift apply exits 3 (STOPPED) — exit 3
+  [ok] drift apply result UNRELATED_DEPENDENCY_DRIFT — UNRELATED_DEPENDENCY_DRIFT
+  [ok] drift phase PRE_INSTALL
+  [ok] drift apply left vehicle-pet pin untouched at BASE_REF
+  [ok] drift apply did not restart the service
+  [ok] drift apply left served bytes unchanged
+
+CASE_5: invalid refs rejected
+  [ok] reject main (exit 2) — exit 2
+  [ok] reject latest (exit 2) — exit 2
+  [ok] reject a81809c3 (exit 2) — exit 2
+  [ok] reject zzzzzzzzzzzz (exit 2) — exit 2
+  [ok] reject a81809c3fbcc (exit 2) — exit 2
+  [ok] reject a81809c3fbcc (exit 2) — exit 2
+  [ok] reject unreachable 40-hex (exit 2) — exit 2
+  [ok] reject local-only commit (exit 2, B1) — exit 2 TARGET_REF_UNREACHABLE_FROM_ORIGIN
+  [ok] CASE_5 left profile bytes untouched
+
+CASE_6: stale local main safety (via CLI)
+  [ok] stale-main plan exits 0 (PLAN_READY) — exit 0 {
+  "schemaVersion": 1,
+  "tool": {
+    "name": "vehicle-pet-release",
+    "version": "1.0.0",
+    "nodeVersion": "v26.7.0",
+    "pnpmVersion": "10.28.1"
+  },
+  "receiptId": "2026-09-08T17-11-57-171Z-plan-69e5db73-548864",
+  "host": {
+    "hostname": "MacBook-Pro.local",
+    "capturedAt": "2026-09-0
+  [ok] stale-main plan resolved target from ORIGIN — {"method":"REMOTE_BARE_FETCH_BY_SHA","originUrl":"/var/folders/jh/5k4x44w12ps1kbrch8__f6b80000gp/T/vp-release-stale-GcVdSs/origin.git","ref":"69e5db73f43b780b6bddf3c2b6797d0b2bba6f31"}
+  [ok] stale clone main untouched — 543d6862c8166a294ada2533c6b6a23e5ea4b27a vs 543d6862c8166a294ada2533c6b6a23e5ea4b27a
+  [ok] stale clone WIP untouched
+
+ALL CASES PASS (CASE_1..6); disposable work removed.

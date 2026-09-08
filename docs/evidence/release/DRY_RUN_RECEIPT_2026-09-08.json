@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "vehicle-pet-release",
+    "version": "1.0.1",
+    "nodeVersion": "v26.7.0",
+    "pnpmVersion": "10.28.1"
+  },
+  "receiptId": "2026-09-08T17-28-49-933Z-plan-a81809c3-39bffd",
+  "host": {
+    "hostname": "MacBook-Pro.local",
+    "capturedAt": "2026-09-08T17:29:27.525Z"
+  },
+  "mode": "plan",
+  "targetRef": "a81809c3fbcc2b5b4b97917463bf75f862aeaee9",
+  "gitTruth": {
+    "method": "REMOTE_BARE_FETCH_BY_SHA",
+    "originUrl": "https://github.com/mayf3/vehicle-pet.git",
+    "ref": "a81809c3fbcc2b5b4b97917463bf75f862aeaee9"
+  },
+  "dshHome": "/Users/yanfenma/.dsh",
+  "profile": "web",
+  "preimage": {
+    "currentRef": "a81809c3fbcc2b5b4b97917463bf75f862aeaee9",
+    "currentSpec": "git+https://github.com/mayf3/vehicle-pet.git#a81809c3fbcc2b5b4b97917463bf75f862aeaee9",
+    "membership": [
+      "@deepseek-ai/dsh-base",
+      "@deepseek-ai/dsh-web-app",
+      "deepseek-pet",
+      "dsh-session-doctor",
+      "dsh-better-sidebar",
+      "@dsh-user/ui-side-panel",
+      "dsh-remote-plugin",
+      "rtor-v4",
+      "dsh-codex",
+      "@mayf3/vehicle-pet"
+    ]
+  },
+  "steps": [],
+  "verdicts": {
+    "GIT_TRUTH": {
+      "verdict": "PASS",
+      "detail": "REMOTE_BARE_FETCH_BY_SHA from https://github.com/mayf3/vehicle-pet.git"
+    },
+    "CURRENT_REF_DISCOVERY": {
+      "verdict": "PASS",
+      "detail": "a81809c3fbcc2b5b4b97917463bf75f862aeaee9"
+    },
+    "SERVICE_DISCOVERY": {
+      "verdict": "PASS",
+      "detail": "pid 81538 port 3080 (/opt/homebrew/Cellar/node/26.7.0/bin/node --import tsx/esm apps/cli/src/bin.ts web --trusted-host macbook-pro.tail84dd3d.ts.net)"
+    },
+    "WEB_HEALTH": {
+      "verdict": "PASS",
+      "detail": "{\"status\":200,\"ok\":true,\"ms\":13}"
+    },
+    "OTHER_PLUGINS_PRESERVED": {
+      "verdict": "PASS",
+      "detail": "enforced by lock drift + membership gates during mutation; preimage resolutions recorded"
+    },
+    "STATE_PROBE_PRE": {
+      "verdict": "PASS",
+      "detail": "1 matching browser target(s)"
+    },
+    "NO_OP": {
+      "verdict": "PASS",
+      "detail": "CURRENT_REF == TARGET_REF"
+    },
+    "ZERO_MUTATION": {
+      "verdict": "PASS",
+      "detail": "YES (plan mode writes nothing outside the receipt dir and the git object store)"
+    }
+  },
+  "result": "NO_OP_ALREADY_AT_TARGET",
+  "exitCode": 0,
+  "note": "production is already at a81809c3fbcc2b5b4b97917463bf75f862aeaee9; nothing to do",
+  "finishedAt": "2026-09-08T17:29:27.525Z"
+}

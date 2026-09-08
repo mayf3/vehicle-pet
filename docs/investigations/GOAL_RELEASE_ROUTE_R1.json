@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "task_id": "GOAL-RELEASE-PREFLIGHT-R1",
+  "goal": "Goal 发布: converge the repeatedly Owner-proven DSH Vehicle Pet fixed-ref production upgrade flow into one repository-local release helper (default read-only, exact-40-hex target, preflight/dry-run/apply/rollback/verify, stale-local-main-safe, evidence-branch-safe) plus a Controlled Runbook, deterministic tests, and a disposable DSH end-to-end proof. This Goal must NOT mutate the real production (read-only dry run only).",
+  "current_gap": "Each production apply round temporarily re-derived the full operational procedure (home/profile pin, lockfile, plugin membership, service identity/PID/port, served client, state preservation, rollback ref) from that round's context, with real observed risks: stale local main evidence base (be653ba), production ref != repository main, unrelated floating-dependency drift (RISK_3), unassumed service management (RISK_4), and per-round one-off scripts (RISK_5).",
+  "done_when": "Goal dispatch §22: RELEASE_HELPER + CONTROLLED_RUNBOOK merged; DEFAULT_DRY_RUN, EXACT_REF_ONLY, NO_OP_SAME_REF, UNRELATED_LOCK_DRIFT_REJECTED, CONTROLLED_RESTART, RUNTIME_PROOF, STATE_PRESERVATION, ROLLBACK_E2E, STALE_LOCAL_MAIN_SAFE, EVIDENCE_PERSISTENCE_SAFE, REAL_PRODUCTION_READ_ONLY_DRY_RUN all PASS; REAL_PRODUCTION_MUTATED=NO; independent code + operational audits ACCEPT; SHIP_BLOCKERS=0; then STOP.",
+  "route_stage": "IMPLEMENTATION",
+  "authority_accepted_in_base": "NOT_APPLICABLE",
+  "owner_decision_required": false,
+  "authority": {
+    "declared_action": "REUSE",
+    "ownership_known": true,
+    "accepted_owner_exists": true,
+    "accepted_meaning_changed": false,
+    "accepted_strict_addition": false,
+    "proposed_target_named": false,
+    "proposal_scope_changed": false,
+    "proposal_ownership_changed": false,
+    "proposal_decision_identity_changed": false,
+    "implementation_authority": "not_applicable",
+    "atomic_spec_implementation_permitted": false,
+    "note": "operational tooling / assurance artifact: no Product Contract created or changed; Engine V3, Overlay Adapter V3, Progress Source V2, Usage Source V2, Token Economy all REUSE-unchanged"
+  },
+  "plan": {
+    "complexity": "BOUNDED",
+    "level": "BRIEF",
+    "brief_location": "Owner Goal dispatch prompt (GOAL_NAME=发布, OWNER_DISPATCH_UNIT=GOAL) plus docs/investigations/GOAL_RELEASE_PREFLIGHT.md"
+  },
+  "assurance": {
+    "failure_consequence": "PRODUCTION_ACTIVATION_CAPABILITY",
+    "level": "CONTROLLED",
+    "controlled_runbook_present": "REQUIRED_BY_ROUTE",
+    "rationale": "REUSE+CONTROLLED route: valid mandate + exact runbook + receipt + independent post-state verification; no new Spec solely for risk. The helper can execute production mutation in future rounds (production activation class), even though this Goal itself forbids real production mutation."
+  },
+  "execution_mandate": {
+    "status": "VALID",
+    "attributable": true,
+    "target_bound": true,
+    "actor_bound": true,
+    "environment_bound": true,
+    "scope_bound": true,
+    "allowed_effects_bound": true,
+    "forbidden_effects_bound": true,
+    "exact_operation_bound": false,
+    "done_when_bound": true,
+    "abort_conditions_bound": true,
+    "secret_handling_bound": true,
+    "receipt_bound": true,
+    "attempt_bounds_bound": true,
+    "self_issued": false,
+    "note": "the Owner Goal dispatch (OWNER_DISPATCH_UNIT=GOAL, explicit DONE_WHEN §22, forbidden effects §5/§9/§10/§11/§16/§18, anti-churn §23) is the attributable mandate; it is goal-scoped, not a single-operation runbook mandate, so exact_operation_bound is false by design"
+  },
+  "write_surface": {
+    "mutation_planned": true,
+    "isolated": true,
+    "note": "implementation on branch release/helper-v1 in the exclusive worktree vehicle-pet-release-impl cut from fresh origin/main b64e2d0dbadaa9ee1b7eb9814703568021adc58a; the Owner's production checkout is never used for writes; real production receives only the read-only dry run"
+  },
+  "spec_gap_dependency": "NONE",
+  "evidence": {
+    "load_bearing_required": true,
+    "reviewability": "PASS",
+    "fabrication_observed": false,
+    "failure_class": "NONE"
+  },
+  "live_authority_gap": {
+    "state": "NONE",
+    "expansion_frozen": true,
+    "auto_delete": false,
+    "permanent_grandfather": false,
+    "owner_disposition_present": false
+  },
+  "emergency": {
+    "state": "NONE",
+    "action_kind": "NONE",
+    "owner_authorized": false,
+    "incident_reference_present": false,
+    "durable_new_behavior": false,
+    "normal_authority_reconciliation_required": false
+  },
+  "review": {
+    "review_target_head": "PENDING_IMPLEMENTATION",
+    "base_head": "b64e2d0dbadaa9ee1b7eb9814703568021adc58a",
+    "current_base_head": "b64e2d0dbadaa9ee1b7eb9814703568021adc58a",
+    "target_head_changed": false,
+    "relevant_base_impact": false,
+    "full_rereview_required": false,
+    "review_scope": "independent code audit + independent operational audit on exact Base b64e2d0 and exact candidate Head after implementation; BLOCKER_UNION one round, one re-audit"
+  },
+  "readiness": {
+    "implementation_allowed": "YES",
+    "merge_ready": "NOT_APPLICABLE",
+    "operation_allowed": "NOT_APPLICABLE"
+  },
+  "stop": {
+    "done_when_met": false,
+    "expansion_triggered": false,
+    "next_action": "CONTINUE"
+  },
+  "findings": []
+}
