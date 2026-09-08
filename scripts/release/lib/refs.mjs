@@ -45,39 +45,75 @@ export function validateExactRef(input) {
 
 /**
  * Prove the ref exists in the origin object graph, without assuming anything
- * about any local branch. Preferred proof is a fetch of the exact SHA from
- * origin; the fallback is a full origin fetch followed by local object
- * presence (all objects then came from origin's graph).
+ * about any local branch — and without the local-object shortcut: `git
+ * fetch origin <sha>` exits 0 WITHOUT transferring anything when the object
+ * already exists locally, so probing the working repository can never
+ * distinguish "origin has it" from "I had it". The proof therefore runs in
+ * a throwaway EMPTY bare repository (no local objects at all): fetch the
+ * exact SHA from the origin URL into it — success means origin itself
+ * provided the object. When origin rejects fetch-by-SHA (some servers do),
+ * fall back to a full fetch into the same empty bare and check object
+ * presence there; every object in that bare came from origin.
+ *
+ * After a successful proof, the ref is fetched into the working repository
+ * ONLY if absent there, so `git archive` can read it (the object's origin
+ * provenance is already established).
  * @param {{repo: string, ref: string, timeoutMs?: number}} options
- * @returns {Promise<{ok: true, method: 'FETCH_BY_SHA'|'LOCAL_OBJECT_POST_FETCH', originUrl: string}
+ * @returns {Promise<{ok: true, method: 'REMOTE_BARE_FETCH_BY_SHA'|'REMOTE_BARE_FULL_FETCH', originUrl: string}
  *   | {ok: false, reason: 'TARGET_REF_UNREACHABLE_FROM_ORIGIN', detail: string}>}
  */
 export async function verifyRefFromOrigin(options) {
-  const { repo, ref, timeoutMs = 120_000 } = options
+  const { repo, ref, timeoutMs = 300_000 } = options
   const originUrl = (await run('git', ['-C', repo, 'remote', 'get-url', 'origin'], { timeoutMs })).stdout.trim()
     || '(no origin remote)'
-  const bySha = await run('git', ['-C', repo, 'fetch', '--quiet', 'origin', ref], { timeoutMs })
-  if (bySha.code === 0) {
-    return { ok: true, method: 'FETCH_BY_SHA', originUrl }
-  }
-  const full = await run('git', ['-C', repo, 'fetch', '--quiet', 'origin'], { timeoutMs })
-  if (full.code !== 0) {
-    return {
-      ok: false,
-      reason: 'TARGET_REF_UNREACHABLE_FROM_ORIGIN',
-      detail: `git fetch origin failed: ${full.stderr.trim() || full.stdout.trim()}`,
+  const probe = await mkdtemp(join(tmpdir(), 'vehicle-pet-release-refcheck-'))
+  try {
+    const init = await run('git', ['init', '-q', '--bare', probe], { timeoutMs })
+    if (init.code !== 0) {
+      return { ok: false, reason: 'TARGET_REF_UNREACHABLE_FROM_ORIGIN', detail: `cannot create the empty verification repository: ${init.stderr.trim()}` }
     }
-  }
-  const object = await run('git', ['-C', repo, 'cat-file', '-e', `${ref}^{commit}`], { timeoutMs })
-  if (object.code !== 0) {
-    return {
-      ok: false,
-      reason: 'TARGET_REF_UNREACHABLE_FROM_ORIGIN',
-      detail: `fetch-by-SHA was rejected by origin and the object is absent after a full fetch `
-        + `(${bySha.stderr.trim() || bySha.stdout.trim() || 'no origin detail'})`,
+    const bySha = await run('git', ['-C', probe, 'fetch', '--quiet', originUrl, ref], { timeoutMs })
+    if (bySha.code === 0) {
+      await ensureObjectFetchedLocally({ repo, ref, originUrl, timeoutMs })
+      return { ok: true, method: 'REMOTE_BARE_FETCH_BY_SHA', originUrl }
     }
+    const full = await run('git', ['-C', probe, 'fetch', '--quiet', originUrl], { timeoutMs })
+    if (full.code !== 0) {
+      return {
+        ok: false,
+        reason: 'TARGET_REF_UNREACHABLE_FROM_ORIGIN',
+        detail: `origin ${originUrl} is unreachable: ${(full.stderr || bySha.stderr).trim() || 'no detail'}`,
+      }
+    }
+    const object = await run('git', ['-C', probe, 'cat-file', '-e', `${ref}^{commit}`], { timeoutMs })
+    if (object.code !== 0) {
+      return {
+        ok: false,
+        reason: 'TARGET_REF_UNREACHABLE_FROM_ORIGIN',
+        detail: `origin ${originUrl} does not provide ${ref} (fetch-by-SHA was rejected and a full fetch into an empty repository does not contain the object)`
+          + ` [bySha: ${bySha.stderr.trim() || bySha.stdout.trim() || 'no detail'}]`,
+      }
+    }
+    await ensureObjectFetchedLocally({ repo, ref, originUrl, timeoutMs })
+    return { ok: true, method: 'REMOTE_BARE_FULL_FETCH', originUrl }
+  } finally {
+    await rm(probe, { recursive: true, force: true })
   }
-  return { ok: true, method: 'LOCAL_OBJECT_POST_FETCH', originUrl }
+}
+
+/**
+ * Make the proven object readable in the working repository for later
+ * `git archive`. The object's origin provenance is already established; a
+ * missing local object is fetched from origin (a plain transfer), an
+ * existing local one needs nothing (its bytes are hash-verified by git
+ * against the same SHA).
+ * @param {{repo: string, ref: string, originUrl: string, timeoutMs: number}} input
+ */
+async function ensureObjectFetchedLocally(input) {
+  const { repo, ref, originUrl, timeoutMs } = input
+  const present = await run('git', ['-C', repo, 'cat-file', '-e', `${ref}^{commit}`], { timeoutMs })
+  if (present.code === 0) return
+  await run('git', ['-C', repo, 'fetch', '--quiet', originUrl, ref], { timeoutMs })
 }
 
 /**

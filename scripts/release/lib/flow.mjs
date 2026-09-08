@@ -67,7 +67,7 @@ export async function runPlan(input) {
   const exitCode = plan.kind === 'BLOCKED' ? 2 : 0
   await finalizeReceipt({
     receiptDir,
-    verdicts: { ...verdicts, ZERO_MUTATION: { verdict: 'PASS', detail: 'YES (plan mode writes nothing outside the receipt dir)' } },
+      verdicts: { ...verdicts, ZERO_MUTATION: { verdict: 'PASS', detail: 'YES (plan mode writes nothing outside the receipt dir and the git object store)' } },
     result,
     exitCode,
     finishedAt: new Date().toISOString(),
@@ -171,11 +171,12 @@ export async function runApply(input) {
     })
   }
   const rereadRaw = await readFile(facts.packageJsonPath, 'utf8')
-  if (rereadRaw !== facts.rawPackageJson) {
+  const rereadLock = await readFile(facts.lockPath, 'utf8')
+  if (rereadRaw !== facts.rawPackageJson || rereadLock !== facts.rawLock) {
     return stopApply({
       options, receiptDir, targetRef,
       reason: 'STOPPED_AT_CONCURRENT_WRITER',
-      detail: 'profile package.json changed between preimage and pin; another writer is active',
+      detail: 'profile package.json or pnpm-lock.yaml changed between preimage and pin; another writer is active',
       verdicts: preflight.verdicts,
       exitCode: 3,
     })
@@ -291,6 +292,21 @@ export async function runApply(input) {
       exitCode: 3,
     })
   }
+  // The installed lock must already name the exact target BEFORE the
+  // restart: the drift gate allows the vehicle-pet move, but only the
+  // lockRef check proves it moved TO THE TARGET (and not, say, to a removed
+  // or extraneous vehicle-pet block).
+  const installedLockRef = lockfileVehiclePetRef(postFacts.facts.lockSummary)
+  if (installedLockRef !== targetRef) {
+    const revert = await revertToPreimage({ facts, receiptDir })
+    return stopApply({
+      options, receiptDir, targetRef,
+      reason: 'VEHICLE_PET_LOCK_ANOMALY',
+      detail: `post-install lockfile resolves ${installedLockRef ?? '(no fixed ref)'} != target ${targetRef}${revert.ok ? '; profile reverted to preimage' : `; AUTO-REVERT FAILED: ${revert.detail}`}`,
+      verdicts: { ...preflight.verdicts, LOCK_REF_GATE: { verdict: 'FAIL', detail: installedLockRef } },
+      exitCode: 3,
+    })
+  }
 
   // ---- controlled restart (§11) -------------------------------------------
   await appendStep({ receiptDir, step: { step: 'RESTART', outcome: 'STARTED', webPortBefore: service.port } })
@@ -348,7 +364,7 @@ export async function runApply(input) {
   const postState = options.skipStateProbe
     ? { status: 'UNAVAILABLE', targets: [], reason: 'state probe disabled by flag' }
     : await capturePetState({ cdpUrl: options.cdpUrl, originPatterns: preflight.originRegexps })
-  const stateVerdicts = comparePetState({ pre: stateCapture, post: postState })
+  const stateVerdicts = comparePetState({ pre: stateCapture, post: postState, expectedOrigins: preflight.expectedOrigins })
   const probeUnavailable = stateVerdicts.STATE_PROBE?.verdict === 'UNAVAILABLE'
   await appendStep({ receiptDir, step: { step: 'STATE_POSTFLIGHT', outcome: probeUnavailable ? 'UNAVAILABLE' : 'DONE', verdicts: stateVerdicts } })
   await writeTextAtomic(join(receiptDir, 'postimage', 'state.json'), `${JSON.stringify({ note: 'pet-owned browser storage after apply', stateCapture: postState }, null, 2)}\n`).catch(() => {})
@@ -414,8 +430,13 @@ export async function runRollback(input) {
   }
   const rollbackRef = receipt?.preimage?.currentRef
   const targetRef = receipt?.targetRef
-  if (typeof rollbackRef !== 'string' || typeof targetRef !== 'string') {
-    return reportReject({ options, reason: 'ROLLBACK_RECEIPT_INVALID', detail: 'receipt lacks preimage.currentRef / targetRef', targetRef: null })
+  // Receipt-supplied refs go into git argv and the pin rewrite — validate
+  // them as exact 40-hex before anything else (fail closed on a crafted
+  // receipt).
+  const rollbackCheck = validateExactRef(typeof rollbackRef === 'string' ? rollbackRef : undefined)
+  const targetCheck = validateExactRef(typeof targetRef === 'string' ? targetRef : undefined)
+  if (!rollbackCheck.ok || !targetCheck.ok) {
+    return reportReject({ options, reason: 'ROLLBACK_RECEIPT_INVALID', detail: `receipt refs are not exact 40-hex (rollback: ${rollbackCheck.ok ? 'ok' : rollbackCheck.reason}; target: ${targetCheck.ok ? 'ok' : targetCheck.reason})`, targetRef: null })
   }
   let preimagePackageJson
   try {
@@ -487,6 +508,19 @@ export async function runRollback(input) {
       exitCode: 4,
     })
   }
+  // Membership must return to the preimage set as well (same gate as apply).
+  const postFactsRollback = await readProfileFacts(facts.profileDir)
+  const membershipPreserved = postFactsRollback.ok
+    && deepEqual(receipt?.preimage?.membership, postFactsRollback.facts.membership)
+  if (!membershipPreserved) {
+    return stopApply({
+      options, receiptDir: rollbackReceiptDir, targetRef: rollbackRef,
+      reason: 'MEMBERSHIP_DRIFT',
+      detail: 'dsh.profile.bundles differs from the receipt preimage after the rollback install',
+      verdicts: { ...preflight.verdicts, MEMBERSHIP_PRESERVED: { verdict: 'FAIL' } },
+      exitCode: 3,
+    })
+  }
 
   if (service === undefined) {
     return stopApply({ options, receiptDir: rollbackReceiptDir, targetRef: rollbackRef, reason: 'SERVICE_NOT_HEALTHY', detail: 'unreachable', verdicts: preflight.verdicts, exitCode: 3 })
@@ -535,7 +569,7 @@ export async function runRollback(input) {
   // Preservation is checked against the apply receipt's postimage when present.
   const applyPostState = await readApplyPostState(receiptDir)
   const stateVerdicts = applyPostState !== undefined
-    ? comparePetState({ pre: applyPostState, post: postState })
+    ? comparePetState({ pre: applyPostState, post: postState, expectedOrigins: preflight.expectedOrigins })
     : { STATE_PROBE: { verdict: /** @type {'UNAVAILABLE'} */ ('UNAVAILABLE'), detail: 'apply receipt has no postimage state; compare manually' } }
   await finalizeReceipt({
     receiptDir: rollbackReceiptDir,
@@ -606,9 +640,13 @@ async function preflightStage(input) {
     health = { status: undefined, ok: false, ms: 0, error: discovered.detail }
   }
 
-  // state probe (pre) — plan mode tolerates unavailability
-  const originRegexps = buildOriginRegexps(options.originPatterns)
+  // state probe (pre) — plan mode tolerates unavailability. With a
+  // discovered port the default origin patterns anchor to THAT port, so an
+  // unrelated localhost tab can never satisfy the preservation compare.
+  const webPort = serviceWithHealth?.port ?? options.portHint
+  const originRegexps = buildOriginRegexps(options.originPatterns, webPort)
   stage.originRegexps = originRegexps
+  stage.expectedOrigins = buildExpectedOrigins(options.originPatterns, webPort)
   const stateCapture = options.skipStateProbe
     ? { status: 'UNAVAILABLE', targets: [], reason: 'state probe disabled by flag' }
     : await capturePetState({ cdpUrl: options.cdpUrl, originPatterns: originRegexps })
@@ -730,10 +768,22 @@ async function readApplyPostState(receiptDir) {
   }
 }
 
-/** @param {string[]} patterns */
-function buildOriginRegexps(patterns) {
-  const list = patterns.length > 0 ? patterns : [`http://127\\.0\\.0\\.1:\\d+`, `http://localhost:\\d+`]
-  return list.map(pattern => new RegExp(pattern))
+/** @param {string[]} patterns @param {number|undefined} port */
+function buildOriginRegexps(patterns, port) {
+  if (patterns.length > 0) return patterns.map(pattern => new RegExp(pattern))
+  if (port !== undefined) {
+    return [
+      new RegExp(`^http://127\\.0\\.0\\.1:${port}($|/)`),
+      new RegExp(`^http://localhost:${port}($|/)`),
+    ]
+  }
+  return [/^http:\/\/127\.0\.0\.1:\d+/, /^http:\/\/localhost:\d+/]
+}
+
+/** Exact origin strings the state compare trusts (B2: anchored to the discovered web port). */
+function buildExpectedOrigins(patterns, port) {
+  if (port === undefined) return []
+  return [`http://127.0.0.1:${port}`, `http://localhost:${port}`]
 }
 
 /** Read the receipt.json of a run (for the CLI's --json output). */

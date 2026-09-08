@@ -422,6 +422,14 @@ const { createTwoRefRepoFixture } = await import('./e2e-fixtures.mjs')
 const fixture = await createTwoRefRepoFixture()
 const unreachable = await tool([TARGET_REF, '--dsh-home', DSH_HOME, '--port', String(PORT), '--out', RECEIPTS, '--vehicle-pet-repo', fixture.origin])
 check('reject unreachable 40-hex (exit 2)', unreachable.code === 2, `exit ${unreachable.code}`)
+// locally-created commit that the fixture origin does NOT have (B1: the
+// git-truth gate must not be fooled by local objects)
+await writeFile(join(fixture.work, 'local-only.txt'), 'never pushed\n', 'utf8')
+await run('git', ['-C', fixture.work, 'add', 'local-only.txt'], { timeoutMs: 30_000 })
+await run('git', ['-C', fixture.work, '-c', 'user.email=e2e@example.invalid', '-c', 'user.name=e2e', 'commit', '-q', '-m', 'local-only'], { timeoutMs: 30_000 })
+const localOnlyRef = (await run('git', ['-C', fixture.work, 'rev-parse', 'HEAD'], { timeoutMs: 30_000 })).stdout.trim()
+const localOnly = await tool([localOnlyRef, '--dsh-home', DSH_HOME, '--port', String(PORT), '--out', RECEIPTS, '--vehicle-pet-repo', fixture.work])
+check('reject local-only commit (exit 2, B1)', localOnly.code === 2, `exit ${localOnly.code} ${localOnly.receipt?.result ?? ''}`)
 check('CASE_5 left profile bytes untouched', (await profilePackageJson()) === bytesCase5)
 
 // ---------------------------------------------------------------------------
@@ -447,7 +455,7 @@ await writeFile(join(fakeHome, 'profiles', 'web', 'pnpm-lock.yaml'), [
 ].join('\n'), 'utf8')
 const plan6 = await tool([stale.refB, '--dsh-home', fakeHome, '--out', join(WORK, 'receipts-6'), '--vehicle-pet-repo', stale.clone])
 check('stale-main plan exits 0 (PLAN_READY)', plan6.code === 0, `exit ${plan6.code} ${plan6.stdout.slice(0, 300)}`)
-check('stale-main plan resolved target from ORIGIN', plan6.receipt?.gitTruth?.method === 'FETCH_BY_SHA' && plan6.receipt?.gitTruth?.ref === stale.refB, JSON.stringify(plan6.receipt?.gitTruth))
+check('stale-main plan resolved target from ORIGIN', ['REMOTE_BARE_FETCH_BY_SHA','REMOTE_BARE_FULL_FETCH'].includes(plan6.receipt?.gitTruth?.method) && plan6.receipt?.gitTruth?.ref === stale.refB, JSON.stringify(plan6.receipt?.gitTruth))
 const localMain = (await run('git', ['-C', stale.clone, 'rev-parse', 'main'], { timeoutMs: 30_000 })).stdout.trim()
 check('stale clone main untouched', localMain === stale.refA, `${localMain} vs ${stale.refA}`)
 const wip = await readFile(join(stale.clone, 'WIP.txt'), 'utf8').catch(() => '')

@@ -65,13 +65,15 @@ Defaults (override with flags when needed):
 
 ## 4. Secret handling
 
-Receipts contain: profile package.json + pnpm-lock bytes, plugin
-membership, other-plugin resolutions, service command/cwd/allowlisted-env,
-port/health, served client hashes, and pet-owned browser storage keys
-(overlay preferences, usage-ledger aggregates, `deepseek-pet:scale`,
-IndexedDB aggregate counts). Receipts never contain prompts, completions,
-message bodies, tool payloads, credentials, browser profiles, or DSH-home
-copies; process environments are allowlisted at capture time.
+Receipts contain: profile package.json + pnpm-lock bytes (exact), plugin
+membership, other-plugin resolutions, service command/cwd/allowlisted-env
+(the allowlist is a projection — only `DSH_*`, `SSH_CONNECTION`, `NODE_ENV`
+and the E2E mock key are recorded), port/health, served client hashes, and
+pet-owned browser storage keys — the EXACT bytes of the overlay-preferences
+and usage-ledger keys (including per-session lastSeen identifiers) plus
+`deepseek-pet:scale` and an IndexedDB aggregate summary. Receipts never
+contain prompts, completions, message bodies, tool payloads, credentials,
+browser profiles, or DSH-home copies.
 
 ## 5. Step A — preflight / plan (READ_ONLY, always first)
 
@@ -80,14 +82,20 @@ node scripts/release/vehicle-pet-release.mjs <TARGET_40HEX>
 ```
 
 Expected output: `RESULT PLAN_READY` (or `NO_OP_ALREADY_AT_TARGET` when
-current == target). The receipt directory is printed; nothing outside it is
-written. Do not continue if any of these are wrong:
+current == target). The receipt directory is printed; the run writes only
+inside the receipt root (including its housekeeping `.gitignore`) and the
+git object store (fetch-by-SHA into an empty verification repository, per
+§1). Do not continue if any of these are wrong:
 
-- `GIT_TRUTH` — target must resolve from origin (fetch-by-SHA).
+- `GIT_TRUTH` — target must resolve from origin (empty-bare fetch probe; a
+  locally-created commit that origin does not have is REJECTED).
 - `CURRENT_REF_DISCOVERY` — the profile pin must be a git-fixed-ref.
 - `SERVICE_DISCOVERY` / `WEB_HEALTH` — exactly one healthy dsh web service.
-- `STATE_PROBE_PRE` — a browser tab matching the web origin must exist
-  (open the daily tab if not).
+- `STATE_PROBE_PRE` — a browser tab matching the web origin (the
+  discovered port) must exist (open the daily tab if not).
+
+The `--profile` flag exists for disposable environments only; the
+production scope of this runbook is the current `web` profile.
 
 ## 6. Step B — apply (the only production-mutating mode)
 
@@ -113,6 +121,9 @@ receipt and exits nonzero):
    Stop: `UNRELATED_DEPENDENCY_DRIFT (POST_INSTALL, reverted)`.
 6. `MEMBERSHIP_GATE` — `dsh.profile.bundles` must be byte-equal. Stop:
    `MEMBERSHIP_DRIFT`.
+6b. `LOCK_REF_GATE` — the post-install lockfile must resolve the exact
+   TARGET ref (the drift gate allows the move; this proves it moved TO the
+   target). Stop + auto-revert: `VEHICLE_PET_LOCK_ANOMALY`.
 7. `RESTART` — SIGTERM to the recorded tree only, relaunch of the recorded
    argv/cwd/env detached, `WEB_PORT_AFTER == WEB_PORT_BEFORE`, health 200.
    Stop: `RESTART_*`.
@@ -128,7 +139,9 @@ receipt and exits nonzero):
    (discouraged; documented deviation required in the receipt note).
 
 Exit codes: `0` success/no-op · `2` rejected before mutation · `3` stopped
-by a gate · `4` failed after mutation (rollback available).
+by a gate · `4` failed after mutation (rollback available) · `70` internal
+error (receipt may remain `IN_PROGRESS` — read it; a crash after the pin
+step leaves current == target, which rollback accepts).
 
 ## 7. Step C — rollback (fixed to the preimage)
 
@@ -137,14 +150,28 @@ node scripts/release/vehicle-pet-release.mjs rollback --receipt <apply receipt d
 ```
 
 Rollback installs the receipt's exact preimage package.json bytes (ref =
-`PREIMAGE_PRODUCTION_REF`), re-runs the drift gates, restarts the web
-service, and re-proves runtime identity against the preimage ref. It only
-runs from the exact applied state recorded in the receipt; it is not a
-general "go to any ref" command. It never removes the plugin.
+`PREIMAGE_PRODUCTION_REF`), re-runs the lock-drift, lock-ref and membership
+gates, restarts the web service, and re-proves runtime identity against the
+preimage ref. It only runs from the exact applied state recorded in the
+receipt; it is not a general "go to any ref" command. It never removes the
+plugin.
 
 Abort conditions that require rollback: restart failure, runtime proof
 failure, or the Owner asking to return. Between a failed step and the
 rollback, change nothing else.
+
+Special case — restart failed and NOTHING listens on the web port: the
+rollback itself needs a healthy service, so first bring one up manually
+from the receipt's `preimage/service.json` (recorded argv/cwd/env; on the
+prod service shape `pnpm dsh web …` from the harness checkout), let health
+return 200, then run the rollback above. Do not improvise beyond the
+recorded command.
+
+Residual known limit: if the web service were ever supervised with
+auto-restart (launchd KeepAlive et al.), the supervisor would race the
+tool's relaunch after TERM. The current production shape is an unsupervised
+detached process tree; if that changes, stop and reconcile the runbook
+first.
 
 Attempt bounds: one apply per receipt; do not retry a failed apply without
 reading its receipt and, if the profile was reverted, starting from Step A
@@ -166,6 +193,13 @@ current `origin/main` in a fresh worktree, copies only allowed file types
 under `docs/evidence/`, verifies the commit touches nothing outside
 `docs/evidence/**`, and leaves pushing/opening the docs-only PR to the
 Operator. The local checkout is never touched.
+
+Housekeeping: the evidence worktree is created NEXT TO the repository as
+`<repo>-evidence-wt-<timestamp>` and is intentionally kept for inspection
+after the commit. Archive the receipt into `docs/evidence/` (Step D) soon
+after every apply — the receipt root is gitignored and is the only copy of
+the exact preimage bytes. When done: `git worktree remove <path> && git
+branch -D evidence/release-<timestamp>`.
 
 If repository main moves after an apply, that is fine: the production ref
 does not chase main, and no re-deploy is performed to "catch up".

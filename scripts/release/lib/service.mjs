@@ -59,11 +59,23 @@ export async function discoverWebService(input) {
     const homeMatches = envHome !== undefined ? envHome === dshHome : dshHome === join(homedir(), '.dsh')
     if (!homeMatches || declaredProfile !== profile) continue
     const cwd = await processCwd(listener.pid)
+    let argv
+    try {
+      argv = tokenize(cmdline)
+    } catch (error) {
+      // A quoted service command line cannot be relaunch-tokenized safely;
+      // report it instead of crashing the whole discovery.
+      return {
+        ok: false,
+        reason: 'SERVICE_UNSUPPORTED_CMDLINE',
+        detail: `dsh web listener on port ${listener.port} has a command line this tool refuses to tokenize: ${String(error)}`,
+      }
+    }
     candidates.push({
       pid: listener.pid,
       port: listener.port,
       cmdline,
-      argv: tokenize(cmdline),
+      argv,
       cwd,
       env: allowlistEnv(env),
       treePids: tree.map(entry => entry.pid),
@@ -134,12 +146,41 @@ export async function listListeners(portHint) {
  */
 export async function readProcessEnv(pid) {
   const result = await run('ps', ['-p', String(pid), '-wwE', '-o', 'command='], { timeoutMs: 10_000 })
+  return parsePsEnv(result.stdout, ENV_ALLOWLIST)
+}
+
+/**
+ * Parse the trailing KEY=VALUE sequence of a `ps -wwE` command= line.
+ * ps does not quote values, so every value runs until the NEXT env token of
+ * ANY key (not just the allowlisted ones — the allowlist only filters what
+ * is KEPT). Multi-word values therefore survive, and a value can never leak
+ * the following variables into itself.
+ * @param {string} text full `ps -o command=` output
+ * @param {readonly string[]} keys allowlisted keys to extract
+ * @returns {Record<string, string>}
+ */
+export function parsePsEnv(text, keys) {
   /** @type {Record<string, string>} */
   const env = {}
-  const text = result.stdout
-  for (const key of ENV_ALLOWLIST) {
-    const match = new RegExp(`(?:^|\\s)${key}=(?:"([^"]*)"|(\\S*))`).exec(text)
-    if (match !== null) env[key] = match[1] ?? match[2] ?? ''
+  const tokenPattern = /(?:^|\s)([A-Za-z_][A-Za-z0-9_]*)=/g
+  /** @type {{key: string, matchStart: number, valueStart: number}[]} */
+  const tokens = []
+  let match
+  while ((match = tokenPattern.exec(text)) !== null) {
+    tokens.push({ key: /** @type {string} */ (match[1]), matchStart: match.index, valueStart: match.index + match[0].length })
+  }
+  for (let index = 0; index < tokens.length; index += 1) {
+    const token = /** @type {{key: string, matchStart: number, valueStart: number}} */ (tokens[index])
+    if (!keys.includes(token.key)) continue
+    const next = tokens[index + 1]
+    const rawValue = next !== undefined
+      ? text.slice(token.valueStart, next.matchStart)
+      : text.slice(token.valueStart)
+    let value = rawValue.replace(/\s+$/, '')
+    if (value.startsWith('"') && value.endsWith('"') && value.length >= 2) {
+      value = value.slice(1, -1)
+    }
+    env[token.key] = value
   }
   return env
 }
