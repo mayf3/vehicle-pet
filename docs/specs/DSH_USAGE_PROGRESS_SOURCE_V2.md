@@ -602,6 +602,7 @@ FROZEN_SEMANTICS_VS_V1 = USAGE_PROGRESS_SEMANTICS, TOKEN_ECONOMY, DAILY_TARGET_F
 RESIDENT_PRESENTATION_REQUIREMENT = REMOVED_FROM_USAGE_SOURCE_AUTHORITY
 SUPERSEDES = DSH_USAGE_PROGRESS_SOURCE_V1
 SUPERSESSION_ATOMIC_IN_ACCEPTANCE_COMMIT = YES
+FINAL_HEAD_DELTA_RECHECK = ACCEPT (independent reviewer, exact head 0696625; first recheck of 6f58355 caught two documentary residues — duplicate README row, stale §13 PENDING/NEXT_ACTION lines — closed by B01 commit 0696625)
 CARRY_FORWARD_NOTES = (1) after acceptance, DSH_PET_OVERLAY_ADAPTER_V3 §3 USAGE_SOURCE_PARENT still names V1; references resolve through the supersession backlink to V2's identical carried seam semantics — a later docs round MAY reconcile the pointer; (2) EVD-USG-001 heading retains the accurate historical "V1 inventory" label
 ```
 
