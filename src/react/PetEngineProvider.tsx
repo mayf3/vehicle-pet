@@ -35,6 +35,7 @@ import { engineCopy, stableVariantIndex } from './copy'
 import { EngineStyles } from './styles'
 
 export interface PetEngineProviderProps {
+  keepsakeVersionAliases?: Readonly<Record<string, Readonly<Record<string, readonly string[]>>>>
   bundles: PackBundleInput[]
   defaultPackId: string
   storage: PetStorageAdapter
@@ -58,6 +59,7 @@ export interface CeremonyState {
 }
 
 export interface PetEngineContextValue {
+  keepsakeVersionAliases?: PetEngineProviderProps['keepsakeVersionAliases']
   snapshot: EngineSnapshot
   greeting: GreetingState | null
   dismissGreeting: () => void
@@ -246,6 +248,7 @@ export function PetEngineProvider(props: PetEngineProviderProps) {
 
   const value = useMemo<PetEngineContextValue>(
     () => ({
+      keepsakeVersionAliases: props.keepsakeVersionAliases,
       snapshot,
       greeting,
       dismissGreeting,
@@ -262,6 +265,7 @@ export function PetEngineProvider(props: PetEngineProviderProps) {
       assetUrl,
     }),
     [
+      props.keepsakeVersionAliases,
       snapshot,
       greeting,
       dismissGreeting,

@@ -32,6 +32,8 @@ GOVERNING_SPEC_LOCATION = docs/specs/
 
 When accepted authorities exist, local Product Direction takes precedence over local Architecture/invariants, which take precedence over accepted governing Specs, then code, tests, runtime, and operational records.
 
+For `autonomous-fleet` L1–L5, use the operational driver/safety-operator/escort table in active `CONFIGURABLE_PET_ENGINE_V4` §11.1. Equipment-based level narratives in superseded V2/V3 are rejected historical material and MUST NOT be used for level mapping. L6–L12 retain their existing accepted meaning. This lookup rule records the Owner correction of 2026-09-08; artwork decoration is not level authority.
+
 The central governance repository supplies a constrained grammar and protocol distribution. It is not `vehicle-pet` product, architecture, Product Spec, code, or acceptance authority. A DeepSeek Harness prototype may be retained only as investigation evidence; it is not authority in this repository.
 
 ## Acceptance and authorization actors

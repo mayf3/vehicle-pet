@@ -412,7 +412,7 @@ describe('VehiclePetOverlay live Harness locale', () => {
         expect(menu.getAttribute('aria-label')).toBe(english ? en['menu.title'] : zh['menu.title'])
         expect(menu.querySelector('[data-vehicle-pet-size-control]')?.textContent).toContain(english ? 'Size' : '大小')
         expect(dialog.getAttribute('aria-label')).toBe(english ? en['dialog.title'] : zh['dialog.title'])
-        expect(dialog.textContent).toContain(english ? 'First run on the road; the journey begins.' : '第一次上路，旅程正式开始。')
+        expect(dialog.textContent).toContain(english ? 'One car: driver occupied, copilot empty, rear escort present.' : '主驾有人，副驾无人，有后方保护车，1 辆车。')
       })
     }
 

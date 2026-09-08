@@ -9,6 +9,7 @@ import { type ReactNode } from 'react';
 import { type CeremonyPlan, type EngineSnapshot, type Locale, type LocalizedTextV1, type PackBundleInput, type ProgressSource, type PetStorageAdapter, type UpgradeReceipt, type HostFeedbackPresentation } from '../engine';
 import { engineCopy } from './copy';
 export interface PetEngineProviderProps {
+    keepsakeVersionAliases?: Readonly<Record<string, Readonly<Record<string, readonly string[]>>>>;
     bundles: PackBundleInput[];
     defaultPackId: string;
     storage: PetStorageAdapter;
@@ -29,6 +30,7 @@ export interface CeremonyState {
     receipts: UpgradeReceipt[];
 }
 export interface PetEngineContextValue {
+    keepsakeVersionAliases?: PetEngineProviderProps['keepsakeVersionAliases'];
     snapshot: EngineSnapshot;
     greeting: GreetingState | null;
     dismissGreeting: () => void;

@@ -71,6 +71,8 @@ export interface EngineSnapshot {
   stageLevelId: string | null
   pendingReceipts: UpgradeReceipt[]
   unlockedKeepsakes: UnlockedKeepsakeKey[]
+  /** Read-only earned records across versions for the current source/subject. */
+  keepsakeHistory: UnlockedKeepsakeKey[]
   hostFeedback: HostFeedbackPresentation | null
   diagnostics: EngineDiagnostic[]
   locale: Locale
@@ -99,6 +101,7 @@ export class PetEngine {
   private boundSourceId: string | null = null
   private presentationEpoch = 0
   private pendingReceipts: UpgradeReceipt[] = []
+  private keepsakeHistory: UnlockedKeepsakeKey[] = []
   private unlockedKeepsakes: UnlockedKeepsakeKey[] = []
   private hostFeedback: HostFeedbackPresentation | null = null
   private diagnostics: EngineDiagnostic[] = []
@@ -170,6 +173,7 @@ export class PetEngine {
         stageLevelId: this.viewModelLevelId(),
         pendingReceipts: [...this.pendingReceipts],
         unlockedKeepsakes: [...this.unlockedKeepsakes],
+        keepsakeHistory: this.keepsakeHistory.filter(key => key.sourceId === this.lastValidSnapshot?.sourceId && key.subjectId === this.lastValidSnapshot?.subjectId),
         hostFeedback: this.hostFeedback,
         diagnostics: [...this.diagnostics],
         locale: this.localeValue,
@@ -515,6 +519,8 @@ export class PetEngine {
     if (snapshot === null) return
     try {
       const unlocked = await this.storage.listUnlockedKeepsakes(snapshot.sourceId, snapshot.subjectId)
+      if (this.lastValidSnapshot?.sourceId !== snapshot.sourceId || this.lastValidSnapshot?.subjectId !== snapshot.subjectId) return
+      this.keepsakeHistory = unlocked.filter(key => key.sourceId === snapshot.sourceId && key.subjectId === snapshot.subjectId)
       const activeIdentity = this.activePack?.manifest
       this.unlockedKeepsakes = activeIdentity === undefined
         ? unlocked
