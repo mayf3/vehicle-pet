@@ -4,7 +4,7 @@
 RUNBOOK_ID = VEHICLE_PET_PRODUCTION_RELEASE_R1
 STATUS = active
 ASSURANCE = CONTROLLED
-BINDING_TOOL = scripts/release/vehicle-pet-release.mjs (v1.0.0)
+BINDING_TOOL = scripts/release/vehicle-pet-release.mjs (v1.0.1)
 SCOPE = mayf3/vehicle-pet → the current DeepSeek Harness web profile, and nothing else
 AUTHORITY = Owner Goal dispatch GOAL_NAME=发布 (OWNER_DISPATCH_UNIT=GOAL);
             this runbook is an Assurance artifact and creates no Product Authority
@@ -24,9 +24,10 @@ Hard boundaries:
   "origin/main moved" is NEVER a reason to deploy. Deployments happen only
   when the Owner names a `TARGET_REF`.
 - The tool never resets, stashes, checks out, or pulls the Owner's working
-  checkout. Git truth comes from `git fetch origin <sha>` (or a full fetch
-  fallback) into the existing object store, and repository bytes from
-  `git archive <ref>`.
+  checkout. Git truth is proven by fetching the exact SHA from the origin
+  URL into a throwaway EMPTY bare repository (a local-object shortcut in
+  the working repository can never fake this proof), and repository bytes
+  come from `git archive <ref>`.
 - Only the web profile service is ever restarted, only via its freshly
   discovered process tree, only with its own recorded argv/cwd/env.
 - This runbook does not authorize: removing the plugin, re-seeding state,
@@ -67,8 +68,8 @@ Defaults (override with flags when needed):
 
 Receipts contain: profile package.json + pnpm-lock bytes (exact), plugin
 membership, other-plugin resolutions, service command/cwd/allowlisted-env
-(the allowlist is a projection — only `DSH_*`, `SSH_CONNECTION`, `NODE_ENV`
-and the E2E mock key are recorded), port/health, served client hashes, and
+(the allowlist is a projection — only `DSH_*`,
+`SSH_CONNECTION`, and `NODE_ENV` are recorded), port/health, served client hashes, and
 pet-owned browser storage keys — the EXACT bytes of the overlay-preferences
 and usage-ledger keys (including per-session lastSeen identifiers) plus
 `deepseek-pet:scale` and an IndexedDB aggregate summary. Receipts never

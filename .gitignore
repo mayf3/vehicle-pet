@@ -10,3 +10,4 @@ tests/dsh/e2e/.artifacts/
 .art-candidates/
 test-results-dsh-coexistence/
 vehicle-pet-release-receipts/
+!docs/evidence/**/*.log

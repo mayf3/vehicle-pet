@@ -95,8 +95,8 @@ export async function createEvidenceBranch(input) {
     const head = (await runOk('git', ['-C', worktree, 'rev-parse', 'HEAD'], { what: 'resolve evidence head', timeoutMs })).stdout.trim()
     return { ok: true, branch, head, base, worktree, files: copied }
   } catch (error) {
-    // Leave the worktree in place for inspection on failure, but undo the
-    // branch registration so the shared repo is not left dirty.
+    // Roll the failed attempt back completely (worktree and branch) so the
+    // shared repo is left clean; the error detail above explains why.
     await run('git', ['-C', repo, 'worktree', 'remove', '--force', worktree], { timeoutMs }).catch(() => {})
     await run('git', ['-C', repo, 'branch', '-D', branch], { timeoutMs }).catch(() => {})
     return { ok: false, reason: 'EVIDENCE_COMMIT_FAILED', detail: String(error) }
