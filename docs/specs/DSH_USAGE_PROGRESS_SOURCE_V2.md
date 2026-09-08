@@ -575,8 +575,7 @@ AUTHORING_READY_FOR_REVIEW = YES
 INDEPENDENT_REVIEW_RESULT = ACCEPT (zero blockers; three documentary findings)
 READY_TO_MARK_ACCEPTED = YES
 READY_TO_MARK_ACCEPTED_REASON = the exact proposed Head 3566eac passed the independent review against Base bf3ce2c with the Owner-mandated seven focus points all PASS; the authorized acceptance transition applies lifecycle fields plus the documentary DECLARED_DELTAS itemization only
-READY_TO_MARK_ACCEPTED = PENDING (requires an independent review of the exact proposed Head; see §14)
-NEXT_ACTION = REVIEW
+NEXT_ACTION = COMPLIANCE (implementation rounds route as REUSE; no usage-source code round is required by this succession)
 ```
 
 ## 14. Acceptance record
@@ -594,6 +593,11 @@ REVIEWED_PROPOSED_HEAD = 3566eac
 ACCEPTANCE_COMMIT_PARENT = 3566eac
 SEMANTIC_DELTA_AFTER_REVIEW = NONE (lifecycle transition + documentary DECLARED_DELTAS itemization only)
 BLOCKERS = 0
+OPEN_OWNER_DECISIONS = NONE
+NORMATIVE_TBD = NONE
+CONTRACT_COUNT = 13
+CONTRACTS_WITH_ACCEPTANCE = 13
+ACCEPTANCE_COUNT = 9
 FROZEN_SEMANTICS_VS_V1 = USAGE_PROGRESS_SEMANTICS, TOKEN_ECONOMY, DAILY_TARGET_FUNCTION, LEDGER, ATTRIBUTION, BACKFILL_POLICY, SOURCE_IDENTITY, COUNTED_CLASSES, DEGRADATION — UNCHANGED
 RESIDENT_PRESENTATION_REQUIREMENT = REMOVED_FROM_USAGE_SOURCE_AUTHORITY
 SUPERSEDES = DSH_USAGE_PROGRESS_SOURCE_V1
