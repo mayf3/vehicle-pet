@@ -1,6 +1,6 @@
 ---
 spec_id: DSH_USAGE_PROGRESS_SOURCE_V2
-status: proposed
+status: accepted
 spec_kind: implementation
 authority_level: governing_spec
 implementation_authority: contracts
@@ -552,7 +552,7 @@ THIS_ROUND = docs-only authority succession: this V2 is proposed docs-first; the
 SPEC_GOVERNANCE_MODE = AUTHOR
 SPEC_ID = DSH_USAGE_PROGRESS_SOURCE_V2
 SPEC_KIND = implementation
-STATUS = proposed
+STATUS = accepted
 AUTHORITY_LEVEL = governing_spec
 IMPLEMENTATION_AUTHORITY = contracts
 PRIMARY_PARENT_AUTHORITY = VEHICLE_PET_PROGRESS_SOURCE_V2
@@ -570,8 +570,11 @@ CONTRACTS_WITH_ACCEPTANCE = 13
 ACCEPTANCE_COUNT = 9
 CONTRACT_MEANING_DELTA_VS_V1 = NONE (all 13 CTR-USG Contracts carried byte-identically)
 FROZEN_SEMANTICS_VS_V1 = USAGE_PROGRESS_SEMANTICS, TOKEN_ECONOMY, DAILY_TARGET_FUNCTION (1350 / 1,000,000 / 12,000), LEDGER schema and retention, ATTRIBUTION, BACKFILL_POLICY (no-backfill), SOURCE_IDENTITY (dsh-usage / companion), COUNTED_CLASSES, DEGRADATION — all UNCHANGED
-DECLARED_DELTAS_VS_V1 = frontmatter identity/lifecycle/supersession metadata plus active-authority governed_by resolution; §1 narrow semantic decoupling (RESIDENT_PRESENTATION_REQUIREMENT = REMOVED_FROM_USAGE_SOURCE_AUTHORITY); DEC-USG-008 revised from "micro progress remains the Engine's existing behavior" to the presentation-blind source-only Decision; STATE-USG-001 historical record annotated (not rewritten); ACC-USG-008 presentation-neutral seam-evidence wording; DEC-USG-005 calibration-table visualization reference (math unchanged); additive ACC-USG-009 (seam evidence MUST NOT depend on any resident presentation element) and symmetric coverage tables; §12 docs-only round note
+DECLARED_DELTAS_VS_V1 = frontmatter identity/lifecycle/supersession metadata plus active-authority governed_by resolution; §1 narrow semantic decoupling (RESIDENT_PRESENTATION_REQUIREMENT = REMOVED_FROM_USAGE_SOURCE_AUTHORITY); DEC-USG-008 revised from "micro progress remains the Engine's existing behavior" to the presentation-blind source-only Decision; STATE-USG-001 historical record annotated (not rewritten); ACC-USG-008 presentation-neutral seam-evidence wording; DEC-USG-005 calibration-table visualization reference (math unchanged); additive ACC-USG-009 (seam evidence MUST NOT depend on any resident presentation element) and symmetric coverage tables; §3 narrative additions (CTR-OVERLAY-013 restated past-tense + verbatim V3 §3 quote, non-normative) and §13/§14 gate restructure itemized; §12 docs-only round note
 AUTHORING_READY_FOR_REVIEW = YES
+INDEPENDENT_REVIEW_RESULT = ACCEPT (zero blockers; three documentary findings)
+READY_TO_MARK_ACCEPTED = YES
+READY_TO_MARK_ACCEPTED_REASON = the exact proposed Head 3566eac passed the independent review against Base bf3ce2c with the Owner-mandated seven focus points all PASS; the authorized acceptance transition applies lifecycle fields plus the documentary DECLARED_DELTAS itemization only
 READY_TO_MARK_ACCEPTED = PENDING (requires an independent review of the exact proposed Head; see §14)
 NEXT_ACTION = REVIEW
 ```
@@ -579,46 +582,43 @@ NEXT_ACTION = REVIEW
 ## 14. Acceptance record
 
 ```text
-DSH_USAGE_PROGRESS_SOURCE_ACCEPTANCE_RECORD_V2 = PENDING (completed only by the authorized acceptance transition)
-STATUS = proposed
-ACCEPTED_BY = PENDING
-ACCEPTED_AT = PENDING
-OWNER_ACCEPTANCE_DECISION = PENDING
-INDEPENDENT_REVIEW_RESULT = PENDING (an independent review of the exact proposed Head is REQUIRED before any acceptance)
-REVIEWED_BASE_COMMIT = PENDING
-REVIEWED_PROPOSED_HEAD = PENDING
-ACCEPTANCE_COMMIT_PARENT = PENDING (must be exactly the reviewed proposed Head)
-SEMANTIC_DELTA_AFTER_REVIEW = PENDING (must be NONE beyond the lifecycle flip and the pre-declared documentary reconciliation: the V1 supersession flip with its superseded_by backlink, the docs/specs/README.md index rows, and this record)
-FINAL_HEAD_DELTA_RECHECK = PENDING (same independent reviewer, exact acceptance Head)
-BLOCKERS = PENDING
-OPEN_OWNER_DECISIONS = NONE
-NORMATIVE_TBD = NONE
+SPEC_LIFECYCLE = proposed → accepted candidate
+DSH_USAGE_PROGRESS_SOURCE_ACCEPTANCE_RECORD_V2 = YES
+ACCEPTED_BY = mayf3
+ACCEPTANCE_ACTOR = mayf3 (Goal 灵动 Owner RESUME_GOAL direction: "Usage V2 acceptance" within the same Goal; dependent authority closure, not NEW_GOAL)
+ACCEPTED_AT = 2026-09-08T01:29:15Z
+OWNER_ACCEPTANCE_DECISION = ACCEPT
+INDEPENDENT_REVIEW_RESULT = ACCEPT (zero blockers; Owner seven focus points 1-7 all PASS)
+REVIEWED_BASE_COMMIT = bf3ce2cb2ff5d3b3ed6f928f1837cd730016a1b4
+REVIEWED_PROPOSED_HEAD = 3566eac
+ACCEPTANCE_COMMIT_PARENT = 3566eac
+SEMANTIC_DELTA_AFTER_REVIEW = NONE (lifecycle transition + documentary DECLARED_DELTAS itemization only)
+BLOCKERS = 0
+FROZEN_SEMANTICS_VS_V1 = USAGE_PROGRESS_SEMANTICS, TOKEN_ECONOMY, DAILY_TARGET_FUNCTION, LEDGER, ATTRIBUTION, BACKFILL_POLICY, SOURCE_IDENTITY, COUNTED_CLASSES, DEGRADATION — UNCHANGED
+RESIDENT_PRESENTATION_REQUIREMENT = REMOVED_FROM_USAGE_SOURCE_AUTHORITY
 SUPERSEDES = DSH_USAGE_PROGRESS_SOURCE_V1
-SUPERSESSION_ATOMIC_IN_ACCEPTANCE_COMMIT = YES (planned)
-ACCEPTANCE_ORDER = PENDING (one atomic docs-only commit together with the V1 supersession flip)
-CONTRACT_COUNT = 13
-CONTRACTS_WITH_ACCEPTANCE = 13
-ACCEPTANCE_COUNT = 9
+SUPERSESSION_ATOMIC_IN_ACCEPTANCE_COMMIT = YES
+CARRY_FORWARD_NOTES = (1) after acceptance, DSH_PET_OVERLAY_ADAPTER_V3 §3 USAGE_SOURCE_PARENT still names V1; references resolve through the supersession backlink to V2's identical carried seam semantics — a later docs round MAY reconcile the pointer; (2) EVD-USG-001 heading retains the accurate historical "V1 inventory" label
 ```
 
-Binding facts (pre-acceptance):
+Binding facts:
 
-- Until the authorized acceptance transition, `DSH_USAGE_PROGRESS_SOURCE_V1`
-  remains the accepted authority of record for the usage seam and this V2 is
-  a `proposed` candidate with no authority effect and no implementation
-  authorization.
-- The acceptance transition MUST be preceded by an independent review of the
-  exact proposed Head returning `ACCEPT` with zero open blockers, and the
-  same independent reviewer MUST perform the final-head delta recheck at the
-  exact acceptance Head (the pattern of the accepted
-  `DSH_PET_OVERLAY_ADAPTER_V3` §13/§14).
-- The acceptance commit MUST atomically: flip this Spec to
-  `status: accepted`; flip `DSH_USAGE_PROGRESS_SOURCE_V1` to
-  `status: superseded` with `superseded_by: DSH_USAGE_PROGRESS_SOURCE_V2`;
-  update the `docs/specs/README.md` index rows; and complete this record. No
-  Goal, Decision, Contract, Acceptance item, or coverage relation may change
-  meaning in that commit.
-- Activation is a reachability rule: this Spec is active repository authority
-  when the exact accepted revision is reachable from `mayf3/vehicle-pet:main`
-  or an implementation base derived from it. Implementation against this V2
-  MUST NOT begin before then; acceptance alone authorizes no code.
+- The independent review bound Base `bf3ce2cb2ff5d3b3ed6f928f1837cd730016a1b4`
+  and proposed Head `3566eac` and returned `ACCEPT` with zero blockers; the
+  Owner-mandated seven focus points (token economy zero change; usage source
+  semantics zero change; only the resident presentation coupling removed; no
+  Overlay UI obligation moved into the source; atomic successor lifecycle; no
+  premature predecessor supersession; complete closure) each PASS.
+- This acceptance commit's parent is exactly `3566eac`; content changes are
+  lifecycle fields (this record, §13 status, frontmatter flip) plus the
+  documentary DECLARED_DELTAS itemization, the atomic flip of
+  `DSH_USAGE_PROGRESS_SOURCE_V1` to `status: superseded` with
+  `superseded_by: DSH_USAGE_PROGRESS_SOURCE_V2`, and the
+  `docs/specs/README.md` index rows — no Goal, Decision, Contract, or
+  Acceptance meaning changed after review.
+- `DshUsageProgressSource` implementation, registered since Goal 陪伴, is
+  conformant under the identical carried Contracts; no code round is required
+  by this succession.
+- Activation is a reachability rule: active when the exact accepted revision
+  is reachable from `mayf3/vehicle-pet:main` or an implementation base derived
+  from it.
