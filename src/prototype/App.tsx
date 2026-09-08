@@ -1,3 +1,4 @@
+import keepsakeVersionAliases from '../packs/keepsake-compatibility.json'
 /**
  * Prototype shell App: the V1 Host. Runs only on MockProgressSource and the
  * build-time bundled registry; no network, model, or Host transport exists.
@@ -40,6 +41,7 @@ export function App(props: AppProps) {
 
   return (
     <PetEngineProvider
+      keepsakeVersionAliases={keepsakeVersionAliases}
       bundles={bundles}
       defaultPackId={defaultPackId}
       storage={storage}

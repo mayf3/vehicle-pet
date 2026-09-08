@@ -61,8 +61,7 @@
         1258,
         1727,
         2172
-      ],
-      "cell_semantics": "each cell: V2 identity subject car + one mini escort car behind-right; roof equipment progression per manifest narratives L1-L5 (clean / antenna / cyan trim lit / square sensor box + longer body / full sensor ring + confident eyes)"
+      ]
     },
     "master-v2-l6.png": "L6 三车小队 composition",
     "master-v2-l7.png": "L7 十车阵列 composition",
@@ -73,9 +72,7 @@
     "master-v2-l12.png": "L12 百万全球 composition",
     "note": "master-v2-l6..l12.png replace the bytes of the previously committed master-l6..l12.png under new names; the old bytes and their PROVENANCE-l6-l12-evolution.json remain valid history for the superseded round (recoverable via git)."
   },
-  "copy_alignment": {
-    "manifest_l3_summary": "黄色饰条 -> 青色饰条 (zh-CN) / first yellow trim -> first cyan trim (en); required by the V2 identity palette so art and narrative do not contradict (same art-copy consistency principle as DEC-PET-031's rejected alternative)."
-  },
+  "copy_alignment": {},
   "acceptance_constraints": {
     "pony_ai_mark": "FORBIDDEN — superseded round's L6-L12 art carried Pony.ai door marks; V2 bytes must contain none",
     "old_white_yellow_style": "must not appear in runtime sprites",
@@ -99,5 +96,6 @@
     "levels": "L6-L12 (7 entries)"
   },
   "status": "SUPERSEDED_BY_OWNER_MATERIAL_20260908",
-  "superseded_note": "Owner review of the deployed result (2026-09-08): \"这不是我做的效果\". The Owner designated the pony-v1-scale-v2 material (per-level final images listed in superseded-round-prompts.json output_hints, plus l1.png-l5.png in the same evidence directory) as THE source material. The Astra-reference-derived masters from this round are removed from the Pack (recoverable in git at 2049fd8). Runtime now ships: L6-L12 = the accepted c3d1d4e masters (built from those exact exec images), L1-L5 = Owner l1.png-l5.png as master-l1.png-master-l5.png."
+  "superseded_note": "Owner review of the deployed result (2026-09-08): \"这不是我做的效果\". The Owner designated the pony-v1-scale-v2 material (per-level final images listed in superseded-round-prompts.json output_hints, plus l1.png-l5.png in the same evidence directory) as THE source material. The Astra-reference-derived masters from this round are removed from the Pack (recoverable in git at 2049fd8). Runtime now ships: L6-L12 = the accepted c3d1d4e masters (built from those exact exec images), L1-L5 = Owner l1.png-l5.png as master-l1.png-master-l5.png.",
+  "semantic_status": "Historical illustration provenance only. Prior equipment-based level narrative was rejected by Owner on 2026-09-08. L1-L5 operational meaning is governed by CONFIGURABLE_PET_ENGINE_V4; L6-L12 unchanged."
 }
