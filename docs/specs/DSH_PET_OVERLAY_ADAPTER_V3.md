@@ -1,6 +1,6 @@
 ---
 spec_id: DSH_PET_OVERLAY_ADAPTER_V3
-status: proposed
+status: accepted
 spec_kind: implementation
 authority_level: governing_spec
 implementation_authority: contracts
@@ -79,7 +79,12 @@ accepts it.
 ### In scope
 
 - the resident two-size presentation (SMALL / LARGE) with persisted size
-  preference and a bounded scale relation between the modes;
+  preference and a bounded scale relation between the modes; the V2 fixed
+  112 px size, the `PANEL_OPEN` state, the 264 px compact panel, the
+  resident micro progress sliver, and the V2 "bottom-right at 112 px"
+  first-launch anchor are each replaced by the declared V3 equivalents
+  (§8 sizing/placement, §8.1 state machine, §8.2 secondary affordance,
+  CTR-OVERLAY-016);
 - removal of the resident within-level micro progress presentation;
 - removal of the compact panel and of `PANEL_OPEN` from the persisted
   interaction machine; pet-first click reactions instead;
@@ -465,7 +470,9 @@ SPEECH_CONTENT_SOURCES = SESSION_STATE, PROGRESS_EVENT, LEVEL_EVENT, USER_INTERA
 SPEECH_AMBIENT_MIN_INTERVAL_S = 600
 SPEECH_LOAD_QUIET_S = 30
 SPEECH_TYPING_SUPPRESSION_S = 15 (payload-ignored input recency)
-SPEECH_REPEAT_GUARD = no identical line twice in a row within a state; per-state recent-history exclusion
+SPEECH_WORKING_ROTATION_S = 120 (max one line per 120 s of a single running period; max three per period)
+SPEECH_CLICK_LINE_THROTTLE_S = 30
+SPEECH_REPEAT_GUARD = no identical line twice in a row within a category; per-category recent-history exclusion
 CLICK_REACTION = expression variant change + light motion + throttled line; NEVER a panel
 ONBOARDING_VISIBILITY = hidden
 SESSION_EFFECT = visual reaction only
@@ -884,7 +891,7 @@ fixed-ref DSH.
 
 ### ACC-OVERLAY-104 — Two-state machine and no-panel proof
 
-- Contracts: `CTR-OVERLAY-004`, `CTR-OVERLAY-005`.
+- Contracts: `CTR-OVERLAY-004`, `CTR-OVERLAY-005`, `CTR-OVERLAY-021`.
 - Method: activate pet (click and keyboard), Escape, collapse, refresh,
   activate launcher; inspect `data-vehicle-pet` state values; static scan the
   client artifact for `PANEL_OPEN` and panel-component residue; attempt every
@@ -948,8 +955,8 @@ fixed-ref DSH.
 
 ### ACC-OVERLAY-109 — Forbidden runtime/path/network/content gate
 
-- Contracts: `CTR-OVERLAY-005`, `CTR-OVERLAY-008`, `CTR-OVERLAY-013`,
-  `CTR-OVERLAY-018`.
+- Contracts: `CTR-OVERLAY-005`, `CTR-OVERLAY-007`, `CTR-OVERLAY-008`,
+  `CTR-OVERLAY-013`, `CTR-OVERLAY-018`.
 - Method: static scan and browser network interception while exercising every
   state and the full speech matrix; scan for content-reading code paths
   (message/reasoning access, regex over host text, clipboard/credential
@@ -1061,7 +1068,7 @@ fixed-ref DSH.
 
 ### ACC-OVERLAY-118 — Resident progress absence
 
-- Contracts: `CTR-OVERLAY-016`.
+- Contracts: `CTR-OVERLAY-008`, `CTR-OVERLAY-016`.
 - Method: DOM query inventory for progress-class elements and gauge-shaped
   nodes at both sizes across states; static scan for resident progress
   rendering paths; journey dialog check that within-level progress remains
@@ -1075,7 +1082,8 @@ fixed-ref DSH.
 
 ### ACC-OVERLAY-119 — Speech bubble lifecycle, positioning, and focus gate
 
-- Contracts: `CTR-OVERLAY-017`, `CTR-OVERLAY-019`.
+- Contracts: `CTR-OVERLAY-015`, `CTR-OVERLAY-017`, `CTR-OVERLAY-018`,
+  `CTR-OVERLAY-019`.
 - Method: trigger every category in a real isolated DSH; measure bubble
   geometry versus composer/send and coexistence regions; verify single
   instance, replacement-not-stacking, auto-dismiss within bounds, timer
@@ -1095,7 +1103,8 @@ fixed-ref DSH.
 
 ### ACC-OVERLAY-120 — Size modes, persistence, and coexistence magnitude
 
-- Contracts: `CTR-OVERLAY-003`, `CTR-OVERLAY-010`, `CTR-OVERLAY-020`.
+- Contracts: `CTR-OVERLAY-003`, `CTR-OVERLAY-010`, `CTR-OVERLAY-016`,
+  `CTR-OVERLAY-020`.
 - Method: in the isolated fixed-ref DSH with deepseek-pet co-installed:
   switch SMALL/LARGE via the affordance; reload; restart the profile;
   re-verify; capture SMALL and LARGE screenshots with the whale visible;
@@ -1148,7 +1157,7 @@ fixed-ref DSH.
 | `CTR-OVERLAY-017` | `ACC-OVERLAY-107`, `ACC-OVERLAY-114`, `ACC-OVERLAY-119` | fixture/browser/instrumented | YES |
 | `CTR-OVERLAY-018` | `ACC-OVERLAY-109`, `ACC-OVERLAY-119` | static/unit/browser | YES |
 | `CTR-OVERLAY-019` | `ACC-OVERLAY-114`, `ACC-OVERLAY-119`, `ACC-OVERLAY-121` | unit/instrumented/browser | YES |
-| `CTR-OVERLAY-020` | `ACC-OVERLAY-103`, `ACC-OVERLAY-111`, `ACC-OVERLAY-117`, `ACC-OVERLAY-120` | browser/unit/runtime | YES |
+| `CTR-OVERLAY-020` | `ACC-OVERLAY-103`, `ACC-OVERLAY-105`, `ACC-OVERLAY-111`, `ACC-OVERLAY-117`, `ACC-OVERLAY-120` | browser/unit/runtime | YES |
 | `CTR-OVERLAY-021` | `ACC-OVERLAY-104`, `ACC-OVERLAY-121` | browser/runtime | YES |
 
 ### 10.2 Acceptance-to-Contract coverage
@@ -1163,7 +1172,7 @@ fixed-ref DSH.
 | `ACC-OVERLAY-106` | `CTR-OVERLAY-006` |
 | `ACC-OVERLAY-107` | `CTR-OVERLAY-007`, `CTR-OVERLAY-014`, `CTR-OVERLAY-017` |
 | `ACC-OVERLAY-108` | `CTR-OVERLAY-007`, `CTR-OVERLAY-013` |
-| `ACC-OVERLAY-109` | `CTR-OVERLAY-005`, `CTR-OVERLAY-008`, `CTR-OVERLAY-013`, `CTR-OVERLAY-018` |
+| `ACC-OVERLAY-109` | `CTR-OVERLAY-005`, `CTR-OVERLAY-007`, `CTR-OVERLAY-008`, `CTR-OVERLAY-013`, `CTR-OVERLAY-018` |
 | `ACC-OVERLAY-110` | `CTR-OVERLAY-009` |
 | `ACC-OVERLAY-111` | `CTR-OVERLAY-003`, `CTR-OVERLAY-010`, `CTR-OVERLAY-020` |
 | `ACC-OVERLAY-112` | `CTR-OVERLAY-011` |
@@ -1245,7 +1254,7 @@ candidate from a fixed ref, restart after add/update/remove, no
 SPEC_GOVERNANCE_MODE = AUTHOR
 SPEC_ID = DSH_PET_OVERLAY_ADAPTER_V3
 SPEC_KIND = implementation
-STATUS = proposed
+STATUS = accepted
 AUTHORITY_LEVEL = governing_spec
 IMPLEMENTATION_AUTHORITY = contracts
 PRIMARY_PARENT_AUTHORITY = VEHICLE_PET_PRODUCT_DIRECTION_V1
@@ -1269,22 +1278,69 @@ MULTI_PET_AUTHORIZED = NO
 CONTENT_AWARE_SPEECH_AUTHORIZED = NO
 ART_V2_REGENERATION_AUTHORIZED = NO
 AUTHORING_READY_FOR_REVIEW = YES
-NEXT_ACTION = REVIEW
+INDEPENDENT_REVIEW_RESULT = ACCEPT
+READY_TO_MARK_ACCEPTED = YES
+READY_TO_MARK_ACCEPTED_REASON = the exact proposed Head b62befc passed the independent review (ACCEPT, zero blockers; findings documentary only), the authorized acceptance transition applied this flip plus the pre-declared documentary reconciliation enumerated in §14, and the same independent reviewer performed the final-head delta recheck
+NEXT_ACTION = COMPLIANCE (implementation round routes as REUSE after this revision is reachable from main)
 ```
 
 ## 14. Acceptance record
 
 ```text
-SPEC_LIFECYCLE = (pending acceptance)
-DSH_OVERLAY_ADAPTER_SPEC_ACCEPTANCE_RECORD_V3 = PENDING
+SPEC_LIFECYCLE = proposed → accepted candidate
+DSH_OVERLAY_ADAPTER_SPEC_ACCEPTANCE_RECORD_V3 = YES
+ACCEPTED_BY = mayf3
+ACCEPTANCE_ACTOR = mayf3 (Goal 灵动 Owner preauthorization; GOAL_MODE=NEW_GOAL with DONE_WHEN binding ALL_GATES/INDEPENDENT_AUDITS/MERGED and PRODUCTION_APPLY_ALLOWED=NO, matching the Goal-internal acceptance pattern of the accepted V2 record)
+ACCEPTED_AT = 2026-09-08T00:08:30Z
+OWNER_ACCEPTANCE_DECISION = ACCEPT
+INDEPENDENT_REVIEW_RESULT = ACCEPT (zero blockers; seven documentary findings)
+REVIEWED_BASE_COMMIT = cce0e9d24907e7c17e42fd2b310a68a98860d5cf
+REVIEWED_PROPOSED_HEAD = b62befc
+ACCEPTANCE_COMMIT_PARENT = b62befc
+SEMANTIC_DELTA_AFTER_REVIEW = NONE (lifecycle transition plus the pre-declared documentary reconciliation only, enumerated below)
+DOCUMENTARY_RECONCILIATION_IN_THIS_COMMIT = §1 exception list itemizes the replaced V2 bottom-right anchor; §8 adds the working-rotation and click-throttle constants and aligns the repeat-guard referent to "category"; ACC-104/109/119/120 Contracts lines and the §10.1/§10.2 tables reconciled to the already-reviewed contract/acceptance bodies (no obligation added or removed); preflight OBSERVED_AT wording and route-record review coordinates refreshed; Goal dispatch persisted as an investigation record
+FINAL_HEAD_DELTA_RECHECK = ACCEPT (same independent reviewer, exact acceptance Head)
+BLOCKERS = 0
+CONTRACT_COUNT = 21
+CONTRACTS_WITH_ACCEPTANCE = 21
+ACCEPTANCE_COUNT = 21
+OPEN_OWNER_DECISIONS = NONE
+NORMATIVE_TBD = NONE
+SUPERSEDES = DSH_PET_OVERLAY_ADAPTER_V2
+SUPERSESSION_ATOMIC_IN_ACCEPTANCE_COMMIT = YES
+REAL_TOKEN_INTEGRATION_AUTHORIZED = NO
+DSH_TOKEN_TO_PROGRESS_AUTHORIZED = NO
+DEEPSEEK_HARNESS_CORE_CHANGE_AUTHORIZED = NO
+REMOTE_PACK_AUTHORIZED = NO
+AUDIO_AUTHORIZED = NO
+TTS_AUTHORIZED = NO
+MULTI_PET_AUTHORIZED = NO
+CONTENT_AWARE_SPEECH_AUTHORIZED = NO
+ART_V2_REGENERATION_AUTHORIZED = NO
+MERGE_AUTHORIZED = YES (Goal 灵动 DONE_WHEN binds MERGED = YES without per-item Owner approval, matching the accepted V2 §14 pattern)
+CARRY_FORWARD_FINDINGS = R1 audit FINDINGS 3 (seedling legacy-coercion probe not restated in an acceptance item), 4 (stale usage-source acceptance method referencing the removed micro bar), and 5 (preflight field-referent wording) are binding on the implementation/acceptance rounds and MUST be closed there or in a later docs round before final conformance
 ```
 
-To be completed only by the authorized acceptance transition after an
-independent review of the exact proposed Head returns its result: the record
-must bind `ACCEPTED_BY`, `ACCEPTANCE_ACTOR`, execution-time `ACCEPTED_AT`,
-`OWNER_ACCEPTANCE_DECISION`, `INDEPENDENT_REVIEW_RESULT`,
-`REVIEWED_BASE_COMMIT`, `REVIEWED_PROPOSED_HEAD`,
-`ACCEPTANCE_COMMIT_PARENT`, `SEMANTIC_DELTA_AFTER_REVIEW`, and the atomic
-lifecycle flip of `DSH_PET_OVERLAY_ADAPTER_V2` to `status: superseded` with
-`superseded_by: DSH_PET_OVERLAY_ADAPTER_V3`, plus the
-`docs/specs/README.md` index rows, in the same docs-only acceptance commit.
+Binding facts:
+
+- The independent review bound the reviewed Base
+  `cce0e9d24907e7c17e42fd2b310a68a98860d5cf` and the reviewed proposed Head
+  `b62befc` and returned `ACCEPT` with zero blockers; all findings were
+  classified documentary (coverage-table/body alignment, exception-list
+  itemization, constant echoes, wording, dispatch persistence) and none
+  added or removed an obligation.
+- This acceptance commit's parent is exactly `b62befc`. Its content changes
+  from the reviewed Head are: this §13/§14 lifecycle record, the frontmatter
+  lifecycle flip of this Spec to `status: accepted`, the atomic flip of
+  `DSH_PET_OVERLAY_ADAPTER_V2` to `status: superseded` with
+  `superseded_by: DSH_PET_OVERLAY_ADAPTER_V3`, the
+  `docs/specs/README.md` index rows, and the enumerated documentary
+  reconciliation — no Goal, Decision, Contract, Acceptance item, coverage
+  relation, or frozen-model value changed meaning.
+- With this commit, `DSH_PET_OVERLAY_ADAPTER_V2` is superseded and
+  `DSH_PET_OVERLAY_ADAPTER_V3` is accepted in the same atomic docs-only
+  change; no partial supersession.
+- Activation is a reachability rule: this Spec is active repository authority
+  when the exact accepted revision is reachable from `mayf3/vehicle-pet:main`
+  or an implementation base derived from it. DSH overlay implementation
+  against V3 MUST NOT begin until then.
