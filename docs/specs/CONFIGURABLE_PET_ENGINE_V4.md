@@ -1,6 +1,6 @@
 ---
-spec_id: CONFIGURABLE_PET_ENGINE_V3
-status: superseded
+spec_id: CONFIGURABLE_PET_ENGINE_V4
+status: accepted
 spec_kind: implementation
 authority_level: governing_spec
 implementation_authority: contracts
@@ -10,23 +10,31 @@ scope:
   - prototype-shell
 governed_by:
   - VEHICLE_PET_PRODUCT_DIRECTION_V1
-  - VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V1
+  - VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V2
 external_authorities: []
 supersedes:
-  - CONFIGURABLE_PET_ENGINE_V2
-superseded_by: CONFIGURABLE_PET_ENGINE_V4
+  - CONFIGURABLE_PET_ENGINE_V3
+superseded_by: null
 owners:
   - mayf3
 ---
 
-# CONFIGURABLE_PET_ENGINE_V3
+# CONFIGURABLE_PET_ENGINE_V4
 
 ## 1. Goal
 
-This V3 supersedes `CONFIGURABLE_PET_ENGINE_V2` and carries every V2
-Decision and Contract forward unchanged except the §11.1 autonomous-fleet
-L6–L12 scale-evolution visual revision (`DEC-PET-032`; DEC-PET-031 remains
-in force for L1–L5). Define the V1 architecture Contracts of the configurable, domain-neutral Pet
+This V4 wholly supersedes CONFIGURABLE_PET_ENGINE_V3. It corrects only the
+L1–L5 operational narrative and dependent localized presentation, restores
+driver/safety-operator/escort semantics, and authorizes a bounded read-only
+keepsake compatibility view for the corrective Pack version. L6–L12 meaning,
+art, fleet counts and every level threshold remain unchanged. The Owner
+explicitly rejected decorative equipment as level meaning on 2026-09-08;
+see docs/investigations/GOAL_CHARACTER_OWNER_CORRECTION.md. Historical
+Observations below retain their original dated coordinates and are not a
+claim about the current implementation. All other Decisions and Contracts
+are carried forward.
+
+Define the V1 architecture Contracts of the configurable, domain-neutral Pet
 Engine, its declarative Pet Pack format, and the prototype shell, with
 `implementation_authority: contracts`. The Engine consumes external
 `ProgressSnapshotV1` input, derives level and presentation purely, renders
@@ -58,18 +66,18 @@ Out of scope:
 ## 3. Authority and dependencies
 
 This Spec is governed by `VEHICLE_PET_PRODUCT_DIRECTION_V1` and
-`VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V1` and binds to their decisions.
+`VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V2` and binds to their decisions.
 Under `CTR-DIR-011` of the parent Spec, this Spec is the single normative owner
 of DOM node caps, presentation journal mechanics, and ceremony numeric limits.
 
 Review and activation constraints:
 
-- This Spec supersedes `CONFIGURABLE_PET_ENGINE_V2` and is reviewed on its own
+- This Spec supersedes `CONFIGURABLE_PET_ENGINE_V3` and is reviewed on its own
   candidate Head; the parent `VEHICLE_PET_PRODUCT_DIRECTION_V1` is already
   accepted authority;
 - implementation MUST NOT begin before this Spec is `accepted` and its
   accepted content is present on `mayf3/vehicle-pet:main` (the implementation
-  base must derive from a `main` revision containing accepted V3);
+  base must derive from a `main` revision containing accepted V4);
 - the DeepSeek Harness prototype at commit
   `3084ac2c9b915c62a11b1ee8d15f4599eb235673` is Evidence recorded in
   `docs/investigations/GENERIC_PET_ENGINE_V1_INPUTS.md`, not a parent authority
@@ -305,21 +313,13 @@ Review and activation constraints:
 - Reason: keeps V1 decidable and free of billing semantics.
 - Owner input remaining: NONE
 
-### DEC-PET-031 — Unmanned visual identity with per-level subject sprites (V2)
+### DEC-PET-031 — Operational autonomy identity with per-level subject sprites (V4 correction)
 
-- Decision owner: `mayf3` (Owner direction, 2026-09-06)
-- Decision: the autonomous-fleet growth story is revised to a fully unmanned
-  identity — every level's cabin is empty, and each level's subject sprite
-  carries its own mini escort car(s) behind it (L12: two). Each of the twelve
-  levels binds to its own subject sprite (`sprite-subject-pod--l1`…`--l12`).
-  The §11.1 narrative column, the Pack manifest narrative copy, and the
-  sprite alt-texts are revised to match. Thresholds, scenes, scale
-  transitions, keepsake count/binding, and all Engine mechanics are unchanged.
-- Rejected alternative: keeping the V1 occupancy narrative and changing only
-  sprite bytes (the empty-cabin art would contradict the "主驾有人" copy).
-- Reason: Owner product decision; the pet reads as one autonomous car growing
-  alongside its escort companions into a fleet.
-- Owner input remaining: NONE
+- Decision owner: mayf3, explicit correction in Goal 角色, 2026-09-08.
+- Decision: L1–L5 mean the exact driver-seat, copilot safety-operator and rear-escort states in §11.1. Decorative hardware or color changes MUST NOT be represented as level meaning, stage title, milestone or keepsake meaning. Each level still binds its own existing stable subject asset ID. The blue-white car identity is retained. Existing retained car art is historical illustrative presentation, not an assertion of operational occupancy or escort presence. This bounded copy-correction release MUST preserve its asset bytes and record known illustration mismatches (existing L2/L4/L5 escort decorations differ from the corrected meaning); it MUST NOT cite those decorations as level truth. Corrected visible and accessible copy MUST state the table. Any newly produced or repaired art, including humanoid mapping, MUST represent the corrected states and MUST NOT assert the opposite. This exception applies only to the already-existing car illustrations; it does not permit new misleading art or future equipment-based copy.
+- Rejected alternative: redefining the level to match decoration in generated art.
+- Reason: explicit Owner correction; original operational progression was lost in V2/V3 narrative.
+- Owner input remaining: NONE.
 
 ### DEC-PET-032 — L6–L12 scale-evolution visual identity (V3)
 
@@ -334,8 +334,7 @@ Review and activation constraints:
   background. The baked count MUST equal the level's frozen fleet-size
   truth, and the remote-operator figure visualizes the same
   "1 名远程人员监管 N 辆无人车" fact. L6–L12 sprites no longer carry
-  the mini escort car(s); that escort identity remains the L1–L5
-  subject presentation only. The §11.1 narrative rows L6–L12, the Pack
+  the mini escort car(s); L1–L5 escort presence is governed exclusively by the corrected §11.1 table. The §11.1 narrative rows L6–L12, the Pack
   manifest stage/summary/milestone copy, the L6–L12 sprite alt-texts,
   and the L6–L12 keepsake copy are revised to match. Fleet-size truth,
   thresholds, scenes, scale/camera/density/milestone presets,
@@ -343,7 +342,7 @@ Review and activation constraints:
   Engine progression, and all Engine mechanics are unchanged.
 - Rejected alternative: keeping the V2 escort/roof-part narrative and
   changing only sprite bytes (the fleet/city/globe art would contradict
-  the "宽体编队/传感环/传感塔/迷你保护车" copy for L6–L12).
+  obsolete equipment-based copy for L6–L12).
 - Rejected alternative: running a new art-candidate round (the Owner
   froze the approved art; no new image generation is in scope).
 - Reason: Owner product decision; at the 112px resident size the
@@ -825,24 +824,25 @@ points for V1; they MUST NOT be described as real Token billing rules.
 
 | Level | Points | Frozen zh-CN narrative | subject sprite | sceneId | scale | camera | density | milestone | population |
 |---|---|---|---|---|---|---|---|---|---|
-| L1 | 0 | 无人驾驶小车首航出发，车内无人，后方跟着 1 辆迷你保护车。 | `sprite-subject-pod--l1` | `road-test` | individual | close | sparse | inline | — |
-| L2 | 10,000 | 车顶立起天线，小车渐入佳境，迷你保护车紧随其后，车内无人。 | `sprite-subject-pod--l2` | `road-test-l2` | individual | close | sparse | inline | — |
-| L3 | 30,000 | 第一条黄色饰条与小灯条点亮，保护车同行，车内无人。 | `sprite-subject-pod--l3` | `road-test-l3` | individual | close | sparse | inline | — |
-| L4 | 60,000 | 方形传感盒装上车顶，车身略长，保护车随行，车内无人。 | `sprite-subject-pod--l4` | `road-test-l4` | individual | close | sparse | inline | — |
-| L5 | 100,000 | 完整传感环绕上车顶，小车眼神更自信，1 名远程人员监管 1 辆无人车。 | `sprite-subject-pod--l5` | `road-test-l5` | individual | close | moderate | inline | — |
+| L1 | 0 | 主驾有人，副驾无人，有后方保护车，1 辆车。 | `sprite-subject-pod--l1` | `road-test` | individual | close | sparse | inline | — |
+| L2 | 10,000 | 主驾有人，副驾无人，无后方保护车，1 辆车。 | `sprite-subject-pod--l2` | `road-test-l2` | individual | close | sparse | inline | — |
+| L3 | 30,000 | 主驾无人，副驾有安全员，有后方保护车，1 辆车。 | `sprite-subject-pod--l3` | `road-test-l3` | individual | close | sparse | inline | — |
+| L4 | 60,000 | 主驾无人，副驾有安全员，无后方保护车，1 辆车。 | `sprite-subject-pod--l4` | `road-test-l4` | individual | close | sparse | inline | — |
+| L5 | 100,000 | 主驾、副驾均无人，无保护车，1 名远程人员监管 1 辆车。 | `sprite-subject-pod--l5` | `road-test-l5` | individual | close | moderate | inline | — |
 | L6 | 180,000 | 三车小队集结出发，1 名远程人员监管 3 辆无人车。 | `sprite-subject-pod--l6` | `convoy` | individual | close | moderate | inline | vehicles ×3 |
 | L7 | 300,000 | 十车阵列展开巡游，1 名远程人员监管 10 辆无人车。 | `sprite-subject-pod--l7` | `district-fleet` | individual | district | moderate | inline | vehicles ×10 |
 | L8 | 500,000 | 百车车队密集列阵，1 名远程人员监管 100 辆无人车。 | `sprite-subject-pod--l8` | `city-fleet` | group | city | dense | inline | vehicles ×100 |
 | L9 | 800,000 | 领航车驶入城市天际线，1 名远程人员监管 1,000 辆无人车。 | `sprite-subject-pod--l9` | `metro-network` | cluster | metro | network | inline | vehicles ×1,000 |
 | L10 | 1,200,000 | 多城天际线同框点亮，1 名远程人员监管 10,000 辆无人车。 | `sprite-subject-pod--l10` | `regional-field` | field | regional | network | inline | vehicles ×10,000 |
 | L11 | 1,800,000 | 多区域地标连成网络，1 名远程人员监管 100,000 辆无人车。 | `sprite-subject-pod--l11` | `continental-web` | region | continental | luminous | inline | vehicles ×100,000 |
-| L12 | 2,500,000 | 领航车与蓝色全球同框，1 名远程人员监管 1,000,000 辆无人车；V3 当前封顶。 | `sprite-subject-pod--l12` | `terminal-horizon` | horizon | terminal | luminous | terminal | vehicles ×1,000,000 |
+| L12 | 2,500,000 | 领航车与蓝色全球同框，1 名远程人员监管 1,000,000 辆无人车；当前封顶。 | `sprite-subject-pod--l12` | `terminal-horizon` | horizon | terminal | luminous | terminal | vehicles ×1,000,000 |
 
 Per-level subject sprites and scene variants (V3 revision): every level binds
 to exactly its own subject sprite (`sprite-subject-pod--lN`, PNG + lossless
 WebP pair, 480×480 transparent canvas) through its own scene — no level
-shares another level's subject sprite. L1–L5 sprites keep the V2 unmanned
-road-test identity with the mini escort car(s) behind the car. L6–L12
+shares another level's subject sprite. L1–L5 operational meaning is exclusively the corrected table above. Their
+blue-white visual identity and asset IDs are retained; decoration is not a
+level definition. L6–L12
 sprites carry the V3 scale-evolution identity of `DEC-PET-032`: the
 supervision-count label, the remote-operator figure, and the level's scale
 outline typeset into a transparent master composition. The shared V1 `road-test` scene becomes five per-level variants of
@@ -941,9 +941,9 @@ The Engine MUST cap rendered nodes at 32 per population and 64 per Pet scene ren
 
 Engine production code MUST NOT contain vehicle, plant, or other Pet-domain rules or vocabulary, including `driver`, `passenger`, `protectionVehicle`, `vehicle`, `fleet`, `safetyOfficer`, and `remoteGuardian`.
 
-### CTR-PET-010 — autonomous-fleet content freeze
+### CTR-PET-010 — autonomous-fleet operational content freeze
 
-The `autonomous-fleet` Pack MUST implement the frozen 12-level narrative, the frozen `MOCK_PROGRESS_POINTS` thresholds, the frozen per-level scene/preset/population assignments of §11.1, and the Pack-owned 100-points-per-km display conversion. The thresholds MUST NOT be presented as real Token billing rules.
+The `autonomous-fleet` Pack MUST implement the frozen 12-level narrative, the frozen `MOCK_PROGRESS_POINTS` thresholds, the frozen per-level scene/preset/population assignments of §11.1, and the Pack-owned 100-points-per-km display conversion. The thresholds MUST NOT be presented as real Token billing rules. L1–L5 localized stage, summary, milestone, keepsake and accessible copy MUST express the operational occupancy/escort table, never decorative equipment progression. L6–L12 content and artwork MUST remain unchanged.
 
 ### CTR-PET-011 — seedling-fixture runs on the same Engine
 
@@ -1024,6 +1024,21 @@ A Pack switch and a Pack version change MUST render the new derivation immediate
 ### CTR-PET-030 — Preset semantics, structural criteria, and accessibility
 
 Every whitelisted preset MUST carry the minimal observable RenderPlan semantics of §10; a preset list without those semantics fails this Contract. Scale transitions MUST satisfy the mechanical structural-difference criteria of §10.1, verified by RenderPlan structure diff, never by human visual judgment alone. Population accessibility MUST follow §10.2: representatives `ariaHidden` with no alt text, exactly one deterministic `aggregate-label` node per population carrying the real logical count and localized object name, and a subject accessible name. Reduced motion MUST preserve all static structural differences.
+
+### CTR-PET-031 — Corrective Pack version and existing keepsake visibility
+
+The corrective autonomous-fleet manifest MUST use new immutable packVersion
+2.0.1; the released 2.0.0 identity MUST NOT be silently rewritten. No
+progress, source/subject identity, activePackId, thresholds, ledger, Token
+Economy, persisted receipt, journal or keepsake record may be reset or
+rewritten. The React keepsake collection for autonomous-fleet@2.0.1 MUST
+additionally display earned keepsake IDs from autonomous-fleet@2.0.0 for the
+same sourceId and subjectId, as a read-only compatibility union. This is
+only a display interpretation: do not duplicate records, issue receipts,
+claim keys, replay ceremonies, or apply it to another Pack/subject/version.
+New forward unlock records remain under 2.0.1. The version-change baseline
+and no-replay rules of CTR-PET-029 remain intact. Missing legacy records
+produce no inferred unlock. Rollback to 2.0.0 leaves all records intact.
 
 ## 13. Acceptance
 
@@ -1297,7 +1312,18 @@ Every whitelisted preset MUST carry the minimal observable RenderPlan semantics 
 - Expected result: every preset's RenderPlan observable matches §10 exactly; representatives are `ariaHidden` with no alt text; exactly one aggregate node per population carries the real logical count and localized name; the subject carries an accessible name; no preset is a name-only entry
 - Failure condition: any preset without its observable semantic, an announced representative, a missing or wrong-count aggregate node, a missing subject name, or placement coordinates deviating from the frozen formulas
 
+### ACC-PET-031 — Operational meaning and loss-free corrective version
+
+- Contracts: CTR-PET-010, CTR-PET-018, CTR-PET-023, CTR-PET-029, CTR-PET-031.
+- Method: compare manifest L1–L5 zh-CN/en stage/summary/milestone/keepsake/alt copy to the five corrected states; scan active copy for rejected equipment narrative; compare L6–L12 and all thresholds/assets to Base; load seeded 2.0.0 keepsakes then 2.0.1 at unchanged points; inspect union, storage bytes and receipt events; test foreign subject/Pack/version and missing legacy records.
+- Environment: isolated implementation checkout, unit/DOM fixtures and DSH preview.
+- Required evidence: exact diff, copy table, tests and before/after storage/receipt trace.
+- Expected result: corrected semantics; L6–L12 and thresholds/assets identical; existing keepsakes visible once, no invented unlock, no write/reset/replay; new forward unlocks use 2.0.1.
+- Failure condition: misleading equipment meaning remains, higher levels change, existing earned collection appears reset, wrong-domain unlock appears, or any reset/replay occurs.
+
 ### Contract coverage
+
+CTR-PET-031 is covered by ACC-PET-031. ACC-PET-031 also covers the corrective-version dependent invariants CTR-PET-010/018/023/029.
 
 | Contract | Acceptance | Covered |
 |---|---|---|
@@ -1355,76 +1381,50 @@ Every Contract maps to one Acceptance item, and every Acceptance item maps back 
 
 ## 15. Migration, compatibility, and rollback
 
-```text
-MIGRATION = forward-only
-HISTORICAL_REWRITE = none
-PRODUCT_COMPATIBILITY = no product code exists; this amendment changes authority text only
-ROLLBACK = revert the complete docs-only amendment commit
-```
+Docs-first whole-authority successor of CONFIGURABLE_PET_ENGINE_V3. Code
+must wait until acceptance is reachable in implementation Base. Corrective
+manifest version 2.0.1 preserves progress and uses the read-only keepsake
+compatibility view in CTR-PET-031. No destructive storage migration. Revert
+the complete acceptance commit for authority rollback, implementation commit
+separately for product rollback. No production application in this Goal.
 
-This whole-authority supersession (`CONFIGURABLE_PET_ENGINE_V3`) carries every
-V2 Decision and Contract forward unchanged except the §11.1 autonomous-fleet
-L6–L12 scale-evolution revision (`DEC-PET-032`). It changes no frozen product
-value beyond that revision: DOM caps remain 32/64, ceremonies remain
-3 beats / 3 seconds, the 12-level fleet table structure, thresholds,
-seedling freeze, scene kinds, presets, populations, keepsake count/binding,
-and asset IDs are unchanged. This Spec is docs-only; implementation of the
-revised L6–L12 content is authorized only in a PR whose base contains the
-accepted V3 revision. Rollback of the authority change reverts the complete
-supersede/acceptance commit, restoring `CONFIGURABLE_PET_ENGINE_V2` as the
-active authority; an already-merged implementation reverts separately by
-reverting its own commit. No partial supersession exists.
-
-## 16. Open questions
+## 16. Open questions and activation
 
 ```text
+STATUS = accepted
+AUTHORITY_ACTION = SUPERSEDE
+IMPLEMENTATION_AUTHORITY = contracts
+PLAN_LEVEL = EXEC_PLAN
+ASSURANCE_LEVEL = DURABLE
+DOCS_FIRST_REQUIRED = YES
 OPEN_OWNER_DECISIONS = NONE
 NORMATIVE_TBD = NONE
-UNRESOLVED_AUTHORITY_CONFLICT = NONE
 PARTIAL_SUPERSESSION = NONE
-READY_TO_MARK_ACCEPTED = YES
+CONTRACT_COUNT = 31
+CONTRACTS_WITH_ACCEPTANCE = 31
+AUTHORING_READY_FOR_REVIEW = YES
+READY_TO_MARK_ACCEPTED = YES (independent exact-Head review ACCEPT, zero blockers/gaps)
 ```
 
-`READY_TO_MARK_ACCEPTED = YES`: this Spec is a
-candidate. Acceptance requires an independent audit of the exact Base/Head
-returning `ACCEPT` with zero blockers, after which `mayf3` accepts under the
-standing Goal 进化 Owner delegation (Goal-autonomous merge once the required
-independent audits return `ACCEPT` with zero `SHIP_BLOCKER`s). At the atomic
-acceptance transition: `status: accepted`, `CONFIGURABLE_PET_ENGINE_V2`
-flips to `status: superseded` with `superseded_by: CONFIGURABLE_PET_ENGINE_V3`,
-and the Spec index (docs/specs/README.md) gains the V3 entry.
-
+Acceptance and merge follow the Owner Goal dispatch and subsequent explicit
+instruction to continue without intermediate questions. Review is independent;
+only after ACCEPT may the authorized acceptance transition atomically mark
+this Spec accepted, V3 superseded with backlink, and update active indexes.
 
 ## 17. Acceptance record
 
 ```text
-SPEC_LIFECYCLE = proposed → accepted candidate (this commit)
-SPEC_ACCEPTANCE_RECORD_V1 = YES
-ACCEPTED_BY = mayf3
-ACCEPTANCE_ACTOR = mayf3 (executed under the Goal 进化 Owner delegation: Goal-autonomous merge after the required independent audits return ACCEPT with zero SHIP_BLOCKERs)
-ACCEPTED_AT = 2026-09-06T13:09:24Z
-OWNER_ACCEPTANCE_DECISION = PREAUTHORIZED_BY_GOAL_DISPATCH
-ACCEPTANCE_EXECUTED_UNDER_EXPLICIT_OWNER_DELEGATION = YES
-INDEPENDENT_AUDIT_RESULT = ACCEPT (0 blockers; independent spec audit)
-REVIEWED_BASE_COMMIT = aa0a014dfc7767f1ff25c73c4775fdd687d56734
-REVIEWED_PROPOSED_HEAD = 4332cd1c4f9abe3616929cac3534cba861593177
-ACCEPTANCE_COMMIT_PARENT = 4332cd1c4f9abe3616929cac3534cba861593177
-SEMANTIC_DELTA_AFTER_REVIEW = NONE (lifecycle transition only: proposed → accepted candidate)
-BLOCKERS_REMAINING = 0
-OPEN_OWNER_DECISIONS = NONE
-NORMATIVE_TBD = NONE
-ACCEPTANCE_ORDER = ATOMIC (CONFIGURABLE_PET_ENGINE_V2 flips to superseded in the same commit)
+ACCEPTED_BY = mayf3 (Owner Goal dispatch and explicit continue authorization)
+ACCEPTED_AT = 2026-09-08T15:17:22.189609+00:00
+REVIEWED_PROPOSED_HEAD = bea280fd01bd2e74cb00514b14a77e3c0564b66a
+BASE_HEAD = b64e2d0dbadaa9ee1b7eb9814703568021adc58a
+INDEPENDENT_REVIEWER = authority_preflight_review
+INDEPENDENT_REVIEW_RESULT = ACCEPT
+BLOCKERS = 0
+SPEC_GAPS = 0
+SEMANTIC_DELTA_AFTER_REVIEW = NONE
+PRODUCTION_APPLY_ALLOWED = NO
 ```
 
-Binding facts at acceptance:
-
-- The independent spec audit reviews the exact Base and the exact proposed
-  Head and must return `ACCEPT` with zero blockers; the exact coordinates are
-  recorded above at the atomic acceptance transition.
-- The acceptance commit's parent is exactly the reviewed Head; the only
-  semantic change is the lifecycle transition plus the superseded flip of
-  `CONFIGURABLE_PET_ENGINE_V2` recorded here and in the Spec index.
-- This Spec becomes active repository authority when this exact Head is
-  reachable from `mayf3/vehicle-pet:main`; the L6–L12 scale-evolution
-  implementation PR is authorized once its base contains the accepted V3
-  revision.
+This acceptance is active only when reachable from main or a main-derived
+implementation base. Final lifecycle delta recheck precedes authority merge.
