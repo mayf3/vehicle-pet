@@ -455,7 +455,7 @@ REDUCED_MOTION_PERSISTENCE = browser local preference (semantics unchanged)
 ACTIVE_PACK_PERSISTENCE = existing Engine activePackId
 EXPRESSION_STATE_CORE = IDLE, WORKING, NEEDS_INPUT, COMPLETED, FAILED_OR_CANCELLED (unchanged mapping duty)
 EXPRESSION_VARIANT_COUNT_MIN = 10 (statically distinguishable, level identity preserved)
-EXPRESSION_ARCHITECTURE = LEVEL_BASE_VISUAL + EXPRESSION_LAYER overlay recipes + SMALL_MOTION
+EXPRESSION_ARCHITECTURE = vehicle preserved level base + expression recipes; companion pose sprite + declarative grade insignia; bounded small motion for either
 EXPRESSION_ASSETS = BUNDLED_WEBP_PRIMARY_PNG_FALLBACK_DETERMINISTIC
 SPEECH_BUBBLE = YES (text only)
 SPEECH_CATALOG_MIN_LINES_PER_LOCALE = 30 across >=6 categories
@@ -747,8 +747,8 @@ persisted preference semantics.
 ### CTR-OVERLAY-016 — Resident progress presentation is absent; growth systems preserved
 
 Neither resident size MAY render a within-level progress bar, sliver, gauge,
-percentage text, or any always-mounted progression readout on or under the
-pet. The usage progress source, `progressPoints`, derived level, usage
+percentage text, token totals or within-level numeric readouts on or under the
+pet. The sole persistent grade exception is the exact grade, localized operational description and clothing insignia required by CTR-023; it adds no gauge or within-level progress readout. The usage progress source, `progressPoints`, derived level, usage
 ledger, token economy, level-up, keepsakes, and Upgrade Receipts continue to
 function unchanged, and within-level progress remains visible inside the
 Full Journey dialog. A session-state reaction, bubble line, or ceremony
@@ -848,7 +848,7 @@ fixed-ref DSH.
 - Contracts: `CTR-OVERLAY-001`.
 - Method and evidence: V2 `ACC-OVERLAY-001` unchanged (diff, packed file
   list, manifest, exports, patch row, clean DSH/profile status), executed at
-  the V3 implementation commit.
+  the V4 implementation commit.
 - Expected result: one external package ships all required surfaces; DSH
   checkout and production profile are unchanged by source implementation.
 - Failure condition: missing declaration/export, Core/profile source edit, or
@@ -920,7 +920,7 @@ fixed-ref DSH.
 - Contracts: `CTR-OVERLAY-006`.
 - Method and evidence: V2 `ACC-OVERLAY-006` unchanged (seeded snapshot,
   both-direction switch, reload, owned-fact equality, dependency graph,
-  boundary scan), executed at the V3 implementation commit.
+  boundary scan), executed at the V4 implementation commit.
 - Expected result: identical owned Engine facts across switches; DSH overlay
   renders only the product Pack; DSH imports only under `src/dsh/**`.
 - Failure condition: points reset/change, forked Pack/Engine, duplicate
@@ -1071,7 +1071,7 @@ fixed-ref DSH.
   available there; usage-source regression run.
 - Required evidence: DOM inventory report, static scan, journey screenshot,
   and usage/progression regression transcript.
-- Expected result: no resident progress presentation in either size; journey
+- Expected result: no resident gauge, token total or within-level progress readout in either size; the CTR-023 descriptive grade label and insignia remain visible; journey
   progress intact; usage source behavior unchanged.
 - Failure condition: any resident gauge/sliver/percentage, or journey/usage
   regression.
@@ -1234,7 +1234,7 @@ fixed-ref DSH.
 ```text
 MIGRATION = forward-only: the V4 client replaces the V3 client through the normal plugin update path; preferences evolve compatibly (absent size resolves LARGE; absent/unknown character resolves vehicle; all other fields carried).
 COMPATIBILITY = pinned to mayf3/deepseek-harness@f77b5a2fcebc2d9138f6608a60636f2294868d42 and its Harness Web React major (carried from V2); future Harness pins require compatibility review.
-ROLLBACK = dsh plugin --profile web update to the prior ref, or remove + reinstall the prior ref; restart Web profile; repository rollback is revert of the V3 implementation commit.
+ROLLBACK = dsh plugin --profile web update to the prior ref, or remove + reinstall the prior ref; restart Web profile; repository rollback is revert of the V4 implementation commit.
 EMERGENCY_CONTAINMENT = stop/remove the bundle and restart the Web profile; no DSH Core rollback involved.
 DATA_MIGRATION = NONE destructive: the versioned browser-local preference record gains a size field with LARGE-on-absence; Engine storage remains canonical and untouched.
 PRODUCTION_APPLICATION = OUT OF SCOPE for this Spec's rounds; the Goal stops at READY_FOR_PRODUCTION_APPLY and the production profile is applied only by a separate Owner gate.
@@ -1264,7 +1264,7 @@ Character selection updates immediately and persists in the existing tolerant pr
 
 ### CTR-OVERLAY-022 — Declarative exclusive character selection
 
-The secondary selector MUST offer exactly `vehicle` and `companion`, localized and keyboard operable, with selected state exposed. A selection MUST immediately replace the visible pet, persist across reload/session/restart and synchronize via the existing storage event path without write loops. Engine instance, active Pack, progress, level, token totals, keepsakes and receipts MUST remain identical. Character mappings MUST be bundled declarative data consumed by generic presentation infrastructure; Engine source/schema and counts-only source MUST NOT gain character semantics. Exactly one pet subject and one bubble may exist at any time, including switches, errors and reduced motion. Vehicle mode preserves actual operational configuration; companion mode contains only the companion.
+The secondary selector MUST offer exactly `vehicle` and `companion`, localized and keyboard operable, with selected state exposed. A selection MUST immediately replace the visible pet, persist across reload/session/restart and synchronize via the existing storage event path without write loops. Engine instance, active Pack, progress, level, token totals, keepsakes and receipts MUST remain identical. Character mappings MUST be bundled declarative data consumed by generic presentation infrastructure; Engine source/schema and counts-only source MUST NOT gain character semantics. Exactly one resident pet subject MUST exist while the resident is visible, including switches, errors and reduced motion; collapsed and onboarding-suppressed states MUST contain zero resident pet subjects. At most one speech bubble may exist, with zero during quiet or suppressed states. The existing Full Journey dialog is a separately scoped Engine view, not a second resident pet; its preserved scene and focus lifecycle do not authorize a second floating pet. Vehicle mode preserves actual operational configuration; companion mode contains only the companion.
 
 ### CTR-OVERLAY-023 — Branded identity, descriptive grades and wearables
 
