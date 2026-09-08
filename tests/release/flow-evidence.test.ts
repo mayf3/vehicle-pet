@@ -66,7 +66,7 @@ describe('runPlan (read-only)', () => {
     const dirs = await receiptDirsOf(outRoot)
     const receipt = JSON.parse(await readFile(join(outRoot, dirs[0]!, 'receipt.json'), 'utf8'))
     expect(receipt.result).toBe('PLAN_READY')
-    expect(receipt.gitTruth.method).toBe('FETCH_BY_SHA')
+    expect(receipt.gitTruth.method).toBe('REMOTE_BARE_FETCH_BY_SHA')
     expect(receipt.preimage.currentRef).toBe(fixture.refA)
   })
 

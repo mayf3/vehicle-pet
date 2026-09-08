@@ -210,14 +210,21 @@ function parseJsonOrNull(value) {
 
 /**
  * Compare pre/post pet-state captures into preservation verdicts (§13).
+ *
+ * Only targets whose in-page `storage.origin` matches `expectedOrigins` are
+ * trusted: a loose URL match alone could select an unrelated localhost tab
+ * (another dev server, another DSH instance) whose empty pet storage would
+ * compare null==null as a fake PASS. With expectedOrigins known (the
+ * discovered web port) a non-matching capture set is UNAVAILABLE, not PASS.
+ *
  * Position / reduced-motion / size must be byte-equal; the usage ledger may
  * legitimately advance during the acceptance window (natural usage), so it
  * is checked for non-regression, and its byte drift is reported.
- * @param {{pre: {status: string, targets: CapturedTarget[]}, post: {status: string, targets: CapturedTarget[]}}} input
+ * @param {{pre: {status: string, targets: CapturedTarget[]}, post: {status: string, targets: CapturedTarget[]}, expectedOrigins?: string[]}} input
  * @returns {Record<string, {verdict: 'PASS'|'FAIL'|'UNAVAILABLE', detail?: string}>}
  */
 export function comparePetState(input) {
-  const { pre, post } = input
+  const { pre, post, expectedOrigins = [] } = input
   /** @type {Record<string, {verdict: 'PASS'|'FAIL'|'UNAVAILABLE', detail?: string}>} */
   const verdicts = {}
   if (pre.status !== 'CAPTURED' || post.status !== 'CAPTURED') {
@@ -228,8 +235,22 @@ export function comparePetState(input) {
       },
     }
   }
-  const preTarget = pre.targets.find(entry => entry.storage !== undefined)
-  const postTarget = post.targets.find(entry => entry.storage !== undefined)
+  const originAllowed = (/** @type {CapturedTarget} */ target) => {
+    const origin = /** @type {any} */ (target.storage)?.origin
+    return typeof origin === 'string' && (expectedOrigins.length === 0 || expectedOrigins.includes(origin))
+  }
+  const preTarget = pre.targets.find(entry => entry.storage !== undefined && originAllowed(entry))
+  const postTarget = post.targets.find(entry => entry.storage !== undefined && originAllowed(entry))
+  if (preTarget === undefined || postTarget === undefined) {
+    return {
+      STATE_PROBE: {
+        verdict: 'UNAVAILABLE',
+        detail: expectedOrigins.length > 0
+          ? `no captured browser target matches the web origin (${expectedOrigins.join(' or ')}); refusing to compare unrelated localhost tabs`
+          : 'storage values missing on a matched target',
+      },
+    }
+  }
   const preValues = /** @type {{values: Record<string, string|null>}|undefined} */ (preTarget?.storage)
   const postValues = /** @type {{values: Record<string, string|null>}|undefined} */ (postTarget?.storage)
   if (preValues === undefined || postValues === undefined) {
@@ -337,5 +358,15 @@ function idbVerdict(before, after) {
   if (beforeSummary.activePackId !== afterSummary.activePackId) {
     return { verdict: 'FAIL', detail: `activePackId ${JSON.stringify(beforeSummary.activePackId)} → ${JSON.stringify(afterSummary.activePackId)}` }
   }
-  return { verdict: 'PASS', detail: 'pet-engine-v1 summary unchanged' }
+  // Store counts must not shrink (records may legitimately grow with usage).
+  const beforeStores = beforeSummary.stores ?? {}
+  const afterStores = afterSummary.stores ?? {}
+  for (const [store, info] of Object.entries(beforeStores)) {
+    const beforeCount = /** @type {any} */ (info)?.count
+    const afterCount = /** @type {any} */ (afterStores[store])?.count
+    if (typeof beforeCount === 'number' && typeof afterCount === 'number' && afterCount < beforeCount) {
+      return { verdict: 'FAIL', detail: `pet-engine-v1 store ${store} shrank ${beforeCount} → ${afterCount}` }
+    }
+  }
+  return { verdict: 'PASS', detail: 'pet-engine-v1 summary preserved (counts non-regressing)' }
 }
