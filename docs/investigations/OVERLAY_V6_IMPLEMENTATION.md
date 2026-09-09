@@ -1,0 +1,2 @@
+# V6 implementation route
+Base74b8f64 contains accepted V6 (PR33, independent authority ACCEPT c59d50e). REUSE / BRIEF / DURABLE / IMPLEMENTATION, isolated codex/overlay-v6-implementation. Owner latest request authorizes compact vehicle caption and playful combinations. Implement CTR027/028 without changing Engine/usage/assets/grades. Verify focused geometry, gestures/lifecycle, full existing required checks, independent code/visual review, then integrate and show. Controlled actual deployment is a separate operation after readiness.

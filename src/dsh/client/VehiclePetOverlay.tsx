@@ -40,6 +40,7 @@ import {
   expressionStateFromSession, selectExpressionVariant,
   type VehiclePetExpressionVariant,
 } from './expressions'
+import { usePlayfulReaction, ReactionDecoration } from './playful-reactions'
 import {activeSessionsFromList, type ActiveSession} from './active-sessions'
 import {ActiveSessionFooter} from './ActiveSessionFooter'
 import { CharacterVisual, companionHitStyle } from './CharacterVisual'
@@ -471,6 +472,7 @@ function levelIndex(levelId: string): number {
 
 function ResidentPet({
   characterId,
+  menuOpen,
   sessionView,
   surfaceSize,
   onOpenMenu,
@@ -519,7 +521,7 @@ function ResidentPet({
   }, [levelId, snapshot.initialized, speech])
 
   const state = expressionStateFromSession(sessionView)
-  const variant = selectExpressionVariant({
+  const baselineVariant = selectExpressionVariant({
     state,
     terminalStatus: sessionView.terminal?.status ?? null,
     milestoneActive: speech.milestoneActive,
@@ -527,7 +529,11 @@ function ResidentPet({
     idleBucket: speech.idleBucket,
     lastVariantForState: lastVariantRef.current,
   })
-  lastVariantRef.current = variant
+  const playful = usePlayfulReaction({ state, terminalIdentity: sessionView.terminal?.identity ?? null,
+    characterId, menuOpen, dragging: dragHandlers.isDragging,
+    ambientKey: speech.bubble?.source === 'ambient' ? speech.bubble.key : null })
+  const variant = state === 'idle' && playful.reaction ? playful.reaction.definition.variant : baselineVariant
+  lastVariantRef.current = baselineVariant
 
   const stateKey: VehiclePetLocaleKey = sessionView.terminal !== null
     ? `state.${sessionView.terminal.status}`
@@ -537,14 +543,21 @@ function ResidentPet({
     ? visibleHitStyle(snapshot, surfaceSize, levelId)
     : companionHitStyle(variant, surfaceSize)
   const grade = characterLevel(levelId, engineLocale)
+  const alpha = characterId === 'vehicle' ? visibleHitStyle(snapshot, surfaceSize, levelId, false) : null
+  const scale = surfaceSize <= 112 ? .72 : .8
+  const gradeHeight = surfaceSize <= 112 ? 22 : 26
+  const captionTop = alpha && typeof alpha.top === 'number' && typeof alpha.height === 'number'
+    ? Math.min(surfaceSize - gradeHeight, (alpha.top + alpha.height) * scale + 8) : undefined
 
   return (
     <>
-      <span className="vpo-characterArea">
+      <span className="vpo-characterArea"
+        data-gesture={playful.reaction?.definition.id} data-motion={playful.reduced ? 'reduced' : 'allowed'}>
       <span className="vpo-scene vpo-characterScene" aria-hidden="true">
         <CharacterVisual character={CHARACTER_DEFINITIONS[characterId]} variant={variant}
           levelId={levelId} interactionCount={petInteractionCount} />
       </span>
+      {playful.reaction ? <ReactionDecoration kind={playful.reaction.definition.decoration} /> : null}
       <button
         type="button"
         className="vpo-surface vpo-petHit"
@@ -572,6 +585,7 @@ function ResidentPet({
         onClick={event => {
           if (dragHandlers.consumeSuppressedClick()) {suppressDoubleUntil.current=Date.now()+500;return}
           if(event.detail>1) return
+          playful.play()
           onPetClick()
           speech.speakForClick(state)
         }}
@@ -581,13 +595,15 @@ function ResidentPet({
         onPointerCancel={dragHandlers.onPointerCancel}
       />
       </span>
+      <div className={captionTop === undefined ? undefined : 'vpo-captionGroup'} style={captionTop === undefined ? { display: 'contents' } : { top: captionTop }}>
       {grade === null ? null : <span className="vpo-grade" data-vehicle-pet-grade={grade.grade}>
         <span className="vpo-gradeBrand">Pony.ai · {grade.grade}</span>
         <span>{grade.description}</span>
       </span>}
+      <ActiveSessionFooter sessions={activeSessions} locale={engineLocale} />
+      </div>
       {sessionView.live === 'needs-input' ? <span className="vpo-badge" aria-hidden="true" /> : null}
       <VehiclePetBubble bubble={speech.bubble} placement={bubblePlacement} />
-      <ActiveSessionFooter sessions={activeSessions} locale={engineLocale} />
     </>
   )
 }
@@ -604,6 +620,7 @@ function visibleHitStyle(
   snapshot: ReturnType<typeof usePetEngine>['snapshot'],
   surfaceSize: number,
   levelId: string | undefined,
+  includeTolerance = true,
 ): CSSProperties {
   const plan = snapshot.plan
   if (plan === null || levelId === undefined) {
@@ -625,7 +642,7 @@ function visibleHitStyle(
   const bbox = packId === undefined ? undefined : levelVisibleBbox[`${packId}/${levelId}`]
   const boxLeft = (centerX / 100) * surfaceSize - side / 2
   const boxTop = (centerY / 100) * surfaceSize - side / 2
-  const tolerance = Math.min(OVERLAY_GEOMETRY.hitboxTolerancePx, side / 8)
+  const tolerance = includeTolerance ? Math.min(OVERLAY_GEOMETRY.hitboxTolerancePx, side / 8) : 0
   const left = bbox === undefined ? boxLeft : boxLeft + (side * bbox.leftPct) / 100
   const top = bbox === undefined ? boxTop : boxTop + (side * bbox.topPct) / 100
   const width = bbox === undefined ? side : (side * bbox.widthPct) / 100

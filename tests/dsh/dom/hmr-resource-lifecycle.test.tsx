@@ -278,8 +278,8 @@ describe('client HMR generation and complete resource disposal inventory', () =>
       // React's two host listeners, the dialog's lifecycle-owned keydown and
       // focusin containment listeners, the speech input-recency pair
       // (payload-ignored keydown+pointerdown, V3 CTR-OVERLAY-019(3)), and the
-      // open menu's outside-press pointerdown — all disposed with the mount.
-      keyboardDocumentListeners: 8,
+      // open menu's outside-press pointerdown and V6 visibilitychange — all disposed with the mount.
+      keyboardDocumentListeners: 9,
       pointerCaptureListeners: 4,
       // Root viewport + open Panel measurement; both must dispose at HMR.
       observers: 2,
