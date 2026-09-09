@@ -602,9 +602,9 @@ test('SIZE_MODE_SMALL. stored size small renders the 112px resident with the com
   expect(box.width).toBe(112)
   expect(box.height).toBe(112)
   expect(box.x).toBeGreaterThan(VIEWPORT.width / 2)
-  // SMALL default inset 176px + 16px margin.
+  // SMALL preserves the whale footprint too: 392px + 16px margin.
   const bottomGap = VIEWPORT.height - (box.y + box.height)
-  expect(Math.abs(bottomGap - (176 + 16))).toBeLessThanOrEqual(2)
+  expect(Math.abs(bottomGap - (392 + 16))).toBeLessThanOrEqual(2)
   await page.screenshot({ path: `${ARTIFACTS}/visible-small.png` })
 })
 
@@ -2019,4 +2019,64 @@ test('32. no React invalid-hook-call or second-runtime console errors', async ()
 
 test.afterAll(async () => {
   await trackedContext?.close().catch(() => {})
+})
+
+test('CHARACTER_V4_PERSISTENCE_AND_GEOMETRY. selection keeps Engine records and level, survives reload, and labels fit both sizes', async ({ page }) => {
+  await openOverlay(page)
+  await waitForIdleBaseline(page)
+  const readPetRecords = () => page.evaluate(async () => {
+    const db = await new Promise<IDBDatabase>((resolve,reject)=>{
+      const request=indexedDB.open('pet-engine-v1',1)
+      request.onsuccess=()=>resolve(request.result)
+      request.onerror=()=>reject(request.error)
+    })
+    try {
+      const result: Record<string, unknown>={}
+      for(const store of ['preferences','journals','keepsakes']) {
+        result[store]=await new Promise((resolve,reject)=>{
+          const tx=db.transaction(store,'readonly')
+          const req=tx.objectStore(store).getAll()
+          req.onsuccess=()=>resolve(req.result)
+          req.onerror=()=>reject(req.error)
+        })
+      }
+      return result
+    } finally {db.close()}
+  })
+  const records=await readPetRecords()
+  const level=await page.locator(PET).getAttribute('data-vehicle-pet-level')
+  await openMenu(page)
+  await expect(page.locator('[data-vehicle-pet-character-option]')).toHaveCount(2)
+  await page.locator('[data-vehicle-pet-character-option="companion"]').click()
+  await closeMenu(page)
+  await expect(page.locator(PET)).toHaveAttribute('data-vehicle-pet-character','companion')
+  await expect(page.locator(PET)).toHaveAttribute('data-vehicle-pet-level',level!)
+  await expect(page.locator('[data-companion-pose]')).toHaveCount(1)
+  await expect(page.locator('.vpo-scene .vp-scene')).toHaveCount(0)
+  expect(await readPetRecords()).toEqual(records)
+  for(const size of ['large','small'] as const) {
+    await openMenu(page)
+    await page.locator(`[data-vehicle-pet-size-option="${size}"]`).click()
+    await closeMenu(page)
+    await page.waitForTimeout(300)
+    const label=page.locator('[data-vehicle-pet-grade]')
+    expect((await label.textContent())!.length).toBeGreaterThan(12)
+    const shell=await shellBox(page), box=await label.boundingBox()
+    expect(box).not.toBeNull()
+    expect(box!.x).toBeGreaterThanOrEqual(shell.x)
+    expect(box!.y+box!.height).toBeLessThanOrEqual(shell.y+shell.height+.5)
+    const composer=await page.locator('textarea:enabled').last().boundingBox()
+    if(composer!==null) expect(overlapArea(box!,composer)).toBe(0)
+    expect(await label.evaluate(e=>e.scrollHeight<=e.clientHeight+1)).toBe(true)
+    await page.screenshot({path:`${ARTIFACTS}/character-v4-${size}.png`})
+  }
+  await page.reload()
+  await dismissStartupDialogs(page)
+  await expect(page.locator(PET)).toHaveAttribute('data-vehicle-pet-character','companion')
+  expect(await readPetRecords()).toEqual(records)
+  await openMenu(page)
+  await page.locator('[data-vehicle-pet-character-option="vehicle"]').click()
+  await closeMenu(page)
+  await expect(page.locator('[data-companion-pose]')).toHaveCount(0)
+  expect(await readPetRecords()).toEqual(records)
 })

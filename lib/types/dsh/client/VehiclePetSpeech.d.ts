@@ -11,7 +11,8 @@
  */
 import { type ReactElement } from 'react';
 import type { VehiclePetSessionView } from './types';
-import type { SpeechCategory } from './speech-catalog';
+import { type SpeechCategory } from './speech-catalog';
+import type { CharacterId } from './types';
 export interface VehiclePetSpeechController {
     /** Current visible line, or null. Replacements reuse the same bubble. */
     readonly bubble: {
@@ -28,6 +29,7 @@ export interface VehiclePetSpeechController {
     readonly milestoneActive: boolean;
 }
 interface SchedulerOptions {
+    readonly characterId?: CharacterId;
     readonly sessionView: VehiclePetSessionView;
     readonly locale: string | undefined;
     readonly enabled: boolean;

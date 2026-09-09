@@ -21,10 +21,13 @@ export interface VehiclePetSessionView {
 }
 
 /** The two resident sizes (V3 CTR-OVERLAY-020); absent choice resolves LARGE. */
+export type CharacterId = 'vehicle' | 'companion'
+
 export type VehiclePetSize = 'small' | 'large'
 
 /** Versioned browser-local overlay preference record (V3 CTR-OVERLAY-010). */
 export interface VehiclePetOverlayPreferences {
+  readonly characterId?: CharacterId
   readonly schemaVersion: 1
   readonly position: { readonly xRatio: number; readonly yRatio: number }
   /** False until the first pointer drag or keyboard move. */
@@ -53,8 +56,8 @@ export const OVERLAY_GEOMETRY = {
   collapsedLauncherSizePx: 36,
   secondaryMenuWidthPx: 216,
   viewportMarginPx: 16,
-  /** Deterministic composer-safe default for SMALL; customized ratios do not use it. */
-  smallDefaultBottomSafeInsetPx: 176,
+  /** Deterministic composer/whale-safe default for SMALL; customized ratios do not use it. */
+  smallDefaultBottomSafeInsetPx: 392,
   /**
    * LARGE default clears the recorded coexistence footprint of a co-installed
    * deepseek-pet overlay in its default bottom-right region (census-measured

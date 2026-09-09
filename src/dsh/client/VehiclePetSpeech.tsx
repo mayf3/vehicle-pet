@@ -20,7 +20,8 @@ import {
   SPEECH_TYPING_SUPPRESSION_MS, SPEECH_WORKING_ROTATION_MS,
   type SpeechCadenceState, type SpeechTriggerSource,
 } from './speech-rules'
-import type { SpeechCategory } from './speech-catalog'
+import { characterSpeechCatalog, type SpeechCategory } from './speech-catalog'
+import type { CharacterId } from './types'
 
 export interface VehiclePetSpeechController {
   /** Current visible line, or null. Replacements reuse the same bubble. */
@@ -36,6 +37,7 @@ export interface VehiclePetSpeechController {
 }
 
 interface SchedulerOptions {
+  readonly characterId?: CharacterId
   readonly sessionView: VehiclePetSessionView
   readonly locale: string | undefined
   readonly enabled: boolean
@@ -58,6 +60,8 @@ interface SchedulerRefs {
 
 export function useVehiclePetSpeech(options: SchedulerOptions): VehiclePetSpeechController {
   const { sessionView, locale, enabled } = options
+  const presentationRef = useRef({ characterId: options.characterId ?? 'vehicle', locale })
+  presentationRef.current = { characterId: options.characterId ?? 'vehicle', locale }
   const startRef = useRef<SchedulerRefs | null>(null)
   if (startRef.current === null) {
     startRef.current = {
@@ -103,10 +107,10 @@ export function useVehiclePetSpeech(options: SchedulerOptions): VehiclePetSpeech
   }, [refs])
 
   const showLine = useCallback((category: SpeechCategory): void => {
-    const selection = selectSpeechLine(category, locale, {
+    const selection = selectSpeechLine(category, presentationRef.current.locale, {
       lastIndexInCategory: refs.lastIndexInCategory.get(category) ?? null,
       rotationCounter: refs.rotationCounter,
-    })
+    }, characterSpeechCatalog(presentationRef.current.characterId, presentationRef.current.locale))
     if (selection.index < 0) return
     refs.lastIndexInCategory.set(category, selection.index)
     refs.rotationCounter = selection.nextRotationCounter
@@ -119,7 +123,7 @@ export function useVehiclePetSpeech(options: SchedulerOptions): VehiclePetSpeech
       setBubble(null)
       dismissTimerRef.current = undefined
     }, SPEECH_AUTO_DISMISS_MS)
-  }, [locale, refs])
+  }, [refs])
 
   const trySpeak = useCallback((source: SpeechTriggerSource): boolean => {
     if (!enabled) return false

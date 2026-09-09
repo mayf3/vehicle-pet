@@ -9,6 +9,20 @@
 const STYLE_ID = 'vehicle-pet/overlay-styles'
 
 const css = `
+.vpo-characterArea{position:absolute;inset:0;transform:scale(.8);transform-origin:50% 0;pointer-events:none}
+[data-vehicle-pet-size="small"] .vpo-characterArea{transform:scale(.72)}
+.vpo-pose{position:absolute;left:20.37%;top:0;width:59.26%;height:100%;pointer-events:none}
+.vpo-pose>img:not(.vpo-insignia){width:100%;height:100%;object-fit:contain}
+.vpo-pose>.vpo-insignia{position:absolute;width:15%;height:auto;pointer-events:none}
+.vpo-grade{position:absolute;bottom:0;left:0;width:100%;max-height:20%;display:flex;flex-direction:column;align-items:center;text-align:center;color:#244853;font:11px/13px system-ui,sans-serif;pointer-events:none;text-shadow:0 1px 2px #fff,0 -1px 2px #fff}
+.vpo-gradeBrand{font-weight:650;color:#245369}
+[data-vehicle-pet-size="small"] .vpo-grade{font-size:10px;line-height:11px;max-height:30%}
+.vpo-shell[data-reduced-motion="false"] .vpo-pose{animation:vpo-companion-breathe 4s ease-in-out infinite}
+.vpo-shell[data-live="running"][data-reduced-motion="false"] .vpo-pose{animation:vpo-drive-rock 1.8s ease-in-out infinite}
+.vpo-shell[data-reduced-motion="true"],.vpo-shell[data-reduced-motion="true"] *{animation:none!important;transition:none!important}
+@keyframes vpo-companion-breathe{0%,100%{transform:translateY(0)}50%{transform:translateY(-1px)}}
+.vpo-assetFallback{position:absolute;inset:30% 10%;font:14px system-ui;color:#244853}
+
 .vpo-root{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:1;font-family:var(--font-sans,ui-sans-serif,system-ui,-apple-system,sans-serif)}
 .vpo-shell{position:absolute;pointer-events:none;transition:left 200ms cubic-bezier(.22,1,.36,1),top 200ms cubic-bezier(.22,1,.36,1),width 200ms cubic-bezier(.22,1,.36,1),height 200ms cubic-bezier(.22,1,.36,1);contain:layout style}
 .vpo-shell[data-dragging="true"]{transition:none;z-index:2}
@@ -49,8 +63,7 @@ const css = `
 .vpo-exprImg{display:block;width:100%;height:100%}
 /* Speech bubble (V3 CTR-OVERLAY-017): single polite surface above (or below)
    the pet; auto-dismissed by the scheduler; never focusable. */
-// F2: the anchor is clamped so even a max-width bubble stays inside the
-// viewport when the shell parks at a margin (CTR-OVERLAY-017).
+/* The anchor keeps a max-width bubble inside the viewport at the margin. */
 .vpo-bubble{position:absolute;z-index:6;left:clamp(146px,50%,calc(100% - 146px));transform:translateX(-50%);width:max-content;max-width:min(260px,calc(100vw - 32px));box-sizing:border-box;padding:9px 13px;border-radius:14px;background:color-mix(in srgb,var(--color-surface,#fff) 96%,transparent);border:1px solid color-mix(in srgb,var(--color-border,#a8bdcc) 72%,transparent);box-shadow:0 10px 28px rgba(10,37,57,.2);font-size:12px;line-height:1.45;color:var(--color-text,#17324d);pointer-events:none;text-align:center}
 .vpo-bubble[data-placement="above"]{bottom:calc(100% + 8px)}
 .vpo-bubble[data-placement="below"]{top:calc(100% + 8px)}
