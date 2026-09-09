@@ -31,7 +31,7 @@ const SHELL = '.vpo-shell'
 const ROOT = '.vpo-root'
 const LAUNCHER = '[data-vehicle-pet-launcher="true"]'
 const MENU = '[data-vehicle-pet-menu="true"]'
-const MENU_TRIGGER = '[data-vehicle-pet-menu-trigger="true"]'
+const MENU_TRIGGER = PET
 const DIALOG = '[data-vehicle-pet-dialog="true"]'
 const PANEL = '[data-vehicle-pet-panel="true"]' // V2 legacy surface: must never exist again.
 const PILL = '[data-pet-host-feedback]'
@@ -39,7 +39,7 @@ const BUBBLE = '[data-vehicle-pet-bubble="true"]'
 const PREF_KEY = 'vehicle-pet/overlay-preferences/v1'
 const VIEWPORT = { width: 1440, height: 900 } as const
 /** CTR-OVERLAY-017: no speech within 30 s of surface mount; +1s slack. */
-const SPEECH_LOAD_QUIET_WAIT_MS = 31_000
+const SPEECH_LOAD_QUIET_WAIT_MS = 16_000
 
 const seenRequests: Request[] = []
 const consoleErrors: string[] = []
@@ -281,8 +281,8 @@ async function sendPrompt(page: Page, text: string): Promise<void> {
  */
 async function openMenu(page: Page): Promise<void> {
   const trigger = page.locator(MENU_TRIGGER)
-  await trigger.focus()
-  await trigger.click()
+  await page.locator(PET).focus()
+  await page.locator(PET).dblclick()
   await page.locator(MENU).waitFor({ state: 'visible' })
 }
 
@@ -555,7 +555,7 @@ test('SIZE_MODE_LARGE. default load renders the 216px LARGE resident with the co
   // Default (never customized) anchor is bottom-right minus the LARGE
   // coexistence-safe inset: 392px + the 16px viewport margin.
   const bottomGap = VIEWPORT.height - (box.y + box.height)
-  expect(Math.abs(bottomGap - (392 + 16))).toBeLessThanOrEqual(2)
+  expect(Math.abs(bottomGap - (392 + 32 + 16))).toBeLessThanOrEqual(2)
   const rightGap = VIEWPORT.width - (box.x + box.width)
   expect(rightGap).toBeGreaterThanOrEqual(14)
   expect(rightGap).toBeLessThanOrEqual(20)
@@ -604,7 +604,7 @@ test('SIZE_MODE_SMALL. stored size small renders the 112px resident with the com
   expect(box.x).toBeGreaterThan(VIEWPORT.width / 2)
   // SMALL preserves the whale footprint too: 392px + 16px margin.
   const bottomGap = VIEWPORT.height - (box.y + box.height)
-  expect(Math.abs(bottomGap - (392 + 16))).toBeLessThanOrEqual(2)
+  expect(Math.abs(bottomGap - (392 + 32 + 16))).toBeLessThanOrEqual(2)
   await page.screenshot({ path: `${ARTIFACTS}/visible-small.png` })
 })
 
@@ -728,17 +728,9 @@ test('SECONDARY_SETTINGS_ACCESSIBLE_TEST. the trigger opens a 216px menu with ex
   await page.locator(PET).click()
   await expect(page.locator(MENU)).toHaveCount(0)
 
-  // Keyboard-equivalent reveal path: the trigger is reachable by Tab from the
-  // pet hit surface, and its activation opens the menu.
   await page.locator(PET).focus()
-  await page.keyboard.press('Tab')
-  const trigger = page.locator(MENU_TRIGGER)
-  expect(await trigger.evaluate(node => document.activeElement === node)).toBe(true)
-  await expect(trigger).toHaveAttribute('aria-expanded', 'false')
-  const triggerLabel = await trigger.getAttribute('aria-label')
-  expect(triggerLabel).toMatch(/打开设置|Open settings/)
-  await trigger.click()
-  await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+  await page.keyboard.press('Shift+Enter')
+  await expect(page.locator('[data-vehicle-pet-menu-trigger]')).toHaveCount(0)
   const menu = page.locator(MENU)
   await menu.waitFor()
   await expect(menu).toHaveAttribute('role', 'group')
@@ -746,7 +738,6 @@ test('SECONDARY_SETTINGS_ACCESSIBLE_TEST. the trigger opens a 216px menu with ex
   // Exactly the four V3 groups; no V2 panel-era content survives.
   for (const selector of [
     '[data-vehicle-pet-size-control]',
-    '[data-vehicle-pet-reduced-motion]',
     '[data-vehicle-pet-open-journey]',
     '[data-vehicle-pet-collapse]',
   ]) {
@@ -755,10 +746,7 @@ test('SECONDARY_SETTINGS_ACCESSIBLE_TEST. the trigger opens a 216px menu with ex
   expect(await menu.locator('[data-vehicle-pet-size-option]').count()).toBe(2)
   expect(await menu.locator('[data-vehicle-pet-size-option="small"]').count()).toBe(1)
   expect(await menu.locator('[data-vehicle-pet-size-option="large"]').count()).toBe(1)
-  expect(await menu.locator('[data-vehicle-pet-reduced-motion-option]').count()).toBe(3)
-  expect(await menu.locator('[data-vehicle-pet-reduced-motion-option="system"]').count()).toBe(1)
-  expect(await menu.locator('[data-vehicle-pet-reduced-motion-option="on"]').count()).toBe(1)
-  expect(await menu.locator('[data-vehicle-pet-reduced-motion-option="off"]').count()).toBe(1)
+  expect(await menu.locator('[data-vehicle-pet-reduced-motion-option]').count()).toBe(0)
 
   // Narrow fixed width (≤224px contract bound; exactly secondaryMenuWidthPx).
   const box = await menu.boundingBox()
@@ -793,8 +781,8 @@ test('SECONDARY_SETTINGS_ACCESSIBLE_TEST. the trigger opens a 216px menu with ex
   await expect.poll(() => page.locator(MENU).count()).toBe(0)
 
   // Escape closes too (focus on the trigger after mouse-open).
-  await trigger.focus()
-  await trigger.click()
+  await page.locator(PET).focus()
+  await page.locator(PET).dblclick()
   await menu.waitFor()
   await page.keyboard.press('Escape')
   await expect.poll(() => page.locator(MENU).count()).toBe(0)
@@ -1036,7 +1024,7 @@ test('MENU_OPEN_OPEN_CLOSE_WITHOUT_INPUT_PRESERVES_ANCHOR_TEST + MENU_OPEN_MOVEM
   await expect.poll(async () => second.evaluate(() => localStorage.getItem('vehicle-pet/overlay-preferences/v1')))
     .toBe(await page.evaluate(() => localStorage.getItem('vehicle-pet/overlay-preferences/v1')))
   await second.locator(MENU_TRIGGER).focus()
-  await second.locator(MENU_TRIGGER).click()
+  await second.locator(MENU_TRIGGER).dblclick()
   await second.locator(MENU).waitFor()
   const secondBefore = await second.locator(SHELL).boundingBox()
   await second.locator(PET).focus()
@@ -1309,7 +1297,7 @@ test('REDUCED_MOTION_STATIC_PARITY_TEST. reduced motion preserves resident subje
   const subject = page.locator('.vpo-scene [data-pet-subject="true"]')
   const before = await subject.boundingBox()
   await openMenu(page)
-  await page.locator('[data-vehicle-pet-reduced-motion-option="on"]').click()
+  await setLegacyMotionPreference(page, false)
   await closeMenu(page)
   await expect(scene).toHaveAttribute('data-reduced-motion', 'true')
   // The shell's 200ms position transition is independent of the plugin
@@ -1385,7 +1373,7 @@ test('HARNESS_LOCALE_LIVE_SYNC_TEST. zh-CN → en → zh-CN updates menu copy, p
     await ensureMenu()
   }
   const assertCopy = async (english: boolean) => {
-    await expect(page.locator(MENU_TRIGGER)).toHaveAttribute('aria-label', english ? 'Open settings' : '打开设置')
+    await expect(page.locator(PET)).toHaveAttribute('aria-description', /Shift\+Enter/)
     await expect(page.locator(MENU)).toHaveAttribute('aria-label', english ? 'Growth companion settings' : '成长伙伴设置')
     await expect(page.locator('[data-vehicle-pet-size-control] .vpo-menuLabel')).toHaveText(english ? 'Size' : '大小')
     await expect(page.locator('[data-vehicle-pet-open-journey]')).toHaveText(english ? 'Full journey' : '查看完整旅程')
@@ -1519,7 +1507,7 @@ test('FULL_JOURNEY_LIGHT_THEME_CONTRAST_TEST + FULL_JOURNEY_DARK_THEME_CONTRAST_
   }
   const setReduced = async (reduced: boolean) => {
     await ensureMenu()
-    await page.locator(`[data-vehicle-pet-reduced-motion-option="${reduced ? 'on' : 'off'}"]`).click()
+    await setLegacyMotionPreference(page, reduced)
   }
   const sampleContrast = async (): Promise<{ min: number; samples: number }> => {
     await ensureMenu()
@@ -1637,9 +1625,9 @@ test('COMPACT_ALL_LEVEL_PIXEL_MATRIX_TEST + COMPACT_MILESTONE_SUBJECT_OVERLAP_TE
   }
   const setReduced = async (enabled: boolean) => {
     await openMenu(page)
-    await page.locator(`[data-vehicle-pet-reduced-motion-option="${enabled ? 'on' : 'off'}"]`).click()
+    await setLegacyMotionPreference(page, enabled)
     await closeMenu(page)
-    await expect(page.locator('.vpo-scene .vp-scene')).toHaveAttribute('data-reduced-motion', enabled ? 'true' : 'false')
+    await expect(page.locator('.vpo-scene .vp-scene')).toHaveAttribute('data-reduced-motion', 'true')
   }
   const runLevels = async (packId: string, levels: readonly { levelId: string; threshold: number }[]) => {
     for (const level of levels) {
@@ -2108,4 +2096,87 @@ test('CHARACTER_V4_TERMINAL_SINGLE_FEEDBACK. quiet-period terminal uses one read
   await page.screenshot({path:`${ARTIFACTS}/character-v4-terminal-single-feedback.png`})
   await expect(page.locator(BUBBLE)).toHaveCount(0,{timeout:7000})
   await expect(page.locator(PILL)).toHaveCount(0)
+})
+
+async function setLegacyMotionPreference(page:Page, reducedMotion:boolean) {
+  await page.emulateMedia({reducedMotion:reducedMotion?'reduce':'no-preference'})
+  await page.evaluate(({key,reducedMotion})=>{
+    const next=JSON.stringify({...JSON.parse(localStorage.getItem(key)??'{}'),reducedMotion})
+    localStorage.setItem(key,next)
+    window.dispatchEvent(new StorageEvent('storage',{key,newValue:next}))
+  },{key:PREF_KEY,reducedMotion})
+  await expect(page.locator('.vpo-shell')).toHaveAttribute('data-reduced-motion','true')
+}
+
+test('OVERLAY_V5_FIVE_POINT_ACCEPTANCE. transparent static vehicle, double-click settings, recurring speech and active footer', async ({page}) => {
+  await openOverlay(page)
+  await waitForIdleBaseline(page)
+  await expect(page.locator('[data-vehicle-pet-menu-trigger]')).toHaveCount(0)
+  const scene=page.locator('.vpo-scene .vp-scene')
+  expect(await scene.evaluate(node=>getComputedStyle(node).backgroundImage)).toBe('none')
+  expect(await scene.evaluate(node=>getComputedStyle(node).boxShadow)).toBe('none')
+  expect(await scene.evaluate(node=>getComputedStyle(node).backgroundColor)).toBe('rgba(0, 0, 0, 0)')
+  await setLegacyMotionPreference(page,false)
+  expect(await page.locator('.vpo-shell').evaluate(node=>node.getAnimations({subtree:true}).length)).toBe(0)
+  const footer=page.locator('[data-vehicle-pet-active-sessions]')
+  await expect(footer).toContainText(/暂无活跃会话|No active sessions/)
+  await page.screenshot({path:`${ARTIFACTS}/v5-vehicle-transparent.png`})
+  await page.locator(PET).dblclick()
+  await expect(page.locator(MENU)).toBeVisible()
+  await expect(page.locator('[data-vehicle-pet-reduced-motion-option]')).toHaveCount(0)
+  await page.screenshot({path:`${ARTIFACTS}/v5-doubleclick-menu.png`})
+  await page.locator('[data-vehicle-pet-character-option="companion"]').click()
+  await page.keyboard.press('Escape')
+  await expect(page.locator(PET)).toBeFocused()
+  await expect(page.locator(BUBBLE)).toBeVisible({timeout:45000})
+  const first=await page.locator(BUBBLE).textContent()
+  await page.screenshot({path:`${ARTIFACTS}/v5-companion-speech.png`})
+  await expect(page.locator(BUBBLE)).toHaveCount(0,{timeout:7000})
+  await expect(page.locator(BUBBLE)).toBeVisible({timeout:45000})
+  expect(await page.locator(BUBBLE).textContent()).not.toBe(first)
+  await fetch('http://127.0.0.1:8902/reset',{method:'POST'})
+  await sendPrompt(page,'v5-active-session-footer')
+  await expect(page.locator(PET)).toHaveAttribute('data-live','running')
+  await expect(footer).toHaveAttribute('data-vehicle-pet-active-sessions','1')
+  await expect(footer).toContainText(/进行中|Running/)
+  const box=(await footer.boundingBox())!
+  const composer=(await page.locator('textarea:enabled').last().boundingBox())!
+  expect(overlapArea(box,composer)).toBe(0)
+  await page.screenshot({path:`${ARTIFACTS}/v5-active-session.png`})
+  await expect(footer).toHaveAttribute('data-vehicle-pet-active-sessions','0',{timeout:30000})
+  await page.setViewportSize({width:390,height:844})
+  const mobile=(await footer.boundingBox())!
+  expect(mobile.x).toBeGreaterThanOrEqual(0)
+  expect(mobile.x+mobile.width).toBeLessThanOrEqual(390)
+  expect(mobile.y+mobile.height).toBeLessThanOrEqual(844)
+  await page.screenshot({path:`${ARTIFACTS}/v5-mobile-footer.png`})
+})
+
+test('OVERLAY_V5_BACKGROUND_SESSION. pending background metadata remains visible without rebinding the pet', async ({page}) => {
+  await openOverlay(page)
+  await waitForIdleBaseline(page)
+  for(let attempt=0;attempt<3;attempt++) {
+    await sendPrompt(page,`v5-background-permission-${attempt}`)
+    await expect.poll(async()=>await page.locator(PET).getAttribute('data-live')==='needs-input' || await page.locator(PET).getAttribute('data-terminal')!==null,{timeout:45000}).toBe(true)
+    if(await page.locator(PET).getAttribute('data-live')==='needs-input') break
+    await waitForIdleBaseline(page)
+  }
+  await page.locator('[data-question-key]').waitFor({timeout:15000})
+  const footer=page.locator('[data-vehicle-pet-active-sessions]')
+  await expect(footer).toHaveAttribute('data-vehicle-pet-active-sessions','1')
+  await expect(footer).toContainText(/等待处理|Needs input/)
+  const backgroundId=await page.locator(ROOT).getAttribute('data-session-list-current')
+  const backgroundTitle=await footer.locator('span').last().textContent()
+  await page.getByRole('button',{name:/New Session|新建会话|New chat|新会话/i}).first().click()
+  await sendPrompt(page,'v5-current-separate-session')
+  await expect(page.locator(PET)).toBeVisible()
+  await expect(page.locator(ROOT)).not.toHaveAttribute('data-session-list-current',backgroundId!)
+  await expect(page.locator(PET)).toHaveAttribute('data-terminal','failed',{timeout:45000})
+  await expect(footer).toHaveAttribute('data-vehicle-pet-active-sessions','1')
+  await expect(footer).toContainText(backgroundTitle!)
+  await expect(footer).toContainText(/等待处理|Needs input/)
+  expect(await footer.textContent()).not.toContain(backgroundId!)
+  const currentId=await page.locator(ROOT).getAttribute('data-session-list-current')
+  await expect(page.locator(ROOT)).toHaveAttribute('data-adapter-session',currentId!)
+  await page.screenshot({path:`${ARTIFACTS}/v5-background-pending.png`})
 })

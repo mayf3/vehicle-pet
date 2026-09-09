@@ -19,6 +19,7 @@ import { usePetEngine } from '../../react';
 import type { VehiclePetBindingInfo } from './session-state-adapter';
 import type { UsageSessionsSource } from './usage-progress-source';
 import { type VehiclePetOverlayPreferences, type VehiclePetSessionView } from './types';
+import { type ActiveSession } from './active-sessions';
 /** The injected hooks share the renderer binds from the `hooks` compartment. */
 export interface VehiclePetInjected {
     hooks: {
@@ -37,6 +38,7 @@ export interface VehiclePetInjected {
 export type VehiclePetOverlayProps = PropsRuntime<'shell.overlay'> & InjectFace<VehiclePetInjected> & PropsLocale<'vehicle-pet'>;
 /** Overlay chrome shared with the menu/dialog: translate + pref commit. */
 interface OverlayChrome {
+    activeSessions?: readonly ActiveSession[];
     t: PropsLocale<'vehicle-pet'>['t'];
     commitPreferences: (update: (current: VehiclePetOverlayPreferences) => VehiclePetOverlayPreferences) => void;
     engineLocale: Locale;

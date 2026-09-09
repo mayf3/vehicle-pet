@@ -15,6 +15,8 @@ const css = `
 .vpo-pose>img:not(.vpo-insignia){width:100%;height:100%;object-fit:contain}
 .vpo-pose>.vpo-insignia{position:absolute;width:15%;height:auto;pointer-events:none}
 .vpo-grade{position:absolute;bottom:0;left:0;width:100%;max-height:20%;display:flex;flex-direction:column;align-items:center;text-align:center;color:#244853;font:11px/13px system-ui,sans-serif;pointer-events:none;text-shadow:0 1px 2px #fff,0 -1px 2px #fff}
+.vpo-activeSessions{position:absolute;top:calc(100% + 4px);left:0;width:100%;height:28px;display:flex;flex-direction:column;align-items:center;pointer-events:none;color:#385767;font:10px/13px system-ui;text-align:center;text-shadow:0 1px 2px white}
+.vpo-activeSessions>span{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .vpo-gradeBrand{font-weight:650;color:#245369}
 [data-vehicle-pet-size="small"] .vpo-grade{font-size:10px;line-height:11px;max-height:30%}
 .vpo-shell[data-reduced-motion="false"] .vpo-pose{animation:vpo-companion-breathe 4s ease-in-out infinite}
@@ -32,7 +34,7 @@ const css = `
    sprite canvas. The full-canvas scene below it is pointer-inert. */
 .vpo-petHit{position:absolute;pointer-events:auto;border-radius:14px;cursor:grab;touch-action:none}
 .vpo-petHit:active{cursor:grabbing}
-.vpo-petHit:focus-visible,.vpo-launcher:focus-visible,.vpo-menu :focus-visible,.vpo-dialog :focus-visible,.vpo-toolsTrigger:focus-visible{outline:2px solid var(--color-accent,#2f80ed);outline-offset:2px}
+.vpo-petHit:focus-visible,.vpo-launcher:focus-visible,.vpo-menu :focus-visible,.vpo-dialog :focus-visible{outline:2px solid var(--color-accent,#2f80ed);outline-offset:2px}
 .vpo-petHit[data-live="running"]{box-shadow:0 0 0 3px color-mix(in srgb,var(--color-accent,#2f80ed) 45%,transparent);animation:vpo-working-pulse 1.6s ease-in-out infinite}
 .vpo-petHit[data-live="needs-input"]{box-shadow:0 0 0 3px color-mix(in srgb,#e6a23c 60%,transparent);animation:vpo-waiting-wobble 1.1s ease-in-out infinite}
 .vpo-petHit[data-live="terminal"]{box-shadow:0 0 0 3px color-mix(in srgb,#67c23a 55%,transparent)}
@@ -40,7 +42,7 @@ const css = `
 .vpo-petHit[data-live="terminal"][data-terminal="cancelled"]{box-shadow:0 0 0 3px color-mix(in srgb,#909399 55%,transparent)}
 .vpo-scene{position:absolute;inset:0;width:100%;height:100%;aspect-ratio:auto;border-radius:16px;overflow:hidden;pointer-events:none}
 .vpo-scene .vp-scene{aspect-ratio:auto;width:100%;height:100%}
-.vpo-scene .vp-scene[data-presentation-mode="compact-overlay"]{background:radial-gradient(circle at 45% 38%,color-mix(in srgb,var(--color-surface,#fff) 94%,#dcecff) 0%,color-mix(in srgb,var(--color-accent,#2f80ed) 12%,var(--color-surface,#fff)) 100%)}
+.vpo-scene .vp-scene[data-presentation-mode="compact-overlay"]{background:transparent;box-shadow:none}
 .vpo-scene .vp-scene[data-presentation-mode="compact-overlay"] .vp-subject-btn{animation:none!important}
 /* LARGE presence boost: the variable is computed by the overlay (capped to
    the shell) and scales the subject button together with its expression
@@ -69,19 +71,16 @@ const css = `
 /* The shared speech surface wins while active; Engine feedback still expires normally. */
 .vpo-shell:has(.vpo-bubble) .vpo-feedbackWrap{visibility:hidden}
 .vpo-feedbackWrap[data-placement="above"]{bottom:calc(100% + 8px)}
-.vpo-feedbackWrap[data-placement="below"]{top:calc(100% + 8px)}
+.vpo-feedbackWrap[data-placement="below"]{top:calc(100% + 40px)}
 .vpo-feedbackWrap>.vp-greeting,.vpo-feedbackWrap>.vp-host-feedback{box-sizing:border-box;font-size:12px;line-height:1.4;pointer-events:auto;overflow-wrap:anywhere}
 .vpo-bubble[data-placement="above"]{bottom:calc(100% + 8px)}
-.vpo-bubble[data-placement="below"]{top:calc(100% + 8px)}
+.vpo-bubble[data-placement="below"]{top:calc(100% + 40px)}
 /* Secondary settings affordance (V3 CTR-OVERLAY-005): the trigger row is
    revealed by hover/focus only — low-distraction by default — and the menu
    itself is a narrow non-modal group. */
-.vpo-tools{position:absolute;z-index:7;left:50%;transform:translateX(-50%);top:calc(100% + 4px);opacity:0;pointer-events:none;transition:opacity .18s ease}
-.vpo-shell:hover .vpo-tools,.vpo-shell:focus-within .vpo-tools,.vpo-tools.vpo-tools-open{opacity:1;pointer-events:auto}
-.vpo-toolsTrigger{display:flex;align-items:center;justify-content:center;min-width:30px;height:26px;padding:0 9px;border-radius:999px;font-size:14px;line-height:1}
 .vpo-menu{position:absolute;z-index:8;box-sizing:border-box;display:grid;gap:6px;padding:8px 12px;border-radius:14px;background:color-mix(in srgb,var(--color-surface,#fff) 96%,transparent);border:1px solid color-mix(in srgb,var(--color-border,#a8bdcc) 72%,transparent);box-shadow:0 14px 40px rgba(10,37,57,.22);font-size:12px;line-height:1.4;color:var(--color-text,#17324d);pointer-events:auto}
 .vpo-menu[data-horizontal="left"]{left:0}.vpo-menu[data-horizontal="right"]{right:0}
-.vpo-menu[data-vertical="above"]{bottom:calc(100% + 26px)}.vpo-menu[data-vertical="below"]{top:calc(100% + 26px)}
+.vpo-menu[data-vertical="above"]{bottom:calc(100% + 40px)}.vpo-menu[data-vertical="below"]{top:calc(100% + 40px)}
 .vpo-menuRow{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
 .vpo-menuRow[data-vehicle-pet-reduced-motion]{grid-template-columns:repeat(3,minmax(0,1fr))}
 .vpo-menuRow>.vpo-menuLabel{grid-column:1/-1}

@@ -9,7 +9,7 @@
 import { describe, expect, it } from 'vitest'
 import { assertCatalogFloors, speechCatalog } from '../../../src/dsh/client/speech-catalog'
 import {
-  evaluateCadence, idleBucketFor, selectSpeechLine,
+  evaluateCadence, idleBucketFor, selectSpeechLine, nextRecurringDelayMs,
   SPEECH_AMBIENT_MIN_INTERVAL_MS, SPEECH_AUTO_DISMISS_MAX_MS, SPEECH_AUTO_DISMISS_MIN_MS,
   SPEECH_CLICK_THROTTLE_MS, SPEECH_LOAD_QUIET_MS, SPEECH_TYPING_SUPPRESSION_MS,
   SPEECH_WORKING_MAX_PER_PERIOD, SPEECH_WORKING_ROTATION_MS,
@@ -81,7 +81,7 @@ describe('speech selection (CTR-OVERLAY-018 pure selection)', () => {
 })
 
 describe('speech cadence matrix (CTR-OVERLAY-019)', () => {
-  it('quiet period: nothing speaks within 30s of mount', () => {
+  it('quiet period: nothing speaks within 15s of mount', () => {
     const during = cadence({ now: MOUNT + SPEECH_LOAD_QUIET_MS - 1 })
     expect(evaluateCadence({ kind: 'session-edge', category: 'completed' }, during)).toEqual({ allowed: false, reason: 'load-quiet' })
     expect(evaluateCadence({ kind: 'ambient' }, during)).toEqual({ allowed: false, reason: 'load-quiet' })
@@ -95,7 +95,7 @@ describe('speech cadence matrix (CTR-OVERLAY-019)', () => {
   })
 
   it('ambient is interval-gated and typing-suppressed', () => {
-    const justSpoke = cadence({ lastAmbientAt: MOUNT + SPEECH_LOAD_QUIET_MS - SPEECH_AMBIENT_MIN_INTERVAL_MS + 5000 })
+    const justSpoke = cadence({ lastSpokenAt: MOUNT + SPEECH_LOAD_QUIET_MS - SPEECH_AMBIENT_MIN_INTERVAL_MS + 5000 })
     expect(evaluateCadence({ kind: 'ambient' }, justSpoke)).toEqual({ allowed: false, reason: 'ambient-interval' })
     const typed = cadence({ lastInputAt: MOUNT + SPEECH_LOAD_QUIET_MS - SPEECH_TYPING_SUPPRESSION_MS + 3000 })
     expect(evaluateCadence({ kind: 'ambient' }, typed)).toEqual({ allowed: false, reason: 'typing' })
@@ -115,7 +115,7 @@ describe('speech cadence matrix (CTR-OVERLAY-019)', () => {
   })
 
   it('ambient is idle-state gated (CTR-OVERLAY-019(3))', () => {
-    for (const state of ['working', 'needs-input', 'terminal'] as const) {
+    for (const state of ['terminal'] as const) {
       const duringWork = cadence({ sessionState: state })
       expect(evaluateCadence({ kind: 'ambient' }, duringWork)).toEqual({ allowed: false, reason: 'not-idle' })
     }
@@ -137,9 +137,9 @@ describe('speech cadence matrix (CTR-OVERLAY-019)', () => {
     expect(evaluateCadence({ kind: 'session-edge', category: 'working' }, quietHands)).toEqual({ allowed: true })
   })
 
-  it('working rotation caps lines per running period but edges still fire', () => {
+  it('working rotation continues beyond prior period caps', () => {
     const capped = cadence({ workingLinesThisPeriod: SPEECH_WORKING_MAX_PER_PERIOD })
-    expect(evaluateCadence({ kind: 'session-edge', category: 'working' }, capped)).toEqual({ allowed: false, reason: 'working-cap' })
+    expect(evaluateCadence({ kind: 'session-edge', category: 'working' }, capped)).toEqual({ allowed: true })
     const underCap = cadence({ workingLinesThisPeriod: SPEECH_WORKING_MAX_PER_PERIOD - 1 })
     expect(evaluateCadence({ kind: 'session-edge', category: 'working' }, underCap)).toEqual({ allowed: true })
   })
@@ -147,7 +147,7 @@ describe('speech cadence matrix (CTR-OVERLAY-019)', () => {
   it('dismiss window constants stay inside the contract bounds', () => {
     expect(SPEECH_AUTO_DISMISS_MIN_MS).toBe(3000)
     expect(SPEECH_AUTO_DISMISS_MAX_MS).toBe(6000)
-    expect(SPEECH_WORKING_ROTATION_MS).toBe(120000)
+    expect(SPEECH_WORKING_ROTATION_MS).toBe(20000)
   })
 })
 
@@ -159,5 +159,14 @@ describe('idle bucket (bounded activity recency)', () => {
     expect(idleBucketFor(now - 119000, now)).toBe(0)
     expect(idleBucketFor(now - 121000, now)).toBe(1)
     expect(idleBucketFor(now - 601000, now)).toBe(2)
+  })
+})
+
+
+describe('V5 injected random deadline', () => {
+  it('samples the 20–40 second interval and clamps invalid input', () => {
+    expect([0, .5, 1].map(nextRecurringDelayMs)).toEqual([20000, 30000, 40000])
+    expect([-1, Number.NaN, Number.POSITIVE_INFINITY].map(nextRecurringDelayMs)).toEqual([20000, 20000, 20000])
+    expect(nextRecurringDelayMs(2)).toBe(40000)
   })
 })
