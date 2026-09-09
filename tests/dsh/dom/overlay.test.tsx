@@ -638,3 +638,23 @@ describe('V4 character selection', () => {
     expect(petButton()).toHaveAttribute('data-vehicle-pet-level',before)
   })
 })
+
+
+describe('V5 settings gestures', () => {
+  it('supports Shift+Enter and ContextMenu, restores focus, and removes legacy controls', async () => {
+    await renderOverlay({ view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' })
+    const pet=petButton()
+    for(const key of ['Enter','ContextMenu']) {
+      pet.focus()
+      fireEvent.keyDown(pet,{key,shiftKey:key==='Enter'})
+      const menu=screen.getByRole('group',{name:t('menu.title')})
+      expect(menu).toBeTruthy()
+      fireEvent.keyDown(menu,{key:'Escape'})
+      expect(document.activeElement).toBe(pet)
+      expect(screen.queryByRole('group',{name:t('menu.title')})).toBeNull()
+    }
+    expect(document.querySelector('[data-vehicle-pet-menu-trigger]')).toBeNull()
+    expect(document.querySelector('[data-vehicle-pet-reduced-motion-option]')).toBeNull()
+    expect(document.querySelector('.vpo-shell')?.getAttribute('data-reduced-motion')).toBe('true')
+  })
+})

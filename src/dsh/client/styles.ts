@@ -42,7 +42,7 @@ const css = `
 .vpo-petHit[data-live="terminal"][data-terminal="cancelled"]{box-shadow:0 0 0 3px color-mix(in srgb,#909399 55%,transparent)}
 .vpo-scene{position:absolute;inset:0;width:100%;height:100%;aspect-ratio:auto;border-radius:16px;overflow:hidden;pointer-events:none}
 .vpo-scene .vp-scene{aspect-ratio:auto;width:100%;height:100%}
-.vpo-scene .vp-scene[data-presentation-mode="compact-overlay"]{background:transparent}
+.vpo-scene .vp-scene[data-presentation-mode="compact-overlay"]{background:transparent;box-shadow:none}
 .vpo-scene .vp-scene[data-presentation-mode="compact-overlay"] .vp-subject-btn{animation:none!important}
 /* LARGE presence boost: the variable is computed by the overlay (capped to
    the shell) and scales the subject button together with its expression
