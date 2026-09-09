@@ -15,6 +15,9 @@ export interface VehiclePetSecondaryMenuProps {
     readonly onCollapse: () => void;
     readonly onOpenJourney: () => void;
     readonly onRequestClose: () => void;
+    /** V7 CTR-029: fired on the outside press that closes the menu, before the
+     * press reaches the pet surface, so the gesture arbiter can drop the chain. */
+    readonly onOutsidePress?: () => void;
     readonly journeyTriggerRef: RefObject<HTMLButtonElement | null>;
 }
 export declare function VehiclePetSecondaryMenu(props: VehiclePetSecondaryMenuProps): ReactElement;
