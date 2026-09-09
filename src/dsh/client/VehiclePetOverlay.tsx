@@ -22,7 +22,7 @@ import type { HostObservable, InjectFace, PropsLocale, PropsRuntime } from '@dee
 import type {} from '@deepseek-ai/dsh-client-ui-layout/client'
 import { IndexedDbPetStorage, MemoryPetStorageAdapter, type Locale, type PetStorageAdapter } from '../../engine'
 import {
-  DailyGreeting, HostActivityFeedback, PetEngineProvider, PetSceneRenderer, UpgradeCeremony, usePetEngine,
+  DailyGreeting, HostActivityFeedback, PetEngineProvider, UpgradeCeremony, usePetEngine,
 } from '../../react'
 import { dshPackBundles, dshDefaultPackId, resolveDshProductPackId } from './engine-bundles'
 import type { VehiclePetLocaleKey } from './locales'
@@ -40,7 +40,9 @@ import {
   expressionStateFromSession, selectExpressionVariant,
   type VehiclePetExpressionVariant,
 } from './expressions'
-import { ExpressionLayer } from './ExpressionLayer'
+import { CharacterVisual, companionHitStyle } from './CharacterVisual'
+import { CHARACTER_DEFINITIONS, characterLevel } from './characters'
+import type { CharacterId } from './types'
 import { VehiclePetDialog } from './VehiclePetDialog'
 import { VehiclePetSecondaryMenu } from './VehiclePetSecondaryMenu'
 import { useVehiclePetSpeech, VehiclePetBubble } from './VehiclePetSpeech'
@@ -358,7 +360,8 @@ function OverlaySurface({
     >
       <div
         className="vpo-shell"
-        style={{ ...drag.shellStyle, '--vp-subject-boost': subjectBoostFor(snapshot.plan, residentSurfaceSizePx(false, effectiveSize(preferences))) } as CSSProperties}
+        data-reduced-motion={snapshot.reducedMotion}
+        style={{ ...drag.shellStyle, '--vpo-x': `${drag.point.x}px`, '--vp-subject-boost': subjectBoostFor(snapshot.plan, residentSurfaceSizePx(false, effectiveSize(preferences))) } as CSSProperties}
         data-dragging={drag.isDragging}
         data-menu-open={menuOpen ? 'true' : 'false'}
         data-live={sessionView.terminal !== null ? 'terminal' : sessionView.live}
@@ -377,6 +380,7 @@ function OverlaySurface({
           </button>
         ) : (
           <ResidentPet
+            characterId={preferences.characterId ?? 'vehicle'}
             sessionView={sessionView}
             surfaceSize={residentSurfaceSizePx(false, effectiveSize(preferences))}
             menuOpen={menuOpen}
@@ -407,13 +411,13 @@ function OverlaySurface({
         ) : null}
 
         {!collapsed ? (
-          <span className="vpo-feedbackWrap">
+          <span className="vpo-feedbackWrap" data-placement={drag.point.y < 110 ? 'below' : 'above'}>
             <DailyGreeting />
             <HostActivityFeedback />
             <TerminalFeedbackDispatcher sessionView={sessionView} />
-            <UpgradeCeremony />
           </span>
         ) : null}
+        {!collapsed ? <UpgradeCeremony /> : null}
       </div>
 
       {!collapsed && dialogOpen ? (
@@ -463,6 +467,7 @@ function levelIndex(levelId: string): number {
 }
 
 function ResidentPet({
+  characterId,
   sessionView,
   surfaceSize,
   menuOpen,
@@ -473,6 +478,7 @@ function ResidentPet({
   dragHandlers,
   onKeyDown,
 }: {
+  characterId: CharacterId
   sessionView: VehiclePetSessionView
   surfaceSize: number
   menuOpen: boolean
@@ -490,6 +496,7 @@ function ResidentPet({
     sessionView,
     locale: engineLocale,
     enabled: true,
+    characterId,
   })
 
   // Level-up milestone: a derived-level increase announces a milestone line
@@ -523,29 +530,26 @@ function ResidentPet({
     ? `state.${sessionView.terminal.status}`
     : `state.${sessionView.live}`
 
-  const hitStyle = visibleHitStyle(snapshot, surfaceSize, levelId)
+  const hitStyle = CHARACTER_DEFINITIONS[characterId].recipe === 'engine-scene'
+    ? visibleHitStyle(snapshot, surfaceSize, levelId)
+    : companionHitStyle(variant, surfaceSize)
+  const grade = characterLevel(levelId, engineLocale)
 
   return (
     <>
-      <span className="vpo-scene" aria-hidden="true">
-        <PetSceneRenderer
-          subjectInteractive={false}
-          interactionCount={petInteractionCount}
-          presentationMode="compact-overlay"
-          subjectOverlay={
-            <ExpressionLayer
-              variant={variant}
-              derivedLevelId={levelId}
-            />
-          }
-        />
+      <span className="vpo-characterArea">
+      <span className="vpo-scene vpo-characterScene" aria-hidden="true">
+        <CharacterVisual character={CHARACTER_DEFINITIONS[characterId]} variant={variant}
+          levelId={levelId} interactionCount={petInteractionCount} />
       </span>
       <button
         type="button"
         className="vpo-surface vpo-petHit"
         style={hitStyle}
         aria-label={t('overlay.label', { state: t(stateKey) })}
+        aria-description={`${t('menu.character.' + characterId as VehiclePetLocaleKey)}${grade === null ? '' : ` · ${grade.grade} ${grade.description}`}`}
         data-vehicle-pet-pet="true"
+        data-vehicle-pet-character={characterId}
         data-vehicle-pet-expression={variant}
         data-vehicle-pet-pack={snapshot.activePack?.manifest.packId}
         data-vehicle-pet-level={levelId}
@@ -562,6 +566,11 @@ function ResidentPet({
         onPointerUp={dragHandlers.onPointerUp}
         onPointerCancel={dragHandlers.onPointerCancel}
       />
+      </span>
+      {grade === null ? null : <span className="vpo-grade" data-vehicle-pet-grade={grade.grade}>
+        <span className="vpo-gradeBrand">Pony.ai · {grade.grade}</span>
+        <span>{grade.description}</span>
+      </span>}
       {sessionView.live === 'needs-input' ? <span className="vpo-badge" aria-hidden="true" /> : null}
       <VehiclePetBubble bubble={speech.bubble} placement={bubblePlacement} />
       <div className={`vpo-tools${menuOpen ? ' vpo-tools-open' : ''}`}>

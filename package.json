@@ -61,8 +61,10 @@
     "test:dsh:e2e:coexistence": "playwright test -c playwright.dsh.coexistence.config.ts",
     "test:release": "vitest run --project release",
     "verify:release": "pnpm test:release && node scripts/release/e2e/run-disposable-e2e.mjs",
-    "verify": "pnpm typecheck && pnpm lint && pnpm test && pnpm test:e2e && pnpm build && pnpm check:contracts && pnpm assets:check && pnpm assets:expression-check",
-    "verify:dsh": "pnpm typecheck && pnpm lint && pnpm check:contracts && pnpm assets:dsh-check && pnpm assets:expression-check && pnpm build:dsh && pnpm check:dsh-bundle && pnpm check:dsh-package && pnpm check:dsh-lifecycle && pnpm test:dsh && pnpm test:dsh:e2e"
+    "verify": "pnpm typecheck && pnpm lint && pnpm test && pnpm test:e2e && pnpm build && pnpm check:contracts && pnpm assets:check && pnpm assets:expression-check && pnpm assets:character-check",
+    "verify:dsh": "pnpm typecheck && pnpm lint && pnpm check:contracts && pnpm assets:dsh-check && pnpm assets:expression-check && pnpm build:dsh && pnpm check:dsh-bundle && pnpm check:dsh-package && pnpm check:dsh-lifecycle && pnpm test:dsh && pnpm test:dsh:e2e && pnpm assets:character-check",
+    "assets:character-generate": "node scripts/generate-character-assets.mjs",
+    "assets:character-check": "node scripts/generate-character-assets.mjs --check"
   },
   "dependencies": {
     "ajv": "^8.17.1",

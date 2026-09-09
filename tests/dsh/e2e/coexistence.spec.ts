@@ -23,6 +23,8 @@ const ARTIFACTS = 'tests/dsh/e2e/.artifacts'
 const consoleErrors: string[] = []
 
 test.beforeEach(async ({ page }) => {
+  const reset=await fetch('http://127.0.0.1:8902/reset',{method:'POST'})
+  if(!reset.ok) throw new Error('Mock reset failed')
   page.on('console', message => {
     if (message.type() === 'error') consoleErrors.push(message.text())
   })
@@ -126,4 +128,32 @@ test('DEEPSEEK_PET_COEXISTENCE_TEST. both pets share the viewport and the LARGE 
 
   // Neither plugin produced console errors or uncaught exceptions.
   expect(consoleErrors, `console errors: ${consoleErrors.join(' | ')}`).toEqual([])
+})
+
+test('CHARACTER_V4_COEXISTENCE. companion and descriptive label clear whale, composer and send', async ({page})=>{
+  await page.goto('/')
+  await connectWorkspaceAndSendPrompt(page)
+  await expect(page.locator(PET)).toHaveCount(1)
+  const trigger=page.locator('[data-vehicle-pet-menu-trigger]')
+  await trigger.focus(); await trigger.click()
+  await page.locator('[data-vehicle-pet-character-option="companion"]').click()
+  await page.keyboard.press('Escape')
+  await expect(page.locator(PET)).toHaveAttribute('data-vehicle-pet-character','companion')
+  await expect(page.locator('.vpo-scene .vp-scene')).toHaveCount(0)
+  await page.waitForTimeout(1500)
+  const shell=await page.locator(SHELL).boundingBox()
+  for(const target of [page.locator(WHALE),page.locator('textarea:enabled').last(),page.getByRole('button',{name:/发送消息|Send message/}).first()]) {
+    const box=await target.boundingBox()
+    expect(box).not.toBeNull()
+    expect(overlapArea(shell!,box!)).toBe(0)
+  }
+  await page.screenshot({path:`${ARTIFACTS}/character-v4-whale-coexistence.png`})
+  await trigger.focus(); await trigger.click()
+  await page.locator('[data-vehicle-pet-size-option="small"]').click()
+  await page.keyboard.press('Escape')
+  await page.waitForTimeout(350)
+  const smallShell=await page.locator(SHELL).boundingBox()
+  const whaleBox=await page.locator(WHALE).boundingBox()
+  expect(overlapArea(smallShell!,whaleBox!)).toBe(0)
+  await page.screenshot({path:`${ARTIFACTS}/character-v4-whale-small.png`})
 })

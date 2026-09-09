@@ -1,0 +1,136 @@
+Verification candidate: ca2728598039932dafeef1b3b4ea30675d482287
+Captured UTC: 2026-09-09T00:47:25.291543+00:00
+Commands ran in /Users/yanfenma/workspace/project/vehicle-pet-character-impl-v4.
+Evidence is an executed sanitized summary; mock session ledger dumps and routine server warnings omitted.
+
+pnpm verify — EXIT 0
+Raw local log SHA256: 74748be70109d1a9dcfcf0ea35e079c84e24d4e3a76acb8c815931a5e7b250d4
+ ✓ |unit| tests/unit/storage-indexeddb.test.ts (5 tests) 33ms
+ ✓ |unit| tests/unit/engine-r1-regressions.test.ts (6 tests) 15ms
+ ✓ |unit| tests/unit/pack-registry-immutability.test.ts (2 tests) 46ms
+ ✓ |unit| tests/unit/engine-pack-lifecycle.test.ts (8 tests) 59ms
+ ✓ |unit| tests/unit/engine-ingestion.test.ts (11 tests) 76ms
+ ✓ |unit| tests/unit/engine-presentation.test.ts (17 tests) 119ms
+ ✓ |unit| tests/unit/validate-pack.test.ts (17 tests) 53ms
+ ✓ |unit| tests/unit/derive.test.ts (4 tests) 5ms
+ ✓ |unit| tests/unit/render-plan.test.ts (12 tests) 8ms
+ ✓ |unit| tests/unit/fleet-freeze.test.ts (8 tests) 6ms
+ ✓ |unit| tests/unit/storage-memory.test.ts (6 tests) 4ms
+ ✓ |unit| tests/unit/render-plan-subject-swap.test.ts (3 tests) 4ms
+ ✓ |unit| tests/unit/validate-host-event.test.ts (4 tests) 3ms
+ ✓ |unit| tests/unit/presets.test.ts (10 tests) 6ms
+ ✓ |unit| tests/unit/validate-snapshot.test.ts (9 tests) 4ms
+ ✓ |unit| tests/unit/fleet-frozen-states.test.ts (2 tests) 4ms
+ ✓ |unit| tests/unit/render-plan-subject-population.test.ts (1 test) 4ms
+ ✓ |dom| tests/dom/x03-component-contrast.test.tsx (4 tests) 697ms
+   ✓ X03 rendered component contrast > keeps the actual DailyGreeting status at WCAG AA contrast  566ms
+ ✓ |dom| tests/dom/e01-renderer-dom-budget.test.tsx (1 test) 171ms
+ ✓ |dom| tests/dom/e06-renderer-preset-semantics.test.tsx (2 tests) 428ms
+   ✓ E06 renderer preset semantics > maps every whitelisted transition, reveal, and celebration value to a live renderer class  410ms
+ ✓ |unit| tests/unit/seedling-conformance.test.ts (13 tests) 6ms
+ ✓ |dom| tests/dom/keepsake-copy-correction.test.tsx (1 test) 369ms
+   ✓ preserves real old-version earned records in the corrected collection without replay or foreign-domain unlocks  368ms
+ ✓ |dom| tests/dom/e03-reduced-motion.test.tsx (2 tests) 706ms
+   ✓ E03 reduced motion mechanics > removes motion while preserving the static centring transform  649ms
+ ✓ |dom| tests/dom/greeting-lifecycle.test.tsx (3 tests) 413ms
+   ✓ daily greeting lifecycle key > rechecks after midnight on a later interaction instead of consuming a once-only listener  350ms
+ ✓ |dom| tests/dom/x03-accessibility-mechanics.test.tsx (2 tests) 406ms
+   ✓ X03 accessibility mechanics > provides WCAG AA contrast for title, greeting, and every host feedback status  337ms
+ ✓ |dom| tests/dom/scene-geometry.test.tsx (5 tests) 1347ms
+   ✓ R3 compact/full-journey scene geometry > COMPACT_ALL_LEVEL_PIXEL_MATRIX_TEST keeps all 16 subjects centred and at least 90% visible in 112px  539ms
+   ✓ R3 compact/full-journey scene geometry > REDUCED_MOTION_COMPACT_GEOMETRY_TEST preserves the normal-motion static bounding geometry  382ms
+ Test Files  26 passed (26)
+      Tests  158 passed (158)
+  ✓   1 tests/e2e/experience-blockers.spec.ts:11:1 › X01: default route is the clean product Pet surface (552ms)
+  ✓   2 tests/e2e/experience-blockers.spec.ts:33:1 › X01: development and showcase surfaces remain explicitly addressable (614ms)
+  ✓   3 tests/e2e/experience-blockers.spec.ts:44:1 › X02: frozen Fleet L1-L4 states have four visibly distinct Pack sprites (667ms)
+  ✓   4 tests/e2e/prototype-conformance.spec.ts:11:1 › normal autonomous-fleet growth and one merged ceremony (591ms)
+  ✓   5 tests/e2e/prototype-conformance.spec.ts:25:1 › seedling grows through the same page and renderer (548ms)
+  ✓   6 tests/e2e/prototype-conformance.spec.ts:36:1 › pack switch is silent and preserves progress (637ms)
+  ✓   7 tests/e2e/prototype-conformance.spec.ts:47:1 › reduced motion retains final structure and static ceremony (597ms)
+  ✓   8 tests/e2e/prototype-conformance.spec.ts:56:1 › Host completed failed and cancelled feedback are distinct (518ms)
+  ✓   9 tests/e2e/prototype-conformance.spec.ts:68:1 › asset fallback keeps progress milestone and accessible subject (528ms)
+  ✓  10 tests/e2e/prototype-conformance.spec.ts:77:1 › max level has capped state and no fabricated next target (463ms)
+  ✓  11 tests/e2e/prototype-conformance.spec.ts:83:1 › showcase contains required fleet and seedling states (493ms)
+  ✓  12 tests/e2e/x03-locale-lang.spec.ts:3:1 › locale controls immediately synchronize the document language in both directions (472ms)
+  12 passed (8.9s)
+✓ 287 modules transformed.
+✓ built in 824ms
+ ✓ |contracts| tests/contracts/dsh-architecture.test.ts (4 tests) 28ms
+ ✓ |contracts| tests/contracts/architecture.test.ts (9 tests) 32ms
+ ✓ |contracts| tests/contracts/engine-neutrality.test.ts (5 tests) 13ms
+ Test Files  3 passed (3)
+      Tests  18 passed (18)
+ASSETS_CHECK_PASS
+expression assets check: OK (byte-identical)
+Character assets check PASS
+
+pnpm verify:dsh — EXIT 0
+Raw local log SHA256: f5dc8f90865720c12b176d1374bd5ddc7d3b8b9f285ef61dcce5e42f48888d1b
+ ✓ |contracts| tests/contracts/dsh-architecture.test.ts (4 tests) 16ms
+ ✓ |contracts| tests/contracts/architecture.test.ts (9 tests) 19ms
+ ✓ |contracts| tests/contracts/engine-neutrality.test.ts (5 tests) 9ms
+ Test Files  3 passed (3)
+      Tests  18 passed (18)
+dsh assets check: OK (byte-identical)
+expression assets check: OK (byte-identical)
+DSH plugin built: lib/index.js, lib/client.js, lib/types
+ ✓ |dsh-unit| tests/dsh/unit/session-state-adapter.test.ts (15 tests) 5ms
+ ✓ |dsh-unit| tests/dsh/unit/characters.test.ts (4 tests) 3ms
+ ✓ |dsh-unit| tests/dsh/unit/speech-rules.test.ts (14 tests) 5ms
+ ✓ |dsh-unit| tests/dsh/unit/preferences.test.ts (25 tests) 87ms
+ ✓ |dsh-unit| tests/dsh/unit/usage-progress-source.test.ts (16 tests) 7ms
+ ✓ |dsh-unit| tests/dsh/unit/expressions.test.ts (11 tests) 6ms
+ ✓ |dsh-unit| tests/dsh/unit/owned-storage-lifecycle.test.ts (6 tests) 5ms
+ ✓ |dsh-dom| tests/dsh/dom/character-speech.test.tsx (1 test) 11ms
+ ✓ |dsh-dom| tests/dsh/dom/character-visual.test.tsx (3 tests) 102ms
+ ✓ |dsh-dom| tests/dsh/dom/hmr-resource-lifecycle.test.tsx (1 test) 193ms
+ ✓ |dsh-dom| tests/dsh/dom/overlay.test.tsx (26 tests) 789ms
+ Test Files  11 passed (11)
+      Tests  122 passed (122)
+  ✓   1 tests/dsh/e2e/overlay.spec.ts:419:1 › 23. onboarding: fresh boot renders no pet, launcher, menu, or dialog DOM (5.4s)
+  ✓   2 tests/dsh/e2e/overlay.spec.ts:429:1 › 24 + 16 + 18 + 21 + 17 + 19 + 20 + 22. structured session lifecycle drives the pet (38.5s)
+  ✓   3 tests/dsh/e2e/overlay.spec.ts:544:1 › SIZE_MODE_LARGE. default load renders the 216px LARGE resident with the coexistence-safe placement (9.2s)
+  ✓   4 tests/dsh/e2e/overlay.spec.ts:584:1 › SIZE_MODE_SMALL. stored size small renders the 112px resident with the composer-safe placement (9.2s)
+  ✓   5 tests/dsh/e2e/overlay.spec.ts:611:1 › SIZE_PERSISTENCE. menu size choice persists across reload in both directions (11.5s)
+  ✓   6 tests/dsh/e2e/overlay.spec.ts:652:1 › DEFAULT_COMPOSER_OVERLAP_TEST. safe bottom-right avoids composer and send button (10.1s)
+  ✓   7 tests/dsh/e2e/overlay.spec.ts:663:1 › MOBILE_COMPOSER_OVERLAP_TEST. 390px viewport keeps the pet on-screen and clear of composer (9.7s)
+  ✓   8 tests/dsh/e2e/overlay.spec.ts:677:1 › SCENE_GEOMETRY_TEST. Fleet subject remains centred and visible in the 216px resident scene (8.9s)
+  ✓   9 tests/dsh/e2e/overlay.spec.ts:698:1 › NO_NORMAL_CLICK_PANEL_TEST + PET_CLICK_REACTION_TEST. a normal pet click is a pet reaction, never a surface (14.1s)
+  ✓  10 tests/dsh/e2e/overlay.spec.ts:724:1 › SECONDARY_SETTINGS_ACCESSIBLE_TEST. the trigger opens a 216px menu with exactly the authorized item set (9.3s)
+  ✓  11 tests/dsh/e2e/overlay.spec.ts:804:1 › 7. drag moves the pet and does not open the menu (9.4s)
+  ✓  12 tests/dsh/e2e/overlay.spec.ts:819:1 › USER_CUSTOM_POSITION_PRESERVATION_TEST. dragged ratios survive refresh without safe-default override (10.1s)
+  ✓  13 tests/dsh/e2e/overlay.spec.ts:842:1 › MENU_OPEN_COMPLETE_ACTIVE_SURFACE_CLAMP_TEST. resize and xRatio 0.49 clamp the real Pet + Menu union (11.7s)
+  ✓  14 tests/dsh/e2e/overlay.spec.ts:898:1 › MENU_OPEN_FIRST_KEYBOARD_STEP_MOVES_TEST + MENU_OPEN_FIRST_POINTER_DRAG_MOVES_TEST. MENU_OPEN movement has no coordinate dead zone (11.2s)
+  ✓  15 tests/dsh/e2e/overlay.spec.ts:972:1 › MENU_OPEN_OPEN_CLOSE_WITHOUT_INPUT_PRESERVES_ANCHOR_TEST + MENU_OPEN_MOVEMENT_COMMITS_CANONICAL_RATIO_TEST + MENU_OPEN_REFRESH_RESTORES_MOVED_POSITION_TEST + MENU_OPEN_RESIZE_HAS_NO_DEAD_ZONE_TEST + MENU_OPEN_MULTITAB_MOVEMENT_SYNC_TEST (13.1s)
+  ✓  16 tests/dsh/e2e/overlay.spec.ts:1053:1 › 10. keyboard movement moves and persists new ratios (9.3s)
+  ✓  17 tests/dsh/e2e/overlay.spec.ts:1069:1 › 11 + 12. collapse to the 36px launcher and restore (9.8s)
+  ✓  18 tests/dsh/e2e/overlay.spec.ts:1090:1 › 13. the DSH surface exposes only the product Pack and no Pack switch (seedling stays internal) (9.0s)
+  ✓  19 tests/dsh/e2e/overlay.spec.ts:1101:1 › NO_RESIDENT_PROGRESS_BAR_TEST. no within-level gauge outside the full journey dialog (CTR-OVERLAY-016) (9.2s)
+  ✓  20 tests/dsh/e2e/overlay.spec.ts:1129:1 › EXPRESSION_VARIANTS_TEST. the resident pet shows a distinct expression attr per session state incl. cancelled (36.7s)
+  ✓  21 tests/dsh/e2e/overlay.spec.ts:1256:1 › SCENE_FULL_JOURNEY_GEOMETRY_TEST. Fleet journey layers stay in scene bounds (9.1s)
+  ✓  22 tests/dsh/e2e/overlay.spec.ts:1306:1 › REDUCED_MOTION_STATIC_PARITY_TEST. reduced motion preserves resident subject bounds (9.3s)
+  ✓  23 tests/dsh/e2e/overlay.spec.ts:1329:1 › SETTINGS_PRIMARY_ACTION_OVERLAP_TEST measures Pet and open Menu against real Settings actions (8.9s)
+  ✓  24 tests/dsh/e2e/overlay.spec.ts:1354:1 › WORKSPACE_PRIMARY_ACTION_OVERLAP_TEST measures Pet and open Menu against real Workspace controls (9.0s)
+  ✓  25 tests/dsh/e2e/overlay.spec.ts:1369:1 › HARNESS_LOCALE_LIVE_SYNC_TEST. zh-CN → en → zh-CN updates menu copy, pet label, and journey live (10.3s)
+  ✓  26 tests/dsh/e2e/overlay.spec.ts:1424:1 › CROSSTAB_COLLAPSE_RESTORE_VISIBLE_TEST. two tabs destroy stale Menu/Dialog and never write-loop (12.8s)
+  ✓  27 tests/dsh/e2e/overlay.spec.ts:1495:1 › FULL_JOURNEY_LIGHT_THEME_CONTRAST_TEST + FULL_JOURNEY_DARK_THEME_CONTRAST_TEST (12.3s)
+  ✓  28 tests/dsh/e2e/overlay.spec.ts:1624:1 › COMPACT_ALL_LEVEL_PIXEL_MATRIX_TEST + COMPACT_MILESTONE_SUBJECT_OVERLAP_TEST + COMPACT_BLACK_VOID_TEST (29.8s)
+  ✓  29 tests/dsh/e2e/overlay.spec.ts:1710:1 › SPEECH_BUBBLE_LIFECYCLE_TEST. one polite catalog line per click edge, auto-dismissed inside the bound (52.5s)
+  ✓  30 tests/dsh/e2e/overlay.spec.ts:1744:1 › SPEECH_NO_FOCUS_STEAL_TEST. the visible bubble never takes or holds focus (45.4s)
+  ✓  31 tests/dsh/e2e/overlay.spec.ts:1765:1 › SPEECH_NO_COMPOSER_OCCLUSION_TEST. the bubble stays clear of the composer and send control (45.0s)
+  ✓  32 tests/dsh/e2e/overlay.spec.ts:1788:1 › SEEDLING_COERCION_PROBE_TEST. a legacy non-product activePackId coerces without data loss (CTR-OVERLAY-006) (9.5s)
+  ✓  33 tests/dsh/e2e/overlay.spec.ts:1913:1 › REAL_HARNESS_INDEXEDDB_DISPOSAL_TEST + REAL_HARNESS_HMR_RESOURCE_INVENTORY_TEST (24.8s)
+  ✓  34 tests/dsh/e2e/overlay.spec.ts:2001:1 › 29 + 30 + 31. no external pet requests, no iframe, no port 5199 (9.0s)
+  ✓  35 tests/dsh/e2e/overlay.spec.ts:2014:1 › 32. no React invalid-hook-call or second-runtime console errors (136ms)
+  ✓  36 tests/dsh/e2e/overlay.spec.ts:2024:1 › CHARACTER_V4_PERSISTENCE_AND_GEOMETRY. selection keeps Engine records and level, survives reload, and labels fit both sizes (23.5s)
+  ✓  37 tests/dsh/e2e/overlay.spec.ts:2091:1 › CHARACTER_V4_TERMINAL_SINGLE_FEEDBACK. quiet-period terminal uses one readable speech surface (50.9s)
+  ✓  38 tests/dsh/e2e/usage-source-live.spec.ts:84:1 › real DSH usage drives the resident pet through the snapshot seam (44.4s)
+  38 passed (11.2m)
+Character assets check PASS
+
+pnpm test:dsh:e2e:coexistence — EXIT 0
+Raw local log SHA256: fed45633aee843c9efada94d18f8bce0b832de9916035887d3b57586e703629d
+  ✓  1 tests/dsh/e2e/coexistence.spec.ts:90:1 › DEEPSEEK_PET_COEXISTENCE_TEST. both pets share the viewport and the LARGE default clears the whale footprint (10.1s)
+  ✓  2 tests/dsh/e2e/coexistence.spec.ts:133:1 › CHARACTER_V4_COEXISTENCE. companion and descriptive label clear whale, composer and send (11.4s)
+  2 passed (43.2s)

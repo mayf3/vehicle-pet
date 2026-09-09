@@ -17,7 +17,7 @@ await build({
   target: ['chrome120', 'firefox121', 'safari17'],
   jsx: 'automatic',
   external: ['react', 'react/jsx-runtime', 'react-dom', 'react-dom/client'],
-  loader: { '.webp': 'dataurl', '.png': 'dataurl' },
+  loader: { '.webp': 'dataurl', '.png': 'dataurl', '.svg': 'dataurl' },
   sourcemap: true,
   minify: true,
   legalComments: 'none',
