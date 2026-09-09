@@ -24,8 +24,8 @@
     "src/dsh/client/assets/companion/pose-7.webp": "61a49a519be056af3d3262071b04bb8bdd7549b6a90cad6c6bcb144b9c8d9124",
     "src/dsh/client/assets/companion/pose-8.png": "f307799ec592d2b3dd98757100d7174ae52748c698b60e7dd545631c364edeb9",
     "src/dsh/client/assets/companion/pose-8.webp": "4da237bfbbcecf0c709a9be7eae17b2c6f58b60e4541b84061209e482e0c8c62",
-    "src/dsh/client/assets/companion/pose-9.png": "bdda81eea7cdb54b02790f27b6467d14e3f9208a901c03e553174d49601ddbd3",
-    "src/dsh/client/assets/companion/pose-9.webp": "42aa8bcc9b8286c4571c137a6b0eba8b95501e3850dcf470c6df90def615f98c",
-    "src/dsh/client/character-assets.generated.ts": "46a2687908e9675a999c90b4a5b76a03e365c246e82c368622941535e4c84755"
+    "src/dsh/client/assets/companion/pose-9.png": "aa4802c8807755b07047c2b84ce6689bc43ff8b4866ee1999182fb52c7c963ce",
+    "src/dsh/client/assets/companion/pose-9.webp": "20d0055cba6c432c5cce0294e55de2b6870a9c60cecb5c01cf611d8b8b2d7a3e",
+    "src/dsh/client/character-assets.generated.ts": "e4bfe1dd24a1c31f79ce60c9ab5e4b438ce0fef58192a9e8e6c2339b53987ec5"
   }
 }
