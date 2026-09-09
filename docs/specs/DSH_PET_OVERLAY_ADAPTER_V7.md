@@ -1,6 +1,6 @@
 ---
 spec_id: DSH_PET_OVERLAY_ADAPTER_V7
-status: proposed
+status: accepted
 spec_kind: implementation
 authority_level: governing_spec
 implementation_authority: contracts
@@ -1750,7 +1750,7 @@ V7 replacements CTR-015/018/019/021/028/010/022 supersede conflicting prior word
 SPEC_GOVERNANCE_MODE = AUTHOR
 AUTHORITY_ACTION = SUPERSEDE
 SPEC_ID = DSH_PET_OVERLAY_ADAPTER_V7
-STATUS = proposed
+STATUS = accepted
 IMPLEMENTATION_AUTHORITY = contracts
 PLAN_LEVEL = EXEC_PLAN
 ASSURANCE_LEVEL = DURABLE
@@ -1761,4 +1761,6 @@ PARTIAL_SUPERSESSION = NONE
 CONTRACT_COUNT = 37
 CONTRACTS_WITH_ACCEPTANCE = 37
 AUTHORING_READY_FOR_REVIEW = YES
-NEXT_ACTION = INDEPENDENT_REVIEW
+NEXT_ACTION = MERGE_AUTHORITY
+
+Acceptance recorded for Owner mayf3 after independent REVIEW ACCEPT at 831006a7e482e6346cbcc14e320874bce477e3ac (BASE 116824b, zero blockers) with the reviewer-prescribed closures applied at c4cc9c2. Active only after merge into main.
