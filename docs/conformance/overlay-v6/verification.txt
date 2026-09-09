@@ -1,0 +1,40 @@
+v6-verify sha256=0a6b8e6f8c691b565f75c9d847ce32255776e3b31c655c74ad54bfef6f199089
+ Test Files  26 passed (26)
+      Tests  158 passed (158)
+  12 passed (5.7s)
+ Test Files  3 passed (3)
+      Tests  18 passed (18)
+ASSETS_CHECK_PASS
+Character assets check PASS
+
+v6-verify-dsh sha256=7f3b9c8ce0c10ecf9db604cc26678c93ee9911ec74ed00fb2f48453b08e3a64b
+ Test Files  3 passed (3)
+      Tests  18 passed (18)
+DSH client bundle OK: 12119774 bytes, 120 inlined assets, externals limited to react
+DSH package OK: 163 files, 9205702 bytes packed
+DSH lifecycle OK: local add, update, remove, reinstall in /tmp/vehicle-pet-overlay-dsh-home-lifecycle-r1
+ Test Files  13 passed (13)
+      Tests  135 passed (135)
+  1 failed
+  1 interrupted
+  39 passed (14.5m)
+
+v6-final-static sha256=7c6dcc85e9ae46a1da3f417105ffaaf682347424cd9da4a09c7f4306d2460c26
+ Test Files  13 passed (13)
+      Tests  135 passed (135)
+
+v6-final-typecheck sha256=28794c53a4db7a49147bd9c13a161dfaff30fe281f482c57ee4ffbbe0aa489f4
+Character assets check PASS
+
+v6-final-focused sha256=bcda1772599397f8ad1b8cecafc801003515f98f653c4f0579ac5813815e5c48
+  4 passed (3.0m)
+
+v6-coexist sha256=32630e215ff2c7d189df7772816cd7acdb67d9d9a1a1ca46c55aa5460e63c4af
+  2 passed (31.3s)
+
+v6-final-package sha256=b4d158024b87164b541dcaa386033b322086e6b9515e197d98512870177ad561
+DSH client bundle OK: 12119774 bytes, 120 inlined assets, externals limited to react
+DSH package OK: 163 files, 9205702 bytes packed
+DSH lifecycle OK: local add, update, remove, reinstall in /tmp/vehicle-pet-overlay-dsh-home-lifecycle-r1
+
+Source/bundle frozen at7fdc564, test-only fixes at57cd395. Full first run39PASS/1FAIL/1interrupted; affected final4/4PASS, coex2/2PASS. No outstanding failed case.
