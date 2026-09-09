@@ -1,6 +1,6 @@
 ---
 spec_id: DSH_PET_OVERLAY_ADAPTER_V5
-status: proposed
+status: accepted
 spec_kind: implementation
 authority_level: governing_spec
 implementation_authority: contracts
@@ -1255,7 +1255,7 @@ V5 acceptance reconciliation: prior ACC-104/105/110/114/119 and related V4 accep
 SPEC_GOVERNANCE_MODE = AUTHOR
 AUTHORITY_ACTION = SUPERSEDE
 SPEC_ID = DSH_PET_OVERLAY_ADAPTER_V5
-STATUS = proposed
+STATUS = accepted
 IMPLEMENTATION_AUTHORITY = contracts
 PLAN_LEVEL = EXEC_PLAN
 ASSURANCE_LEVEL = DURABLE
@@ -1265,8 +1265,10 @@ NORMATIVE_TBD = NONE
 PARTIAL_SUPERSESSION = NONE
 CONTRACT_COUNT = 26
 CONTRACTS_WITH_ACCEPTANCE = 26
-INDEPENDENT_REVIEW = PENDING
+INDEPENDENT_REVIEW = ACCEPT at cb3da221374dbe1b3aacbb7e80370bda89a377d8
 PRODUCTION_APPLY_ALLOWED = NO
 AUTHORING_READY_FOR_REVIEW = YES
-NEXT_ACTION = REVIEW
+NEXT_ACTION = IMPLEMENTATION_FROM_ACCEPTED_MAIN_BASE
 ```
+
+Acceptance: mayf3 Owner dispatch, recorded by author after independent authority_preflight_review ACCEPT at cb3da221374dbe1b3aacbb7e80370bda89a377d8. Activation requires merge into main; production application remains forbidden.
