@@ -614,3 +614,27 @@ describe('VehiclePetOverlay movement and multi-tab sync', () => {
     setItem.mockRestore()
   })
 })
+
+describe('V4 character selection', () => {
+  it('swaps only the resident presentation, persists the choice, and keeps the same derived level', async () => {
+    const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
+    const view = await renderOverlay(source)
+    const before = petButton().getAttribute('data-vehicle-pet-level')
+    openMenu()
+    fireEvent.click(document.querySelector('[data-vehicle-pet-character-option="companion"]')!)
+    expect(document.querySelectorAll('[data-vehicle-pet-pet]')).toHaveLength(1)
+    expect(petButton()).toHaveAttribute('data-vehicle-pet-character','companion')
+    expect(petButton()).toHaveAttribute('data-vehicle-pet-level',before)
+    expect(document.querySelector('[data-companion-pose]')).not.toBeNull()
+    expect(document.querySelector('.vpo-scene [data-pet-scene]')).toBeNull()
+    expect(document.querySelector('[data-vehicle-pet-grade]')?.textContent).toContain('有人驾驶，有保护车')
+    expect(JSON.parse(localStorage.getItem(OVERLAY_PREFERENCES_KEY)!).characterId).toBe('companion')
+    view.unmount()
+    await renderOverlay(source)
+    expect(petButton()).toHaveAttribute('data-vehicle-pet-character','companion')
+    openMenu()
+    fireEvent.click(document.querySelector('[data-vehicle-pet-character-option="vehicle"]')!)
+    expect(document.querySelector('[data-companion-pose]')).toBeNull()
+    expect(petButton()).toHaveAttribute('data-vehicle-pet-level',before)
+  })
+})

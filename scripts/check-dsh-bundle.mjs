@@ -88,9 +88,11 @@ if (/import\.meta/.test(codeOnly)) {
 //    plus the V2 expression-asset map (CTR-OVERLAY-014 bundled presentation).
 const generated = await readFile(path.join(repoRoot, 'src/dsh/client/asset-bundles.generated.ts'), 'utf8')
 const expressionGenerated = await readFile(path.join(repoRoot, 'src/dsh/client/expression-assets.generated.ts'), 'utf8')
+const characterGenerated = await readFile(path.join(repoRoot, 'src/dsh/client/character-assets.generated.ts'), 'utf8')
 const generatedCount = (generated.match(/^import /gm) ?? []).length
   + (expressionGenerated.match(/^import /gm) ?? []).length
-const dataUrlCount = (bundle.match(/data:image\/(?:webp|png);base64,/g) ?? []).length
+  + (characterGenerated.match(/^import /gm) ?? []).length
+const dataUrlCount = (bundle.match(/data:image\/(?:webp|png);base64,|data:image\/svg\+xml[;,]/g) ?? []).length
 if (generatedCount === 0) {
   failures.push('generated asset map is empty')
 } else if (dataUrlCount !== generatedCount) {
@@ -125,7 +127,7 @@ try {
     target: ['chrome120', 'firefox121', 'safari17'],
     jsx: 'automatic',
     external: ['react', 'react/jsx-runtime', 'react-dom', 'react-dom/client'],
-    loader: { '.webp': 'dataurl', '.png': 'dataurl' },
+    loader: { '.webp': 'dataurl', '.png': 'dataurl', '.svg': 'dataurl' },
     sourcemap: false,
     minify: true,
     legalComments: 'none',

@@ -7,7 +7,7 @@
  * indices.
  */
 
-import { speechCatalog, type SpeechCategory } from './speech-catalog'
+import { speechCatalog, type SpeechCategory, type SpeechCatalogEntry } from './speech-catalog'
 
 /** Bubble auto-dismiss: target 4 s, hard bounds 3–6 s (CTR-OVERLAY-017). */
 export const SPEECH_AUTO_DISMISS_MS = 4000
@@ -140,8 +140,8 @@ export function selectSpeechLine(
   category: SpeechCategory,
   locale: string | undefined,
   selection: SpeechSelectionState,
+  catalog: readonly SpeechCatalogEntry[] = speechCatalog(locale),
 ): SpeechSelection {
-  const catalog = speechCatalog(locale)
   const indices: number[] = []
   for (let index = 0; index < catalog.length; index += 1) {
     const entry = catalog[index]

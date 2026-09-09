@@ -20,6 +20,7 @@ export const DEFAULT_OVERLAY_PREFERENCES: Readonly<VehiclePetOverlayPreferences>
   collapsed: false,
   reducedMotion: undefined,
   size: undefined,
+  characterId: 'vehicle',
 })
 
 const finiteRatio = (value: unknown, fallback: number): number =>
@@ -55,6 +56,7 @@ export function normalizeOverlayPreferences(value: unknown): VehiclePetOverlayPr
     collapsed: typeof candidate.collapsed === 'boolean' ? candidate.collapsed : false,
     reducedMotion: typeof candidate.reducedMotion === 'boolean' ? candidate.reducedMotion : undefined,
     size: normalizeSize(candidate.size),
+    characterId: candidate.characterId === 'companion' ? 'companion' : 'vehicle',
   }
 }
 
@@ -116,7 +118,8 @@ export function adoptStorageEvent(
       || next.positionCustomized !== current.positionCustomized
       || next.collapsed !== current.collapsed
       || next.reducedMotion !== current.reducedMotion
-      || next.size !== current.size) {
+      || next.size !== current.size
+      || next.characterId !== current.characterId) {
       return next
     }
     return null

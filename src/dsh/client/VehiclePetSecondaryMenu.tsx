@@ -67,6 +67,15 @@ export function VehiclePetSecondaryMenu(props: VehiclePetSecondaryMenuProps): Re
       style={{ width: `${OVERLAY_GEOMETRY.secondaryMenuWidthPx}px`, maxWidth: 'calc(100vw - 32px)' }}
       onKeyDown={handleKeyDown}
     >
+      <div className="vpo-menuRow" role="group" aria-label={t('menu.character')}>
+        <span className="vpo-menuLabel">{t('menu.character')}</span>
+        {(['vehicle', 'companion'] as const).map(id => <button
+          key={id} type="button" className="vpo-control"
+          data-vehicle-pet-character-option={id}
+          aria-pressed={(props.preferences.characterId ?? 'vehicle') === id}
+          onClick={() => commitPreferences(current => ({ ...current, characterId: id }))}
+        >{t(`menu.character.${id}`)}</button>)}
+      </div>
       <div className="vpo-menuRow" role="group" aria-label={t('menu.size')} data-vehicle-pet-size-control="true">
         <span className="vpo-menuLabel">{t('menu.size')}</span>
         <button

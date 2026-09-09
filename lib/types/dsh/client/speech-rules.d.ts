@@ -6,7 +6,7 @@
  * never sees anything but a category, a rotation counter, and recent-history
  * indices.
  */
-import { type SpeechCategory } from './speech-catalog';
+import { type SpeechCategory, type SpeechCatalogEntry } from './speech-catalog';
 /** Bubble auto-dismiss: target 4 s, hard bounds 3–6 s (CTR-OVERLAY-017). */
 export declare const SPEECH_AUTO_DISMISS_MS = 4000;
 export declare const SPEECH_AUTO_DISMISS_MIN_MS = 3000;
@@ -85,7 +85,7 @@ export interface SpeechSelection {
  * CTR-OVERLAY-018 selection: pure, rotation-driven, and never repeats the
  * identical line twice in a row within the same category.
  */
-export declare function selectSpeechLine(category: SpeechCategory, locale: string | undefined, selection: SpeechSelectionState): SpeechSelection;
+export declare function selectSpeechLine(category: SpeechCategory, locale: string | undefined, selection: SpeechSelectionState, catalog?: readonly SpeechCatalogEntry[]): SpeechSelection;
 /** Bounded idle bucket from payload-ignored activity recency (expressions). */
 export declare function idleBucketFor(lastActivityAt: number | null, now: number): 0 | 1 | 2;
 //# sourceMappingURL=speech-rules.d.ts.map
