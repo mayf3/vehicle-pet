@@ -35,16 +35,29 @@ function stubProps(): VehiclePetOverlayProps {
     useSessionView: selector => selector(IDLE_VIEW),
     useLocale: selector => selector({ active: 'zh-CN', revision: 1 }),
     useSessions: selector => selector(SESSIONS_ON as never),
-    t: (key: VehiclePetLocaleKey) => zh[key],
+    t: (key: VehiclePetLocaleKey, params?: Record<string, string>) => {
+      let text: string = zh[key]
+      for (const [name, value] of Object.entries(params ?? {})) text = text.replace(`{${name}}`, value)
+      return text
+    },
   } as VehiclePetOverlayProps
 }
 
 async function renderOverlay() {
   const view = render(<VehiclePetOverlay {...stubProps()} />)
-  await vi.waitFor(() => {
-    expect(screen.queryByRole('button', { name: t('overlay.label', { state: t('state.idle') }) })).not.toBeNull()
-  })
-  return view
+  // Deterministic mount drain: fake timers plus microtask flushing, in a
+  // loop — vi.waitFor's timer advancement is order-dependent under fake
+  // timers, so the drain is explicit instead.
+  for (let attempt = 0; attempt < 200; attempt += 1) {
+    if (screen.queryByRole('button', { name: t('overlay.label', { state: t('state.idle') }) }) !== null) {
+      return view
+    }
+    await act(async () => {
+      vi.advanceTimersByTime(25)
+      await Promise.resolve()
+    })
+  }
+  throw new Error('the overlay did not mount within the drained window')
 }
 
 function petButton(): HTMLElement {

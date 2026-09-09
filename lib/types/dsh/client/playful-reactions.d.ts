@@ -1,4 +1,5 @@
-import type { VehiclePetExpressionState } from './expressions';
+import type { VehiclePetExpressionState, VehiclePetExpressionVariant } from './expressions';
+import type { AmbientActionDefinition } from './ambient-rules';
 import type { CharacterId } from './types';
 export declare const PLAYFUL_REACTIONS: readonly [{
     readonly id: "wave";
@@ -33,7 +34,23 @@ export declare const PLAYFUL_REACTIONS: readonly [{
     readonly variant: "idle-happy";
     readonly decoration: "flower";
 }];
-type Reaction = typeof PLAYFUL_REACTIONS[number];
+/**
+ * A rendered reaction: pool entries keep their own animation key; ambient and
+ * petting presentations carry the gesture class their action definition
+ * selects. `anim` keys into the bounded one-shot CSS gesture set.
+ */
+export interface RenderedReaction {
+    readonly definition: {
+        readonly id: string;
+        readonly anim: string;
+        readonly variant: VehiclePetExpressionVariant;
+        readonly decoration: string;
+    };
+    readonly key: number;
+    readonly motionAllowed: boolean;
+    /** Held reactions (petting) persist until released; never auto-cleared. */
+    readonly held: boolean;
+}
 interface Context {
     state: VehiclePetExpressionState;
     terminalIdentity: string | null;
@@ -43,17 +60,17 @@ interface Context {
     ambientKey: number | null;
 }
 export declare function usePlayfulReaction(context: Context): {
-    reaction: {
-        definition: Reaction;
-        key: number;
-        motionAllowed: boolean;
-    } | null;
+    reaction: RenderedReaction | null;
     reduced: boolean;
     play: () => void;
+    playPetting: () => void;
+    releasePetting: () => void;
+    playAmbient: (action: AmbientActionDefinition) => void;
+    playSettle: () => void;
     cancel: () => void;
 };
 export declare function ReactionDecoration({ kind }: {
-    kind: Reaction['decoration'];
+    kind: string;
 }): import("react").JSX.Element;
 export {};
 //# sourceMappingURL=playful-reactions.d.ts.map

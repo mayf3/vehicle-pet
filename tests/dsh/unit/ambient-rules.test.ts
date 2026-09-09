@@ -64,8 +64,10 @@ describe('AMBIENT_CADENCE (V7 CTR-033)', () => {
       expect(delay).toBeGreaterThanOrEqual(AMBIENT_GAP_MIN_MS)
       expect(delay).toBeLessThanOrEqual(AMBIENT_GAP_MAX_MS)
     }
+    // Non-finite and out-of-range samples clamp to the band edges (non-finite = 0).
     expect(nextAmbientDelayMs(Number.NaN)).toBe(AMBIENT_GAP_MIN_MS)
-    expect(nextAmbientDelayMs(Number.POSITIVE_INFINITY)).toBe(AMBIENT_GAP_MAX_MS)
+    expect(nextAmbientDelayMs(Number.POSITIVE_INFINITY)).toBe(AMBIENT_GAP_MIN_MS)
+    expect(nextAmbientDelayMs(2)).toBe(AMBIENT_GAP_MAX_MS)
     expect(nextAmbientDelayMs(-3)).toBe(AMBIENT_GAP_MIN_MS)
   })
 })

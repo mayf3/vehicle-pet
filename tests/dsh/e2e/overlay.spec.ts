@@ -294,9 +294,22 @@ async function closeMenu(page: Page): Promise<void> {
 }
 
 async function seedPreferences(page: Page, record: Record<string, unknown>): Promise<void> {
+  // V7 (CTR-035/036): storage-pinned flows seed the ritual fields as already
+  // spent for the local day, so ritual persistence never writes mid-test and
+  // the byte-equality pins keep judging only the user-action fields.
+  const seeded = {
+    lastSeenAt: Date.now(),
+    rituals: {
+      dayKey: new Date().toLocaleDateString('sv'),
+      firstCompletionDone: true,
+      lateNightDone: true,
+      welcomeDayKey: new Date().toLocaleDateString('sv'),
+    },
+    ...record,
+  }
   await page.evaluate(({ key, value }) => {
     window.localStorage.setItem(key, JSON.stringify(value))
-  }, { key: PREF_KEY, value: record })
+  }, { key: PREF_KEY, value: seeded })
 }
 
 async function petBox(page: Page) {
@@ -968,6 +981,8 @@ test('MENU_OPEN_OPEN_CLOSE_WITHOUT_INPUT_PRESERVES_ANCHOR_TEST + MENU_OPEN_MOVEM
   await page.setViewportSize({ width: 390, height: 844 })
   await page.reload()
   await expect.poll(() => page.locator(PET).count(), { timeout: 30_000 }).toBe(1)
+  // Let the mount-time lastSeenAt refresh flush before the byte capture.
+  await page.waitForTimeout(500)
   const closedBefore = await shellBox(page)
   const storedBeforeOpen = await page.evaluate(() => localStorage.getItem('vehicle-pet/overlay-preferences/v1'))
   await openMenu(page)
@@ -1135,12 +1150,26 @@ test('EXPRESSION_VARIANTS_TEST. the resident pet shows a distinct expression att
   expect(idleSrc ?? '').toContain('data:image')
   await page.screenshot({ path: `${ARTIFACTS}/expression-idle-large.png` })
 
-  // Clicks cycle the friendly idle pool without repeating back-to-back.
+  // Clicks cycle the friendly idle pool without repeating back-to-back. An
+  // Escape before each click arms the payload-ignored input-recency gate
+  // (CTR-OVERLAY-019(3)): within the 5 s window no recurring line can fire,
+  // so no piggyback can interleave the pool rotation — the reaction id
+  // sequence is deterministic. Variants ride the reaction (CTR-028).
+  const reactionId = () => page.locator('.vpo-characterArea').getAttribute('data-vehicle-pet-reaction-id')
+  const settleGap = () => page.waitForTimeout(550) // clears the double-click window
+  await page.keyboard.press('Escape')
   await expr.click()
+  await expect.poll(reactionId).toBe('wave')
   await expect(expr).toHaveAttribute('data-vehicle-pet-expression', 'idle-happy')
+  await settleGap()
+  await page.keyboard.press('Escape')
   await expr.click()
+  await expect.poll(reactionId).toBe('wink')
   await expect(expr).toHaveAttribute('data-vehicle-pet-expression', 'completed-proud')
+  await settleGap()
+  await page.keyboard.press('Escape')
   await expr.click()
+  await expect.poll(reactionId).toBe('bounce')
   await expect(expr).toHaveAttribute('data-vehicle-pet-expression', 'completed')
   await expect(page.locator('.vpo-characterArea')).not.toHaveAttribute('data-gesture', /.+/, { timeout: 4000 })
   await expect(expr).toHaveAttribute('data-vehicle-pet-expression', 'idle')
@@ -1434,6 +1463,16 @@ test('CROSSTAB_COLLAPSE_RESTORE_VISIBLE_TEST. two tabs destroy stale Menu/Dialog
     ;(window as unknown as { __vpoPreferenceWrites: typeof state }).__vpoPreferenceWrites = state
   })
   const writes = async (target: Page) => target.evaluate(() => (window as unknown as { __vpoPreferenceWrites: { writes: number } }).__vpoPreferenceWrites.writes)
+  // V7 (CTR-035/036): spend both tabs' once-per-day rituals before the
+  // instrumented window, so a stray completed turn cannot insert a ritual
+  // persistence write into the loop-freedom counts.
+  for (const target of [page, second]) {
+    await seedPreferences(target, {})
+    await target.reload()
+    await expect.poll(() => target.locator(PET).count(), { timeout: 30_000 }).toBe(1)
+    // Let the mount-time lastSeenAt refresh flush before the write instrument.
+    await target.waitForTimeout(500)
+  }
   await instrumentWrites(page)
   await instrumentWrites(second)
 

@@ -37,6 +37,16 @@ export type SpeechTriggerSource = {
 } | {
     readonly kind: 'click';
     readonly category: SpeechCategory;
+}
+/**
+ * V7 explicit path (CTR-030/033/035/036): petting, welcome-back, and
+ * once-per-day ritual lines. Event-driven like milestone edges — callers
+ * schedule after the load-quiet period; the single scheduler stays the
+ * only bubble source.
+ */
+ | {
+    readonly kind: 'explicit';
+    readonly category: SpeechCategory;
 };
 export interface SpeechCadenceState {
     /** Epoch ms of surface mount. */
@@ -91,4 +101,9 @@ export declare function selectSpeechLine(category: SpeechCategory, locale: strin
 export declare function idleBucketFor(lastActivityAt: number | null, now: number): 0 | 1 | 2;
 /** Injected random sample keeps deadline selection pure and reproducible. */
 export declare function nextRecurringDelayMs(sample: number): number;
+/**
+ * V7 CTR-034: the recurring deadline stays inside the CTR-019 sampled 20–40 s
+ * band; the daypart only slides the sample toward the quiet end late at night.
+ */
+export declare function nextDaypartRecurringDelayMs(bucket: 'morning' | 'daytime' | 'evening' | 'late-night', sample: number): number;
 //# sourceMappingURL=speech-rules.d.ts.map

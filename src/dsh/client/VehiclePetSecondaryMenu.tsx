@@ -18,6 +18,9 @@ export interface VehiclePetSecondaryMenuProps {
   readonly onCollapse: () => void
   readonly onOpenJourney: () => void
   readonly onRequestClose: () => void
+  /** V7 CTR-029: fired on the outside press that closes the menu, before the
+   * press reaches the pet surface, so the gesture arbiter can drop the chain. */
+  readonly onOutsidePress?: () => void
   readonly journeyTriggerRef: RefObject<HTMLButtonElement | null>
 }
 
@@ -38,6 +41,7 @@ export function VehiclePetSecondaryMenu(props: VehiclePetSecondaryMenuProps): Re
       const element = props.menuRef.current
       if (element === null) return
       if (event.target instanceof Node && element.contains(event.target)) return
+      props.onOutsidePress?.()
       props.onRequestClose()
     }
     document.addEventListener('pointerdown', onDocumentPointerDown, { capture: true })

@@ -342,6 +342,18 @@ function OverlaySurface({
     onTouchLastSeen: touchLastSeen,
   }), [preferences.lastSeenAt, preferences.rituals, commitRitual, touchLastSeen])
 
+  // V7 CTR-029: set by the menu's outside press before the pet's pointerdown
+  // handler runs; the next press consumes it and drops the gesture chain.
+  const outsidePressRef = useRef(false)
+  const markOutsidePress = useCallback(() => {
+    outsidePressRef.current = true
+  }, [])
+  const consumeOutsidePress = useCallback((): boolean => {
+    const seen = outsidePressRef.current
+    outsidePressRef.current = false
+    return seen
+  }, [])
+
   const collapse = useCallback(() => {
     setMenuOpen(false)
     setDialogOpen(false)
@@ -423,6 +435,7 @@ function OverlaySurface({
             dragHandlers={drag}
             onKeyDown={handleSurfaceKeyDown}
             rituals={ritualBridge}
+            consumeOutsidePress={consumeOutsidePress}
           />
         )}
 
@@ -436,6 +449,7 @@ function OverlaySurface({
             }}
             onCollapse={collapse}
             onRequestClose={closeMenu}
+            onOutsidePress={markOutsidePress}
             onOpenJourney={() => {
               setDialogOpen(true)
             }}
@@ -501,6 +515,8 @@ function levelIndex(levelId: string): number {
 
 /** Direct interactions (click/petting/drag/menu) arm the ambient cooldown. */
 const LATE_NIGHT_INPUT_RECENCY_MS = 30 * 60 * 1000
+/** The lastSeenAt touch rewrites only stamps older than this (V7 CTR-035). */
+const LASTSEEN_TOUCH_STALE_MS = 60 * 1000
 
 function ResidentPet({
   characterId,
@@ -514,6 +530,7 @@ function ResidentPet({
   dragHandlers,
   onKeyDown,
   rituals,
+  consumeOutsidePress,
 }: {
   characterId: CharacterId
   sessionView: VehiclePetSessionView
@@ -525,6 +542,7 @@ function ResidentPet({
   onPetClick: () => void
   dragHandlers: ReturnType<typeof useOverlayDrag>
   onKeyDown: (event: ReactKeyboardEvent<HTMLElement>) => void
+  consumeOutsidePress: () => boolean
   rituals: {
     readonly lastSeenAt: number | undefined
     readonly markers: RitualMarkers
@@ -624,7 +642,25 @@ function ResidentPet({
   })
 
   // Gesture arbiter (CTR-029): one pure state model for the pointer session.
+  // While the secondary menu is open, a pet press is an outside press (it
+  // closes the menu, CTR-005) — never a pet gesture. Such presses consume and
+  // reset the arbiter session so the trailing click cannot chain into a
+  // synthetic double-click that would reopen what it just closed.
+  const menuOpenRef = useRef(menuOpen)
+  menuOpenRef.current = menuOpen
+  // Set by the menu's outside press (document capture — strictly before the
+  // pet's own pointerdown handler, React flush ordering included). The next
+  // press consumes it: the closing click drops the whole gesture chain, so
+  // its release can never synthesize a double-click that reopens the menu
+  // (CTR-005/029).
+  const outsidePressSeenRef = useRef(false)
   const handleGesture = useCallback((event: GestureInputEvent) => {
+    if (event.type === 'press' && consumeOutsidePress()) {
+      outsidePressSeenRef.current = true
+      gestureRef.current = INITIAL_GESTURE_STATE
+      setGesture(INITIAL_GESTURE_STATE)
+      return
+    }
     const previous = gestureRef.current
     const result = reduceGesture(previous, event)
     gestureRef.current = result.state
@@ -683,7 +719,10 @@ function ResidentPet({
   }, [gesture.phase, gesture.pressedAt, noteInteraction, playful])
 
   // V7 CTR-035: welcome back after a long absence — one line, no guilt, the
-  // greeting slot is taken for the day; lastSeenAt refreshes per mount/visit.
+  // greeting slot is taken for the day. lastSeenAt refreshes once per mount
+  // (the absence boundary is a remount; absent field = no welcome, and a
+  // fired welcome never repeats within its local day). No event-driven
+  // preference writes exist: every other write stays a user action.
   const welcomedRef = useRef(false)
   useEffect(() => {
     if (welcomedRef.current) return
@@ -694,16 +733,13 @@ function ResidentPet({
       speech.speakAfterQuiet('welcome')
       ritualBridgeRef.current.onRitual('welcome')
     }
-    ritualBridgeRef.current.onTouchLastSeen()
-  }, [rituals.lastSeenAt, speech])
-
-  useEffect(() => {
-    const touch = () => {
-      if (!document.hidden) ritualBridgeRef.current.onTouchLastSeen()
+    // Freshness-gated touch: write only when the stored stamp is absent or
+    // stale (an adopt-restored resident remounts without writing again).
+    const stored = rituals.lastSeenAt
+    if (stored === undefined || now - stored > LASTSEEN_TOUCH_STALE_MS) {
+      ritualBridgeRef.current.onTouchLastSeen()
     }
-    document.addEventListener('visibilitychange', touch)
-    return () => document.removeEventListener('visibilitychange', touch)
-  }, [])
+  }, [rituals.lastSeenAt, speech])
 
   // V7 CTR-036: the late-night ritual — at most once per ritual day, only
   // while the user is actually around, gentle copy only.
@@ -770,6 +806,7 @@ function ResidentPet({
           event.preventDefault()
           if (dragHandlers.consumeSuppressedClick()) return
           if (suppressClickRef.current) { suppressClickRef.current = false; return }
+          if (outsidePressSeenRef.current) { outsidePressSeenRef.current = false; return }
           onOpenMenu()
         }}
         onClick={event => {

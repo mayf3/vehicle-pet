@@ -52,6 +52,7 @@ describe('PET_DOUBLE_CLICK / DOUBLE_CLICK_DOES_NOT_FIRE_TWO_SPEECH_BUBBLES', () 
     state = result.state
     result = reduceGesture(state, { type: 'release', at: at(50), point: point(10, 10) })
     expect(result.verdict).toEqual({ kind: 'click', doubleClick: false })
+    state = result.state
     result = reduceGesture(state, { type: 'press', at: at(120), point: point(10, 10) })
     state = result.state
     result = reduceGesture(state, { type: 'release', at: at(160), point: point(10, 10) })

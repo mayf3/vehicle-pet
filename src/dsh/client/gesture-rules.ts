@@ -117,7 +117,12 @@ export function reduceGesture(
         return { state: cleared(state, { lastClickAt: event.at }), verdict: { kind: 'click', doubleClick } }
       }
       if (state.phase === 'petting') {
-        return { state: cleared(state, {}), verdict: { kind: 'petting-release' } }
+        // The release settles into an observable petting-release phase; the
+        // next press starts a fresh session from it (CTR-030 quiet settle).
+        return {
+          state: { ...state, phase: 'petting-release', origin: null, pressedAt: null, petting: false },
+          verdict: { kind: 'petting-release' },
+        }
       }
       if (state.phase === 'dragged') {
         return { state: { ...state, phase: 'drop', origin: null, pressedAt: null, petting: false }, verdict: { kind: 'drop' } }
