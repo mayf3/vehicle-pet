@@ -1,11 +1,6 @@
 /**
- * VehiclePetSecondaryMenu: the small non-modal secondary settings affordance
- * (DSH_PET_OVERLAY_ADAPTER_V3 DEC-OVERLAY-008 / CTR-OVERLAY-005). Revealed by
- * hover / focus / the keyboard-equivalent toggle — never by a normal pet click
- * — and contains exactly: size (SMALL/LARGE), Reduced Motion (system/on/off
- * semantics unchanged), Full Journey entry, and Collapse. No progression
- * numbers, level names, Pack names, keepsakes, or engineering readouts.
- * Outside press and Escape close it. Narrow fixed width ≤224px.
+ * V5 compact settings, opened by pet double-click or keyboard equivalent.
+ * Character, size, Full Journey and Collapse; outside press / Escape close.
  */
 import { type ReactElement, type RefObject } from 'react';
 import { type VehiclePetOverlayPreferences, type VehiclePetSize } from './types';

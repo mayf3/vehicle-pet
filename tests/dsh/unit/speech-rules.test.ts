@@ -9,7 +9,7 @@
 import { describe, expect, it } from 'vitest'
 import { assertCatalogFloors, speechCatalog } from '../../../src/dsh/client/speech-catalog'
 import {
-  evaluateCadence, idleBucketFor, selectSpeechLine,
+  evaluateCadence, idleBucketFor, selectSpeechLine, nextRecurringDelayMs,
   SPEECH_AMBIENT_MIN_INTERVAL_MS, SPEECH_AUTO_DISMISS_MAX_MS, SPEECH_AUTO_DISMISS_MIN_MS,
   SPEECH_CLICK_THROTTLE_MS, SPEECH_LOAD_QUIET_MS, SPEECH_TYPING_SUPPRESSION_MS,
   SPEECH_WORKING_MAX_PER_PERIOD, SPEECH_WORKING_ROTATION_MS,
@@ -159,5 +159,14 @@ describe('idle bucket (bounded activity recency)', () => {
     expect(idleBucketFor(now - 119000, now)).toBe(0)
     expect(idleBucketFor(now - 121000, now)).toBe(1)
     expect(idleBucketFor(now - 601000, now)).toBe(2)
+  })
+})
+
+
+describe('V5 injected random deadline', () => {
+  it('samples the 20–40 second interval and clamps invalid input', () => {
+    expect([0, .5, 1].map(nextRecurringDelayMs)).toEqual([20000, 30000, 40000])
+    expect([-1, Number.NaN, Number.POSITIVE_INFINITY].map(nextRecurringDelayMs)).toEqual([20000, 20000, 20000])
+    expect(nextRecurringDelayMs(2)).toBe(40000)
   })
 })

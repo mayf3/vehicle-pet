@@ -11,15 +11,15 @@ import { type SpeechCategory, type SpeechCatalogEntry } from './speech-catalog';
 export declare const SPEECH_AUTO_DISMISS_MS = 4000;
 export declare const SPEECH_AUTO_DISMISS_MIN_MS = 3000;
 export declare const SPEECH_AUTO_DISMISS_MAX_MS = 6000;
-/** Load quiet period: no speech within 30 s of surface mount (CTR-019(1)). */
-export declare const SPEECH_LOAD_QUIET_MS = 30000;
-/** Ambient idle lines: at most one per 600 s (CTR-019(3)). */
-export declare const SPEECH_AMBIENT_MIN_INTERVAL_MS = 600000;
+/** Load quiet period: no speech within 15 s of surface mount (CTR-019(1)). */
+export declare const SPEECH_LOAD_QUIET_MS = 15000;
+/** Ambient idle lines: minimum 20 s between recurring lines (CTR-019(3)). */
+export declare const SPEECH_AMBIENT_MIN_INTERVAL_MS = 20000;
 /** Payload-ignored input recency window suppressing ambient lines (CTR-019(3)). */
-export declare const SPEECH_TYPING_SUPPRESSION_MS = 15000;
-/** Working rotation: min gap and per-running-period cap (CTR-019(4)). */
-export declare const SPEECH_WORKING_ROTATION_MS = 120000;
-export declare const SPEECH_WORKING_MAX_PER_PERIOD = 3;
+export declare const SPEECH_TYPING_SUPPRESSION_MS = 5000;
+/** Working rotation: legacy exported bounds; recurring has no per-period cap (CTR-019(4)). */
+export declare const SPEECH_WORKING_ROTATION_MS = 20000;
+export declare const SPEECH_WORKING_MAX_PER_PERIOD: number;
 /** Click lines: at most one per 30 s (CTR-019(7)). */
 export declare const SPEECH_CLICK_THROTTLE_MS = 30000;
 /** Activity recency buckets for the idle expression (bounded, payload-ignored). */
@@ -74,6 +74,7 @@ export interface SpeechSelectionState {
     readonly lastIndexInCategory: number | null;
     /** Stable per-session rotation counter (incremented on every selection). */
     readonly rotationCounter: number;
+    readonly randomSample?: number;
 }
 export interface SpeechSelection {
     /** Index into the locale catalog for the chosen line. */
@@ -88,4 +89,6 @@ export interface SpeechSelection {
 export declare function selectSpeechLine(category: SpeechCategory, locale: string | undefined, selection: SpeechSelectionState, catalog?: readonly SpeechCatalogEntry[]): SpeechSelection;
 /** Bounded idle bucket from payload-ignored activity recency (expressions). */
 export declare function idleBucketFor(lastActivityAt: number | null, now: number): 0 | 1 | 2;
+/** Injected random sample keeps deadline selection pure and reproducible. */
+export declare function nextRecurringDelayMs(sample: number): number;
 //# sourceMappingURL=speech-rules.d.ts.map
