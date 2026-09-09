@@ -1,4 +1,8 @@
-# Character Bible — visual candidate V2
+# Character Bible — integrated V4 candidate
+
+The identity below records the accepted design history. Current production assets use the true-alpha master, ten isolated poses, twelve composited insignia and deterministic PNG/WebP outputs described in ART_PRODUCTION.md. Runtime acceptance is recorded separately in the V4 conformance record. Historical pending statements below refer to the earlier concept stage. Production application remains forbidden.
+
+## Identity history
 
 Status: Owner retained the identity but corrected the composition on 2026-09-09: exactly one visible character mode, vehicle OR companion, never both. Both carry Pony.ai branding; companion displays current level through an explicit badge. See OWNER_EXCLUSIVE_CHARACTERS.md. Earlier combined four-stage art and no-brand instructions are superseded exploration. Final production-art acceptance remains separate. No runtime implementation claimed.
 

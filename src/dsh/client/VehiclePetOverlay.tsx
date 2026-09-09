@@ -40,7 +40,7 @@ import {
   expressionStateFromSession, selectExpressionVariant,
   type VehiclePetExpressionVariant,
 } from './expressions'
-import { CharacterVisual } from './CharacterVisual'
+import { CharacterVisual, companionHitStyle } from './CharacterVisual'
 import { CHARACTER_DEFINITIONS, characterLevel } from './characters'
 import type { CharacterId } from './types'
 import { VehiclePetDialog } from './VehiclePetDialog'
@@ -361,7 +361,7 @@ function OverlaySurface({
       <div
         className="vpo-shell"
         data-reduced-motion={snapshot.reducedMotion}
-        style={{ ...drag.shellStyle, '--vp-subject-boost': subjectBoostFor(snapshot.plan, residentSurfaceSizePx(false, effectiveSize(preferences))) } as CSSProperties}
+        style={{ ...drag.shellStyle, '--vpo-x': `${drag.point.x}px`, '--vp-subject-boost': subjectBoostFor(snapshot.plan, residentSurfaceSizePx(false, effectiveSize(preferences))) } as CSSProperties}
         data-dragging={drag.isDragging}
         data-menu-open={menuOpen ? 'true' : 'false'}
         data-live={sessionView.terminal !== null ? 'terminal' : sessionView.live}
@@ -411,13 +411,13 @@ function OverlaySurface({
         ) : null}
 
         {!collapsed ? (
-          <span className="vpo-feedbackWrap">
+          <span className="vpo-feedbackWrap" data-placement={drag.point.y < 110 ? 'below' : 'above'}>
             <DailyGreeting />
             <HostActivityFeedback />
             <TerminalFeedbackDispatcher sessionView={sessionView} />
-            <UpgradeCeremony />
           </span>
         ) : null}
+        {!collapsed ? <UpgradeCeremony /> : null}
       </div>
 
       {!collapsed && dialogOpen ? (
@@ -532,7 +532,7 @@ function ResidentPet({
 
   const hitStyle = CHARACTER_DEFINITIONS[characterId].recipe === 'engine-scene'
     ? visibleHitStyle(snapshot, surfaceSize, levelId)
-    : { left: '20%', top: '2%', width: '64%', height: '82%' }
+    : companionHitStyle(variant, surfaceSize)
   const grade = characterLevel(levelId, engineLocale)
 
   return (
