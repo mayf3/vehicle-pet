@@ -17,6 +17,9 @@ export type SpeechCategory =
   | 'completed'
   | 'failed'
   | 'milestone'
+  | 'petting'
+  | 'welcome'
+  | 'ritual'
 
 export interface SpeechCatalogEntry {
   readonly category: SpeechCategory
@@ -28,15 +31,21 @@ export function speechCatalog(locale: string | undefined): readonly SpeechCatalo
   return characterSpeechCatalog('vehicle', locale)
 }
 
-/** Catalog floors (V3 CTR-OVERLAY-018): ≥30 lines per locale, ≥5 per category. */
+/** Catalog floors (V3 CTR-OVERLAY-018; V7 adds petting/welcome/ritual ≥3). */
 export function assertCatalogFloors(): void {
-  for (const [locale, entries] of (['zh-CN', 'en'] as const).map(locale => [locale, speechCatalog(locale)] as const)) {
-    if (entries.length < 30) throw new Error(`speech catalog ${locale}: ${entries.length} < 30 lines`)
-    const perCategory = new Map<string, number>()
-    for (const entry of entries) perCategory.set(entry.category, (perCategory.get(entry.category) ?? 0) + 1)
-    for (const category of ['idle', 'working', 'needs-input', 'completed', 'failed', 'milestone']) {
-      const count = perCategory.get(category) ?? 0
-      if (count < 5) throw new Error(`speech catalog ${locale}: category ${category} has ${count} < 5 lines`)
+  for (const character of ['vehicle', 'companion'] as const) {
+    for (const [locale, entries] of (['zh-CN', 'en'] as const).map(locale => [locale, characterSpeechCatalog(character, locale)] as const)) {
+      if (entries.length < 30) throw new Error(`speech catalog ${character}/${locale}: ${entries.length} < 30 lines`)
+      const perCategory = new Map<string, number>()
+      for (const entry of entries) perCategory.set(entry.category, (perCategory.get(entry.category) ?? 0) + 1)
+      for (const category of ['idle', 'working', 'needs-input', 'completed', 'failed', 'milestone']) {
+        const count = perCategory.get(category) ?? 0
+        if (count < 5) throw new Error(`speech catalog ${character}/${locale}: category ${category} has ${count} < 5 lines`)
+      }
+      for (const category of ['petting', 'welcome', 'ritual']) {
+        const count = perCategory.get(category) ?? 0
+        if (count < 3) throw new Error(`speech catalog ${character}/${locale}: category ${category} has ${count} < 3 lines`)
+      }
     }
   }
 }

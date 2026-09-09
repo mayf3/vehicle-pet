@@ -17,3 +17,36 @@ export function characterLevel(levelId: string | undefined, locale: string | und
   if (level === undefined) return null
   return { index, grade: level.id.toUpperCase(), description: locale?.toLowerCase().startsWith('zh') ? level['zh-CN'] : level.en }
 }
+
+/**
+ * Declarative behavior profiles (V7 CTR-OVERLAY-037): each bundled character
+ * definition carries its own presentation tendencies over the same underlying
+ * events. Generic presentation infrastructure consumes these; no user-facing
+ * personality setting, no third character, no second scheduler.
+ */
+export interface CharacterBehaviorProfile {
+  /** Ambient repertoire ids (see ambient-rules.ts); per-character pools. */
+  readonly ambientPool: readonly string[]
+  /** Which playful reaction each structured state edge tends to present. */
+  readonly stateReactions: {
+    readonly completed: 'bounce' | 'proud' | 'nod'
+    readonly failed: 'shy' | 'sleepy'
+    readonly working: 'nod' | 'wave'
+    readonly 'needs-input': 'peek' | 'wave'
+  }
+  /** Petting presentation family (approved masters only). */
+  readonly petting: { readonly variant: VehiclePetExpressionVariant; readonly decoration: 'heart' | 'sparkles' }
+}
+
+export const BEHAVIOR_PROFILES: Record<CharacterId, CharacterBehaviorProfile> = {
+  vehicle: {
+    ambientPool: ['look-left', 'look-right', 'sensor-check', 'wheel-blink', 'small-shuffle'],
+    stateReactions: { completed: 'bounce', failed: 'shy', working: 'nod', 'needs-input': 'peek' },
+    petting: { variant: 'idle-happy', decoration: 'sparkles' },
+  },
+  companion: {
+    ambientPool: ['stretch', 'yawn', 'glance-terminal', 'rest', 'tidy-cuff', 'look-around'],
+    stateReactions: { completed: 'nod', failed: 'shy', working: 'wave', 'needs-input': 'peek' },
+    petting: { variant: 'idle-happy', decoration: 'heart' },
+  },
+}
