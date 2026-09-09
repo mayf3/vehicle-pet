@@ -1,6 +1,6 @@
 ---
 spec_id: DSH_PET_OVERLAY_ADAPTER_V6
-status: proposed
+status: accepted
 spec_kind: implementation
 authority_level: governing_spec
 implementation_authority: contracts
@@ -1278,7 +1278,7 @@ V6 replacements CTR-015/027/028 supersede conflicting prior V5 static-only wordi
 SPEC_GOVERNANCE_MODE = AUTHOR
 AUTHORITY_ACTION = SUPERSEDE
 SPEC_ID = DSH_PET_OVERLAY_ADAPTER_V6
-STATUS = proposed
+STATUS = accepted
 IMPLEMENTATION_AUTHORITY = contracts
 PLAN_LEVEL = BRIEF
 ASSURANCE_LEVEL = DURABLE
@@ -1289,4 +1289,6 @@ PARTIAL_SUPERSESSION = NONE
 CONTRACT_COUNT = 28
 CONTRACTS_WITH_ACCEPTANCE = 28
 AUTHORING_READY_FOR_REVIEW = YES
-NEXT_ACTION = REVIEW
+NEXT_ACTION = MERGE_AUTHORITY
+
+Acceptance recorded for Owner mayf3 after independent authority_preflight_review ACCEPT at c59d50e85d233440ae38a3106731d4f1203ca570. Active only after merge into main.
