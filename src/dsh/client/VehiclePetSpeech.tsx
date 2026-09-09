@@ -25,7 +25,7 @@ import type { CharacterId } from './types'
 
 export interface VehiclePetSpeechController {
   /** Current visible line, or null. Replacements reuse the same bubble. */
-  readonly bubble: { readonly text: string; readonly key: number } | null
+  readonly bubble: { readonly text: string; readonly key: number; readonly source?: SpeechTriggerSource['kind'] } | null
   /** Attempt a click line (throttled by CTR-OVERLAY-019(7)). */
   readonly speakForClick: (category: SpeechCategory) => void
   /** Announce a level-up / keepsake moment (proud presentation + line). */
@@ -87,7 +87,7 @@ export function useVehiclePetSpeech(options: SchedulerOptions): VehiclePetSpeech
   const refs = startRef.current
   const sessionViewRef = useRef(sessionView)
   sessionViewRef.current = sessionView
-  const [bubble, setBubble] = useState<{ text: string; key: number } | null>(null)
+  const [bubble, setBubble] = useState<{ text: string; key: number; source?: SpeechTriggerSource['kind'] } | null>(null)
   const [idleBucket, setIdleBucket] = useState<0 | 1 | 2>(0)
   const [milestoneActive, setMilestoneActive] = useState(false)
   const dismissTimerRef = useRef<ReturnType<typeof globalThis.setTimeout> | undefined>(undefined)
@@ -111,7 +111,7 @@ export function useVehiclePetSpeech(options: SchedulerOptions): VehiclePetSpeech
     }
   }, [refs])
 
-  const showLine = useCallback((category: SpeechCategory): void => {
+  const showLine = useCallback((category: SpeechCategory, source: SpeechTriggerSource['kind']): void => {
     const selection = selectSpeechLine(category, presentationRef.current.locale, {
       lastIndexInCategory: refs.lastIndexInCategory.get(category) ?? null,
       rotationCounter: refs.rotationCounter,
@@ -123,7 +123,7 @@ export function useVehiclePetSpeech(options: SchedulerOptions): VehiclePetSpeech
     refs.lastSpokenAt = Date.now()
     if (category === 'idle') refs.lastAmbientAt = Date.now()
     bubbleKeyRef.current += 1
-    setBubble({ text: selection.text, key: bubbleKeyRef.current })
+    setBubble({ text: selection.text, key: bubbleKeyRef.current, source })
     globalThis.clearTimeout(dismissTimerRef.current)
     dismissTimerRef.current = globalThis.setTimeout(() => {
       setBubble(null)
@@ -138,7 +138,7 @@ export function useVehiclePetSpeech(options: SchedulerOptions): VehiclePetSpeech
     const category: SpeechCategory = source.kind === 'ambient'
       ? sessionViewRef.current.live === 'running' ? 'working' : sessionViewRef.current.live === 'needs-input' ? 'needs-input' : 'idle'
       : source.category
-    showLine(category)
+    showLine(category, source.kind)
     if (source.kind === 'click') refs.lastClickSpokenAt = Date.now()
     if (source.kind === 'ambient') refs.lastAmbientAt = Date.now()
     if (source.kind === 'session-edge' && source.category === 'working') {
@@ -236,7 +236,7 @@ export function useVehiclePetSpeech(options: SchedulerOptions): VehiclePetSpeech
 }
 
 export interface VehiclePetBubbleProps {
-  readonly bubble: { readonly text: string; readonly key: number } | null
+  readonly bubble: { readonly text: string; readonly key: number; readonly source?: SpeechTriggerSource['kind'] } | null
   readonly placement: 'above' | 'below'
 }
 

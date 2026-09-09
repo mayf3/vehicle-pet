@@ -82,6 +82,13 @@ async function petState(page: Page) {
 }
 
 test('real DSH usage drives the resident pet through the snapshot seam', async ({ page }) => {
+  // Other session tests deliberately consume approval/failure slots. This
+  // usage probe needs completed turns, independent of their script position.
+  const resetMock = async () => {
+    const reset = await fetch('http://127.0.0.1:8902/reset', { method: 'POST' })
+    expect(reset.ok).toBe(true)
+  }
+  await resetMock()
   await page.goto('/')
   await page.waitForLoadState('domcontentloaded')
   await connectWorkspace(page)
@@ -98,6 +105,7 @@ test('real DSH usage drives the resident pet through the snapshot seam', async (
   console.log('[usage-live] after1:', JSON.stringify(after1))
   await page.screenshot({ path: `${ARTIFACTS}/usage-live-after-1.png` })
 
+  await resetMock()
   await composer.fill('usage-live-2: 再演示一段字符串反转')
   await composer.press('Enter')
   await page.waitForTimeout(18_000)

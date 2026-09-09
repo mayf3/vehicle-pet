@@ -1139,8 +1139,10 @@ test('EXPRESSION_VARIANTS_TEST. the resident pet shows a distinct expression att
   await expr.click()
   await expect(expr).toHaveAttribute('data-vehicle-pet-expression', 'idle-happy')
   await expr.click()
-  await expect(expr).toHaveAttribute('data-vehicle-pet-expression', 'idle-curious')
+  await expect(expr).toHaveAttribute('data-vehicle-pet-expression', 'completed-proud')
   await expr.click()
+  await expect(expr).toHaveAttribute('data-vehicle-pet-expression', 'completed')
+  await expect(page.locator('.vpo-characterArea')).not.toHaveAttribute('data-gesture', /.+/, { timeout: 4000 })
   await expect(expr).toHaveAttribute('data-vehicle-pet-expression', 'idle')
 
   // needs-input: the mock's slot position can drift when dangling requests
@@ -2145,6 +2147,8 @@ test('OVERLAY_V5_FIVE_POINT_ACCEPTANCE. transparent static vehicle, double-click
   await page.screenshot({path:`${ARTIFACTS}/v5-active-session.png`})
   await expect(footer).toHaveAttribute('data-vehicle-pet-active-sessions','0',{timeout:30000})
   await page.setViewportSize({width:390,height:844})
+  // ResizeObserver repositions the surface on the next layout frame.
+  await expect.poll(async () => { const box=(await footer.boundingBox())!; return box.x+box.width }).toBeLessThanOrEqual(390)
   const mobile=(await footer.boundingBox())!
   expect(mobile.x).toBeGreaterThanOrEqual(0)
   expect(mobile.x+mobile.width).toBeLessThanOrEqual(390)
@@ -2179,4 +2183,85 @@ test('OVERLAY_V5_BACKGROUND_SESSION. pending background metadata remains visible
   const currentId=await page.locator(ROOT).getAttribute('data-session-list-current')
   await expect(page.locator(ROOT)).toHaveAttribute('data-adapter-session',currentId!)
   await page.screenshot({path:`${ARTIFACTS}/v5-background-pending.png`})
+})
+
+test('V6_COMPACT_PLAYFUL: real alpha gap all levels and eight reactions for both characters', async ({ page }) => {
+  await openOverlay(page)
+  await waitForIdleBaseline(page)
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  buildClientGeneration('e2e-r3-active-matrix')
+  await expect(page.locator(ROOT)).toHaveAttribute('data-client-generation', 'e2e-r3-active-matrix', { timeout: 60000 })
+  try {
+    for (const level of fleetManifest.levels) {
+      await page.evaluate(points => (window as unknown as { __vehiclePetE2E: { progress: { setPoints: (n:number)=>void } } }).__vehiclePetE2E.progress.setPoints(points), level.threshold)
+      await expect(page.locator(PET)).toHaveAttribute('data-vehicle-pet-level', level.levelId)
+      const skip = page.getByRole('button', { name: /^(Skip|跳过)$/ })
+      if (await skip.isVisible()) await skip.click()
+
+      for (const size of ['large', 'small']) {
+        await openMenu(page)
+        await page.locator('[data-vehicle-pet-character-option="vehicle"]').click()
+        await page.locator(`[data-vehicle-pet-size-option="${size}"]`).click()
+        await closeMenu(page)
+        await page.locator(PET).evaluate(el => (el as HTMLElement).blur())
+        const bottom = await page.locator('.vpo-scene [data-pet-subject="true"] > img').evaluate(async node => {
+          const img = node as HTMLImageElement
+          await img.decode()
+          const canvas = document.createElement('canvas')
+          canvas.width = img.naturalWidth; canvas.height = img.naturalHeight
+          const context = canvas.getContext('2d')!
+          context.drawImage(img,0,0)
+          const pixels = context.getImageData(0,0,canvas.width,canvas.height).data
+          let last = 0
+          for (let y=0;y<canvas.height;y++) for(let x=0;x<canvas.width;x++) if(pixels[(y*canvas.width+x)*4+3]!>8) last=y+1
+          const box=img.getBoundingClientRect()
+          return box.top+box.height*last/canvas.height
+        })
+        const grade = (await page.locator('[data-vehicle-pet-grade]').boundingBox())!
+        const footer = (await page.locator('.vpo-activeSessions').boundingBox())!
+        expect(grade.y-bottom, `${size}/${level.levelId} alpha gap`).toBeGreaterThanOrEqual(6)
+        expect(grade.y-bottom).toBeLessThanOrEqual(14)
+        expect(footer.y-grade.y-grade.height).toBeGreaterThanOrEqual(4)
+        expect(footer.y-grade.y-grade.height).toBeLessThanOrEqual(8)
+        expect(footer.y+footer.height).toBeLessThanOrEqual(VIEWPORT.height)
+        await page.locator(SHELL).screenshot({path:`${ARTIFACTS}/v6-${size}-${level.levelId}.png`})
+      }
+    }
+    // Reset the disposable fixture's subject, preserving monotonic real progression.
+    await page.evaluate(() => (window as unknown as { __vehiclePetE2E: { progress: { resetSubject: ()=>void } } }).__vehiclePetE2E.progress.resetSubject())
+    await expect(page.locator(PET)).toHaveAttribute('data-vehicle-pet-level', 'l1')
+    for (const character of ['vehicle', 'companion']) {
+      await openMenu(page)
+      await page.locator(`[data-vehicle-pet-character-option="${character}"]`).click()
+      await page.locator('[data-vehicle-pet-size-option="large"]').click()
+      await closeMenu(page)
+      const seen = new Set<string>()
+      for (let index=0;index<8;index++) {
+        await page.locator(PET).press('Enter')
+        const area=page.locator('.vpo-characterArea')
+        const gesture=(await area.getAttribute('data-gesture'))!
+        seen.add(gesture)
+        expect(await area.evaluate(el=>el.getAnimations().length)).toBe(0)
+        await page.locator(PET).evaluate(el => (el as HTMLElement).blur())
+        await page.locator(SHELL).screenshot({path:`${ARTIFACTS}/v6-${character}-${gesture}.png`})
+      }
+      expect(seen.size).toBe(8)
+      await page.screenshot({path:`${ARTIFACTS}/v6-${character}-full.png`})
+      await page.locator(PET).dblclick()
+      await expect(page.locator(MENU)).toBeVisible()
+      await expect(page.locator('.vpo-characterArea')).not.toHaveAttribute('data-gesture', /.+/)
+      await closeMenu(page)
+      await page.emulateMedia({ reducedMotion: 'no-preference' })
+      const gradeBefore=await page.locator('[data-vehicle-pet-grade]').boundingBox()
+      await page.locator(PET).press('Enter')
+      await expect.poll(()=>page.locator('.vpo-characterArea').evaluate(el=>el.getAnimations().length)).toBe(1)
+      expect(await page.locator('[data-vehicle-pet-grade]').boundingBox()).toEqual(gradeBefore)
+      await expect(page.locator('.vpo-characterArea')).not.toHaveAttribute('data-gesture', /.+/, {timeout:4000})
+      expect(await page.locator('.vpo-characterArea').evaluate(el=>el.getAnimations().length)).toBe(0)
+      await page.emulateMedia({ reducedMotion: 'reduce' })
+    }
+  } finally {
+    buildClientGeneration('production')
+    await expect(page.locator(ROOT)).toHaveAttribute('data-client-generation', 'production', { timeout:60000 })
+  }
 })

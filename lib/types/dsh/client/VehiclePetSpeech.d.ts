@@ -11,6 +11,7 @@
  */
 import { type ReactElement } from 'react';
 import type { VehiclePetSessionView } from './types';
+import { type SpeechTriggerSource } from './speech-rules';
 import { type SpeechCategory } from './speech-catalog';
 import type { CharacterId } from './types';
 export interface VehiclePetSpeechController {
@@ -18,6 +19,7 @@ export interface VehiclePetSpeechController {
     readonly bubble: {
         readonly text: string;
         readonly key: number;
+        readonly source?: SpeechTriggerSource['kind'];
     } | null;
     /** Attempt a click line (throttled by CTR-OVERLAY-019(7)). */
     readonly speakForClick: (category: SpeechCategory) => void;
@@ -40,6 +42,7 @@ export interface VehiclePetBubbleProps {
     readonly bubble: {
         readonly text: string;
         readonly key: number;
+        readonly source?: SpeechTriggerSource['kind'];
     } | null;
     readonly placement: 'above' | 'below';
 }
