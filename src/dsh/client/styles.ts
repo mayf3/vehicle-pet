@@ -9,6 +9,26 @@
 const STYLE_ID = 'vehicle-pet/overlay-styles'
 
 const css = `
+.vpo-captionGroup{position:absolute;left:0;width:100%;pointer-events:none}
+.vpo-captionGroup .vpo-grade{position:relative;max-height:none}
+.vpo-captionGroup .vpo-activeSessions{position:relative;top:auto;margin-top:4px}
+
+.vpo-reactionDecoration{position:absolute;left:74%;top:14%;width:19%;height:19%;pointer-events:none;overflow:visible}
+.vpo-shell[data-reduced-motion="true"] .vpo-characterArea[data-motion="allowed"][data-gesture="wave"]{animation:vpo-v6-wave 1000ms ease-out!important}
+.vpo-shell[data-reduced-motion="true"] .vpo-characterArea[data-motion="allowed"][data-gesture="wink"]{animation:vpo-v6-wink 800ms ease-out!important}
+.vpo-shell[data-reduced-motion="true"] .vpo-characterArea[data-motion="allowed"][data-gesture="bounce"]{animation:vpo-v6-hop 1100ms ease-out!important}
+.vpo-shell[data-reduced-motion="true"] .vpo-characterArea[data-motion="allowed"][data-gesture="peek"]{animation:vpo-v6-peek 1000ms ease-out!important}
+.vpo-shell[data-reduced-motion="true"] .vpo-characterArea[data-motion="allowed"][data-gesture="shy"]{animation:vpo-v6-wink 1000ms ease-out!important}
+.vpo-shell[data-reduced-motion="true"] .vpo-characterArea[data-motion="allowed"][data-gesture="sleepy"]{animation:vpo-v6-nod 1200ms ease-out!important}
+.vpo-shell[data-reduced-motion="true"] .vpo-characterArea[data-motion="allowed"][data-gesture="proud"]{animation:vpo-v6-hop 900ms ease-out!important}
+.vpo-shell[data-reduced-motion="true"] .vpo-characterArea[data-motion="allowed"][data-gesture="nod"]{animation:vpo-v6-nod 800ms ease-out!important}
+@keyframes vpo-v6-wave{0%,100%{rotate:0deg}25%,65%{rotate:-3deg}45%,80%{rotate:3deg}}
+@keyframes vpo-v6-wink{0%,100%{rotate:0deg}40%,65%{rotate:-3deg}}
+@keyframes vpo-v6-hop{0%,45%,100%{translate:0 0}25%,70%{translate:0 -4px}}
+@keyframes vpo-v6-peek{0%,100%{translate:0 0}40%,70%{translate:4px 0}}
+@keyframes vpo-v6-nod{0%,100%{translate:0 0}40%{translate:0 -2px}}
+@media(prefers-reduced-motion:reduce){.vpo-shell[data-reduced-motion="true"] .vpo-characterArea[data-motion="allowed"][data-gesture]{animation:none!important}}
+
 .vpo-characterArea{position:absolute;inset:0;transform:scale(.8);transform-origin:50% 0;pointer-events:none}
 [data-vehicle-pet-size="small"] .vpo-characterArea{transform:scale(.72)}
 .vpo-pose{position:absolute;left:calc((100% - 100% * 320 / 540) / 2);top:0;width:calc(100% * 320 / 540);height:100%;pointer-events:none}
