@@ -478,6 +478,7 @@ WELCOME_BACK_THRESHOLD_H = BAND_MIN_8 (exact value recorded; NO guilt/streak/dur
 DAILY_RITUALS = FIRST_COMPLETION_TODAY, LATE_NIGHT (once per local day each; first-open-of-day remains Engine DailyGreeting)
 CHARACTER_BEHAVIOR_PROFILES = DECLARATIVE_BUNDLED_WEIGHTS (no user-facing setting)
 SPEECH_NEW_CATEGORIES = petting, welcome, ritual (floor >=3 per character per locale)
+SPEECH_TRIGGER_SOURCES_V7 = PETTING, WELCOME_BACK, DAYPART_RITUAL, DAILY_RITUAL, AMBIENT_ACTION (all via the ONE scheduler; extends the carried SPEECH_CONTENT_SOURCES per §15 Reconciliation item 3)
 NEEDINESS_SYSTEMS = NONE (hunger/sick/death/mood/affection/streak/penalty unchanged prohibitions)
 ```
 
@@ -1315,8 +1316,9 @@ contract, and acceptance and adds one bounded experience layer: direct touch
 (petting), cursor awareness, drag body reaction, a quiet ambient behavior
 layer, device-local daypart weighting, a guilt-free return ritual, bounded
 daily rituals, and declarative character behavior profiles. The Engine,
-progression, token economy, usage seams, assets, art, catalogs, and both
-sizes are unchanged. No new art generation is required: every new visual is a
+progression, token economy, usage seams, assets, art, existing catalog
+floors, and both sizes are unchanged; the only catalog change is the
+reconciliation-scoped category addition of Reconciliation item 2. No new art generation is required: every new visual is a
 recombination of the approved ten pose/expression masters, the existing
 decoration family, and bounded code-native motion.
 
@@ -1685,7 +1687,8 @@ unchanged and remains binding.
 - Method: fake-clock unit matrix over the gap band, load quiet, typing
   suppression, interaction cooldown, no-back-to-back, consumed attempts,
   working/needs-input suppression, terminal preemption; real DSH run
-  sampling a ≥30-minute window for silence dominance; cancel matrix
+  sampling a ≥30-minute window for silence dominance; an OS reduced-motion
+  run proving static presentation of ambient actions; cancel matrix
   (state/menu/drag/hidden/unmount); disposal inventory including the new
   timer and cursor listeners; both characters' repertoires rendered.
 - Expected result: minutes-level quiet cadence with majority silence;
