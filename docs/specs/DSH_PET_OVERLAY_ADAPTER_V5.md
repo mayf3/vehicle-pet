@@ -1,6 +1,6 @@
 ---
-spec_id: DSH_PET_OVERLAY_ADAPTER_V4
-status: superseded
+spec_id: DSH_PET_OVERLAY_ADAPTER_V5
+status: accepted
 spec_kind: implementation
 authority_level: governing_spec
 implementation_authority: contracts
@@ -20,46 +20,17 @@ external_authorities:
     revision: f77b5a2fcebc2d9138f6608a60636f2294868d42
     relation: interoperates_with
 supersedes:
-  - DSH_PET_OVERLAY_ADAPTER_V3
-superseded_by: DSH_PET_OVERLAY_ADAPTER_V5
+  - DSH_PET_OVERLAY_ADAPTER_V4
+superseded_by: null
 owners:
   - mayf3
 ---
 
-# DSH_PET_OVERLAY_ADAPTER_V4
+# DSH_PET_OVERLAY_ADAPTER_V5
 
 ## 1. Goal
 
-This V4 supersedes `DSH_PET_OVERLAY_ADAPTER_V3` and carries every V3 Decision
-and Contract forward unchanged except the items listed below. The carried
-forward surface — one external DSH bundle plugin, exactly one additive
-`shell.overlay` entry, the active Configurable Pet Engine authority as the only
-owner of progression, Packs, keepsakes, receipts, and product rendering, the
-structured six-state session mapping, local tolerant preferences, onboarding
-hiding, complete disposal, host React identity, and the token/progress deferral
-boundary — is restated here with unchanged meaning.
-
-V4 exceptions: exactly two mutually exclusive character presentations, persisted character choice, character-specific expressions and speech catalogs, Pony.ai branding, on-body grade insignia and a descriptive grade label are authorized by §12.1–§12.4. Vehicle art stays intact; the new companion uses original transparent pose sprites. These changes replace the prior vehicle-only rendering restriction and add Character as the fifth secondary setting. All unchanged V3 obligations are restated below. Historical observations retain their original coordinates and are not V4 execution evidence.
-
-Motivation: the Owner-frozen direction of Goal 灵动 (MORE_PET / LESS_UI). The
-resident Vehicle Pet becomes a two-size (SMALL / LARGE) pet-first companion:
-
-- the pet is the primary UI; the daily normal click is a **pet reaction**
-  (expression variant, light motion, occasionally one short spoken line), never
-  a panel;
-- the resident within-level micro progress sliver is **removed** from both
-  sizes while the entire growth system (progressPoints, derived level, usage
-  ledger, token economy, level-up, keepsakes, journey) continues unchanged;
-- the 264 px compact panel is **removed**, not reskinned; its low-frequency
-  capabilities (size, Reduced Motion, Full Journey, collapse) move into a small
-  secondary settings affordance modeled on observed low-distraction
-  interaction principles (hover/focus-revealed minimal actions, settings far
-  from the daily surface);
-- a non-modal **speech bubble** adds liveness: a curated original line catalog
-  (≥30 lines per supported locale) driven only by structured state, with
-  strict anti-harassment cadence;
-- the static expression layer grows from 5 to **at least 10 visible variants**
-  while preserving vehicle Art V2 and adding the original companion pose art of §12.1.
+This V5 wholly supersedes `DSH_PET_OVERLAY_ADAPTER_V4`. It retains its two mutually exclusive branded characters, twelve operational grades, ten expressions, shared Engine/growth/prefs, structured reactions, no-model boundary and full disposal. The Owner's five-point refinement changes only resident transparency, always-static motion, double-click settings, continuous randomized catalog speech and a read-only active-session footer. Current normative values and replacement contracts below apply; retained historical observations are not V5 execution evidence.
 
 ```text
 GOAL = MORE_PET / LESS_UI: the resident pet behaves like a long-term companion, not a plugin button.
@@ -301,7 +272,7 @@ Carried forward unchanged from V2: `DSH_BUNDLE_PLUGIN` in
   deleted. The resident surface has two sizes, `SMALL` and `LARGE`, selected
   by a persisted browser-local preference; absence of an explicit choice
   resolves to `LARGE`. A normal left click / keyboard activation on the
-  visible pet is a **pet reaction** (expression variant change, light motion,
+  visible pet is a **pet reaction** (static expression variant change,
   and a throttled occasional spoken line), never a settings or information
   surface.
 - Rejected alternatives: keeping `PANEL_OPEN` behind a modifier, reskinning
@@ -329,8 +300,8 @@ are unchanged.
 
 - Decision owner: `mayf3` (Goal 灵动 frozen direction).
 - Decision: the one versioned tolerant browser-local preference record
-  continues to own normalized position, collapsed state, and the explicit
-  Reduced Motion choice, and additionally owns the `SMALL`/`LARGE` size
+  continues to own normalized position, collapsed state, and the inert legacy
+  Reduced Motion field, and additionally owns the `SMALL`/`LARGE` size
   choice and a bundled character ID. Missing or unknown character IDs resolve to vehicle. The preference evolves compatibly: a record without an explicit
   size choice — including every pre-V3 record — resolves to `LARGE`. The
   choice survives reload, new sessions, and DSH restarts because it is
@@ -365,24 +336,11 @@ Carried forward unchanged from V2.
   pipeline and the Art boundary.
 - Owner decision remaining: NONE.
 
-### DEC-OVERLAY-008 — Secondary settings affordance replaces the compact panel
+### DEC-OVERLAY-008 — Double-click secondary settings
 
-- Decision owner: `mayf3` (Goal 灵动 frozen direction, informed by the
-  whale census principles only).
-- Decision: the capabilities of the removed panel move into one small,
-  non-modal secondary affordance revealed from the resident pet on hover /
-  focus / long-press-equivalent keyboard path, containing exactly:
-  Character (vehicle / companion), size (SMALL / LARGE), the Reduced Motion control with unchanged
-  system/on/off semantics, the Full Journey entry, and collapse. The
-  affordance carries no progression numbers, level names, Pack names, or
-  keepsake content — product data remains in the Full Journey dialog. It is
-  bounded (at most five items, narrow fixed width), closes on outside
-  press or Escape, and never opens by a normal pet click alone.
-- Rejected alternatives: keeping any information panel on the daily loop,
-  moving settings into the host settings page only (insufficiently
-  discoverable for size), a permanently visible toolbar.
-- Reason: SETTINGS_IS_SECONDARY / PET_IS_PRIMARY; the whale reference shows
-  hover-revealed minimal actions keep the daily surface clean.
+- Decision owner: mayf3, five-point feedback of 2026-09-09.
+- Decision: the resident pet opens its non-modal settings on double-click, with Shift+Enter or ContextMenu as the equivalent keyboard path. Single click remains an expression reaction; dragging never opens settings. Remove the ellipsis trigger and the Reduced Motion setting. Settings contain exactly Character, Size, Full Journey and Collapse. Outside press and Escape close it.
+- Reason: Owner prefers the whale's direct gesture and permanently static presentation.
 - Owner decision remaining: NONE.
 
 ### DEC-OVERLAY-009 — Original, structured-state speech bubble
@@ -393,7 +351,7 @@ Carried forward unchanged from V2.
   (`zh-CN`, `en`), distributed across idle, working, needs-input,
   completed, failed/cancelled, and level-up/milestone. Triggers are only:
   structured session state edges, Engine progress/level/keepsake events,
-  direct user interaction, and a bounded idle timer. The bubble never
+  direct user interaction, and a bounded recurring timer. The bubble never
   speaks prompt, completion, message, or reasoning content, never calls a
   model, and never consumes tokens. Presentation: non-modal, single
   instance, auto-dismiss within a fixed bounded window, positioned above or
@@ -445,7 +403,7 @@ SMALL_SURFACE_HEIGHT_PX = 112 (unchanged nominal; minor sprite-bbox-fit adjustme
 LARGE_SURFACE_HEIGHT_PX = 216 nominal (band 1.6x..2.2x SMALL; implementation MAY record 190..240 final from the measured sprite bbox)
 RESIDENT_PROGRESS_BAR = ABSENT (both sizes)
 COLLAPSED_LAUNCHER_SIZE_PX = 36
-SECONDARY_AFFORDANCE = hover/focus-revealed, non-modal, <=5 items, fixed narrow width <=224px, no progression content
+SECONDARY_AFFORDANCE = double-click or Shift+Enter/ContextMenu, non-modal, exactly 4 items, fixed narrow width <=224px, no progression content
 SIZE_PERSISTENCE = browser-local versioned preference; absent choice resolves LARGE
 DRAG = YES
 KEYBOARD_MOVE = YES
@@ -455,7 +413,7 @@ REDUCED_MOTION_PERSISTENCE = browser local preference (semantics unchanged)
 ACTIVE_PACK_PERSISTENCE = existing Engine activePackId
 EXPRESSION_STATE_CORE = IDLE, WORKING, NEEDS_INPUT, COMPLETED, FAILED_OR_CANCELLED (unchanged mapping duty)
 EXPRESSION_VARIANT_COUNT_MIN = 10 (statically distinguishable, level identity preserved)
-EXPRESSION_ARCHITECTURE = vehicle preserved level base + expression recipes; companion pose sprite + declarative grade insignia; bounded small motion for either
+EXPRESSION_ARCHITECTURE = vehicle preserved level base + expression recipes; companion pose sprite + declarative grade insignia; no motion for either
 EXPRESSION_ASSETS = BUNDLED_WEBP_PRIMARY_PNG_FALLBACK_DETERMINISTIC
 SPEECH_BUBBLE = YES (text only)
 SPEECH_CATALOG_MIN_LINES_PER_LOCALE = 30 across >=6 categories
@@ -465,13 +423,13 @@ SPEECH_FOCUS_STEAL = NO
 SPEECH_COMPOSER_OCCLUSION = NO
 SPEECH_WHALE_OCCLUSION = NO
 SPEECH_CONTENT_SOURCES = SESSION_STATE, PROGRESS_EVENT, LEVEL_EVENT, USER_INTERACTION, BOUNDED_IDLE_TIMER
-SPEECH_AMBIENT_MIN_INTERVAL_S = 600
-SPEECH_LOAD_QUIET_S = 30
-SPEECH_TYPING_SUPPRESSION_S = 15 (payload-ignored input recency)
-SPEECH_WORKING_ROTATION_S = 120 (max one line per 120 s of a single running period; max three per period)
+SPEECH_RECURRING_INTERVAL_S = randomized 20..40, first sampled at mount, ongoing in idle/working/needs-input; no per-period cap
+SPEECH_LOAD_QUIET_S = 15
+SPEECH_TYPING_SUPPRESSION_S = 5 (payload-ignored input recency)
+SPEECH_WORKING_ROTATION_S = same recurring schedule, unlimited periods; 5-second input-recency suppression
 SPEECH_CLICK_LINE_THROTTLE_S = 30
 SPEECH_REPEAT_GUARD = no identical line twice in a row within a category; per-category recent-history exclusion
-CLICK_REACTION = expression variant change + light motion + throttled line; NEVER a panel
+CLICK_REACTION = static expression + throttled line; double-click opens settings
 ONBOARDING_VISIBILITY = hidden
 SESSION_EFFECT = visual reaction only
 REAL_TOKEN_INTEGRATION = NO
@@ -489,11 +447,11 @@ ART_V2_LEVEL_BASE = PRESERVED (no L1-L12 regeneration)
 
 ### 8.1 State transitions
 
-- `VISIBLE`: render the current pet at the preferred size, light idle motion,
+- `VISIBLE`: render the current pet at the preferred size, always-static presentation,
   static expression variant, speech bubble when active, daily greeting and
   short Host-activity feedback through the bubble presentation, and the
-  secondary affordance on hover/focus. It MUST NOT render an information
-  panel, a progress gauge, or a monitoring surface. A normal click is a pet
+  secondary affordance on double-click or Shift+Enter/ContextMenu. It MUST NOT render an information
+  panel, a progress gauge, or a monitoring dashboard. A bounded active-session title footer is required by CTR-025. A normal click is a pet
   reaction (`DEC-OVERLAY-002`); it never opens any surface.
 - `COLLAPSED`: render only the 36 px keyboard-accessible launcher; not full
   hide; activation restores `VISIBLE`.
@@ -509,11 +467,10 @@ The secondary affordance contains exactly:
 
 1. Character: vehicle / companion choice;
 2. Size: SMALL / LARGE choice;
-3. Reduced Motion control (system/on/off semantics unchanged from V2);
-4. “View full journey” action;
-5. Collapse action.
+3. “View full journey” action;
+4. Collapse action.
 
-No sixth item is permitted; Escape and outside press close the affordance. The affordance MUST NOT contain progression
+No fifth item is permitted; Escape and outside press close the affordance. The affordance MUST NOT contain progression
 numbers, within-level progress, next thresholds, stage or level names, Pack
 names, keepsakes, or any engineering/system readout — those remain in the
 Full Journey dialog, which keeps its V2 accessible in-Harness Overlay/Dialog
@@ -527,8 +484,8 @@ presentation column is restyled:
 
 | Adapter state | Structured meaning | V3 presentation |
 |---|---|---|
-| `DSH_RUNNING` | current selected session running | working variant (static layer + focus motion); on start edge, at most one working line; while running, rotation per `CTR-OVERLAY-019` bounds |
-| `DSH_NEEDS_INPUT` | structured pending interaction | needs-input variant (static layer + attention motion); one needs-input line per pending edge |
+| `DSH_RUNNING` | current selected session running | working variant (static layer + no motion); on start edge, at most one working line; while running, rotation per `CTR-OVERLAY-019` bounds |
+| `DSH_NEEDS_INPUT` | structured pending interaction | needs-input variant (static layer + no motion); one needs-input line per pending edge |
 | `DSH_TURN_COMPLETED` | terminal success edge | one short completed reaction: completed variant (proud after a level/milestone event, happy otherwise) + one completed line + the existing `HostActivityEventV1` dispatch |
 | `DSH_TURN_FAILED` | terminal failure edge | one short failed reaction: soft-failed variant + one failed line + existing dispatch |
 | `DSH_TURN_CANCELLED` | terminal cancellation edge | one short cancelled reaction: relaxed-cancelled variant + one failed/cancelled-category line + existing dispatch |
@@ -619,18 +576,9 @@ semantics (exact same-mount restoration, persisted `COLLAPSED` across
 reload) are unchanged from V2. Escape closes the secondary affordance or the
 journey dialog, never the pet.
 
-### CTR-OVERLAY-005 — Secondary affordance and full-journey boundaries
+### CTR-OVERLAY-005 — Double-click settings and full journey
 
-The secondary affordance MUST contain exactly the §8.2 item set (at most five
-entries including any explicit close), be non-modal, be revealed only by
-hover, focus, an equivalent keyboard path, or an explicit user action — never
-by a normal pet click alone — close on outside press and Escape, and carry no
-progression numbers, level/stage names, Pack names, keepsakes, or engineering
-readouts. “View full journey” MUST open the accessible in-Harness
-Overlay/Dialog reusing the existing React product surface, close without
-changing progression, and never open an external page, iframe, dev server, or
-development console. Rendering a panel-shaped surface on the daily loop,
-exceeding the item bound, or putting product data in the affordance fails.
+Settings MUST open on a double-click of the visible pet or Shift+Enter/ContextMenu while it is focused. Single click MUST remain a pet reaction, not open settings; drag release and its following synthetic click/double-click MUST not open settings. There MUST be no ellipsis/toolbar trigger. The pet's accessible description MUST explain double-click and the keyboard equivalent. The menu MUST remain non-modal, at most 224px wide, and contain exactly Character, Size, Full Journey and Collapse, with no motion control. Outside press and Escape close it; Escape restores pet focus without changing position/progression. Full Journey retains its accessible in-Harness dialog, with no external page or iframe.
 
 ### CTR-OVERLAY-006 — One Engine and the two existing Packs
 
@@ -661,7 +609,7 @@ adapter MUST NOT read prompt bodies, completion bodies, message or reasoning
 text, credentials, or clipboard content; MUST NOT regex-match, tokenize, or
 hash any host conversation text for speech selection, expression selection,
 or any other purpose; and MUST NOT read another plugin's DOM (including the
-deepseek-pet surface) for geometry, state, or presence. Global input-activity
+deepseek-pet surface) for geometry, state, or presence. Only host-projected title/displayTitle and running/pending metadata may additionally be read for the bounded footer in CTR-025. Titles MUST NOT enter speech selection, persistence, logs or analytics. Global input-activity
 recency for `CTR-OVERLAY-019` MUST ignore event payload and target identity.
 
 ### CTR-OVERLAY-009 — Host React identity only
@@ -673,7 +621,7 @@ packed-artifact gates.
 ### CTR-OVERLAY-010 — Tolerant, multi-tab-consistent preferences including size
 
 One versioned browser-local preference record MUST own normalized position,
-`collapsed`, the explicit Reduced Motion choice, and the `SMALL`/`LARGE` size
+`collapsed`, the inert legacy Reduced Motion field, and the `SMALL`/`LARGE` size
 choice and the character ID (`vehicle` or `companion`). Missing or unknown character IDs resolve to `vehicle`, independently of other valid fields. Missing, malformed, wrong-version, out-of-range, quota-failed, or
 unavailable storage MUST fall back safely without blocking the pet. A record
 lacking an explicit size choice MUST resolve to `LARGE` (this migrates every
@@ -733,22 +681,15 @@ runtime image generation. Expression presentation MUST NOT change
 progression and MUST NOT add pointer or focus targets beyond the pet surface
 and its contracted affordances.
 
-### CTR-OVERLAY-015 — Reduced motion keeps static state and variant readability
+### CTR-OVERLAY-015 — Static presentation always
 
-With reduced motion in effect (explicit preference first, OS setting as
-fallback, per `CTR-OVERLAY-010`), the overlay MUST suppress motion as before;
-every expression variant of `CTR-OVERLAY-014` MUST remain statically
-distinguishable without animation; speech text MUST remain fully readable
-and its lifecycle (appear, auto-dismiss) MUST NOT depend on animation; the
-click reaction degrades to the variant change without motion. Relocating the
-Reduced Motion control into the secondary affordance MUST NOT change the
-persisted preference semantics.
+The DSH adapter MUST always request reduced motion from the Engine and suppress all overlay/scene/shell animation and transition, irrespective of OS or legacy saved preference. Expression poses still change statically with state, clicks and cadence; text still appears and auto-dismisses. Remove the motion setting. Existing reducedMotion fields MAY be retained inertly for rollback compatibility, but MUST NOT reactivate motion or cause preference rewrites on mount. The Engine and prototype retain their existing reduced-motion interfaces; only this adapter selects the permanently static mode.
 
 ### CTR-OVERLAY-016 — Resident progress presentation is absent; growth systems preserved
 
 Neither resident size MAY render a within-level progress bar, sliver, gauge,
 percentage text, token totals or within-level numeric readouts on or under the
-pet. The sole persistent grade exception is the exact grade, localized operational description and clothing insignia required by CTR-023; it adds no gauge or within-level progress readout. The usage progress source, `progressPoints`, derived level, usage
+pet. The sole persistent grade exception is the exact grade, localized operational description and clothing insignia required by CTR-023, plus the active-session footer in CTR-025; it adds no gauge or within-level progress readout. The usage progress source, `progressPoints`, derived level, usage
 ledger, token economy, level-up, keepsakes, and Upgrade Receipts continue to
 function unchanged, and within-level progress remains visible inside the
 Full Journey dialog. A session-state reaction, bubble line, or ceremony
@@ -779,34 +720,13 @@ repository; deepseek-pet strings and translations of them are forbidden;
 copy MUST be short, companionable, and MUST NOT contain status codes,
 percentages, token counts, or engineering log phrasing. Selection MUST be a
 pure, unit-testable function of (category, structured trigger context,
-recent-selection history, bounded rotation counter); it MUST NOT select the
+recent-selection history, injected bounded random sample); it MUST NOT select the
 identical line twice in a row within the same category; runtime selection
 MUST NOT call a model or read any content forbidden by `CTR-OVERLAY-008`.
 
-### CTR-OVERLAY-019 — Speech cadence and anti-harassment bounds
+### CTR-OVERLAY-019 — Continuous randomized, bounded speech
 
-The speech scheduler MUST enforce all of the following, as pure
-unit-testable rules:
-
-1. load quiet period: no speech within 30 s of surface mount (the daily
-   greeting, mandated by the product baseline, is exempt as a single
-   once-per-local-day line and MAY show after a short delay);
-2. event lines (session state edges, level/milestone events) may preempt
-   ambient lines but are edge-deduplicated per `CTR-OVERLAY-007`;
-3. ambient idle lines: at most one per 600 s, only in the idle state, only
-   when payload-ignored user input recency exceeds 15 s;
-4. working rotation: at most one line per 120 s of a single running period,
-   at most three per running period, never while input recency is under
-   15 s;
-5. no identical line twice consecutively within a category;
-6. at most one bubble at a time (`CTR-OVERLAY-017`);
-7. click lines are throttled to at most one per 30 s; rapid clicks change
-   expression variants without speaking;
-8. all timers and listeners owned by the scheduler are disposed on plugin
-   stop (`CTR-OVERLAY-012`).
-
-The independent experience audit MUST judge the realized cadence
-`ANNOYANCE_RISK = LOW` against these bounds.
+Use the one existing scheduler across both character choices. After a 15-second initial quiet period, visible resident pets MUST continue attempting a context-appropriate original catalog line every independently sampled 20–40 seconds, without a per-running-period cap. The first recurring deadline is sampled at mount; after an emitted or suppressed recurring attempt, sample the next deadline, so typing or a hidden page never creates a catch-up burst. Pause recurring speech while document.hidden or collapsed/onboarding; no catch-up on return. Recent keyboard/pointer input within 5 seconds suppresses a recurring attempt; event-driven needs-input/terminal/milestone feedback retains deduplication and may preempt. Recurring text uses working for running, needs-input while pending, neutral idle after terminal expiry. Select randomly from eligible catalog entries excluding the previous line in the same category; randomness is an injected numeric input to pure testable selection/cadence rules, never derived from conversation content. Click lines retain a 30-second throttle. One bubble, 4-second target auto-dismiss (3–6 seconds), no forced speech on character switch, no reset of existing cooldown/deadline/history, and complete timer/listener cleanup remain mandatory. No model call, audio, focus stealing, flashing, or penalty for absence.
 
 ### CTR-OVERLAY-020 — Size modes, bounded relation, and toggle
 
@@ -821,18 +741,9 @@ authorized equivalent user action), effective immediately on choice, and
 stable across reload and restart. Both sizes satisfy `CTR-OVERLAY-003`
 placement and hitbox rules and `CTR-OVERLAY-016` progress absence.
 
-### CTR-OVERLAY-021 — Pet click reaction feels like the pet
+### CTR-OVERLAY-021 — Single click reaction, double-click settings
 
-A normal left click or keyboard activation on the visible pet MUST produce a
-bounded pet reaction: an expression variant change (respecting
-`CTR-OVERLAY-014` selection rules and `CTR-OVERLAY-015` reduced-motion
-degradation), a small motion (suppressed under reduced motion), and at most
-a throttled speech line per `CTR-OVERLAY-019`(7). A click MUST NOT open the
-secondary affordance, the journey dialog, any panel-shaped surface, or any
-host navigation. A drag MUST NOT produce the reaction (V2 drag-suppression
-semantics). The reaction MUST feel like companion feedback, not like
-activating a settings control; the independent experience audit MUST confirm
-the click does not read as a settings button.
+Single click/Enter/Space produces a static expression reaction and at most the throttled line; no motion. Double-click or Shift+Enter/ContextMenu opens only the bounded settings menu per CTR-005. A double-click sequence MUST NOT emit two lines or repeated reactions, and dragging MUST cause neither reaction nor menu. Keyboard arrows retain movement. Both modes must work at SMALL/LARGE and after reload.
 
 ## 10. Acceptance
 
@@ -848,7 +759,7 @@ fixed-ref DSH.
 - Contracts: `CTR-OVERLAY-001`.
 - Method and evidence: V2 `ACC-OVERLAY-001` unchanged (diff, packed file
   list, manifest, exports, patch row, clean DSH/profile status), executed at
-  the V4 implementation commit.
+  the V5 implementation commit.
 - Expected result: one external package ships all required surfaces; DSH
   checkout and production profile are unchanged by source implementation.
 - Failure condition: missing declaration/export, Core/profile source edit, or
@@ -920,7 +831,7 @@ fixed-ref DSH.
 - Contracts: `CTR-OVERLAY-006`.
 - Method and evidence: V2 `ACC-OVERLAY-006` unchanged (seeded snapshot,
   both-direction switch, reload, owned-fact equality, dependency graph,
-  boundary scan), executed at the V4 implementation commit.
+  boundary scan), executed at the V5 implementation commit.
 - Expected result: identical owned Engine facts across switches; DSH overlay
   renders only the product Pack; DSH imports only under `src/dsh/**`.
 - Failure condition: points reset/change, forked Pack/Engine, duplicate
@@ -1232,9 +1143,9 @@ fixed-ref DSH.
 ## 12. Migration, compatibility, and rollback
 
 ```text
-MIGRATION = forward-only: the V4 client replaces the V3 client through the normal plugin update path; preferences evolve compatibly (absent size resolves LARGE; absent/unknown character resolves vehicle; all other fields carried).
+MIGRATION = forward-only: the V5 client replaces the V4 client through the normal plugin update path; preferences evolve compatibly (absent size resolves LARGE; absent/unknown character resolves vehicle; all other fields carried).
 COMPATIBILITY = pinned to mayf3/deepseek-harness@f77b5a2fcebc2d9138f6608a60636f2294868d42 and its Harness Web React major (carried from V2); future Harness pins require compatibility review.
-ROLLBACK = dsh plugin --profile web update to the prior ref, or remove + reinstall the prior ref; restart Web profile; repository rollback is revert of the V4 implementation commit.
+ROLLBACK = dsh plugin --profile web update to the prior ref, or remove + reinstall the prior ref; restart Web profile; repository rollback is revert of the V5 implementation commit.
 EMERGENCY_CONTAINMENT = stop/remove the bundle and restart the Web profile; no DSH Core rollback involved.
 DATA_MIGRATION = NONE destructive: the versioned browser-local preference record gains a size field with LARGE-on-absence; Engine storage remains canonical and untouched.
 PRODUCTION_APPLICATION = OUT OF SCOPE for this Spec's rounds; the Goal stops at READY_FOR_PRODUCTION_APPLY and the production profile is applied only by a separate Owner gate.
@@ -1303,45 +1214,61 @@ Each character MUST have at least ten statically distinguishable expressions, in
 - Expected result: ten distinct poses, correct on-body mapping, alpha transparent background, catalog floors per character, unchanged scheduler and same-identity fallback; no runtime generation.
 - Failure condition: opaque image rectangles, wrong pose/grade, switch resets cadence, duplicate bubble/terminal replay, inappropriate cancellation copy or asset failure changes character.
 
-Coverage extension: CTR-022 → ACC-122; CTR-023 → ACC-123; CTR-024 → ACC-124. Existing CTR-001–021 and their acceptance mappings remain binding, evaluated with both characters wherever presentation or preferences are affected. Historical pre-V4 observation and acceptance records do not establish V4 implementation conformance.
+Coverage extension: CTR-022 → ACC-122; CTR-023 → ACC-123; CTR-024 → ACC-124. Existing CTR-001–021 and their acceptance mappings remain binding, evaluated with both characters wherever presentation or preferences are affected. Historical pre-V4 observation and acceptance records do not establish V5 implementation conformance.
 
 ## 12.4 Execution and delivery boundary
 
 The Owner dispatch in `docs/investigations/GOAL_CHARACTER_OWNER_DISPATCH.md`, updated by the approved wearable preview and 2026-09-09 integration request, authorizes documentation, independent review, acceptance and merge, then implementation from that accepted base. The four sheets and original art provenance are required delivery evidence. Run pnpm verify, pnpm verify:dsh, relevant asset checks, isolated pinned DSH lifecycle/coexistence checks, independent code audit and independent visual review. Merge only after required checks. Stop at READY_FOR_PRODUCTION_APPLY; this task does not authorize production profile mutation or deployment. No spec acceptance alone establishes runtime readiness.
 
-## 13. Authorization gate
+## 13. Owner-directed interaction refinement
+
+This whole-authority V5 succeeds V4. Historical observations and conformance results copied above remain historical evidence, not proof of this version. The original shared Engine, two mutually exclusive characters, operational levels, growth preservation, bundled art and no-production-apply boundary remain intact. No new art generation is required.
+
+### DEC-OVERLAY-015 — Quiet visuals, ongoing speech and active-session context
+
+Owner: mayf3, 2026-09-09 feedback. Remove the car's blue presentation backdrop, make motion permanently off, replace the ellipsis menu trigger with double-click, continue randomized catalog speech, and show active sessions below the character. Current-session visual reaction semantics remain unchanged; the footer is a separate read-only projection across the public session list, not an alternate growth source or session controller.
+
+### CTR-OVERLAY-025 — Bounded read-only active-session footer
+
+Below the grade description, show a compact read-only footer from the injected `ctx.sessions.list` snapshot. Active means `running === true` or an explicit nonempty pendingInteraction; pending takes precedence. Use only listed rows (ids when supplied), no hidden addressed rows, no additional session bindings. Show one sanitized title at a time and a total active count when greater than one; cycle every 6 seconds with a hard visual maximum of two short lines. Order deterministically with current active session first, then session ID. A completion/removal MUST disappear on the next list update, and title changes update immediately. Empty list shows localized "暂无活跃会话" / "No active sessions". Missing title uses localized "未命名会话" / "Untitled session", never a raw ID or path. Only title/displayTitle metadata is authorized: normalize control characters, bound input to 80 visible characters, render plain React text, ellipsize within available width; no HTML, body/log reads, copying into speech, navigation, persistence, analytics or extra network. The footer has no focus/pointer targets and never steals focus or writes growth. Its timers/subscriptions dispose on unmount/stop; no history survives reload.
+
+The complete active surface includes this footer (maximum 36px below the grade within the existing 112/216 square by reserving figure space, or an explicitly measured extension up to 36px with matching drag/viewport/composer/whale safe bounds). It MUST fit both sizes and narrow viewports without covering input/send/whale default footprints. No session list dashboard or expandable monitor is introduced.
+
+### CTR-OVERLAY-026 — Transparent resident vehicle presentation
+
+The resident car scene MUST have a transparent background with no pale-blue gradient, tile or backdrop. Preserve the original car, escort and remote-operator asset alpha and operational meanings; do not repaint/regenerate them. Scene hitbox and focus must still follow visible art. Full Journey may retain its existing scene backdrop. The companion remains transparent.
+
+### ACC-OVERLAY-125 — Five-point interaction acceptance
+
+- Contracts: CTR-003/005/008/010/015/017/018/019/021/025/026, with CTR-022/023/024 preserved.
+- Method: test transparent car styling, permanently static mode with legacy on/off/absent preferences and both OS settings; double-click/Shift+Enter/ContextMenu/outside/Escape and drag suppression; fake-clock randomized recurring speech beyond three running periods, bounds, hidden/input suppression, switch continuity, anti-repeat and disposal; listed running/pending/idle/removed/missing-title/hostile-title sessions and title updates; read-only footer lifecycle and count/rotation. Drive production component and real pinned-Harness session metadata, including background activity and narrow viewport geometry.
+- Environment: deterministic unit/DOM, existing asset checks, isolated pinned DSH and independent code/visual review.
+- Required evidence: fixed refs, executed tests, screenshots of transparent car and companion, double-click menu, recurring speech and active-session footer; no production apply.
+- Expected result: all five Owner changes work without data loss, extra model calls, duplicate scheduler, hidden interaction area or input/send/whale obstruction caused by the new surface.
+- Failure condition: blue car tile, motion returns, ellipsis/motion setting remains, normal click opens settings, drag opens menu, speech stops after a fixed number of lines, title/body leakage or unbounded/interactive footer.
+
+V5 acceptance reconciliation: prior ACC-104/105/110/114/119 and related V4 acceptance wording about menu triggers, reduced-motion settings or sparse cadence is evaluated under the explicit replacement CTR-005/010/015/019/021 and ACC-125 above. Unchanged acceptance obligations remain binding. This is a whole-authority successor; V4 is superseded atomically only on acceptance/merge. Documentation and isolated implementation/merge are authorized by the existing Owner dispatch plus this five-point request; production activation remains forbidden.
+
+## 14. Authorization gate
 
 ```text
 SPEC_GOVERNANCE_MODE = AUTHOR
-SPEC_ID = DSH_PET_OVERLAY_ADAPTER_V4
-STATUS = accepted
 AUTHORITY_ACTION = SUPERSEDE
+SPEC_ID = DSH_PET_OVERLAY_ADAPTER_V5
+STATUS = accepted
 IMPLEMENTATION_AUTHORITY = contracts
-PRIMARY_PARENT_AUTHORITY = VEHICLE_PET_PRODUCT_DIRECTION_V1 and CONFIGURABLE_PET_ENGINE_V4
 PLAN_LEVEL = EXEC_PLAN
 ASSURANCE_LEVEL = DURABLE
 DOCS_FIRST_REQUIRED = YES
-CONTRACT_COUNT = 24
-CONTRACTS_WITH_ACCEPTANCE = 24
 OPEN_OWNER_DECISIONS = NONE
 NORMATIVE_TBD = NONE
 PARTIAL_SUPERSESSION = NONE
-AUTHORING_READY_FOR_REVIEW = YES
-INDEPENDENT_REVIEW_RESULT = ACCEPT
-NEXT_ACTION = IMPLEMENTATION_AFTER_MERGE
-```
-
-## 14. Acceptance record
-
-```text
-ACCEPTED_BY = mayf3 (original Goal authorization; latest approved integration direction)
-ACCEPTED_AT = 2026-09-08T23:41:13.532800+00:00
-REVIEWED_BASE_COMMIT = 8fc429a7c86d61819014c5e51933adc05b9be1e5
-REVIEWED_PROPOSED_HEAD = d442aebaa9a186a77c2b9c0dc6422431d46f9947
-INDEPENDENT_REVIEWER = authority_preflight_review (no author/implementation participation)
-REVIEW_RESULT = ACCEPT; zero blockers and zero load-bearing gaps
-SEMANTIC_DELTA = lifecycle and atomic predecessor/index backlinks only
-ACTIVATION = only when accepted revision is reachable from main and implementation base
-MERGE_AUTHORIZED = YES (original Goal DONE_WHEN includes merged authority/implementation)
+CONTRACT_COUNT = 26
+CONTRACTS_WITH_ACCEPTANCE = 26
+INDEPENDENT_REVIEW = ACCEPT at cb3da221374dbe1b3aacbb7e80370bda89a377d8
 PRODUCTION_APPLY_ALLOWED = NO
+AUTHORING_READY_FOR_REVIEW = YES
+NEXT_ACTION = IMPLEMENTATION_FROM_ACCEPTED_MAIN_BASE
 ```
+
+Acceptance: mayf3 Owner dispatch, recorded by author after independent authority_preflight_review ACCEPT at cb3da221374dbe1b3aacbb7e80370bda89a377d8. Activation requires merge into main; production application remains forbidden.
