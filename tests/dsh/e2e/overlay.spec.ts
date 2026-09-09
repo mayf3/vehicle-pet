@@ -2147,6 +2147,8 @@ test('OVERLAY_V5_FIVE_POINT_ACCEPTANCE. transparent static vehicle, double-click
   await page.screenshot({path:`${ARTIFACTS}/v5-active-session.png`})
   await expect(footer).toHaveAttribute('data-vehicle-pet-active-sessions','0',{timeout:30000})
   await page.setViewportSize({width:390,height:844})
+  // ResizeObserver repositions the surface on the next layout frame.
+  await expect.poll(async () => { const box=(await footer.boundingBox())!; return box.x+box.width }).toBeLessThanOrEqual(390)
   const mobile=(await footer.boundingBox())!
   expect(mobile.x).toBeGreaterThanOrEqual(0)
   expect(mobile.x+mobile.width).toBeLessThanOrEqual(390)
