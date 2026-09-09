@@ -67,4 +67,3 @@ NEXT_AUTHORITY_ACTION = Owner merge decision for the exact accepted overlay revi
 
 
 Current Engine authority is CONFIGURABLE_PET_ENGINE_V4 after acceptance reaches main. L1–L5 operational occupancy/escort semantics supersede the erroneous V2/V3 decorative narrative. L6–L12 unchanged.
-
