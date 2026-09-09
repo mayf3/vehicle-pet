@@ -69,6 +69,8 @@ export interface OverlayDragController {
   readonly activeBounds: ActiveSurfaceBounds
   readonly shellStyle: CSSProperties
   readonly isDragging: boolean
+  /** V7 CTR-032 drag body reaction: bounded tilt toward the movement direction. */
+  readonly tiltDeg: number
   /** True exactly once after a drag; consumes the flag so the click is ignored. */
   readonly consumeSuppressedClick: () => boolean
   readonly moveByKeyboard: (dx: number, dy: number) => void
@@ -79,6 +81,9 @@ export interface OverlayDragController {
 }
 
 const DRAG_THRESHOLD_PX = 4
+/** V7 CTR-032: drag tilt bound; 4° at ≥64 px of horizontal travel. */
+const DRAG_TILT_MAX_DEG = 4
+const DRAG_TILT_PX_PER_DEG = 16
 const KEYBOARD_STEP_PX = 8
 const KEYBOARD_LARGE_STEP_PX = 32
 // The menu clears the active-session footer. The modeled gap must equal
@@ -248,6 +253,7 @@ export function useOverlayDrag({
   })
   const [dragAnchor, setDragAnchor] = useState<OverlayPoint | undefined>()
   const [isDragging, setIsDragging] = useState(false)
+  const [tiltDeg, setTiltDeg] = useState(0)
   const rootRef = useRef<HTMLDivElement>(null)
   const menuRef = useRef<HTMLElement | null>(null)
   const dragRef = useRef<DragState | undefined>()
@@ -314,6 +320,7 @@ export function useOverlayDrag({
     dragRef.current = undefined
     setDragAnchor(undefined)
     setIsDragging(false)
+    setTiltDeg(0)
     if (drag.moved) {
       ignoreClickRef.current = true
       if (drag.visibleMoved) {
@@ -362,6 +369,9 @@ export function useOverlayDrag({
     const dy = event.clientY - drag.start.y
     if (!drag.moved && Math.hypot(dx, dy) > DRAG_THRESHOLD_PX) drag.moved = true
     if (!drag.moved) return
+    // V7 CTR-032: bounded lean toward the horizontal movement direction; the
+    // figure and hitbox transform together (single characterArea transform).
+    setTiltDeg(Math.max(-DRAG_TILT_MAX_DEG, Math.min(DRAG_TILT_MAX_DEG, dx / DRAG_TILT_PX_PER_DEG)))
     const next = moveCompleteActiveSurface(
       drag.origin,
       { x: dx, y: dy },
@@ -386,6 +396,7 @@ export function useOverlayDrag({
     activeBounds: layout.activeBounds,
     shellStyle: { left: layout.point.x, top: layout.point.y, width: size, height: size },
     isDragging,
+    tiltDeg,
     consumeSuppressedClick: () => {
       if (!ignoreClickRef.current) return false
       ignoreClickRef.current = false

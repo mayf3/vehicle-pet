@@ -161,6 +161,57 @@
         "zh-CN": "等级牌换新啦，还是熟悉的我。",
         "en": "New badge, same familiar me."
       }
+    ],
+    "petting": [
+      {
+        "id": "companion-petting-1",
+        "zh-CN": "嘿嘿，被摸头了。",
+        "en": "Ehehe… head pats."
+      },
+      {
+        "id": "companion-petting-2",
+        "zh-CN": "再、再摸一下也可以哦。",
+        "en": "O-okay, one more pat."
+      },
+      {
+        "id": "companion-petting-3",
+        "zh-CN": "袖口都被摸乱啦。",
+        "en": "You ruffled my sleeve."
+      }
+    ],
+    "welcome": [
+      {
+        "id": "companion-welcome-1",
+        "zh-CN": "回来啦。",
+        "en": "Welcome back."
+      },
+      {
+        "id": "companion-welcome-2",
+        "zh-CN": "又见面啦。",
+        "en": "It's you again."
+      },
+      {
+        "id": "companion-welcome-3",
+        "zh-CN": "今天也一起吧。",
+        "en": "Let's make it a good day."
+      }
+    ],
+    "ritual": [
+      {
+        "id": "companion-ritual-1",
+        "zh-CN": "第一件事，搞定。",
+        "en": "First thing's done."
+      },
+      {
+        "id": "companion-ritual-2",
+        "zh-CN": "还没休息呀。",
+        "en": "Still up?"
+      },
+      {
+        "id": "companion-ritual-3",
+        "zh-CN": "今天也辛苦啦。",
+        "en": "You worked hard today."
+      }
     ]
   },
   "vehicle": {
@@ -324,6 +375,57 @@
         "id": "vehicle-level-up-5",
         "zh-CN": "下一段风景，继续一起看。",
         "en": "See the next view together."
+      }
+    ],
+    "petting": [
+      {
+        "id": "vehicle-petting-1",
+        "zh-CN": "再摸摸，最爱这个了。",
+        "en": "More of that, please!"
+      },
+      {
+        "id": "vehicle-petting-2",
+        "zh-CN": "呜哇，被摸得很舒服。",
+        "en": "That hits the spot."
+      },
+      {
+        "id": "vehicle-petting-3",
+        "zh-CN": "引擎都跟着开心了。",
+        "en": "Even my engine purrs."
+      }
+    ],
+    "welcome": [
+      {
+        "id": "vehicle-welcome-1",
+        "zh-CN": "回来啦！",
+        "en": "You're back!"
+      },
+      {
+        "id": "vehicle-welcome-2",
+        "zh-CN": "又见面啦，今天也一起吧。",
+        "en": "There you are. Let's roll."
+      },
+      {
+        "id": "vehicle-welcome-3",
+        "zh-CN": "正好，我热好车了。",
+        "en": "Perfect timing, all warmed up."
+      }
+    ],
+    "ritual": [
+      {
+        "id": "vehicle-ritual-1",
+        "zh-CN": "今天第一单，稳稳的。",
+        "en": "First one of the day, done."
+      },
+      {
+        "id": "vehicle-ritual-2",
+        "zh-CN": "夜还早，我陪你。",
+        "en": "Late night. I'm right here."
+      },
+      {
+        "id": "vehicle-ritual-3",
+        "zh-CN": "今天也辛苦啦。",
+        "en": "Good work today."
       }
     ]
   }

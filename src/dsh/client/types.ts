@@ -37,6 +37,23 @@ export interface VehiclePetOverlayPreferences {
   readonly reducedMotion: boolean | undefined
   /** Explicit size choice; absent resolves to LARGE (V3 DEC-OVERLAY-005). */
   readonly size: VehiclePetSize | undefined
+  /**
+   * V7 CTR-035/036 ritual fields. Absent/invalid fields silently disable the
+   * welcome-back and once-per-day rituals; they never block the pet.
+   */
+  readonly lastSeenAt?: number
+  readonly rituals?: RitualMarkers
+}
+
+/**
+ * Once-per-local-day ritual markers (V7 CTR-OVERLAY-036). No history beyond
+ * the current local day markers is ever accumulated.
+ */
+export interface RitualMarkers {
+  readonly dayKey: string | undefined
+  readonly firstCompletionDone: boolean
+  readonly lateNightDone: boolean
+  readonly welcomeDayKey: string | undefined
 }
 
 /**
