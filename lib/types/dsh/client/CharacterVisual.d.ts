@@ -1,6 +1,12 @@
 import { type ReactElement } from 'react';
 import { type CharacterDefinition } from './characters';
 import type { VehiclePetExpressionVariant } from './expressions';
+export declare function companionHitStyle(variant: VehiclePetExpressionVariant, surfaceSize: number): {
+    left: string;
+    top: string;
+    width: string;
+    height: string;
+};
 interface Props {
     character: CharacterDefinition;
     variant: VehiclePetExpressionVariant;

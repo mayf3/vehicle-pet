@@ -11,7 +11,7 @@ const STYLE_ID = 'vehicle-pet/overlay-styles'
 const css = `
 .vpo-characterArea{position:absolute;inset:0;transform:scale(.8);transform-origin:50% 0;pointer-events:none}
 [data-vehicle-pet-size="small"] .vpo-characterArea{transform:scale(.72)}
-.vpo-pose{position:absolute;left:20.37%;top:0;width:59.26%;height:100%;pointer-events:none}
+.vpo-pose{position:absolute;left:calc((100% - 100% * 320 / 540) / 2);top:0;width:calc(100% * 320 / 540);height:100%;pointer-events:none}
 .vpo-pose>img:not(.vpo-insignia){width:100%;height:100%;object-fit:contain}
 .vpo-pose>.vpo-insignia{position:absolute;width:15%;height:auto;pointer-events:none}
 .vpo-grade{position:absolute;bottom:0;left:0;width:100%;max-height:20%;display:flex;flex-direction:column;align-items:center;text-align:center;color:#244853;font:11px/13px system-ui,sans-serif;pointer-events:none;text-shadow:0 1px 2px #fff,0 -1px 2px #fff}
@@ -65,6 +65,10 @@ const css = `
    the pet; auto-dismissed by the scheduler; never focusable. */
 /* The anchor keeps a max-width bubble inside the viewport at the margin. */
 .vpo-bubble{position:absolute;z-index:6;left:clamp(146px,50%,calc(100% - 146px));transform:translateX(-50%);width:max-content;max-width:min(260px,calc(100vw - 32px));box-sizing:border-box;padding:9px 13px;border-radius:14px;background:color-mix(in srgb,var(--color-surface,#fff) 96%,transparent);border:1px solid color-mix(in srgb,var(--color-border,#a8bdcc) 72%,transparent);box-shadow:0 10px 28px rgba(10,37,57,.2);font-size:12px;line-height:1.45;color:var(--color-text,#17324d);pointer-events:none;text-align:center}
+.vpo-feedbackWrap{position:absolute;z-index:6;display:grid;gap:6px;width:min(260px,calc(100vw - 32px));left:clamp(calc(16px - var(--vpo-x)),calc(50% - 130px),calc(100vw - var(--vpo-x) - 276px));pointer-events:none}
+.vpo-feedbackWrap[data-placement="above"]{bottom:calc(100% + 8px)}
+.vpo-feedbackWrap[data-placement="below"]{top:calc(100% + 8px)}
+.vpo-feedbackWrap>.vp-greeting,.vpo-feedbackWrap>.vp-host-feedback{box-sizing:border-box;font-size:12px;line-height:1.4;pointer-events:auto;overflow-wrap:anywhere}
 .vpo-bubble[data-placement="above"]{bottom:calc(100% + 8px)}
 .vpo-bubble[data-placement="below"]{top:calc(100% + 8px)}
 /* Secondary settings affordance (V3 CTR-OVERLAY-005): the trigger row is
@@ -76,7 +80,10 @@ const css = `
 .vpo-menu{position:absolute;z-index:8;box-sizing:border-box;display:grid;gap:8px;padding:10px 12px;border-radius:14px;background:color-mix(in srgb,var(--color-surface,#fff) 96%,transparent);border:1px solid color-mix(in srgb,var(--color-border,#a8bdcc) 72%,transparent);box-shadow:0 14px 40px rgba(10,37,57,.22);font-size:12px;line-height:1.4;color:var(--color-text,#17324d);pointer-events:auto}
 .vpo-menu[data-horizontal="left"]{left:0}.vpo-menu[data-horizontal="right"]{right:0}
 .vpo-menu[data-vertical="above"]{bottom:calc(100% + 26px)}.vpo-menu[data-vertical="below"]{top:calc(100% + 26px)}
-.vpo-menuRow{display:grid;gap:5px}
+.vpo-menuRow{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+.vpo-menuRow[data-vehicle-pet-reduced-motion]{grid-template-columns:repeat(3,minmax(0,1fr))}
+.vpo-menuRow>.vpo-menuLabel{grid-column:1/-1}
+.vpo-menuRow>.vpo-control{padding:4px 6px;text-align:center}
 .vpo-menuLabel{opacity:.65}
 .vpo-control{font:inherit;min-height:28px;padding:4px 10px;border-radius:8px;border:1px solid color-mix(in srgb,var(--color-border,#a8bdcc) 72%,transparent);background:color-mix(in srgb,var(--color-surface,#fff) 84%,transparent);color:inherit;cursor:pointer;text-align:start}
 .vpo-control[aria-pressed="true"]{border-color:var(--color-accent,#2f80ed)}

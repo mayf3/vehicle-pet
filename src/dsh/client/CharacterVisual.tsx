@@ -2,8 +2,22 @@ import { useState, type ReactElement } from 'react'
 import { PetSceneRenderer } from '../../react'
 import { ExpressionLayer } from './ExpressionLayer'
 import { COMPANION_POSES, characterLevel, type CharacterDefinition } from './characters'
-import { companionAssets, insigniaAssets, poseAnchors } from './character-assets.generated'
+import { companionAssets, insigniaAssets, poseAnchors, poseAlphaBounds } from './character-assets.generated'
 import type { VehiclePetExpressionVariant } from './expressions'
+
+// The pose canvas is 320×540, contained in the square resident canvas.
+export function companionHitStyle(variant: VehiclePetExpressionVariant, surfaceSize: number) {
+  const [x0,y0,x1,y1] = poseAlphaBounds[COMPANION_POSES[variant]]!
+  const ratio = 320 / 540
+  // Two pre-transform pixels cover the subtle idle motion and alpha edge.
+  const pad = 2 / surfaceSize * 100
+  return {
+    left: `${(1-ratio)/2*100+x0/540*100-pad}%`,
+    top: `${y0/540*100-pad}%`,
+    width: `${(x1-x0)/540*100+pad*2}%`,
+    height: `${(y1-y0)/540*100+pad*2}%`,
+  }
+}
 
 interface Props {
   character: CharacterDefinition

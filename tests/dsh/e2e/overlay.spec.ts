@@ -2062,6 +2062,13 @@ test('CHARACTER_V4_PERSISTENCE_AND_GEOMETRY. selection keeps Engine records and 
     const label=page.locator('[data-vehicle-pet-grade]')
     expect((await label.textContent())!.length).toBeGreaterThan(12)
     const shell=await shellBox(page), box=await label.boundingBox()
+    const greeting=page.locator('[data-pet-greeting]')
+    if(await greeting.count()) {
+      const greetingBox=await greeting.boundingBox()
+      expect(overlapArea(shell,greetingBox!)).toBe(0)
+      expect(greetingBox!.x).toBeGreaterThanOrEqual(0)
+      expect(greetingBox!.x+greetingBox!.width).toBeLessThanOrEqual(VIEWPORT.width)
+    }
     expect(box).not.toBeNull()
     expect(box!.x).toBeGreaterThanOrEqual(shell.x)
     expect(box!.y+box!.height).toBeLessThanOrEqual(shell.y+shell.height+.5)
