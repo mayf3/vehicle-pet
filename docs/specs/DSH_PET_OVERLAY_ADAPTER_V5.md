@@ -1143,7 +1143,7 @@ fixed-ref DSH.
 ## 12. Migration, compatibility, and rollback
 
 ```text
-MIGRATION = forward-only: the V4 client replaces the V3 client through the normal plugin update path; preferences evolve compatibly (absent size resolves LARGE; absent/unknown character resolves vehicle; all other fields carried).
+MIGRATION = forward-only: the V5 client replaces the V4 client through the normal plugin update path; preferences evolve compatibly (absent size resolves LARGE; absent/unknown character resolves vehicle; all other fields carried).
 COMPATIBILITY = pinned to mayf3/deepseek-harness@f77b5a2fcebc2d9138f6608a60636f2294868d42 and its Harness Web React major (carried from V2); future Harness pins require compatibility review.
 ROLLBACK = dsh plugin --profile web update to the prior ref, or remove + reinstall the prior ref; restart Web profile; repository rollback is revert of the V5 implementation commit.
 EMERGENCY_CONTAINMENT = stop/remove the bundle and restart the Web profile; no DSH Core rollback involved.
