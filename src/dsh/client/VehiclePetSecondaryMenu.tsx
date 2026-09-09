@@ -1,11 +1,6 @@
 /**
- * VehiclePetSecondaryMenu: the small non-modal secondary settings affordance
- * (DSH_PET_OVERLAY_ADAPTER_V3 DEC-OVERLAY-008 / CTR-OVERLAY-005). Revealed by
- * hover / focus / the keyboard-equivalent toggle — never by a normal pet click
- * — and contains exactly: size (SMALL/LARGE), Reduced Motion (system/on/off
- * semantics unchanged), Full Journey entry, and Collapse. No progression
- * numbers, level names, Pack names, keepsakes, or engineering readouts.
- * Outside press and Escape close it. Narrow fixed width ≤224px.
+ * V5 compact settings, opened by pet double-click or keyboard equivalent.
+ * Character, size, Full Journey and Collapse; outside press / Escape close.
  */
 
 import {
@@ -28,10 +23,6 @@ export interface VehiclePetSecondaryMenuProps {
 
 export function VehiclePetSecondaryMenu(props: VehiclePetSecondaryMenuProps): ReactElement {
   const { t, commitPreferences } = useOverlayChrome()
-
-  const commitReducedMotion = useCallback((reduced: boolean | undefined): void => {
-    commitPreferences(current => ({ ...current, reducedMotion: reduced }))
-  }, [commitPreferences])
 
   const handleKeyDown = useCallback((event: ReactKeyboardEvent<HTMLElement>): void => {
     if (event.key === 'Escape') {
@@ -95,37 +86,6 @@ export function VehiclePetSecondaryMenu(props: VehiclePetSecondaryMenuProps): Re
           onClick={() => props.onCommitSize('large')}
         >
           {t('menu.size.large')}
-        </button>
-      </div>
-
-      <div className="vpo-menuRow" role="group" aria-label={t('menu.reducedMotion')} data-vehicle-pet-reduced-motion="true">
-        <span className="vpo-menuLabel">{t('menu.reducedMotion')}</span>
-        <button
-          type="button"
-          className="vpo-control"
-          aria-pressed={props.preferences.reducedMotion === undefined ? 'true' : 'false'}
-          data-vehicle-pet-reduced-motion-option="system"
-          onClick={() => commitReducedMotion(undefined)}
-        >
-          {t('menu.reducedMotion.system')}
-        </button>
-        <button
-          type="button"
-          className="vpo-control"
-          aria-pressed={props.preferences.reducedMotion === true ? 'true' : 'false'}
-          data-vehicle-pet-reduced-motion-option="on"
-          onClick={() => commitReducedMotion(true)}
-        >
-          {t('menu.reducedMotion.on')}
-        </button>
-        <button
-          type="button"
-          className="vpo-control"
-          aria-pressed={props.preferences.reducedMotion === false ? 'true' : 'false'}
-          data-vehicle-pet-reduced-motion-option="off"
-          onClick={() => commitReducedMotion(false)}
-        >
-          {t('menu.reducedMotion.off')}
         </button>
       </div>
 

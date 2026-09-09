@@ -68,7 +68,7 @@ function petButton(): HTMLElement {
 }
 
 function openMenu(): HTMLElement {
-  fireEvent.click(screen.getByRole('button', { name: t('menu.open') }))
+  fireEvent.doubleClick(petButton())
   return screen.getByRole('group', { name: t('menu.title') })
 }
 
@@ -183,18 +183,18 @@ describe('SECONDARY_SETTINGS_ACCESSIBLE (V3 CTR-OVERLAY-005, DEC-OVERLAY-008)', 
     const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
     const view = await renderOverlay(source)
     // Not opened by a normal pet click (covered above); only the trigger opens it.
-    fireEvent.click(screen.getByRole('button', { name: t('menu.open') }))
+    fireEvent.doubleClick(petButton())
     const menu = screen.getByRole('group', { name: t('menu.title') })
     expect(menu).toHaveAttribute('data-vehicle-pet-menu', 'true')
     expect(menu.style.width).toBe(`${OVERLAY_GEOMETRY.secondaryMenuWidthPx}px`)
 
     // Exactly: size, reduced motion, journey, collapse.
     expect(menu.querySelector('[data-vehicle-pet-size-control]')).not.toBeNull()
-    expect(menu.querySelector('[data-vehicle-pet-reduced-motion]')).not.toBeNull()
+    expect(menu.querySelector('[data-vehicle-pet-reduced-motion]')).toBeNull()
     expect(menu.querySelector('[data-vehicle-pet-open-journey]')).not.toBeNull()
     expect(menu.querySelector('[data-vehicle-pet-collapse]')).not.toBeNull()
     expect(menu.querySelectorAll('[data-vehicle-pet-size-option]')).toHaveLength(2)
-    expect(menu.querySelectorAll('[data-vehicle-pet-reduced-motion-option]')).toHaveLength(3)
+    expect(menu.querySelectorAll('[data-vehicle-pet-reduced-motion-option]')).toHaveLength(0)
 
     // No progression content, no Pack name, no keepsake, no engineering readout.
     for (const removed of ['[data-vehicle-pet-stage]', '[data-vehicle-pet-progress]', '[data-vehicle-pet-next-threshold]', '[data-vehicle-pet-pack-name]', '[data-vehicle-pet-keepsake]', '[data-vehicle-pet-pack-switch]', '[data-vehicle-pet-pack-option]']) {
@@ -236,7 +236,7 @@ describe('SECONDARY_SETTINGS_ACCESSIBLE (V3 CTR-OVERLAY-005, DEC-OVERLAY-008)', 
     expect(document.body.textContent).not.toContain('种子伙伴')
 
     // The journey dialog opens from the menu and shows no Pack option either.
-    fireEvent.click(screen.getByRole('button', { name: t('menu.open') }))
+    fireEvent.doubleClick(petButton())
     fireEvent.click(screen.getByRole('button', { name: t('menu.viewJourney') }))
     await screen.findByRole('dialog', { name: t('dialog.title') })
     expect(document.querySelector('[data-vehicle-pet-pack-option]')).toBeNull()
@@ -364,7 +364,7 @@ describe('VehiclePetOverlay full journey dialog', () => {
     document.body.append(outside)
     const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
     const view = await renderOverlay(source)
-    fireEvent.click(screen.getByRole('button', { name: t('menu.open') }))
+    fireEvent.doubleClick(petButton())
     const trigger = screen.getByRole('button', { name: t('menu.viewJourney') })
     fireEvent.click(trigger)
 
@@ -401,7 +401,7 @@ describe('VehiclePetOverlay live Harness locale', () => {
   it('HARNESS_LOCALE_LIVE_SYNC_TEST updates chrome, Pack, stage, keepsake, and journey zh-CN → en → zh-CN without remounting', async () => {
     const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh-CN' }
     const view = await renderOverlay(source)
-    fireEvent.click(screen.getByRole('button', { name: t('menu.open') }))
+    fireEvent.doubleClick(petButton())
     fireEvent.click(screen.getByRole('button', { name: zh['menu.viewJourney'] }))
 
     const assertLocale = async (locale: 'zh-CN' | 'en') => {
@@ -455,7 +455,7 @@ describe('VehiclePetOverlay onboarding suppression matrix', () => {
   it('removes pet, menu, dialog, and focus targets then restores VISIBLE', async () => {
     const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
     const view = await renderOverlay(source)
-    fireEvent.click(screen.getByRole('button', { name: t('menu.open') }))
+    fireEvent.doubleClick(petButton())
     fireEvent.click(screen.getByRole('button', { name: t('menu.viewJourney') }))
     expect(screen.queryByRole('dialog', { name: t('dialog.title') })).not.toBeNull()
 
@@ -564,7 +564,7 @@ describe('VehiclePetOverlay movement and multi-tab sync', () => {
   it('CROSSTAB_COLLAPSE_RESTORE_VISIBLE_TEST destroys stale Menu and Dialog without writes', async () => {
     const source: Source = { view: IDLE_VIEW, sessions: SESSIONS_ON, locale: 'zh' }
     await renderOverlay(source)
-    fireEvent.click(screen.getByRole('button', { name: t('menu.open') }))
+    fireEvent.doubleClick(petButton())
     fireEvent.click(screen.getByRole('button', { name: t('menu.viewJourney') }))
     await screen.findByRole('dialog', { name: t('dialog.title') })
 

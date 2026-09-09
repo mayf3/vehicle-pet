@@ -78,11 +78,11 @@ describe('safe bottom-right placement', () => {
     const defaults = copyOverlayDefaults()
     const safe = pointFromRatios(defaults, bounds, OVERLAY_GEOMETRY.smallSurfaceHeightPx)
     expect(safe.x).toBe(1440 - OVERLAY_GEOMETRY.smallSurfaceHeightPx - OVERLAY_GEOMETRY.viewportMarginPx)
-    expect(safe.y).toBe(900 - OVERLAY_GEOMETRY.smallSurfaceHeightPx - OVERLAY_GEOMETRY.viewportMarginPx - OVERLAY_GEOMETRY.smallDefaultBottomSafeInsetPx)
+    expect(safe.y).toBe(900 - OVERLAY_GEOMETRY.smallSurfaceHeightPx - 32 - OVERLAY_GEOMETRY.viewportMarginPx - OVERLAY_GEOMETRY.smallDefaultBottomSafeInsetPx)
 
     const customized = { ...defaults, positionCustomized: true }
     const restored = pointFromRatios(customized, bounds, OVERLAY_GEOMETRY.smallSurfaceHeightPx)
-    expect(restored.y).toBe(900 - OVERLAY_GEOMETRY.smallSurfaceHeightPx - OVERLAY_GEOMETRY.viewportMarginPx)
+    expect(restored.y).toBe(900 - OVERLAY_GEOMETRY.smallSurfaceHeightPx - 32 - OVERLAY_GEOMETRY.viewportMarginPx)
   })
 
   it('keeps the default visible and collapsed surfaces inside a 390px viewport', () => {
@@ -157,7 +157,7 @@ describe('MENU_COMPLETE_ACTIVE_SURFACE_CLAMP_TEST', () => {
         { horizontal: 'left', vertical: 'below' },
       )
       expect(layout.activeBounds.right - layout.activeBounds.left).toBe(size)
-      expect(layout.activeBounds.bottom - layout.activeBounds.top).toBe(size)
+      expect(layout.activeBounds.bottom - layout.activeBounds.top).toBe(size + (size === 36 ? 0 : 32))
       expect(layout.activeBounds.right).toBeLessThanOrEqual(374)
       expect(layout.activeBounds.bottom).toBeLessThanOrEqual(828)
     }
@@ -275,9 +275,9 @@ describe('SIZE_PERSISTENCE_PREFERENCES (V3 CTR-OVERLAY-010/020)', () => {
   it('LARGE default placement reserves the recorded coexistence inset; SMALL keeps the composer-safe inset', () => {
     const bounds = { width: 1440, height: 900 }
     const large = pointFromRatios(copyOverlayDefaults(), bounds, OVERLAY_GEOMETRY.largeSurfaceHeightPx)
-    expect(large.y).toBe(900 - OVERLAY_GEOMETRY.largeSurfaceHeightPx - OVERLAY_GEOMETRY.viewportMarginPx - OVERLAY_GEOMETRY.largeDefaultBottomSafeInsetPx)
+    expect(large.y).toBe(900 - OVERLAY_GEOMETRY.largeSurfaceHeightPx - 32 - OVERLAY_GEOMETRY.viewportMarginPx - OVERLAY_GEOMETRY.largeDefaultBottomSafeInsetPx)
     const small = pointFromRatios(copyOverlayDefaults(), bounds, OVERLAY_GEOMETRY.smallSurfaceHeightPx)
-    expect(small.y).toBe(900 - OVERLAY_GEOMETRY.smallSurfaceHeightPx - OVERLAY_GEOMETRY.viewportMarginPx - OVERLAY_GEOMETRY.smallDefaultBottomSafeInsetPx)
+    expect(small.y).toBe(900 - OVERLAY_GEOMETRY.smallSurfaceHeightPx - 32 - OVERLAY_GEOMETRY.viewportMarginPx - OVERLAY_GEOMETRY.smallDefaultBottomSafeInsetPx)
   })
 
   it('SIZE_MODE bands: LARGE 1.6x-2.2x SMALL with both within their nominal bands', () => {

@@ -40,6 +40,8 @@ import {
   expressionStateFromSession, selectExpressionVariant,
   type VehiclePetExpressionVariant,
 } from './expressions'
+import {activeSessionsFromList, type ActiveSession} from './active-sessions'
+import {ActiveSessionFooter} from './ActiveSessionFooter'
 import { CharacterVisual, companionHitStyle } from './CharacterVisual'
 import { CHARACTER_DEFINITIONS, characterLevel } from './characters'
 import type { CharacterId } from './types'
@@ -66,6 +68,7 @@ export type VehiclePetOverlayProps = PropsRuntime<'shell.overlay'>
 
 /** Overlay chrome shared with the menu/dialog: translate + pref commit. */
 interface OverlayChrome {
+  activeSessions?: readonly ActiveSession[]
   t: PropsLocale<'vehicle-pet'>['t']
   commitPreferences: (update: (current: VehiclePetOverlayPreferences) => VehiclePetOverlayPreferences) => void
   engineLocale: Locale
@@ -92,6 +95,8 @@ export function VehiclePetOverlay(props: VehiclePetOverlayProps): ReactElement |
   const { useSessionView, useLocale, useSessions, t, sessionBinding, usageSessions, clientGeneration } = props
 
   const sessionView = useSessionView(view => view)
+  const sessionMetadata = useSessions(state => state)
+  const activeSessions = useMemo(()=>activeSessionsFromList(sessionMetadata),[sessionMetadata])
   const activeLocale = useLocale(snapshot => snapshot.active)
   const engineLocale: Locale = activeLocale === 'en' ? 'en' : 'zh-CN'
   const sessionListCurrent = useSessions(state => state.current)
@@ -123,7 +128,7 @@ export function VehiclePetOverlay(props: VehiclePetOverlayProps): ReactElement |
     })
   }, [])
 
-  const chrome = useMemo<OverlayChrome>(() => ({ t, commitPreferences, engineLocale }), [t, commitPreferences, engineLocale])
+  const chrome = useMemo<OverlayChrome>(() => ({ t, commitPreferences, engineLocale, activeSessions }), [t, commitPreferences, engineLocale, activeSessions])
 
   // CTR-OVERLAY-011: onboarding renders no pet DOM, launcher, menu, dialog,
   // bubble, or pointer/focus target at all. The gate is ephemeral, not a
@@ -219,7 +224,7 @@ function OverlayEngineGate({
     fallback: MemoryStorageFallback,
   }), [])
 
-  const reducedMotion = preferences.reducedMotion ?? systemPrefersReducedMotion()
+  const reducedMotion = true
   if (storage === null) return null
   return (
     <PetEngineProvider
@@ -246,10 +251,7 @@ function OverlayEngineGate({
 
 const MemoryStorageFallback = new MemoryPetStorageAdapter()
 
-function systemPrefersReducedMotion(): boolean {
-  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return false
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches
-}
+
 
 /**
  * The visible overlay: resident pet (SMALL 112 / LARGE 216), launcher (36px),
@@ -299,7 +301,8 @@ function OverlaySurface({
 
   const closeMenu = useCallback(() => {
     setMenuOpen(false)
-  }, [])
+    drag.rootRef.current?.querySelector<HTMLButtonElement>('[data-vehicle-pet-pet]')?.focus()
+  }, [drag.rootRef])
 
   // R4-B2 invariant carried to V3: every collapsed preference source (local
   // action, storage adoption, reload, or fallback) destroys transient open
@@ -470,7 +473,6 @@ function ResidentPet({
   characterId,
   sessionView,
   surfaceSize,
-  menuOpen,
   onOpenMenu,
   bubblePlacement,
   petInteractionCount,
@@ -489,7 +491,8 @@ function ResidentPet({
   dragHandlers: ReturnType<typeof useOverlayDrag>
   onKeyDown: (event: ReactKeyboardEvent<HTMLElement>) => void
 }): ReactElement {
-  const { t, engineLocale } = useOverlayChrome()
+  const { t, engineLocale, activeSessions = [] } = useOverlayChrome()
+  const suppressDoubleUntil = useRef(0)
   const { snapshot } = usePetEngine()
 
   const speech = useVehiclePetSpeech({
@@ -547,7 +550,7 @@ function ResidentPet({
         className="vpo-surface vpo-petHit"
         style={hitStyle}
         aria-label={t('overlay.label', { state: t(stateKey) })}
-        aria-description={`${t('menu.character.' + characterId as VehiclePetLocaleKey)}${grade === null ? '' : ` · ${grade.grade} ${grade.description}`}`}
+        aria-description={`${engineLocale==='en'?'Double-click or Shift+Enter for settings. ':'双击或 Shift+Enter 打开设置。'}${t('menu.character.' + characterId as VehiclePetLocaleKey)}${grade === null ? '' : ` · ${grade.grade} ${grade.description}`}`}
         data-vehicle-pet-pet="true"
         data-vehicle-pet-character={characterId}
         data-vehicle-pet-expression={variant}
@@ -555,9 +558,20 @@ function ResidentPet({
         data-vehicle-pet-level={levelId}
         data-live={sessionView.terminal !== null ? 'terminal' : sessionView.live}
         data-terminal={sessionView.terminal?.status}
-        onKeyDown={onKeyDown}
-        onClick={() => {
-          if (dragHandlers.consumeSuppressedClick()) return
+        onKeyDown={event => {
+          if ((event.shiftKey && event.key==='Enter') || event.key==='ContextMenu') {
+            event.preventDefault(); onOpenMenu(); return
+          }
+          onKeyDown(event)
+        }}
+        onDoubleClick={event => {
+          event.preventDefault()
+          if(Date.now()<suppressDoubleUntil.current || dragHandlers.consumeSuppressedClick()) return
+          onOpenMenu()
+        }}
+        onClick={event => {
+          if (dragHandlers.consumeSuppressedClick()) {suppressDoubleUntil.current=Date.now()+500;return}
+          if(event.detail>1) return
           onPetClick()
           speech.speakForClick(state)
         }}
@@ -573,19 +587,7 @@ function ResidentPet({
       </span>}
       {sessionView.live === 'needs-input' ? <span className="vpo-badge" aria-hidden="true" /> : null}
       <VehiclePetBubble bubble={speech.bubble} placement={bubblePlacement} />
-      <div className={`vpo-tools${menuOpen ? ' vpo-tools-open' : ''}`}>
-        <button
-          type="button"
-          className="vpo-control vpo-toolsTrigger"
-          aria-label={t('menu.open')}
-          aria-expanded={menuOpen}
-          data-vehicle-pet-menu-trigger="true"
-          onClick={onOpenMenu}
-          onKeyDown={onKeyDown}
-        >
-          ⋯
-        </button>
-      </div>
+      <ActiveSessionFooter sessions={activeSessions} locale={engineLocale} />
     </>
   )
 }
