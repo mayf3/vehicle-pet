@@ -23,6 +23,8 @@ const ARTIFACTS = 'tests/dsh/e2e/.artifacts'
 const consoleErrors: string[] = []
 
 test.beforeEach(async ({ page }) => {
+  const reset=await fetch('http://127.0.0.1:8902/reset',{method:'POST'})
+  if(!reset.ok) throw new Error('Mock reset failed')
   page.on('console', message => {
     if (message.type() === 'error') consoleErrors.push(message.text())
   })

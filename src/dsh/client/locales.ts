@@ -56,11 +56,11 @@ export const en: Record<VehiclePetLocaleKey, string> = {
   'menu.size.small': 'Small',
   'menu.size.large': 'Large',
   'menu.reducedMotion': 'Reduced motion',
-  'menu.reducedMotion.system': 'Follow system',
+  'menu.reducedMotion.system': 'System',
   'menu.reducedMotion.on': 'On',
   'menu.reducedMotion.off': 'Off',
   'menu.collapse': 'Collapse overlay',
-  'menu.viewJourney': 'View full journey',
+  'menu.viewJourney': 'Full journey',
   'dialog.title': 'Growth Journey',
   'dialog.close': 'Close journey',
 }

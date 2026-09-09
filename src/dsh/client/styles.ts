@@ -64,8 +64,10 @@ const css = `
 /* Speech bubble (V3 CTR-OVERLAY-017): single polite surface above (or below)
    the pet; auto-dismissed by the scheduler; never focusable. */
 /* The anchor keeps a max-width bubble inside the viewport at the margin. */
-.vpo-bubble{position:absolute;z-index:6;left:clamp(146px,50%,calc(100% - 146px));transform:translateX(-50%);width:max-content;max-width:min(260px,calc(100vw - 32px));box-sizing:border-box;padding:9px 13px;border-radius:14px;background:color-mix(in srgb,var(--color-surface,#fff) 96%,transparent);border:1px solid color-mix(in srgb,var(--color-border,#a8bdcc) 72%,transparent);box-shadow:0 10px 28px rgba(10,37,57,.2);font-size:12px;line-height:1.45;color:var(--color-text,#17324d);pointer-events:none;text-align:center}
+.vpo-bubble{position:absolute;z-index:6;left:clamp(calc(146px - var(--vpo-x)),50%,calc(100vw - var(--vpo-x) - 146px));transform:translateX(-50%);width:max-content;max-width:min(260px,calc(100vw - 32px));box-sizing:border-box;padding:9px 13px;border-radius:14px;background:color-mix(in srgb,var(--color-surface,#fff) 96%,transparent);border:1px solid color-mix(in srgb,var(--color-border,#a8bdcc) 72%,transparent);box-shadow:0 10px 28px rgba(10,37,57,.2);font-size:12px;line-height:1.45;color:var(--color-text,#17324d);pointer-events:none;text-align:center}
 .vpo-feedbackWrap{position:absolute;z-index:6;display:grid;gap:6px;width:min(260px,calc(100vw - 32px));left:clamp(calc(16px - var(--vpo-x)),calc(50% - 130px),calc(100vw - var(--vpo-x) - 276px));pointer-events:none}
+/* The shared speech surface wins while active; Engine feedback still expires normally. */
+.vpo-shell:has(.vpo-bubble) .vpo-feedbackWrap{visibility:hidden}
 .vpo-feedbackWrap[data-placement="above"]{bottom:calc(100% + 8px)}
 .vpo-feedbackWrap[data-placement="below"]{top:calc(100% + 8px)}
 .vpo-feedbackWrap>.vp-greeting,.vpo-feedbackWrap>.vp-host-feedback{box-sizing:border-box;font-size:12px;line-height:1.4;pointer-events:auto;overflow-wrap:anywhere}
@@ -77,7 +79,7 @@ const css = `
 .vpo-tools{position:absolute;z-index:7;left:50%;transform:translateX(-50%);top:calc(100% + 4px);opacity:0;pointer-events:none;transition:opacity .18s ease}
 .vpo-shell:hover .vpo-tools,.vpo-shell:focus-within .vpo-tools,.vpo-tools.vpo-tools-open{opacity:1;pointer-events:auto}
 .vpo-toolsTrigger{display:flex;align-items:center;justify-content:center;min-width:30px;height:26px;padding:0 9px;border-radius:999px;font-size:14px;line-height:1}
-.vpo-menu{position:absolute;z-index:8;box-sizing:border-box;display:grid;gap:8px;padding:10px 12px;border-radius:14px;background:color-mix(in srgb,var(--color-surface,#fff) 96%,transparent);border:1px solid color-mix(in srgb,var(--color-border,#a8bdcc) 72%,transparent);box-shadow:0 14px 40px rgba(10,37,57,.22);font-size:12px;line-height:1.4;color:var(--color-text,#17324d);pointer-events:auto}
+.vpo-menu{position:absolute;z-index:8;box-sizing:border-box;display:grid;gap:6px;padding:8px 12px;border-radius:14px;background:color-mix(in srgb,var(--color-surface,#fff) 96%,transparent);border:1px solid color-mix(in srgb,var(--color-border,#a8bdcc) 72%,transparent);box-shadow:0 14px 40px rgba(10,37,57,.22);font-size:12px;line-height:1.4;color:var(--color-text,#17324d);pointer-events:auto}
 .vpo-menu[data-horizontal="left"]{left:0}.vpo-menu[data-horizontal="right"]{right:0}
 .vpo-menu[data-vertical="above"]{bottom:calc(100% + 26px)}.vpo-menu[data-vertical="below"]{top:calc(100% + 26px)}
 .vpo-menuRow{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
