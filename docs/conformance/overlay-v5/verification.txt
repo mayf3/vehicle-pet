@@ -1,0 +1,21 @@
+/tmp/v5-verify.log SHA256 8533d4fe298d5daf823e0192a18211aaa43ead0bb79f42e93289925356a39f9d
+ Test Files  26 passed (26)
+      Tests  158 passed (158)
+  12 passed (12.2s)
+ Test Files  3 passed (3)
+      Tests  18 passed (18)
+/tmp/v5-verify-dsh.log SHA256 ebabedf109146d44a67231589d06617a54cc45e7489c2bd7e98de6e49b7bfefd
+ Test Files  3 passed (3)
+      Tests  18 passed (18)
+ Test Files  12 passed (12)
+      Tests  128 passed (128)
+  38 passed (10.2m)
+/tmp/v5-final-checks.log SHA256 bf7695a5af9854bf77d5fd974d04730fdddca87dfbd2d5306ef43f7823d7268a
+ Test Files  12 passed (12)
+      Tests  130 passed (130)
+/tmp/v5-focused-e2e.log SHA256 8c65af84c37e2269a9b1265f416d122182fd2494959dc03dbe737d5e10a9054f
+  2 passed (1.8m)
+/tmp/v5-coexist.log SHA256 1e273db683a0771c12a084712c27f01713fbe44ccf7578235f2a6d77f7021b49
+  2 passed (33.7s)
+/tmp/v5-governance.log SHA256 c8671db6c5d33b2e2c051a17143acc9bb5736cf8788e72feed4728b5cb32f332
+vendored governance bytes match governance.lock.json and adoption is accepted
