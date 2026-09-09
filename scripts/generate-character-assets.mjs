@@ -14,7 +14,7 @@ const emit = async (path, value) => {
 const meta = await sharp(source).metadata()
 if (!meta.hasAlpha || meta.width !== 1536 || meta.height !== 1024) throw new Error('Unexpected source')
 let imports = '', rows = ''
-const rects=[[16,319],[340,597],[639,896],[916,1224],[1240,1534],[20,290],[326,632],[637,910],[938,1194],[1260,1526]]
+const rects=[[16,319],[340,597],[639,896],[916,1224],[1240,1534],[20,290],[326,632],[637,910],[938,1194],[1208,1536]]
 const sourceAnchors=[[82,54,-14],[73,52,12],[77,51,-8],[72,45,-28],[70,51,25],[76,52,10],[80,48,-18],[73,50,8],[29,50,-18],[72,51,-22]]
 const anchors=[], bounds=[]
 for (let i=0;i<10;i++) {
