@@ -30,6 +30,7 @@ export interface VehiclePetSpeechController {
 }
 interface SchedulerOptions {
     readonly characterId?: CharacterId;
+    readonly random?: () => number;
     readonly sessionView: VehiclePetSessionView;
     readonly locale: string | undefined;
     readonly enabled: boolean;
