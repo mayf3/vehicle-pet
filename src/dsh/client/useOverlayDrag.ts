@@ -81,10 +81,11 @@ export interface OverlayDragController {
 const DRAG_THRESHOLD_PX = 4
 const KEYBOARD_STEP_PX = 8
 const KEYBOARD_LARGE_STEP_PX = 32
-// The menu hangs below/above the shell clearing the hover-revealed tools
-// trigger row; the modeled gap must equal the CSS offset (styles.ts) so the
+// The menu clears the active-session footer. The modeled gap must equal
+// the CSS offset (styles.ts) so the
 // complete-active-surface union is honest (V3 audit F1).
-const PANEL_GAP_PX = 26
+const PANEL_GAP_PX = 40
+const footerHeight = (size: number): number => size === OVERLAY_GEOMETRY.collapsedLauncherSizePx ? 0 : 32
 const PANEL_FALLBACK_HEIGHT_PX = 240
 
 const clamp = (value: number, min: number, max: number): number => Math.min(max, Math.max(min, value))
@@ -108,7 +109,7 @@ export function pointFromRatios(
 ): OverlayPoint {
   const margin = OVERLAY_GEOMETRY.viewportMarginPx
   const availableX = Math.max(0, bounds.width - size - margin * 2)
-  const availableY = Math.max(0, bounds.height - size - margin * 2)
+  const availableY = Math.max(0, bounds.height - size - footerHeight(size) - margin * 2)
   const ratioPoint = {
     x: margin + availableX * preferences.position.xRatio,
     y: margin + availableY * preferences.position.yRatio,
@@ -128,7 +129,7 @@ function sizeToVehiclePetSize(size: number): VehiclePetSize {
 function ratiosFromPoint(point: OverlayPoint, bounds: OverlayBounds, size: number): { xRatio: number; yRatio: number } {
   const margin = OVERLAY_GEOMETRY.viewportMarginPx
   const availableX = Math.max(0, bounds.width - size - margin * 2)
-  const availableY = Math.max(0, bounds.height - size - margin * 2)
+  const availableY = Math.max(0, bounds.height - size - footerHeight(size) - margin * 2)
   return {
     xRatio: availableX === 0 ? 1 : clamp((point.x - margin) / availableX, 0, 1),
     yRatio: availableY === 0 ? 1 : clamp((point.y - margin) / availableY, 0, 1),
@@ -158,12 +159,12 @@ export function resolveCompleteActiveSurfaceLayout(
   if (!menuOpen) {
     const point = {
       x: clamp(anchor.x, margin, Math.max(margin, viewport.width - surfaceSize - margin)),
-      y: clamp(anchor.y, margin, Math.max(margin, viewport.height - surfaceSize - margin)),
+      y: clamp(anchor.y, margin, Math.max(margin, viewport.height - surfaceSize - footerHeight(surfaceSize) - margin)),
     }
     return {
       point,
       panelPlacement: preferred,
-      activeBounds: { left: point.x, top: point.y, right: point.x + surfaceSize, bottom: point.y + surfaceSize },
+      activeBounds: { left: point.x, top: point.y, right: point.x + surfaceSize, bottom: point.y + surfaceSize + footerHeight(surfaceSize) },
     }
   }
 
@@ -172,8 +173,8 @@ export function resolveCompleteActiveSurfaceLayout(
     right: { min: Math.min(0, surfaceSize - menuSize.width), max: surfaceSize },
   } as const
   const verticalOffsets = {
-    below: { min: 0, max: Math.max(surfaceSize, surfaceSize + PANEL_GAP_PX + menuSize.height) },
-    above: { min: Math.min(0, -PANEL_GAP_PX - menuSize.height), max: surfaceSize },
+    below: { min: 0, max: Math.max(surfaceSize + footerHeight(surfaceSize), surfaceSize + PANEL_GAP_PX + menuSize.height) },
+    above: { min: Math.min(0, -PANEL_GAP_PX - menuSize.height), max: surfaceSize + footerHeight(surfaceSize) },
   } as const
 
   const leftOverflow = overflowForAxis(anchor.x, horizontalOffsets.left.min, horizontalOffsets.left.max, viewport.width)

@@ -14,15 +14,15 @@ export const SPEECH_AUTO_DISMISS_MS = 4000
 export const SPEECH_AUTO_DISMISS_MIN_MS = 3000
 export const SPEECH_AUTO_DISMISS_MAX_MS = 6000
 
-/** Load quiet period: no speech within 30 s of surface mount (CTR-019(1)). */
-export const SPEECH_LOAD_QUIET_MS = 30000
-/** Ambient idle lines: at most one per 600 s (CTR-019(3)). */
-export const SPEECH_AMBIENT_MIN_INTERVAL_MS = 600000
+/** Load quiet period: no speech within 15 s of surface mount (CTR-019(1)). */
+export const SPEECH_LOAD_QUIET_MS = 15000
+/** Ambient idle lines: minimum 20 s between recurring lines (CTR-019(3)). */
+export const SPEECH_AMBIENT_MIN_INTERVAL_MS = 20000
 /** Payload-ignored input recency window suppressing ambient lines (CTR-019(3)). */
-export const SPEECH_TYPING_SUPPRESSION_MS = 15000
-/** Working rotation: min gap and per-running-period cap (CTR-019(4)). */
-export const SPEECH_WORKING_ROTATION_MS = 120000
-export const SPEECH_WORKING_MAX_PER_PERIOD = 3
+export const SPEECH_TYPING_SUPPRESSION_MS = 5000
+/** Working rotation: legacy exported bounds; recurring has no per-period cap (CTR-019(4)). */
+export const SPEECH_WORKING_ROTATION_MS = 20000
+export const SPEECH_WORKING_MAX_PER_PERIOD = Number.POSITIVE_INFINITY
 /** Click lines: at most one per 30 s (CTR-019(7)). */
 export const SPEECH_CLICK_THROTTLE_MS = 30000
 /** Activity recency buckets for the idle expression (bounded, payload-ignored). */
@@ -82,15 +82,15 @@ export function evaluateCadence(
     return { allowed: false, reason: 'load-quiet' }
   }
   if (source.kind === 'ambient') {
-    if (cadence.sessionState !== 'idle') {
+    if (cadence.sessionState === 'terminal') {
       return { allowed: false, reason: 'not-idle' }
     }
     if (cadence.lastInputAt !== null
       && cadence.now - cadence.lastInputAt < SPEECH_TYPING_SUPPRESSION_MS) {
       return { allowed: false, reason: 'typing' }
     }
-    if (cadence.lastAmbientAt !== null
-      && cadence.now - cadence.lastAmbientAt < SPEECH_AMBIENT_MIN_INTERVAL_MS) {
+    if (cadence.lastSpokenAt !== null
+      && cadence.now - cadence.lastSpokenAt < SPEECH_AMBIENT_MIN_INTERVAL_MS) {
       return { allowed: false, reason: 'ambient-interval' }
     }
     return { allowed: true }
@@ -103,9 +103,6 @@ export function evaluateCadence(
     return { allowed: true }
   }
   if (source.kind === 'session-edge' && source.category === 'working') {
-    if (cadence.workingLinesThisPeriod >= SPEECH_WORKING_MAX_PER_PERIOD) {
-      return { allowed: false, reason: 'working-cap' }
-    }
     // CTR-OVERLAY-019(4): rotation never interrupts recent user input.
     if (cadence.lastInputAt !== null
       && cadence.now - cadence.lastInputAt < SPEECH_TYPING_SUPPRESSION_MS) {
@@ -123,6 +120,7 @@ export interface SpeechSelectionState {
   readonly lastIndexInCategory: number | null
   /** Stable per-session rotation counter (incremented on every selection). */
   readonly rotationCounter: number
+  readonly randomSample?: number
 }
 
 export interface SpeechSelection {
@@ -148,8 +146,11 @@ export function selectSpeechLine(
     if (entry !== undefined && entry.category === category) indices.push(index)
   }
   if (indices.length === 0) return { index: -1, text: '', nextRotationCounter: selection.rotationCounter }
-  const offset = selection.rotationCounter % indices.length
-  const chosen = indices[offset]
+  const candidates=indices.filter(index=>index!==selection.lastIndexInCategory)
+  const eligible=candidates.length?candidates:indices
+  const sample=selection.randomSample ?? ((selection.rotationCounter % eligible.length)/eligible.length)
+  const offset=Math.floor(Math.max(0,Math.min(.999999,Number.isFinite(sample)?sample:0))*eligible.length)
+  const chosen = eligible[offset]
   if (chosen === undefined) return { index: -1, text: '', nextRotationCounter: selection.rotationCounter }
   const alternative = indices[(offset + 1) % indices.length] ?? chosen
   const finalIndex = chosen === selection.lastIndexInCategory && indices.length > 1 ? alternative : chosen
@@ -167,4 +168,9 @@ export function idleBucketFor(lastActivityAt: number | null, now: number): 0 | 1
   if (elapsed >= IDLE_BUCKET_LONG_MS) return 2
   if (elapsed >= IDLE_BUCKET_MID_MS) return 1
   return 0
+}
+
+/** Injected random sample keeps deadline selection pure and reproducible. */
+export function nextRecurringDelayMs(sample: number): number {
+  return 20000+Math.floor(Math.max(0,Math.min(1,Number.isFinite(sample)?sample:0))*20000)
 }
