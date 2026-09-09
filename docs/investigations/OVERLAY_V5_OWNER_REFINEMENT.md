@@ -1,0 +1,7 @@
+# Five-point Owner refinement
+
+Attributable authorization: mayf3 in this task, 2026-09-09: remove pale-blue car background; turn motion off; double-click instead of ellipsis to open settings; continuously randomized speech like the whale; active sessions beneath. Existing Owner dispatch authorizes independent review, docs acceptance/merge then isolated implementation/merge, not production application.
+
+Base e2c7e9d810f0e2cbca990f00f7800f8ab7f7ef69. Isolated authority branch codex/overlay-v5-spec. PREFLIGHT: SUPERSEDE / EXEC_PLAN / DURABLE, AUTHORITY_AUTHORING; implementation forbidden until accepted V5 enters main. Current V4 requires motion preferences, ellipsis-like secondary interaction and sparse speech; active-session titles need an explicit display-only metadata exception. V5 selects static rendering, double-click plus accessible keyboard, random 20–40s cadence with 5s input pause, and one read-only cycling active-session title/count. No Owner-only decision remains. Pinned host f77b5a2 supplies structured list ids/byId, title/displayTitle, running/pendingInteraction; no host core change or scrape is needed.
+
+Done when successor and implementation pass independent required reviews, relevant checks and isolated DSH visual evidence, merge, refresh the current disposable preview. Stop READY_FOR_PRODUCTION_APPLY. Expansion trigger: content/body access, production mutation, new model calls, growth or host-core changes.
