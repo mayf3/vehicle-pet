@@ -1,6 +1,6 @@
 ---
-spec_id: DSH_PET_OVERLAY_ADAPTER_V5
-status: superseded
+spec_id: DSH_PET_OVERLAY_ADAPTER_V6
+status: accepted
 spec_kind: implementation
 authority_level: governing_spec
 implementation_authority: contracts
@@ -20,17 +20,17 @@ external_authorities:
     revision: f77b5a2fcebc2d9138f6608a60636f2294868d42
     relation: interoperates_with
 supersedes:
-  - DSH_PET_OVERLAY_ADAPTER_V4
-superseded_by: DSH_PET_OVERLAY_ADAPTER_V6
+  - DSH_PET_OVERLAY_ADAPTER_V5
+superseded_by: null
 owners:
   - mayf3
 ---
 
-# DSH_PET_OVERLAY_ADAPTER_V5
+# DSH_PET_OVERLAY_ADAPTER_V6
 
 ## 1. Goal
 
-This V5 wholly supersedes `DSH_PET_OVERLAY_ADAPTER_V4`. It retains its two mutually exclusive branded characters, twelve operational grades, ten expressions, shared Engine/growth/prefs, structured reactions, no-model boundary and full disposal. The Owner's five-point refinement changes only resident transparency, always-static motion, double-click settings, continuous randomized catalog speech and a read-only active-session footer. Current normative values and replacement contracts below apply; retained historical observations are not V5 execution evidence.
+This V6 wholly supersedes `DSH_PET_OVERLAY_ADAPTER_V5`. It preserves all unchanged Engine, grade, asset, privacy, speech, footer and settings contracts. The Owner's latest refinement compacts vehicle captions and adds bounded playful reactions. Historical observations and earlier delivery mandates below remain historical. Current V6 replacements govern motion and layout.
 
 ```text
 GOAL = MORE_PET / LESS_UI: the resident pet behaves like a long-term companion, not a plugin button.
@@ -681,9 +681,9 @@ runtime image generation. Expression presentation MUST NOT change
 progression and MUST NOT add pointer or focus targets beyond the pet surface
 and its contracted affordances.
 
-### CTR-OVERLAY-015 — Static presentation always
+### CTR-OVERLAY-015 — Quiet baseline with bounded interaction gestures
 
-The DSH adapter MUST always request reduced motion from the Engine and suppress all overlay/scene/shell animation and transition, irrespective of OS or legacy saved preference. Expression poses still change statically with state, clicks and cadence; text still appears and auto-dismisses. Remove the motion setting. Existing reducedMotion fields MAY be retained inertly for rollback compatibility, but MUST NOT reactivate motion or cause preference rewrites on mount. The Engine and prototype retain their existing reduced-motion interfaces; only this adapter selects the permanently static mode.
+Engine scenes remain reduced-motion/static; legacy stored reducedMotion remains inert and is not rewritten. The removed motion setting stays removed. V6 permits only the bounded overlay-owned one-shot gestures in CTR-028; the former V5 permanently-static restriction is replaced. OS prefers-reduced-motion suppresses every gesture while retaining its static expression/decoration and all interaction semantics. No perpetual breathing/bobbing, animation of labels or window position, sound, flashing or extra model call is allowed.
 
 ### CTR-OVERLAY-016 — Resident progress presentation is absent; growth systems preserved
 
@@ -1249,26 +1249,46 @@ The resident car scene MUST have a transparent background with no pale-blue grad
 
 V5 acceptance reconciliation: prior ACC-104/105/110/114/119 and related V4 acceptance wording about menu triggers, reduced-motion settings or sparse cadence is evaluated under the explicit replacement CTR-005/010/015/019/021 and ACC-125 above. Unchanged acceptance obligations remain binding. This is a whole-authority successor; V4 is superseded atomically only on acceptance/merge. Documentation and isolated implementation/merge are authorized by the existing Owner dispatch plus this five-point request; production activation remains forbidden.
 
-## 14. Authorization gate
+## 14. V6 compact captions and playful interaction
 
-```text
+### DEC-OVERLAY-017 — Compact visible-car grouping
+Owner mayf3 observes excessive whitespace between the visible car and the caption. Grade and active-session footer follow the visible vehicle bounds rather than the square source canvas; no change to level or original artwork.
+
+### DEC-OVERLAY-018 — More expressive, brief interactions
+Owner requests more expressions/actions inspired by whale companionship. Reuse the approved ten pose masters and add at least eight visibly distinct composite interaction choices (wave, wink, happy hop, curious peek, shy/heart, sleepy, proud/sparkle, encouraging nod). These are new presentation combinations, not a claim of eight newly drawn face masters. Labels and precise operational level markings remain legible. Baseline remains quiet.
+
+### CTR-OVERLAY-027 — Car caption anchoring
+In both sizes and all twelve levels the grade begins 6–14 rendered CSS pixels below the untransformed baseline rendered-alpha bottom of the complete vehicle/escort/operator artwork (excluding hitbox tolerance). The 6–14px oracle is measured at rest, before/after a reaction; while a gesture runs, spacing may vary but artwork must never overlap the grade/footer. The active-session footer follows its grade with 4–8px spacing, capped within the existing complete-surface envelope. Original figure size, source alpha, escort/operator configuration and hit honesty stay unchanged. Grouping applies to vehicle mode only; companion layout stays intact. No canvas-bottom anchoring may introduce a large empty gap. Unknown/uninitialized bounds use the existing conservative layout. Bubble/menu safety and viewport/input bounds remain binding.
+
+### CTR-OVERLAY-028 — One transient playful reaction
+Use one adapter-owned transient reaction state, never a second Engine or speech scheduler. At least eight composite idle reactions combine the approved pose/expression with a small pointer-inert code-native decoration and a short gesture. Single click rotates this pool; existing double-click settings still work, with at most one reaction per double-click sequence. Drag cannot start a reaction. Idle catalog bubbles may trigger the next pool entry using the existing speech event/deadline; no extra ambient timer or model/content input. Active session state overrides playful idle poses, clears idle effects, and may show one state-appropriate gesture on a fresh state/terminal identity only. No event replay on reload, locale/character switch or resubscribe.
+
+A reaction lasts at most 2400ms and returns to the mapped baseline. Its motion lasts at most 1200ms, with maximum translation 4px and rotation 4 degrees, no scale expansion or flashing. The visible figure and its pointer target transform together; labels/footer/bubble stay still. Decorations remain inside the figure area's safe margin, never receive focus or pointers, and do not replace or obscure brand/grade/face. New input replaces rather than queues an effect; state change, drag, menu opening, hidden document and unmount cancel it. Character switching preserves the shared reaction counter/cadence but cancels the current gesture. prefers-reduced-motion is observed live, disposes its listener, and renders the static pose/decoration without interpolation. No persistence or growth mutation.
+
+### ACC-OVERLAY-126 — Compact playful resident acceptance
+- Contracts: CTR-003/005/007/008/015/017/019/022/023/024/025/027/028.
+- Method: both sizes × twelve vehicle levels measured baseline rendered-alpha bottom-to-grade gap excluding hitbox padding, footer fit and source-byte preservation; eight static reaction combinations for both characters, fake-clock expiry/replacement/state priority, click/double-click/drag, OS reduce and cleanup; real pinned DSH screenshots and interaction checks including whale coexistence. Existing regressions remain applicable; V5 zero-animation checks are evaluated in baseline or OS-reduced mode.
+- Required evidence: fixed Base/Head, executed affected tests, exact bundle identity, independent code and visual review. Static images prove appearance; execution establishes motion/lifecycle.
+- Expected: compact car grouping and varied fun interactions without input/whale obstruction, fake task completion, growth change, repeated/continuous motion, duplicated speech or resource leaks.
+- Failure: excessive car-caption gap, mixed characters, replaced original car art, detached hitbox, recurring motion without eligible trigger, stale/stacked effects, gesture despite OS reduce, contract/state leakage.
+
+## 15. Authorization and reconciliation
+V6 replacements CTR-015/027/028 supersede conflicting prior V5 static-only wording; all other accepted obligations carry forward. The latest Owner request authorizes this bounded enhancement following the established docs-first independent review/acceptance/merge workflow. Previous production mandates are historical operation-specific records; actual deployment requires its own current operation record. No implementation begins before V6 acceptance is merged into its implementation base.
+
 SPEC_GOVERNANCE_MODE = AUTHOR
 AUTHORITY_ACTION = SUPERSEDE
-SPEC_ID = DSH_PET_OVERLAY_ADAPTER_V5
+SPEC_ID = DSH_PET_OVERLAY_ADAPTER_V6
 STATUS = accepted
 IMPLEMENTATION_AUTHORITY = contracts
-PLAN_LEVEL = EXEC_PLAN
+PLAN_LEVEL = BRIEF
 ASSURANCE_LEVEL = DURABLE
 DOCS_FIRST_REQUIRED = YES
 OPEN_OWNER_DECISIONS = NONE
 NORMATIVE_TBD = NONE
 PARTIAL_SUPERSESSION = NONE
-CONTRACT_COUNT = 26
-CONTRACTS_WITH_ACCEPTANCE = 26
-INDEPENDENT_REVIEW = ACCEPT at cb3da221374dbe1b3aacbb7e80370bda89a377d8
-PRODUCTION_APPLY_ALLOWED = NO
+CONTRACT_COUNT = 28
+CONTRACTS_WITH_ACCEPTANCE = 28
 AUTHORING_READY_FOR_REVIEW = YES
-NEXT_ACTION = IMPLEMENTATION_FROM_ACCEPTED_MAIN_BASE
-```
+NEXT_ACTION = MERGE_AUTHORITY
 
-Acceptance: mayf3 Owner dispatch, recorded by author after independent authority_preflight_review ACCEPT at cb3da221374dbe1b3aacbb7e80370bda89a377d8. Activation requires merge into main; production application remains forbidden.
+Acceptance recorded for Owner mayf3 after independent authority_preflight_review ACCEPT at c59d50e85d233440ae38a3106731d4f1203ca570. Active only after merge into main.
