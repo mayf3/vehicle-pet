@@ -61,6 +61,7 @@ describe('normalizeOverlayPreferences', () => {
       collapsed: true,
       reducedMotion: true,
     })).toEqual({
+      characterId: 'vehicle',
       schemaVersion: 1,
       position: { xRatio: 0.25, yRatio: 0.5 },
       positionCustomized: true,
@@ -335,6 +336,7 @@ describe('saveOverlayPreferences', () => {
       size: 'small',
     }, storage)
     expect(JSON.parse(store.get(OVERLAY_PREFERENCES_KEY) ?? '')).toEqual({
+      characterId: 'vehicle',
       schemaVersion: 1,
       position: { xRatio: 1, yRatio: 1 },
       positionCustomized: false,
@@ -370,7 +372,7 @@ describe('adoptStorageEvent', () => {
     const current = copyOverlayDefaults()
     const next = JSON.stringify({ schemaVersion: 1, position: { xRatio: 0.2, yRatio: 0.4 }, collapsed: true, reducedMotion: false })
     expect(adoptStorageEvent({ key: OVERLAY_PREFERENCES_KEY, newValue: next }, current))
-      .toEqual({ schemaVersion: 1, position: { xRatio: 0.2, yRatio: 0.4 }, positionCustomized: true, collapsed: true, reducedMotion: false })
+      .toEqual({ characterId: 'vehicle', schemaVersion: 1, position: { xRatio: 0.2, yRatio: 0.4 }, positionCustomized: true, collapsed: true, reducedMotion: false })
     const nonDefault = normalizeOverlayPreferences(JSON.parse(next))
     expect(adoptStorageEvent({ key: OVERLAY_PREFERENCES_KEY, newValue: null }, nonDefault))
       .toEqual(copyOverlayDefaults())

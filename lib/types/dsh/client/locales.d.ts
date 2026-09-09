@@ -18,6 +18,9 @@ export declare const zh: {
     readonly 'launcher.restore': "展开成长伙伴";
     readonly 'menu.open': "打开设置";
     readonly 'menu.title': "成长伙伴设置";
+    readonly 'menu.character': "角色";
+    readonly 'menu.character.vehicle': "车";
+    readonly 'menu.character.companion': "伙伴";
     readonly 'menu.size': "大小";
     readonly 'menu.size.small': "小";
     readonly 'menu.size.large': "大";

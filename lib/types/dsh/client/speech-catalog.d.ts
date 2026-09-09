@@ -6,6 +6,7 @@
  * speech-rules.ts. Lines are short, companionable, and never report status
  * codes, percentages, or token counts.
  */
+import type { CharacterId } from './types';
 export type SpeechCategory = 'idle' | 'working' | 'needs-input' | 'completed' | 'failed' | 'milestone';
 export interface SpeechCatalogEntry {
     readonly category: SpeechCategory;
@@ -15,4 +16,6 @@ export interface SpeechCatalogEntry {
 export declare function speechCatalog(locale: string | undefined): readonly SpeechCatalogEntry[];
 /** Catalog floors (V3 CTR-OVERLAY-018): ≥30 lines per locale, ≥5 per category. */
 export declare function assertCatalogFloors(): void;
+/** Both catalogs use the existing category selector and scheduler. */
+export declare function characterSpeechCatalog(id: CharacterId, locale: string | undefined): readonly SpeechCatalogEntry[];
 //# sourceMappingURL=speech-catalog.d.ts.map
