@@ -17,7 +17,6 @@ const __FIXED_MS = __RealDate.parse(process.env.VP_PINNED_DATE ?? '2026-09-10T23
 class __PinnedDate extends __RealDate {
   constructor(...args: unknown[]) {
     if (args.length === 0) { super(__FIXED_MS); return }
-    // @ts-expect-error variadic passthrough
     super(...(args as []))
   }
   static override now(): number { return __FIXED_MS }
