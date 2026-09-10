@@ -43,6 +43,7 @@ import {
 import { usePlayfulReaction, ReactionDecoration } from './playful-reactions'
 import {
   GESTURE_PETTING_HOLD_MS, INITIAL_GESTURE_STATE, promoteToPetting, reduceGesture,
+  readClickChainAt, storeClickChainAt,
   type GestureInputEvent, type GestureState,
 } from './gesture-rules'
 import { useAmbientBehavior } from './use-ambient'
@@ -658,11 +659,17 @@ function ResidentPet({
   // cannot chain into a synthetic double-click that would reopen what it just
   // closed (CTR-005/029).
   const handleGesture = useCallback((event: GestureInputEvent) => {
-    const previous = gestureRef.current
+    // Hydrate the double-click chain only where it is consumed (a release
+    // from `pressed`): the overlay can be re-created between the two clicks
+    // of a double-click (session remounts), while the native dblclick this
+    // arbiter replaced was remount-resilient (CTR-029).
+    const previous = gestureRef.current.phase === 'pressed' && event.type === 'release'
+      ? { ...gestureRef.current, lastClickAt: readClickChainAt() }
+      : gestureRef.current
     const result = reduceGesture(previous, event)
     gestureRef.current = result.state
     setGesture(result.state)
-    ;(window as unknown as { pplog?: (s: string) => void }).pplog?.(`vg ${result.verdict.kind}${(result.verdict as { doubleClick?: boolean }).doubleClick === true ? '+dbl' : ''}`)
+    if (result.verdict.kind === 'click') storeClickChainAt(result.state.lastClickAt)
     switch (result.verdict.kind) {
       case 'click':
         // CTR-005/021: double-click opens only the settings menu; the single
