@@ -20,7 +20,7 @@ class __PinnedDate extends __RealDate {
     // @ts-expect-error variadic passthrough
     super(...(args as []))
   }
-  override static now(): number { return __FIXED_MS }
+  static override now(): number { return __FIXED_MS }
 }
 // @ts-expect-error global patch
 globalThis.Date = __PinnedDate
