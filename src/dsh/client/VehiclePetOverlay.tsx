@@ -133,10 +133,9 @@ export function VehiclePetOverlay(props: VehiclePetOverlayProps): ReactElement |
     })
   }, [])
 
-  const commitPreferences = useCallback((update: (current: VehiclePetOverlayPreferences) => VehiclePetOverlayPreferences, tag?: string) => {
+  const commitPreferences = useCallback((update: (current: VehiclePetOverlayPreferences) => VehiclePetOverlayPreferences) => {
     setPreferences(current => {
       const next = update(current)
-      if (tag !== undefined) (globalThis as { __vpTags?: string[] }).__vpTags = [...((globalThis as { __vpTags?: string[] }).__vpTags ?? []), tag]
       saveOverlayPreferences(next)
       return next
     })
@@ -334,10 +333,10 @@ function OverlaySurface({
     commitPreferences(current => ({
       ...current,
       rituals: recordRitual(current.rituals ?? EMPTY_RITUAL_MARKERS, kind, dayKey),
-    }), `ritual:${kind}`)
+    }))
   }, [commitPreferences])
   const touchLastSeen = useCallback(() => {
-    commitPreferences(current => ({ ...current, lastSeenAt: Date.now() }), 'touch')
+    commitPreferences(current => ({ ...current, lastSeenAt: Date.now() }))
   }, [commitPreferences])
   const ritualBridge = useMemo(() => ({
     lastSeenAt: preferences.lastSeenAt,
