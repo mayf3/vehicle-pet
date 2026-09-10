@@ -429,7 +429,7 @@ function OverlaySurface({
             sessionView={sessionView}
             surfaceSize={residentSurfaceSizePx(false, effectiveSize(preferences))}
             menuOpen={menuOpen}
-            onOpenMenu={() => { (window as unknown as { pplog?: (s: string) => void }).pplog?.('OPEN'); openSecondaryMenu() }}
+            onOpenMenu={openSecondaryMenu}
             bubblePlacement={drag.point.y < 72 ? 'below' : 'above'}
             petInteractionCount={petInteractionCount}
             onPetClick={() => setPetInteractionCount(count => count + 1)}
@@ -653,24 +653,15 @@ function ResidentPet({
   })
 
   // Gesture arbiter (CTR-029): one pure state model for the pointer session.
-  // While the secondary menu is open, a pet press is an outside press (it
-  // closes the menu, CTR-005) — never a pet gesture. Such presses consume and
-  // reset the arbiter session so the trailing click cannot chain into a
-  // synthetic double-click that would reopen what it just closed.
-  const menuOpenRef = useRef(menuOpen)
-  menuOpenRef.current = menuOpen
-  // Set by the menu's outside press (document capture — strictly before the
-  // pet's own pointerdown handler, React flush ordering included). The next
-  // press consumes it: the closing click drops the whole gesture chain, so
-  // its release can never synthesize a double-click that reopens the menu
-  // (CTR-005/029).
+  // The menu's outside-press close resets the session through gestureResetRef
+  // (document capture ordering), so the closing interaction's trailing click
+  // cannot chain into a synthetic double-click that would reopen what it just
+  // closed (CTR-005/029).
   const handleGesture = useCallback((event: GestureInputEvent) => {
-    ;(window as unknown as { pplog?: (s: string) => void }).pplog?.(`hg ${event.type} ph=${gestureRef.current.phase} lca=${gestureRef.current.lastClickAt}`)
     const previous = gestureRef.current
     const result = reduceGesture(previous, event)
     gestureRef.current = result.state
     setGesture(result.state)
-    ;(window as unknown as { pplog?: (s: string) => void }).pplog?.(`vg ${result.verdict.kind}${(result.verdict as { doubleClick?: boolean }).doubleClick === true ? '+dbl' : ''}`)
     ;(window as unknown as { pplog?: (s: string) => void }).pplog?.(`vg ${result.verdict.kind}${(result.verdict as { doubleClick?: boolean }).doubleClick === true ? '+dbl' : ''}`)
     switch (result.verdict.kind) {
       case 'click':

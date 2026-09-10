@@ -1386,7 +1386,6 @@ test('WORKSPACE_PRIMARY_ACTION_OVERLAP_TEST measures Pet and open Menu against r
 })
 
 test('HARNESS_LOCALE_LIVE_SYNC_TEST. zh-CN → en → zh-CN updates menu copy, pet label, and journey live', async ({ page }) => {
-  await page.exposeFunction('pplog', (line: string) => console.log('PPEVT', line))
   await openOverlay(page)
   const ensureMenu = async () => {
     if (await page.locator(MENU).count() === 0) await openMenu(page)

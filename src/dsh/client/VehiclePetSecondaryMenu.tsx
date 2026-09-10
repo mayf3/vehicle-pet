@@ -41,7 +41,6 @@ export function VehiclePetSecondaryMenu(props: VehiclePetSecondaryMenuProps): Re
       const element = props.menuRef.current
       if (element === null) return
       if (event.target instanceof Node && element.contains(event.target)) return
-      ;(window as unknown as { pplog?: (s: string) => void }).pplog?.('OUTSIDE-CLOSE')
       props.onOutsidePress?.()
       props.onRequestClose()
     }
