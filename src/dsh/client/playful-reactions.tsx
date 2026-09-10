@@ -111,6 +111,15 @@ export function usePlayfulReaction(context: Context) {
     start({ id: 'settle', anim: 'melt', variant: 'idle', decoration: 'none' }, false, true)
   }, [start])
 
+  /**
+   * V7 CTR-032 drag lift: a HELD surprised/curious variant for the whole
+   * drag (approved master, no added motion — the tilt rides the transform).
+   * Forced for the same pointerup-ordering reason as playSettle.
+   */
+  const playDragLift = useCallback(() => {
+    start({ id: 'drag-lift', anim: 'none', variant: 'idle-curious', decoration: 'none' }, true, true)
+  }, [start])
+
   useEffect(() => {
     const media = window.matchMedia?.('(prefers-reduced-motion: reduce)')
     if (!media) return
@@ -133,7 +142,12 @@ export function usePlayfulReaction(context: Context) {
     const changed = previous.current.signature !== signature
     const switched = previous.current.character !== context.characterId
     previous.current = { signature, character: context.characterId }
-    if (changed || switched || context.menuOpen || context.dragging) cancel()
+    if (changed || switched || context.menuOpen) cancel()
+    else if (context.dragging) {
+      // A drag keeps its own held lift presentation (CTR-032) and clears
+      // anything else; the drop settle replaces it at pointerup.
+      setReaction(current => (current?.definition.id === 'drag-lift' ? current : null))
+    }
     if (changed && !switched && context.state !== 'idle') {
       const id = stateReactionId(context.characterId, context.state)
       const picked = PLAYFUL_REACTIONS.find(entry => entry.id === id) ?? PLAYFUL_REACTIONS[4]!
@@ -153,6 +167,7 @@ export function usePlayfulReaction(context: Context) {
     releasePetting,
     playAmbient,
     playSettle,
+    playDragLift,
     cancel,
   }
 }

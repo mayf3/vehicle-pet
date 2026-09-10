@@ -11,6 +11,19 @@ CONTAINMENT_IN_PLACE = tests/dsh/dom/setup.ts 钉 Date(仅测试面,8a04a90..8ff
 
 ## 1. 现象
 
+> **FACTUAL CORRECTION (2026-09-11, post-fix-round)**:本记录初版把同期的菜单类
+> e2e 失败一并归于本现象,**该归因是错误的**。菜单类失败的已证实根因
+> (全部已在实现分支修复并验证):(a) 宿主页面交互后 activeElement 落于 body,
+> Escape 键盘链失效 → 修复 = 菜单打开期 document 级捕获 keydown;(b) late-night
+> ritual 的 due-check 与标记写入使用了不一致的日键 → 修复 = 统一 ritual-day key;
+> (c) `commitPreferences` 的 updater 内含 save 副作用,React 渲染期重放
+> updater 放大为写风暴 → 修复 = 纯 updater + once-per-commit 持久化;
+> (d) dblclick 中途重挂载丢失手势链 → 修复 = 模块级链记忆。
+> **仍然成立且未完全解释的只剩 §1.1 的 jsdom 日期敏感 OOM/hang 一项**
+> (containment 生效,不影响 shipped runtime)→ 分类 KNOWN_LIMITATION/FOLLOW_UP_DEBT。
+
+### 1.1 jsdom 日期敏感 OOM/hang(仍然成立的部分)
+
 设备本地日期 ≥ 2026-09-11 时:
 
 1. **jsdom 套件**:`tests/dsh/dom/overlay.test.tsx` 在 journey dialog 渲染路径进入同步死循环

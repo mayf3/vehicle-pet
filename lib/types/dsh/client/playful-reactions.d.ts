@@ -67,6 +67,7 @@ export declare function usePlayfulReaction(context: Context): {
     releasePetting: () => void;
     playAmbient: (action: AmbientActionDefinition) => void;
     playSettle: () => void;
+    playDragLift: () => void;
     cancel: () => void;
 };
 export declare function ReactionDecoration({ kind }: {

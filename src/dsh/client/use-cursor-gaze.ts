@@ -16,6 +16,8 @@ import { useEffect, useRef, type RefObject } from 'react'
 export const GAZE_PROXIMITY_RADIUS_PX = 160
 /** Maximum translation toward the cursor (CTR-031 bound). */
 export const GAZE_MAX_OFFSET_PX = 4
+/** Pointer stillness that returns the glance to neutral (CTR-031). */
+export const GAZE_REST_IDLE_MS = 1200
 
 export interface CursorGazeOptions {
   readonly elementRef: RefObject<HTMLElement | null>
@@ -31,6 +33,17 @@ export function useCursorGaze({ elementRef, enabled, disabled }: CursorGazeOptio
   const enabledRef = useRef(enabled)
   enabledRef.current = enabled
 
+  // CTR-031: a disable flip (menu/petting/drag/state) takes effect
+  // immediately, not lazily on the next pointer event.
+  useEffect(() => {
+    if (!enabled || !disabled) return
+    const element = elementRef.current
+    if (element === null) return
+    element.style.setProperty('--vp-gaze-x', '0px')
+    element.style.setProperty('--vp-gaze-y', '0px')
+    element.removeAttribute('data-gaze-active')
+  }, [enabled, disabled, elementRef])
+
   useEffect(() => {
     if (!enabled) {
       const element = elementRef.current
@@ -42,25 +55,43 @@ export function useCursorGaze({ elementRef, enabled, disabled }: CursorGazeOptio
       return
     }
     let frame: number | undefined
+    let restTimer: ReturnType<typeof setTimeout> | undefined
     let pointerX = Number.NaN
     let pointerY = Number.NaN
     let active = false
+
+    const resetToNeutral = (): void => {
+      const element = elementRef.current
+      if (element === null || !active) return
+      active = false
+      element.style.setProperty('--vp-gaze-x', '0px')
+      element.style.setProperty('--vp-gaze-y', '0px')
+      element.removeAttribute('data-gaze-active')
+    }
+    // CTR-031: a pointer that stops inside the radius lets the glance fall
+    // back to neutral after the recorded rest window (coordinates are
+    // forgotten so apply takes the neutral branch).
+    const armRestTimer = (): void => {
+      if (restTimer !== undefined) clearTimeout(restTimer)
+      restTimer = setTimeout(() => {
+        restTimer = undefined
+        pointerX = Number.NaN
+        pointerY = Number.NaN
+        frame ??= requestAnimationFrame(apply)
+      }, GAZE_REST_IDLE_MS)
+    }
 
     const apply = (): void => {
       frame = undefined
       const element = elementRef.current
       if (element === null) return
       if (Number.isNaN(pointerX) || disabledRef.current) {
-        if (active) {
-          active = false
-          element.style.setProperty('--vp-gaze-x', '0px')
-          element.style.setProperty('--vp-gaze-y', '0px')
-          element.removeAttribute('data-gaze-active')
-        }
+        resetToNeutral()
         return
       }
       const rect = element.getBoundingClientRect()
       if (rect.width === 0 && rect.height === 0) return
+      armRestTimer()
       const centerX = rect.left + rect.width / 2
       const centerY = rect.top + rect.height / 2
       const dx = pointerX - centerX
@@ -103,6 +134,7 @@ export function useCursorGaze({ elementRef, enabled, disabled }: CursorGazeOptio
     return () => {
       document.removeEventListener('pointermove', onMove)
       document.removeEventListener('pointerleave', onLeave)
+      if (restTimer !== undefined) clearTimeout(restTimer)
       if (frame !== undefined) cancelAnimationFrame(frame)
       const element = elementRef.current
       if (element !== null) {
