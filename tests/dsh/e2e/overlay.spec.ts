@@ -1459,7 +1459,7 @@ test('CROSSTAB_COLLAPSE_RESTORE_VISIBLE_TEST. two tabs destroy stale Menu/Dialog
     // PROGRESS_SOURCE_V1 CTR-USG-009) is a separate sanctioned writer whose
     // persistence frequency is bounded by its own change-only rule.
     const preferenceKey = 'vehicle-pet/overlay-preferences/v1'
-    const state = { writes: 0 }
+    const state: { writes: number; values?: string[] } = { writes: 0 }
     const prototype = Storage.prototype
     const native = prototype.setItem
     prototype.setItem = function (key, ...args) {
