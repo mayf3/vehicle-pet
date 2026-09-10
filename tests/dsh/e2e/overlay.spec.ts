@@ -297,13 +297,19 @@ async function seedPreferences(page: Page, record: Record<string, unknown>): Pro
   // V7 (CTR-035/036): storage-pinned flows seed the ritual fields as already
   // spent for the local day, so ritual persistence never writes mid-test and
   // the byte-equality pins keep judging only the user-action fields.
+  const now = new Date()
+  // The late-night ritual day rolls over at 05:00 (V7 lateNightRitualDayKey):
+  // between 00:00 and 05:00 the runtime attributes the night to the previous
+  // evening, so the seed must stamp the same key or the ritual fires once.
+  const evening = now.getHours() < 5 ? new Date(now.getTime() - 24 * 60 * 60 * 1000) : now
+  const eveningKey = evening.toLocaleDateString('sv')
   const seeded = {
-    lastSeenAt: Date.now(),
+    lastSeenAt: now.getTime(),
     rituals: {
-      dayKey: new Date().toLocaleDateString('sv'),
+      dayKey: eveningKey,
       firstCompletionDone: true,
       lateNightDone: true,
-      welcomeDayKey: new Date().toLocaleDateString('sv'),
+      welcomeDayKey: eveningKey,
     },
     ...record,
   }
@@ -1457,12 +1463,22 @@ test('CROSSTAB_COLLAPSE_RESTORE_VISIBLE_TEST. two tabs destroy stale Menu/Dialog
     const prototype = Storage.prototype
     const native = prototype.setItem
     prototype.setItem = function (key, ...args) {
-      if (String(key) === preferenceKey) state.writes += 1
+      if (String(key) === preferenceKey) {
+        state.writes += 1
+        ;(state.values ??= []).push(String(args[0]))
+      }
       return native.apply(this, [key, ...args])
     }
-    ;(window as unknown as { __vpoPreferenceWrites: typeof state }).__vpoPreferenceWrites = state
+    ;(window as unknown as { __vpoPreferenceWrites: typeof state & { values?: string[] } }).__vpoPreferenceWrites = state
   })
-  const writes = async (target: Page) => target.evaluate(() => (window as unknown as { __vpoPreferenceWrites: { writes: number } }).__vpoPreferenceWrites.writes)
+  const writes = async (target: Page) => {
+    const data = await target.evaluate(() => {
+      const w = (window as unknown as { __vpoPreferenceWrites: { writes: number; values?: string[] } }).__vpoPreferenceWrites
+      return { writes: w.writes, values: w.values ?? [] }
+    })
+    if (data.values.length) console.log('WRITEVALUES', JSON.stringify(data.values, null, 1))
+    return data.writes
+  }
   // V7 (CTR-035/036): spend both tabs' once-per-day rituals before the
   // instrumented window, so a stray completed turn cannot insert a ritual
   // persistence write into the loop-freedom counts.
