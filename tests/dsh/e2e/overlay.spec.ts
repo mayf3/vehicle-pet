@@ -281,9 +281,19 @@ async function sendPrompt(page: Page, text: string): Promise<void> {
  */
 async function openMenu(page: Page): Promise<void> {
   const trigger = page.locator(MENU_TRIGGER)
-  await page.locator(PET).focus()
-  await page.locator(PET).dblclick()
-  await page.locator(MENU).waitFor({ state: 'visible' })
+  // The synthetic double-click needs both clicks inside the arbiter window:
+  // a lost first attempt (rare timing race) retries once — the contract under
+  // test is the menu interaction, not Playwright click timing.
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    await page.locator(PET).focus()
+    await page.locator(PET).dblclick()
+    try {
+      await page.locator(MENU).waitFor({ state: 'visible', timeout: 3_000 })
+      return
+    } catch {
+      if (attempt === 1) throw new Error('menu did not open after double-click retry')
+    }
+  }
 }
 
 /** Escape closes the menu (CTR-OVERLAY-004); focus rests inside the menu or its trigger. */
