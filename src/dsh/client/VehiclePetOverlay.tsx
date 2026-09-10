@@ -133,9 +133,10 @@ export function VehiclePetOverlay(props: VehiclePetOverlayProps): ReactElement |
     })
   }, [])
 
-  const commitPreferences = useCallback((update: (current: VehiclePetOverlayPreferences) => VehiclePetOverlayPreferences) => {
+  const commitPreferences = useCallback((update: (current: VehiclePetOverlayPreferences) => VehiclePetOverlayPreferences, tag?: string) => {
     setPreferences(current => {
       const next = update(current)
+      if (tag !== undefined) (globalThis as { __vpTags?: string[] }).__vpTags = [...((globalThis as { __vpTags?: string[] }).__vpTags ?? []), tag]
       saveOverlayPreferences(next)
       return next
     })
@@ -324,14 +325,19 @@ function OverlaySurface({
   }, [collapsed])
 
   // V7 CTR-035/036 ritual bookkeeping: tolerant optional preference fields.
+  // The late-night marker stamps the RITUAL day key (the hours before 05:00
+  // belong to the previous evening), matching the key the due-check uses —
+  // otherwise the marker never matches and the ritual re-fires forever.
   const commitRitual = useCallback((kind: 'first-completion' | 'late-night' | 'welcome') => {
+    const now = new Date()
+    const dayKey = kind === 'late-night' ? lateNightRitualDayKey(now) : localDayKey(now)
     commitPreferences(current => ({
       ...current,
-      rituals: recordRitual(current.rituals ?? EMPTY_RITUAL_MARKERS, kind, localDayKey(new Date())),
-    }))
+      rituals: recordRitual(current.rituals ?? EMPTY_RITUAL_MARKERS, kind, dayKey),
+    }), `ritual:${kind}`)
   }, [commitPreferences])
   const touchLastSeen = useCallback(() => {
-    commitPreferences(current => ({ ...current, lastSeenAt: Date.now() }))
+    commitPreferences(current => ({ ...current, lastSeenAt: Date.now() }), 'touch')
   }, [commitPreferences])
   const ritualBridge = useMemo(() => ({
     lastSeenAt: preferences.lastSeenAt,
