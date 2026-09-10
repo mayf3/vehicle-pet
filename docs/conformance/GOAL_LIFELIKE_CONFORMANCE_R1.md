@@ -86,9 +86,14 @@ BROWSER_E2E_CLASSIFICATION = SHIP_BLOCKER (fixed in this round).
 - 新增非阻断 FOLLOW_UP(F-1):`suppressDailyGreetingToday` useMemo 依赖不含日期,
   跨本地午夜的长会话中 memo 陈旧——失败方向为静默(不会双问候),任意偏好写入
   自愈;记 FOLLOW_UP_DEBT,不阻塞。
-- EXPERIENCE_DELTA_RECHECK(原 auditor,bounded:gaze/drag/welcome/petting):
-  见下方补记。
-- ANNOYANCE_RISK = LOW(首轮判定;delta recheck 未推翻)。
+- **EXPERIENCE_DELTA_RECHECK = ACCEPT**(原 auditor resumed,bounded,HEAD 0c1e7a0 vs
+  其审定的 549d48f,重读全部被触及面):三项修复实质性加强原判定——Q4 drag-feel
+  gap 闭合(CRT-032 lift 条款已实现并有 e2e)、Q5 gaze gap 闭合(CTR-031 完整实现)、
+  Q8 welcome gap 闭合(CTR-035 slot 语义精确实现);Q1/Q3 边际更安静;gap 3/6
+  维持 FOLLOW_UP_DEBT 分类与首轮一致。**ANNOYANCE_RISK = LOW(维持,strengthened)**。
+- 无新 annoyance/blocker:gaze rest 1200ms 不可感知;菜单 Escape capture 仅菜单
+  打开期生效、dialog 优先、随关闭卸载;被抑制的 return day 仍有 welcome 单问候
+  (≤15s 静默后出现,即预期单问候结果)。
 
 ## 6. SHIP_BLOCKERS = 0(after fix round;pre-fix union recorded in §2)
 
