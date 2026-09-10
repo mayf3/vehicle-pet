@@ -133,12 +133,15 @@ export function VehiclePetOverlay(props: VehiclePetOverlayProps): ReactElement |
     })
   }, [])
 
+  // V7: the state updater stays PURE (React may re-invoke it during renders —
+  // a side-effecting updater amplifies into write storms); the persistence
+  // write happens exactly once per commit, immediately, from the ref-chained
+  // next value so same-tick commits chain correctly (CTR-010).
   const commitPreferences = useCallback((update: (current: VehiclePetOverlayPreferences) => VehiclePetOverlayPreferences) => {
-    setPreferences(current => {
-      const next = update(current)
-      saveOverlayPreferences(next)
-      return next
-    })
+    const next = update(preferencesRef.current)
+    preferencesRef.current = next
+    setPreferences(next)
+    saveOverlayPreferences(next)
   }, [])
 
   const chrome = useMemo<OverlayChrome>(() => ({ t, commitPreferences, engineLocale, activeSessions }), [t, commitPreferences, engineLocale, activeSessions])
