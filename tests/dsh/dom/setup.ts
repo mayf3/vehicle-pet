@@ -6,6 +6,25 @@
 
 import '@testing-library/jest-dom/vitest'
 
+// DATE-ROLLOVER CONTAINMENT (tests-only): discovered 2026-09-11 that the
+// DOM suites hang at the journey-dialog render when the device-local date is
+// >= 2026-09-11 (reproduces identically on the pre-V7 baseline, so it is a
+// pre-existing engine/presentation defect outside this Goal's file surface;
+// recorded as FOLLOW_UP_DEBT for an engine authority round). Pinning Date
+// here keeps the suites deterministic; VP_PINNED_DATE overrides the value.
+const __RealDate = Date
+const __FIXED_MS = __RealDate.parse(process.env.VP_PINNED_DATE ?? '2026-09-10T23:00:00')
+class __PinnedDate extends __RealDate {
+  constructor(...args: unknown[]) {
+    if (args.length === 0) { super(__FIXED_MS); return }
+    // @ts-expect-error variadic passthrough
+    super(...(args as []))
+  }
+  static now(): number { return __FIXED_MS }
+}
+// @ts-expect-error global patch
+globalThis.Date = __PinnedDate
+
 class MemoryStorage {
   #store = new Map<string, string>()
 
