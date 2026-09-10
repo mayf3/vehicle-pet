@@ -2330,3 +2330,108 @@ test('V6_COMPACT_PLAYFUL: real alpha gap all levels and eight reactions for both
     await expect(page.locator(ROOT)).toHaveAttribute('data-client-generation', 'production', { timeout:60000 })
   }
 })
+
+// ===========================================================================
+// V7 lifelike interaction layer (DSH_PET_OVERLAY_ADAPTER_V7 ACC-127..133):
+// the narrowest real-browser proofs for the gesture/gaze seams that jsdom
+// cannot observe. One case per risk seam; ambient actions stay covered by
+// the deterministic unit matrix (CTR-033).
+// ===========================================================================
+
+test('LIFELIKE_LONG_PRESS_VS_CLICK. a stationary hold pets; it never opens a surface', async ({ page }) => {
+  await openOverlay(page)
+  const pet = page.locator(PET)
+  const area = page.locator('.vpo-characterArea')
+  const box = await pet.boundingBox()
+  await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2)
+  await page.mouse.down()
+  await page.waitForTimeout(700) // inside the 550ms hold band, past jitter
+  await expect(area).toHaveAttribute('data-vehicle-pet-petting', 'true')
+  await expect(area).toHaveAttribute('data-vehicle-pet-reaction-id', 'petting')
+  await expect(page.locator(MENU)).toHaveCount(0)
+  await page.mouse.up()
+  await expect(area).toHaveAttribute('data-vehicle-pet-petting', 'false')
+  await expect(page.locator(MENU)).toHaveCount(0)
+  await expect(page.locator(DIALOG)).toHaveCount(0)
+})
+
+test('LIFELIKE_DOUBLE_CLICK_SYNTHESIS. two rapid clicks open settings, not two reactions', async ({ page }) => {
+  await openOverlay(page)
+  const pet = page.locator(PET)
+  const box = await pet.boundingBox()
+  const cx = box!.x + box!.width / 2
+  const cy = box!.y + box!.height / 2
+  await page.mouse.move(cx, cy)
+  await page.mouse.down()
+  await page.mouse.up()
+  await page.mouse.down()
+  await page.mouse.up()
+  await page.locator(MENU).waitFor({ state: 'visible', timeout: 5_000 })
+  // The second click of the sequence is consumed by the settings open: no
+  // trailing bubble may stack on top of the menu.
+  await expect(page.locator('.vpo-bubble')).toHaveCount(0)
+  await page.keyboard.press('Escape')
+  await expect(page.locator(MENU)).toHaveCount(0)
+})
+
+test('LIFELIKE_DRAG_DOES_NOT_CLICK. drag lifts, settles, persists, never clicks', async ({ page }) => {
+  await openOverlay(page)
+  await waitForIdleBaseline(page)
+  const pet = page.locator(PET)
+  const area = page.locator('.vpo-characterArea')
+  const box = await pet.boundingBox()
+  const startX = box!.x + box!.width / 2
+  const startY = box!.y + box!.height / 2
+  await page.mouse.move(startX, startY)
+  await page.mouse.down()
+  await page.mouse.move(startX - 60, startY - 10, { steps: 8 })
+  await expect(area).toHaveAttribute('data-vehicle-pet-reaction-id', 'drag-lift')
+  await page.mouse.up()
+  await expect(area).toHaveAttribute('data-vehicle-pet-reaction-id', 'settle')
+  await expect(page.locator(MENU)).toHaveCount(0)
+  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('vehicle-pet/overlay-preferences/v1') ?? '{}') as { positionCustomized: boolean })
+  expect(stored.positionCustomized).toBe(true)
+  await expect(area).toHaveAttribute('data-vehicle-pet-petting', 'false')
+})
+
+test('LIFELIKE_CURSOR_GAZE_RESET. gaze engages near, rests to neutral, static under reduced motion', async ({ page }) => {
+  await openOverlay(page)
+  await waitForIdleBaseline(page)
+  const area = page.locator('.vpo-characterArea')
+  const box = await page.locator(PET).boundingBox()
+  const cx = box!.x + box!.width / 2
+  const cy = box!.y + box!.height / 2
+  const gazeVars = () => page.evaluate(() => {
+    const area = document.querySelector('.vpo-characterArea') as HTMLElement
+    return {
+      x: area.style.getPropertyValue('--vp-gaze-x'),
+      y: area.style.getPropertyValue('--vp-gaze-y'),
+      active: area.getAttribute('data-gaze-active'),
+    }
+  })
+  await page.mouse.move(cx + 60, cy - 20)
+  await page.waitForTimeout(150)
+  let gaze = await gazeVars()
+  expect(gaze.active).toBe('true')
+  expect(gaze.x).not.toBe('0px')
+  // Stillness: after the recorded rest window the glance returns to neutral.
+  await page.waitForTimeout(1_800)
+  gaze = await gazeVars()
+  expect(gaze).toEqual({ x: '0px', y: '0px', active: null })
+  // Reduced motion: the gaze never engages at all.
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.mouse.move(cx + 20, cy + 30)
+  await page.waitForTimeout(200)
+  gaze = await gazeVars()
+  expect(gaze.x).toBe('0px')
+  expect(gaze.active).toBeNull()
+})
+
+test('LIFELIKE_MENU_ESCAPE_ANY_FOCUS. Escape closes the menu with focus on body', async ({ page }) => {
+  await openOverlay(page)
+  await openMenu(page)
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
+  expect(await page.evaluate(() => document.activeElement?.tagName)).toBe('BODY')
+  await page.keyboard.press('Escape')
+  await expect(page.locator(MENU)).toHaveCount(0)
+})

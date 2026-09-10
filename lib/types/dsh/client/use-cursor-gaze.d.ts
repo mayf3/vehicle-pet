@@ -14,6 +14,8 @@ import { type RefObject } from 'react';
 export declare const GAZE_PROXIMITY_RADIUS_PX = 160;
 /** Maximum translation toward the cursor (CTR-031 bound). */
 export declare const GAZE_MAX_OFFSET_PX = 4;
+/** Pointer stillness that returns the glance to neutral (CTR-031). */
+export declare const GAZE_REST_IDLE_MS = 1200;
 export interface CursorGazeOptions {
     readonly elementRef: RefObject<HTMLElement | null>;
     /** Master switch: false keeps the presentation fully static. */

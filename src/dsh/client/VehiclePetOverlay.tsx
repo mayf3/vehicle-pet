@@ -341,6 +341,17 @@ function OverlaySurface({
   const touchLastSeen = useCallback(() => {
     commitPreferences(current => ({ ...current, lastSeenAt: Date.now() }))
   }, [commitPreferences])
+  // CTR-035: WELCOME_BACK wins over the normal greeting in the same return
+  // window — when the stored absence crosses the threshold (welcome pending)
+  // or today's welcome was already claimed, the Engine greeting pill stays
+  // suppressed for this session.
+  const suppressDailyGreetingToday = useMemo(() => {
+    const todayKey = localDayKey(new Date())
+    const markers = preferences.rituals ?? EMPTY_RITUAL_MARKERS
+    return shouldWelcomeBack(preferences.lastSeenAt, Date.now(), todayKey, markers)
+      || markers.welcomeDayKey === todayKey
+  }, [preferences.lastSeenAt, preferences.rituals])
+
   const ritualBridge = useMemo(() => ({
     lastSeenAt: preferences.lastSeenAt,
     markers: preferences.rituals ?? EMPTY_RITUAL_MARKERS,
@@ -470,7 +481,10 @@ function OverlaySurface({
 
         {!collapsed ? (
           <span className="vpo-feedbackWrap" data-placement={drag.point.y < 110 ? 'below' : 'above'}>
-            <DailyGreeting />
+            {/* CTR-035: a return-day welcome takes the first-open-of-day
+                greeting slot — the Engine greeting pill stays suppressed for
+                this session so the return day never double-greets. */}
+            {!suppressDailyGreetingToday ? <DailyGreeting /> : null}
             <HostActivityFeedback />
             <TerminalFeedbackDispatcher sessionView={sessionView} />
           </span>
@@ -684,6 +698,7 @@ function ResidentPet({
     switch (result.verdict.kind) {
       case 'click':
         storeClickChainAt(result.state.lastClickAt)
+        if (result.verdict.doubleClick) noteInteraction()
         break
       case 'petting-start':
       case 'drag-start':
@@ -720,7 +735,9 @@ function ResidentPet({
         noteInteraction()
         break
       case 'drag-start':
-        playful.cancel()
+        // CTR-032: the lift holds a surprised/curious variant for the drag;
+        // the settle on drop replaces it.
+        playful.playDragLift()
         noteInteraction()
         break
       case 'drop':
@@ -773,14 +790,17 @@ function ResidentPet({
   }, [rituals.lastSeenAt, speech])
 
   // V7 CTR-036: the late-night ritual — at most once per ritual day, only
-  // while the user is actually around, gentle copy only.
+  // while the user is actually around, gentle copy only. The firedRef keeps
+  // the marker-write race from double-attempting before the re-render lands.
+  const lateNightFiredRef = useRef(false)
   useEffect(() => {
-    if (daypart !== 'late-night') return
+    if (daypart !== 'late-night' || lateNightFiredRef.current) return
     if (!isLateNightRitualDue(markersRef.current, lateNightRitualDayKey(new Date()))) return
     const cadence = speech.readCadence()
     const recent = cadence.lastInputAt !== null
       && cadence.now - cadence.lastInputAt <= LATE_NIGHT_INPUT_RECENCY_MS
     if (!recent) return
+    lateNightFiredRef.current = true
     speech.speakAfterQuiet('ritual')
     ritualBridgeRef.current.onRitual('late-night')
   }, [daypart, speech])
