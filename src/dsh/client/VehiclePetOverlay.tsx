@@ -568,10 +568,13 @@ function ResidentPet({
   const gestureRef = useRef(gesture)
   gestureRef.current = gesture
   // Menu closes invoke this synchronously (raw-listener ordering included):
-  // the closing interaction's gesture chain dies with the menu.
+  // the closing interaction's gesture chain dies with the menu — including
+  // the module-level double-click chain memory (587bf81), which would
+  // otherwise let the closing click synthesize a reopen.
   gestureResetRef.current = () => {
     gestureRef.current = INITIAL_GESTURE_STATE
     setGesture(INITIAL_GESTURE_STATE)
+    storeClickChainAt(null)
     suppressDblClickRef.current = true
   }
   const suppressClickRef = useRef(false)
@@ -678,7 +681,21 @@ function ResidentPet({
     const result = reduceGesture(previous, event)
     gestureRef.current = result.state
     setGesture(result.state)
-    if (result.verdict.kind === 'click') storeClickChainAt(result.state.lastClickAt)
+    switch (result.verdict.kind) {
+      case 'click':
+        storeClickChainAt(result.state.lastClickAt)
+        break
+      case 'petting-start':
+      case 'drag-start':
+      case 'drop':
+      case 'petting-release':
+        // Anything between two clicks breaks a double-click chain (native
+        // dblclick semantics): petting holds, drags, and drops clear it.
+        storeClickChainAt(null)
+        break
+      default:
+        break
+    }
     switch (result.verdict.kind) {
       case 'click':
         // CTR-005/021: double-click opens only the settings menu; the single
