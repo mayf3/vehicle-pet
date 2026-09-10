@@ -311,10 +311,7 @@ function OverlaySurface({
     commitPreferences,
   })
 
-  const closeMenu = useCallback(() => {
-    setMenuOpen(false)
-    drag.rootRef.current?.querySelector<HTMLButtonElement>('[data-vehicle-pet-pet]')?.focus()
-  }, [drag.rootRef])
+
 
   // R4-B2 invariant carried to V3: every collapsed preference source (local
   // action, storage adoption, reload, or fallback) destroys transient open
@@ -342,17 +339,21 @@ function OverlaySurface({
     onTouchLastSeen: touchLastSeen,
   }), [preferences.lastSeenAt, preferences.rituals, commitRitual, touchLastSeen])
 
-  // V7 CTR-029: set by the menu's outside press before the pet's pointerdown
-  // handler runs; the next press consumes it and drops the gesture chain.
-  const outsidePressRef = useRef(false)
-  const markOutsidePress = useCallback(() => {
-    outsidePressRef.current = true
+  // V7 CTR-029: an outside press closes the menu, and Chromium may synthesize
+  // a native dblclick from that same closing click plus the previous pet
+  // click — which would instantly reopen what it just closed. Outside-press
+  // closes are therefore stamped, and the resident's gesture session is
+  // reset through gestureResetRef (chain + session cleared); Escape closes
+  // are never stamped, so close-then-reopen flows stay instant.
+  const gestureResetRef = useRef<() => void>(() => {})
+  const armOutsidePressReset = useCallback(() => {
+    gestureResetRef.current()
   }, [])
-  const consumeOutsidePress = useCallback((): boolean => {
-    const seen = outsidePressRef.current
-    outsidePressRef.current = false
-    return seen
-  }, [])
+  const closeMenu = useCallback(() => {
+    setMenuOpen(false)
+    drag.rootRef.current?.querySelector<HTMLButtonElement>('[data-vehicle-pet-pet]')?.focus()
+  }, [drag.rootRef])
+  const openSecondaryMenu = useCallback(() => setMenuOpen(true), [])
 
   const collapse = useCallback(() => {
     setMenuOpen(false)
@@ -428,14 +429,14 @@ function OverlaySurface({
             sessionView={sessionView}
             surfaceSize={residentSurfaceSizePx(false, effectiveSize(preferences))}
             menuOpen={menuOpen}
-            onOpenMenu={() => setMenuOpen(true)}
+            onOpenMenu={() => { (window as unknown as { pplog?: (s: string) => void }).pplog?.('OPEN'); openSecondaryMenu() }}
             bubblePlacement={drag.point.y < 72 ? 'below' : 'above'}
             petInteractionCount={petInteractionCount}
             onPetClick={() => setPetInteractionCount(count => count + 1)}
             dragHandlers={drag}
             onKeyDown={handleSurfaceKeyDown}
             rituals={ritualBridge}
-            consumeOutsidePress={consumeOutsidePress}
+            gestureResetRef={gestureResetRef}
           />
         )}
 
@@ -449,7 +450,7 @@ function OverlaySurface({
             }}
             onCollapse={collapse}
             onRequestClose={closeMenu}
-            onOutsidePress={markOutsidePress}
+            onOutsidePress={armOutsidePressReset}
             onOpenJourney={() => {
               setDialogOpen(true)
             }}
@@ -530,7 +531,7 @@ function ResidentPet({
   dragHandlers,
   onKeyDown,
   rituals,
-  consumeOutsidePress,
+  gestureResetRef,
 }: {
   characterId: CharacterId
   sessionView: VehiclePetSessionView
@@ -542,7 +543,7 @@ function ResidentPet({
   onPetClick: () => void
   dragHandlers: ReturnType<typeof useOverlayDrag>
   onKeyDown: (event: ReactKeyboardEvent<HTMLElement>) => void
-  consumeOutsidePress: () => boolean
+  gestureResetRef: { current: () => void }
   rituals: {
     readonly lastSeenAt: number | undefined
     readonly markers: RitualMarkers
@@ -556,7 +557,17 @@ function ResidentPet({
   const [gesture, setGesture] = useState<GestureState>(INITIAL_GESTURE_STATE)
   const gestureRef = useRef(gesture)
   gestureRef.current = gesture
+  // Menu closes invoke this synchronously (raw-listener ordering included):
+  // the closing interaction's gesture chain dies with the menu.
+  gestureResetRef.current = () => {
+    gestureRef.current = INITIAL_GESTURE_STATE
+    setGesture(INITIAL_GESTURE_STATE)
+    suppressDblClickRef.current = true
+  }
   const suppressClickRef = useRef(false)
+  // Armed by an outside-press menu close: the closing interaction's own
+  // synthesized dblclick is consumed once instead of reopening (CTR-005).
+  const suppressDblClickRef = useRef(false)
   const lastInteractionRef = useRef(0)
   const noteInteraction = useCallback(() => {
     lastInteractionRef.current = Date.now()
@@ -653,18 +664,14 @@ function ResidentPet({
   // press consumes it: the closing click drops the whole gesture chain, so
   // its release can never synthesize a double-click that reopens the menu
   // (CTR-005/029).
-  const outsidePressSeenRef = useRef(false)
   const handleGesture = useCallback((event: GestureInputEvent) => {
-    if (event.type === 'press' && consumeOutsidePress()) {
-      outsidePressSeenRef.current = true
-      gestureRef.current = INITIAL_GESTURE_STATE
-      setGesture(INITIAL_GESTURE_STATE)
-      return
-    }
+    ;(window as unknown as { pplog?: (s: string) => void }).pplog?.(`hg ${event.type} ph=${gestureRef.current.phase} lca=${gestureRef.current.lastClickAt}`)
     const previous = gestureRef.current
     const result = reduceGesture(previous, event)
     gestureRef.current = result.state
     setGesture(result.state)
+    ;(window as unknown as { pplog?: (s: string) => void }).pplog?.(`vg ${result.verdict.kind}${(result.verdict as { doubleClick?: boolean }).doubleClick === true ? '+dbl' : ''}`)
+    ;(window as unknown as { pplog?: (s: string) => void }).pplog?.(`vg ${result.verdict.kind}${(result.verdict as { doubleClick?: boolean }).doubleClick === true ? '+dbl' : ''}`)
     switch (result.verdict.kind) {
       case 'click':
         // CTR-005/021: double-click opens only the settings menu; the single
@@ -806,7 +813,7 @@ function ResidentPet({
           event.preventDefault()
           if (dragHandlers.consumeSuppressedClick()) return
           if (suppressClickRef.current) { suppressClickRef.current = false; return }
-          if (outsidePressSeenRef.current) { outsidePressSeenRef.current = false; return }
+          if (suppressDblClickRef.current) { suppressDblClickRef.current = false; return }
           onOpenMenu()
         }}
         onClick={event => {
