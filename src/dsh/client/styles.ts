@@ -27,10 +27,26 @@ const css = `
 @keyframes vpo-v6-hop{0%,45%,100%{translate:0 0}25%,70%{translate:0 -4px}}
 @keyframes vpo-v6-peek{0%,100%{translate:0 0}40%,70%{translate:4px 0}}
 @keyframes vpo-v6-nod{0%,100%{translate:0 0}40%{translate:0 -2px}}
+/* V7 CTR-029/030/033: petting, settle and ambient one-shot gestures share the
+   same bounded motion class (≤4 px, ≤4°, ≤1200 ms) as the V6 pool. */
+.vpo-shell[data-reduced-motion="true"] .vpo-characterArea[data-motion="allowed"][data-gesture="look-left"]{animation:vpo-v7-look 1000ms ease-out!important}
+.vpo-shell[data-reduced-motion="true"] .vpo-characterArea[data-motion="allowed"][data-gesture="look-right"]{animation:vpo-v7-look 1000ms ease-out!important}
+.vpo-shell[data-reduced-motion="true"] .vpo-characterArea[data-motion="allowed"][data-gesture="blink"]{animation:vpo-v6-wink 900ms ease-out!important}
+.vpo-shell[data-reduced-motion="true"] .vpo-characterArea[data-motion="allowed"][data-gesture="shuffle"]{animation:vpo-v6-hop 1000ms ease-out!important}
+.vpo-shell[data-reduced-motion="true"] .vpo-characterArea[data-motion="allowed"][data-gesture="stretch"]{animation:vpo-v7-stretch 1200ms ease-out!important}
+.vpo-shell[data-reduced-motion="true"] .vpo-characterArea[data-motion="allowed"][data-gesture="melt"]{animation:vpo-v7-melt 1200ms ease-out!important}
+@keyframes vpo-v7-look{0%,100%{translate:0 0}35%,65%{translate:-4px 0}}
+@keyframes vpo-v7-stretch{0%,100%{rotate:0deg}45%{rotate:-3deg}}
+@keyframes vpo-v7-melt{0%,100%{translate:0 0;rotate:0deg}45%{translate:0 2px;rotate:2deg}}
 @media(prefers-reduced-motion:reduce){.vpo-shell[data-reduced-motion="true"] .vpo-characterArea[data-motion="allowed"][data-gesture]{animation:none!important}}
+/* V7 CTR-031/032: cursor gaze and drag tilt ride the same transform as the
+   figure scale, so the visible figure and its pointer target move together
+   while the grade/footer/bubble stay still. OS reduced motion pins both to
+   rest (STATIC_OR_DISABLED). */
+@media(prefers-reduced-motion:reduce){.vpo-characterArea{--vp-gaze-x:0px!important;--vp-gaze-y:0px!important;--vp-tilt:0deg!important}}
 
-.vpo-characterArea{position:absolute;inset:0;transform:scale(.8);transform-origin:50% 0;pointer-events:none}
-[data-vehicle-pet-size="small"] .vpo-characterArea{transform:scale(.72)}
+.vpo-characterArea{position:absolute;inset:0;transform:translate(var(--vp-gaze-x,0px),var(--vp-gaze-y,0px)) rotate(var(--vp-tilt,0deg)) scale(.8);transform-origin:50% 0;pointer-events:none}
+[data-vehicle-pet-size="small"] .vpo-characterArea{transform:translate(var(--vp-gaze-x,0px),var(--vp-gaze-y,0px)) rotate(var(--vp-tilt,0deg)) scale(.72)}
 .vpo-pose{position:absolute;left:calc((100% - 100% * 320 / 540) / 2);top:0;width:calc(100% * 320 / 540);height:100%;pointer-events:none}
 .vpo-pose>img:not(.vpo-insignia){width:100%;height:100%;object-fit:contain}
 .vpo-pose>.vpo-insignia{position:absolute;width:15%;height:auto;pointer-events:none}

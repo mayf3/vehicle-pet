@@ -18,6 +18,11 @@ export interface VehiclePetSecondaryMenuProps {
   readonly onCollapse: () => void
   readonly onOpenJourney: () => void
   readonly onRequestClose: () => void
+  /** V7 CTR-029: fired by the outside-press close only (never by Escape), so
+   * the pet can drop the closing interaction's double-click chain. */
+  readonly onOutsidePress?: () => void
+  /** While true, Escape belongs to the journey dialog, not the menu. */
+  readonly dialogOpen?: boolean
   readonly journeyTriggerRef: RefObject<HTMLButtonElement | null>
 }
 
@@ -31,17 +36,28 @@ export function VehiclePetSecondaryMenu(props: VehiclePetSecondaryMenuProps): Re
     }
   }, [props])
 
-  // Outside press closes the menu (CTR-OVERLAY-005); the listener is scoped to
-  // this mount and removed with it.
+  // Outside press closes the menu (CTR-OVERLAY-005), and Escape closes it from
+  // wherever focus happens to rest (host page interactions can leave
+  // activeElement on body, outside the overlay's React tree); a V7 open
+  // journey dialog owns Escape first. Both listeners are capture-phase,
+  // scoped to this mount, and removed with it.
   useEffect(() => {
+    const onDocumentKeyDown = (event: KeyboardEvent): void => {
+      if (event.key !== 'Escape' || props.dialogOpen) return
+      event.stopPropagation()
+      props.onRequestClose()
+    }
     const onDocumentPointerDown = (event: PointerEvent): void => {
       const element = props.menuRef.current
       if (element === null) return
       if (event.target instanceof Node && element.contains(event.target)) return
+      props.onOutsidePress?.()
       props.onRequestClose()
     }
+    document.addEventListener('keydown', onDocumentKeyDown, { capture: true })
     document.addEventListener('pointerdown', onDocumentPointerDown, { capture: true })
     return () => {
+      document.removeEventListener('keydown', onDocumentKeyDown, { capture: true })
       document.removeEventListener('pointerdown', onDocumentPointerDown, { capture: true })
     }
   }, [props])

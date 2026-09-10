@@ -1,13 +1,15 @@
 /**
  * VehiclePetSpeech: the single non-modal speech bubble and its scheduler
- * (DSH_PET_OVERLAY_ADAPTER_V3 CTR-OVERLAY-017/018/019). Lines come only from
- * the bundled catalog through the pure rules in speech-rules.ts; triggers are
- * structured session edges, engine milestone events, direct interaction, and
- * a bounded idle timer. The input-recency listener records timestamps only —
- * never key values, targets, or any host content. Every timer and listener is
- * returned as a disposer (CTR-OVERLAY-012). The bubble is aria-live=polite,
- * never focusable, replaces (never stacks), and auto-dismisses within the
- * bounded window.
+ * (DSH_PET_OVERLAY_ADAPTER_V3 CTR-OVERLAY-017/018/019; V7 CTR-030/033/035/036
+ * add explicit petting/welcome/ritual triggers through the same scheduler).
+ * Lines come only from the bundled catalog through the pure rules in
+ * speech-rules.ts; triggers are structured session edges, engine milestone
+ * events, direct interaction, a bounded idle timer, and the V7 explicit path.
+ * The input-recency listener records timestamps only — never key values,
+ * targets, or any host content. Every timer and listener is returned as a
+ * disposer (CTR-OVERLAY-012). The bubble is aria-live=polite, never
+ * focusable, replaces (never stacks), and auto-dismisses within the bounded
+ * window.
  */
 
 import {
@@ -15,13 +17,17 @@ import {
   type ReactElement,
 } from 'react'
 import type { VehiclePetSessionView } from './types'
+import type { RitualMarkers } from './types'
 import {
   evaluateCadence, idleBucketFor, selectSpeechLine, SPEECH_AUTO_DISMISS_MS,
-  nextRecurringDelayMs,
+  SPEECH_LOAD_QUIET_MS, nextRecurringDelayMs, nextDaypartRecurringDelayMs,
   type SpeechCadenceState, type SpeechTriggerSource,
 } from './speech-rules'
 import { characterSpeechCatalog, type SpeechCategory } from './speech-catalog'
+import { isFirstCompletionToday, localDayKey } from './ritual-rules'
 import type { CharacterId } from './types'
+
+type DaypartBucket = 'morning' | 'daytime' | 'evening' | 'late-night'
 
 export interface VehiclePetSpeechController {
   /** Current visible line, or null. Replacements reuse the same bubble. */
@@ -30,10 +36,28 @@ export interface VehiclePetSpeechController {
   readonly speakForClick: (category: SpeechCategory) => void
   /** Announce a level-up / keepsake moment (proud presentation + line). */
   readonly speakMilestone: () => void
+  /** V7 explicit path: petting / welcome-back / ritual line, once called. */
+  readonly speakExplicit: (category: SpeechCategory) => void
+  /** V7 explicit path delayed until the load-quiet period has elapsed. */
+  readonly speakAfterQuiet: (category: SpeechCategory) => void
   /** Effective idle bucket for the expression layer. */
   readonly idleBucket: 0 | 1 | 2
   /** True while a level-up / keepsake moment should present proudly. */
   readonly milestoneActive: boolean
+  /** Payload-ignored cadence snapshot for the ambient behavior layer. */
+  readonly readCadence: () => {
+    readonly mountedAt: number
+    readonly lastInputAt: number | null
+    readonly sessionState: 'idle' | 'working' | 'needs-input' | 'terminal'
+    readonly now: number
+  }
+}
+
+export interface VehiclePetRitualHooks {
+  /** Current tolerant ritual markers (preference record). */
+  readonly getMarkers: () => RitualMarkers
+  /** Persist a fired ritual (once-per-local-day bookkeeping). */
+  readonly onRitual: (kind: 'first-completion' | 'late-night' | 'welcome') => void
 }
 
 interface SchedulerOptions {
@@ -42,6 +66,15 @@ interface SchedulerOptions {
   readonly sessionView: VehiclePetSessionView
   readonly locale: string | undefined
   readonly enabled: boolean
+  /** V7 CTR-034: daypart slides the recurring delay inside the 20–40 s band. */
+  readonly daypartBucket?: DaypartBucket
+  /** V7 CTR-036: first-completion-of-day speaks the ritual category once. */
+  readonly rituals?: VehiclePetRitualHooks
+  /**
+   * V7 CTR-030: while a petting hold is active, recurring attempts are
+   * consumed (no catch-up) instead of interrupting the episode.
+   */
+  readonly pettingActive?: boolean
 }
 
 interface SchedulerRefs {
@@ -66,6 +99,12 @@ export function useVehiclePetSpeech(options: SchedulerOptions): VehiclePetSpeech
   randomRef.current = options.random ?? Math.random
   const presentationRef = useRef({ characterId: options.characterId ?? 'vehicle', locale })
   presentationRef.current = { characterId: options.characterId ?? 'vehicle', locale }
+  const bucketRef = useRef<DaypartBucket | undefined>(options.daypartBucket)
+  bucketRef.current = options.daypartBucket
+  const ritualsRef = useRef<VehiclePetRitualHooks | undefined>(options.rituals)
+  ritualsRef.current = options.rituals
+  const pettingRef = useRef(options.pettingActive ?? false)
+  pettingRef.current = options.pettingActive ?? false
   const startRef = useRef<SchedulerRefs | null>(null)
   if (startRef.current === null) {
     startRef.current = {
@@ -92,6 +131,7 @@ export function useVehiclePetSpeech(options: SchedulerOptions): VehiclePetSpeech
   const [milestoneActive, setMilestoneActive] = useState(false)
   const dismissTimerRef = useRef<ReturnType<typeof globalThis.setTimeout> | undefined>(undefined)
   const milestoneTimerRef = useRef<ReturnType<typeof globalThis.setTimeout> | undefined>(undefined)
+  const quietTimersRef = useRef<ReturnType<typeof globalThis.setTimeout>[]>([])
   const bubbleKeyRef = useRef(0)
 
   const cadenceState = useCallback((): SpeechCadenceState => {
@@ -151,6 +191,20 @@ export function useVehiclePetSpeech(options: SchedulerOptions): VehiclePetSpeech
     trySpeak({ kind: 'click', category })
   }, [trySpeak])
 
+  const speakExplicit = useCallback((category: SpeechCategory): void => {
+    trySpeak({ kind: 'explicit', category })
+  }, [trySpeak])
+
+  const speakAfterQuiet = useCallback((category: SpeechCategory): void => {
+    const delay = Math.max(0, refs.mountedAt + SPEECH_LOAD_QUIET_MS - Date.now())
+    const handle = globalThis.setTimeout(() => {
+      trySpeak({ kind: 'explicit', category })
+    }, delay)
+    // Bounded: if the surface unmounts before the quiet period elapses, the
+    // pending line is dropped with the surface (no catch-up).
+    quietTimersRef.current.push(handle)
+  }, [refs, trySpeak])
+
   // Payload-ignored input recency: only the timestamp is recorded. Never the
   // key value, target, or any host content (CTR-OVERLAY-008/019(3)).
   useEffect(() => {
@@ -168,13 +222,21 @@ export function useVehiclePetSpeech(options: SchedulerOptions): VehiclePetSpeech
 
   // Session edges: needs-input and terminal lines. Terminal identities are
   // edge-deduplicated by the adapter; the identity check here keeps the line
-  // side equally idempotent across reload/resubscribe.
+  // side equally idempotent across reload/resubscribe. V7 CTR-036: the first
+  // completed edge of a local day speaks the ritual category instead (still
+  // one line, one bubble, once per day).
   useEffect(() => {
     if (!enabled) return
     const terminal = sessionView.terminal
     if (terminal !== null && terminal.identity !== refs.lastTerminalIdentity) {
       refs.lastTerminalIdentity = terminal.identity
-      const category: SpeechCategory = terminal.status === 'completed' ? 'completed' : 'failed'
+      let category: SpeechCategory = terminal.status === 'completed' ? 'completed' : 'failed'
+      const rituals = ritualsRef.current
+      if (terminal.status === 'completed' && rituals !== undefined
+        && isFirstCompletionToday(rituals.getMarkers(), localDayKey(new Date()))) {
+        category = 'ritual'
+        rituals.onRitual('first-completion')
+      }
       trySpeak({ kind: 'session-edge', category })
       return
     }
@@ -200,16 +262,25 @@ export function useVehiclePetSpeech(options: SchedulerOptions): VehiclePetSpeech
 
   // One persistent deadline across character/locale switches. Background and
   // input-suppressed attempts consume their deadline rather than catching up.
+  // V7 CTR-034: the daypart bucket slides the sampled delay inside the band.
   useEffect(() => {
     if (!enabled) return
-    const postpone = () => { refs.nextRecurringAt=Date.now()+nextRecurringDelayMs(randomRef.current()) }
+    const resample = (): void => {
+      const bucket = bucketRef.current
+      const sample = randomRef.current()
+      refs.nextRecurringAt = Date.now() + (bucket !== undefined
+        ? nextDaypartRecurringDelayMs(bucket, sample)
+        : nextRecurringDelayMs(sample))
+    }
+    const postpone = () => { resample() }
     document.addEventListener('visibilitychange',postpone)
     const handle = globalThis.setInterval(() => {
       const now=Date.now()
       setIdleBucket(idleBucketFor(refs.lastInputAt,now))
       if(now<refs.nextRecurringAt) return
-      postpone()
+      resample()
       if(document.hidden) return
+      if(pettingRef.current) return
       trySpeak({kind:'ambient'})
     },1000)
     return () => {
@@ -223,6 +294,8 @@ export function useVehiclePetSpeech(options: SchedulerOptions): VehiclePetSpeech
   useEffect(() => () => {
     globalThis.clearTimeout(dismissTimerRef.current)
     globalThis.clearTimeout(milestoneTimerRef.current)
+    for (const handle of quietTimersRef.current) globalThis.clearTimeout(handle)
+    quietTimersRef.current = []
   }, [])
 
   const speakMilestone = useCallback((): void => {
@@ -232,7 +305,20 @@ export function useVehiclePetSpeech(options: SchedulerOptions): VehiclePetSpeech
     milestoneTimerRef.current = globalThis.setTimeout(() => setMilestoneActive(false), 6000)
   }, [trySpeak])
 
-  return { bubble, speakForClick, speakMilestone, idleBucket, milestoneActive }
+  const readCadence = useCallback(() => {
+    const view = sessionViewRef.current
+    return {
+      mountedAt: refs.mountedAt,
+      lastInputAt: refs.lastInputAt,
+      sessionState: (view.terminal !== null
+        ? 'terminal'
+        : view.live === 'running' ? 'working' : view.live === 'needs-input' ? 'needs-input' : 'idle') as
+        'idle' | 'working' | 'needs-input' | 'terminal',
+      now: Date.now(),
+    }
+  }, [refs])
+
+  return { bubble, speakForClick, speakMilestone, speakExplicit, speakAfterQuiet, idleBucket, milestoneActive, readCadence }
 }
 
 export interface VehiclePetBubbleProps {

@@ -45,6 +45,8 @@ export interface OverlayDragController {
     readonly activeBounds: ActiveSurfaceBounds;
     readonly shellStyle: CSSProperties;
     readonly isDragging: boolean;
+    /** V7 CTR-032 drag body reaction: bounded tilt toward the movement direction. */
+    readonly tiltDeg: number;
     /** True exactly once after a drag; consumes the flag so the click is ignored. */
     readonly consumeSuppressedClick: () => boolean;
     readonly moveByKeyboard: (dx: number, dy: number) => void;

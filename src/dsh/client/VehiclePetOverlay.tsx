@@ -41,11 +41,23 @@ import {
   type VehiclePetExpressionVariant,
 } from './expressions'
 import { usePlayfulReaction, ReactionDecoration } from './playful-reactions'
+import {
+  GESTURE_PETTING_HOLD_MS, INITIAL_GESTURE_STATE, promoteToPetting, reduceGesture,
+  readClickChainAt, storeClickChainAt,
+  type GestureInputEvent, type GestureState,
+} from './gesture-rules'
+import { useAmbientBehavior } from './use-ambient'
+import { useCursorGaze } from './use-cursor-gaze'
+import { daypartFromDate, type DaypartBucket } from './daypart'
+import {
+  EMPTY_RITUAL_MARKERS, isLateNightRitualDue, lateNightRitualDayKey,
+  localDayKey, recordRitual, shouldWelcomeBack,
+} from './ritual-rules'
 import {activeSessionsFromList, type ActiveSession} from './active-sessions'
 import {ActiveSessionFooter} from './ActiveSessionFooter'
 import { CharacterVisual, companionHitStyle } from './CharacterVisual'
 import { CHARACTER_DEFINITIONS, characterLevel } from './characters'
-import type { CharacterId } from './types'
+import type { CharacterId, RitualMarkers } from './types'
 import { VehiclePetDialog } from './VehiclePetDialog'
 import { VehiclePetSecondaryMenu } from './VehiclePetSecondaryMenu'
 import { useVehiclePetSpeech, VehiclePetBubble } from './VehiclePetSpeech'
@@ -121,12 +133,15 @@ export function VehiclePetOverlay(props: VehiclePetOverlayProps): ReactElement |
     })
   }, [])
 
+  // V7: the state updater stays PURE (React may re-invoke it during renders —
+  // a side-effecting updater amplifies into write storms); the persistence
+  // write happens exactly once per commit, immediately, from the ref-chained
+  // next value so same-tick commits chain correctly (CTR-010).
   const commitPreferences = useCallback((update: (current: VehiclePetOverlayPreferences) => VehiclePetOverlayPreferences) => {
-    setPreferences(current => {
-      const next = update(current)
-      saveOverlayPreferences(next)
-      return next
-    })
+    const next = update(preferencesRef.current)
+    preferencesRef.current = next
+    setPreferences(next)
+    saveOverlayPreferences(next)
   }, [])
 
   const chrome = useMemo<OverlayChrome>(() => ({ t, commitPreferences, engineLocale, activeSessions }), [t, commitPreferences, engineLocale, activeSessions])
@@ -300,10 +315,7 @@ function OverlaySurface({
     commitPreferences,
   })
 
-  const closeMenu = useCallback(() => {
-    setMenuOpen(false)
-    drag.rootRef.current?.querySelector<HTMLButtonElement>('[data-vehicle-pet-pet]')?.focus()
-  }, [drag.rootRef])
+
 
   // R4-B2 invariant carried to V3: every collapsed preference source (local
   // action, storage adoption, reload, or fallback) destroys transient open
@@ -313,6 +325,55 @@ function OverlaySurface({
     setMenuOpen(false)
     setDialogOpen(false)
   }, [collapsed])
+
+  // V7 CTR-035/036 ritual bookkeeping: tolerant optional preference fields.
+  // The late-night marker stamps the RITUAL day key (the hours before 05:00
+  // belong to the previous evening), matching the key the due-check uses —
+  // otherwise the marker never matches and the ritual re-fires forever.
+  const commitRitual = useCallback((kind: 'first-completion' | 'late-night' | 'welcome') => {
+    const now = new Date()
+    const dayKey = kind === 'late-night' ? lateNightRitualDayKey(now) : localDayKey(now)
+    commitPreferences(current => ({
+      ...current,
+      rituals: recordRitual(current.rituals ?? EMPTY_RITUAL_MARKERS, kind, dayKey),
+    }))
+  }, [commitPreferences])
+  const touchLastSeen = useCallback(() => {
+    commitPreferences(current => ({ ...current, lastSeenAt: Date.now() }))
+  }, [commitPreferences])
+  // CTR-035: WELCOME_BACK wins over the normal greeting in the same return
+  // window — when the stored absence crosses the threshold (welcome pending)
+  // or today's welcome was already claimed, the Engine greeting pill stays
+  // suppressed for this session.
+  const suppressDailyGreetingToday = useMemo(() => {
+    const todayKey = localDayKey(new Date())
+    const markers = preferences.rituals ?? EMPTY_RITUAL_MARKERS
+    return shouldWelcomeBack(preferences.lastSeenAt, Date.now(), todayKey, markers)
+      || markers.welcomeDayKey === todayKey
+  }, [preferences.lastSeenAt, preferences.rituals])
+
+  const ritualBridge = useMemo(() => ({
+    lastSeenAt: preferences.lastSeenAt,
+    markers: preferences.rituals ?? EMPTY_RITUAL_MARKERS,
+    onRitual: commitRitual,
+    onTouchLastSeen: touchLastSeen,
+  }), [preferences.lastSeenAt, preferences.rituals, commitRitual, touchLastSeen])
+
+  // V7 CTR-029: an outside press closes the menu, and Chromium may synthesize
+  // a native dblclick from that same closing click plus the previous pet
+  // click — which would instantly reopen what it just closed. Outside-press
+  // closes are therefore stamped, and the resident's gesture session is
+  // reset through gestureResetRef (chain + session cleared); Escape closes
+  // are never stamped, so close-then-reopen flows stay instant.
+  const gestureResetRef = useRef<() => void>(() => {})
+  const armOutsidePressReset = useCallback(() => {
+    gestureResetRef.current()
+  }, [])
+  const closeMenu = useCallback(() => {
+    setMenuOpen(false)
+    drag.rootRef.current?.querySelector<HTMLButtonElement>('[data-vehicle-pet-pet]')?.focus()
+  }, [drag.rootRef])
+  const openSecondaryMenu = useCallback(() => setMenuOpen(true), [])
 
   const collapse = useCallback(() => {
     setMenuOpen(false)
@@ -365,7 +426,7 @@ function OverlaySurface({
       <div
         className="vpo-shell"
         data-reduced-motion={snapshot.reducedMotion}
-        style={{ ...drag.shellStyle, '--vpo-x': `${drag.point.x}px`, '--vp-subject-boost': subjectBoostFor(snapshot.plan, residentSurfaceSizePx(false, effectiveSize(preferences))) } as CSSProperties}
+        style={{ ...drag.shellStyle, '--vpo-x': `${drag.point.x}px`, '--vp-subject-boost': subjectBoostFor(snapshot.plan, residentSurfaceSizePx(false, effectiveSize(preferences))), '--vp-tilt': `${drag.tiltDeg}deg` } as CSSProperties}
         data-dragging={drag.isDragging}
         data-menu-open={menuOpen ? 'true' : 'false'}
         data-live={sessionView.terminal !== null ? 'terminal' : sessionView.live}
@@ -388,12 +449,14 @@ function OverlaySurface({
             sessionView={sessionView}
             surfaceSize={residentSurfaceSizePx(false, effectiveSize(preferences))}
             menuOpen={menuOpen}
-            onOpenMenu={() => setMenuOpen(true)}
+            onOpenMenu={openSecondaryMenu}
             bubblePlacement={drag.point.y < 72 ? 'below' : 'above'}
             petInteractionCount={petInteractionCount}
             onPetClick={() => setPetInteractionCount(count => count + 1)}
             dragHandlers={drag}
             onKeyDown={handleSurfaceKeyDown}
+            rituals={ritualBridge}
+            gestureResetRef={gestureResetRef}
           />
         )}
 
@@ -407,6 +470,8 @@ function OverlaySurface({
             }}
             onCollapse={collapse}
             onRequestClose={closeMenu}
+            onOutsidePress={armOutsidePressReset}
+            dialogOpen={dialogOpen}
             onOpenJourney={() => {
               setDialogOpen(true)
             }}
@@ -416,7 +481,10 @@ function OverlaySurface({
 
         {!collapsed ? (
           <span className="vpo-feedbackWrap" data-placement={drag.point.y < 110 ? 'below' : 'above'}>
-            <DailyGreeting />
+            {/* CTR-035: a return-day welcome takes the first-open-of-day
+                greeting slot — the Engine greeting pill stays suppressed for
+                this session so the return day never double-greets. */}
+            {!suppressDailyGreetingToday ? <DailyGreeting /> : null}
             <HostActivityFeedback />
             <TerminalFeedbackDispatcher sessionView={sessionView} />
           </span>
@@ -470,6 +538,11 @@ function levelIndex(levelId: string): number {
   return match === null ? 0 : Number(match[1])
 }
 
+/** Direct interactions (click/petting/drag/menu) arm the ambient cooldown. */
+const LATE_NIGHT_INPUT_RECENCY_MS = 30 * 60 * 1000
+/** The lastSeenAt touch rewrites only stamps older than this (V7 CTR-035). */
+const LASTSEEN_TOUCH_STALE_MS = 60 * 1000
+
 function ResidentPet({
   characterId,
   menuOpen,
@@ -481,6 +554,8 @@ function ResidentPet({
   onPetClick,
   dragHandlers,
   onKeyDown,
+  rituals,
+  gestureResetRef,
 }: {
   characterId: CharacterId
   sessionView: VehiclePetSessionView
@@ -492,16 +567,62 @@ function ResidentPet({
   onPetClick: () => void
   dragHandlers: ReturnType<typeof useOverlayDrag>
   onKeyDown: (event: ReactKeyboardEvent<HTMLElement>) => void
+  gestureResetRef: { current: () => void }
+  rituals: {
+    readonly lastSeenAt: number | undefined
+    readonly markers: RitualMarkers
+    readonly onRitual: (kind: 'first-completion' | 'late-night' | 'welcome') => void
+    readonly onTouchLastSeen: () => void
+  }
 }): ReactElement {
   const { t, engineLocale, activeSessions = [] } = useOverlayChrome()
-  const suppressDoubleUntil = useRef(0)
   const { snapshot } = usePetEngine()
+
+  const [gesture, setGesture] = useState<GestureState>(INITIAL_GESTURE_STATE)
+  const gestureRef = useRef(gesture)
+  gestureRef.current = gesture
+  // Menu closes invoke this synchronously (raw-listener ordering included):
+  // the closing interaction's gesture chain dies with the menu — including
+  // the module-level double-click chain memory (587bf81), which would
+  // otherwise let the closing click synthesize a reopen.
+  gestureResetRef.current = () => {
+    gestureRef.current = INITIAL_GESTURE_STATE
+    setGesture(INITIAL_GESTURE_STATE)
+    storeClickChainAt(null)
+    suppressDblClickRef.current = true
+  }
+  const suppressClickRef = useRef(false)
+  // Armed by an outside-press menu close: the closing interaction's own
+  // synthesized dblclick is consumed once instead of reopening (CTR-005).
+  const suppressDblClickRef = useRef(false)
+  const lastInteractionRef = useRef(0)
+  const noteInteraction = useCallback(() => {
+    lastInteractionRef.current = Date.now()
+  }, [])
+  const [daypart, setDaypart] = useState<DaypartBucket>(() => daypartFromDate(new Date()))
+  const markersRef = useRef(rituals.markers)
+  markersRef.current = rituals.markers
+  const ritualBridgeRef = useRef(rituals)
+  ritualBridgeRef.current = rituals
+  const characterAreaRef = useRef<HTMLSpanElement | null>(null)
+
+  // V7 CTR-034: device-local daypart, re-evaluated each minute.
+  useEffect(() => {
+    const handle = globalThis.setInterval(() => setDaypart(daypartFromDate(new Date())), 60000)
+    return () => globalThis.clearInterval(handle)
+  }, [])
 
   const speech = useVehiclePetSpeech({
     sessionView,
     locale: engineLocale,
     enabled: true,
     characterId,
+    daypartBucket: daypart,
+    pettingActive: gesture.petting,
+    rituals: {
+      getMarkers: () => markersRef.current,
+      onRitual: kind => ritualBridgeRef.current.onRitual(kind),
+    },
   })
 
   // Level-up milestone: a derived-level increase announces a milestone line
@@ -528,12 +649,161 @@ function ResidentPet({
     clickCount: petInteractionCount,
     idleBucket: speech.idleBucket,
     lastVariantForState: lastVariantRef.current,
+    daypartSleepy: daypart === 'late-night',
   })
+  // "Dragging" means a real position drag (gesture phase), not a held
+  // pointer: petting holds present while isDragging (pointer-down) is true.
+  const realDragging = dragHandlers.isDragging && gesture.phase === 'dragged'
   const playful = usePlayfulReaction({ state, terminalIdentity: sessionView.terminal?.identity ?? null,
-    characterId, menuOpen, dragging: dragHandlers.isDragging,
+    characterId, menuOpen, dragging: realDragging,
     ambientKey: speech.bubble?.source === 'ambient' ? speech.bubble.key : null })
-  const variant = state === 'idle' && playful.reaction ? playful.reaction.definition.variant : baselineVariant
-  lastVariantRef.current = baselineVariant
+  const baselineForSelection = baselineVariant
+  const variant = state === 'idle' && playful.reaction ? playful.reaction.definition.variant : baselineForSelection
+  lastVariantRef.current = baselineForSelection
+
+  // V7 CTR-031: bounded cursor awareness — static under reduced motion,
+  // disabled while busy; reads only pointer coordinates near the figure.
+  useCursorGaze({
+    elementRef: characterAreaRef,
+    enabled: true,
+    disabled: playful.reduced || menuOpen || dragHandlers.isDragging || gesture.petting || state !== 'idle',
+  })
+
+  // V7 CTR-033: the one ambient behavior timer; verdicts pure in ambient-rules.
+  useAmbientBehavior({
+    characterId,
+    daypartBucket: daypart,
+    readCadence: speech.readCadence,
+    readLastInteractionAt: () => lastInteractionRef.current,
+    enabled: !gesture.petting,
+    play: playful.playAmbient,
+  })
+
+  // Gesture arbiter (CTR-029): one pure state model for the pointer session.
+  // The menu's outside-press close resets the session through gestureResetRef
+  // (document capture ordering), so the closing interaction's trailing click
+  // cannot chain into a synthetic double-click that would reopen what it just
+  // closed (CTR-005/029).
+  const handleGesture = useCallback((event: GestureInputEvent) => {
+    // Hydrate the double-click chain only where it is consumed (a release
+    // from `pressed`): the overlay can be re-created between the two clicks
+    // of a double-click (session remounts), while the native dblclick this
+    // arbiter replaced was remount-resilient (CTR-029).
+    const previous = gestureRef.current.phase === 'pressed' && event.type === 'release'
+      ? { ...gestureRef.current, lastClickAt: readClickChainAt() }
+      : gestureRef.current
+    const result = reduceGesture(previous, event)
+    gestureRef.current = result.state
+    setGesture(result.state)
+    switch (result.verdict.kind) {
+      case 'click':
+        storeClickChainAt(result.state.lastClickAt)
+        if (result.verdict.doubleClick) noteInteraction()
+        break
+      case 'petting-start':
+      case 'drag-start':
+      case 'drop':
+      case 'petting-release':
+        // Anything between two clicks breaks a double-click chain (native
+        // dblclick semantics): petting holds, drags, and drops clear it.
+        storeClickChainAt(null)
+        break
+      default:
+        break
+    }
+    switch (result.verdict.kind) {
+      case 'click':
+        // CTR-005/021: double-click opens only the settings menu; the single
+        // click of the sequence may already have shown at most one reaction.
+        if (result.verdict.doubleClick) {
+          suppressClickRef.current = false
+          onOpenMenu()
+          break
+        }
+        playful.play()
+        onPetClick()
+        noteInteraction()
+        speech.speakForClick(state)
+        break
+      case 'petting-start':
+        suppressClickRef.current = true
+        playful.playPetting()
+        noteInteraction()
+        break
+      case 'petting-release':
+        playful.releasePetting()
+        noteInteraction()
+        break
+      case 'drag-start':
+        // CTR-032: the lift holds a surprised/curious variant for the drag;
+        // the settle on drop replaces it.
+        playful.playDragLift()
+        noteInteraction()
+        break
+      case 'drop':
+        playful.playSettle()
+        noteInteraction()
+        break
+      default:
+        break
+    }
+  }, [noteInteraction, onOpenMenu, onPetClick, playful, speech, state])
+
+  // Petting hold promotion (CTR-029/030): a stationary hold inside the band
+  // becomes petting; the click path stays suppressed for that press.
+  useEffect(() => {
+    if (gesture.phase !== 'pressed' || gesture.pressedAt === null) return
+    const remaining = Math.max(0, GESTURE_PETTING_HOLD_MS - (Date.now() - gesture.pressedAt))
+    const handle = globalThis.setTimeout(() => {
+      const result = promoteToPetting(gestureRef.current)
+      if (result.verdict.kind !== 'petting-start') return
+      gestureRef.current = result.state
+      setGesture(result.state)
+      suppressClickRef.current = true
+      playful.playPetting()
+      noteInteraction()
+    }, remaining)
+    return () => globalThis.clearTimeout(handle)
+  }, [gesture.phase, gesture.pressedAt, noteInteraction, playful])
+
+  // V7 CTR-035: welcome back after a long absence — one line, no guilt, the
+  // greeting slot is taken for the day. lastSeenAt refreshes once per mount
+  // (the absence boundary is a remount; absent field = no welcome, and a
+  // fired welcome never repeats within its local day). No event-driven
+  // preference writes exist: every other write stays a user action.
+  const welcomedRef = useRef(false)
+  useEffect(() => {
+    if (welcomedRef.current) return
+    welcomedRef.current = true
+    const now = Date.now()
+    const todayKey = localDayKey(new Date())
+    if (shouldWelcomeBack(rituals.lastSeenAt, now, todayKey, markersRef.current)) {
+      speech.speakAfterQuiet('welcome')
+      ritualBridgeRef.current.onRitual('welcome')
+    }
+    // Freshness-gated touch: write only when the stored stamp is absent or
+    // stale (an adopt-restored resident remounts without writing again).
+    const stored = rituals.lastSeenAt
+    if (stored === undefined || now - stored > LASTSEEN_TOUCH_STALE_MS) {
+      ritualBridgeRef.current.onTouchLastSeen()
+    }
+  }, [rituals.lastSeenAt, speech])
+
+  // V7 CTR-036: the late-night ritual — at most once per ritual day, only
+  // while the user is actually around, gentle copy only. The firedRef keeps
+  // the marker-write race from double-attempting before the re-render lands.
+  const lateNightFiredRef = useRef(false)
+  useEffect(() => {
+    if (daypart !== 'late-night' || lateNightFiredRef.current) return
+    if (!isLateNightRitualDue(markersRef.current, lateNightRitualDayKey(new Date()))) return
+    const cadence = speech.readCadence()
+    const recent = cadence.lastInputAt !== null
+      && cadence.now - cadence.lastInputAt <= LATE_NIGHT_INPUT_RECENCY_MS
+    if (!recent) return
+    lateNightFiredRef.current = true
+    speech.speakAfterQuiet('ritual')
+    ritualBridgeRef.current.onRitual('late-night')
+  }, [daypart, speech])
 
   const stateKey: VehiclePetLocaleKey = sessionView.terminal !== null
     ? `state.${sessionView.terminal.status}`
@@ -551,8 +821,12 @@ function ResidentPet({
 
   return (
     <>
-      <span className="vpo-characterArea"
-        data-gesture={playful.reaction?.definition.id} data-motion={playful.reduced ? 'reduced' : 'allowed'}>
+      <span className="vpo-characterArea" ref={characterAreaRef}
+        data-gesture={playful.reaction?.definition.anim}
+        data-vehicle-pet-reaction-id={playful.reaction?.definition.id}
+        data-vehicle-pet-petting={gesture.petting ? 'true' : 'false'}
+        data-gaze-active={undefined}
+        data-motion={playful.reduced ? 'reduced' : 'allowed'}>
       <span className="vpo-scene vpo-characterScene" aria-hidden="true">
         <CharacterVisual character={CHARACTER_DEFINITIONS[characterId]} variant={variant}
           levelId={levelId} interactionCount={petInteractionCount} />
@@ -563,7 +837,7 @@ function ResidentPet({
         className="vpo-surface vpo-petHit"
         style={hitStyle}
         aria-label={t('overlay.label', { state: t(stateKey) })}
-        aria-description={`${engineLocale==='en'?'Double-click or Shift+Enter for settings. ':'双击或 Shift+Enter 打开设置。'}${t('menu.character.' + characterId as VehiclePetLocaleKey)}${grade === null ? '' : ` · ${grade.grade} ${grade.description}`}`}
+        aria-description={`${engineLocale==='en'?'Double-click or Shift+Enter for settings. Hold to pet. ':'双击或 Shift+Enter 打开设置。长按可以摸摸。'}${t('menu.character.' + characterId as VehiclePetLocaleKey)}${grade === null ? '' : ` · ${grade.grade} ${grade.description}`}`}
         data-vehicle-pet-pet="true"
         data-vehicle-pet-character={characterId}
         data-vehicle-pet-expression={variant}
@@ -578,21 +852,42 @@ function ResidentPet({
           onKeyDown(event)
         }}
         onDoubleClick={event => {
+          // Native double-click parity with the arbiter's synthetic window;
+          // both paths converge on the same idempotent menu open (CTR-005).
           event.preventDefault()
-          if(Date.now()<suppressDoubleUntil.current || dragHandlers.consumeSuppressedClick()) return
+          if (dragHandlers.consumeSuppressedClick()) return
+          if (suppressClickRef.current) { suppressClickRef.current = false; return }
+          if (suppressDblClickRef.current) { suppressDblClickRef.current = false; return }
           onOpenMenu()
         }}
         onClick={event => {
-          if (dragHandlers.consumeSuppressedClick()) {suppressDoubleUntil.current=Date.now()+500;return}
-          if(event.detail>1) return
+          // Suppressed native clicks: after a real drag the trailing click is
+          // consumed; after petting the whole click path stays suppressed.
+          if (dragHandlers.consumeSuppressedClick()) return
+          if (suppressClickRef.current) { suppressClickRef.current = false; return }
+          if (event.detail > 0) return // pointer clicks are arbiter-handled
+          // Keyboard activation (Enter/Space, event.detail === 0): single
+          // click reaction, CTR-021 keyboard parity.
           playful.play()
           onPetClick()
           speech.speakForClick(state)
         }}
-        onPointerDown={dragHandlers.onPointerDown}
-        onPointerMove={dragHandlers.onPointerMove}
-        onPointerUp={dragHandlers.onPointerUp}
-        onPointerCancel={dragHandlers.onPointerCancel}
+        onPointerDown={event => {
+          dragHandlers.onPointerDown(event)
+          handleGesture({ type: 'press', at: Date.now(), point: { x: event.clientX, y: event.clientY } })
+        }}
+        onPointerMove={event => {
+          dragHandlers.onPointerMove(event)
+          handleGesture({ type: 'move', at: Date.now(), point: { x: event.clientX, y: event.clientY } })
+        }}
+        onPointerUp={event => {
+          dragHandlers.onPointerUp(event)
+          handleGesture({ type: 'release', at: Date.now(), point: { x: event.clientX, y: event.clientY } })
+        }}
+        onPointerCancel={event => {
+          dragHandlers.onPointerCancel(event)
+          handleGesture({ type: 'cancel', at: Date.now() })
+        }}
       />
       </span>
       <div className={captionTop === undefined ? undefined : 'vpo-captionGroup'} style={captionTop === undefined ? { display: 'contents' } : { top: captionTop }}>

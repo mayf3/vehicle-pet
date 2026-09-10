@@ -9,7 +9,7 @@
  * another tab without write loops; every listener is returned as a disposer.
  */
 
-import type { VehiclePetOverlayPreferences, VehiclePetSize } from './types'
+import type { RitualMarkers, VehiclePetOverlayPreferences, VehiclePetSize } from './types'
 
 export const OVERLAY_PREFERENCES_KEY = 'vehicle-pet/overlay-preferences/v1'
 
@@ -21,6 +21,8 @@ export const DEFAULT_OVERLAY_PREFERENCES: Readonly<VehiclePetOverlayPreferences>
   reducedMotion: undefined,
   size: undefined,
   characterId: 'vehicle',
+  lastSeenAt: undefined,
+  rituals: { dayKey: undefined, firstCompletionDone: false, lateNightDone: false, welcomeDayKey: undefined },
 })
 
 const finiteRatio = (value: unknown, fallback: number): number =>
@@ -57,6 +59,28 @@ export function normalizeOverlayPreferences(value: unknown): VehiclePetOverlayPr
     reducedMotion: typeof candidate.reducedMotion === 'boolean' ? candidate.reducedMotion : undefined,
     size: normalizeSize(candidate.size),
     characterId: candidate.characterId === 'companion' ? 'companion' : 'vehicle',
+    // V7 ritual fields (CTR-035/036): tolerant optional additions. Invalid
+    // values silently disable the ritual instead of blocking the pet.
+    lastSeenAt: typeof candidate.lastSeenAt === 'number' && Number.isFinite(candidate.lastSeenAt) && candidate.lastSeenAt > 0
+      ? candidate.lastSeenAt
+      : undefined,
+    rituals: normalizeRitualMarkers(candidate.rituals),
+  }
+}
+
+const boundedKey = (value: unknown): string | undefined =>
+  typeof value === 'string' && value.length > 0 && value.length <= 10 ? value : undefined
+
+function normalizeRitualMarkers(value: unknown): RitualMarkers {
+  if (typeof value !== 'object' || value === null) {
+    return { dayKey: undefined, firstCompletionDone: false, lateNightDone: false, welcomeDayKey: undefined }
+  }
+  const candidate = value as Partial<RitualMarkers>
+  return {
+    dayKey: boundedKey(candidate.dayKey),
+    firstCompletionDone: candidate.firstCompletionDone === true,
+    lateNightDone: candidate.lateNightDone === true,
+    welcomeDayKey: boundedKey(candidate.welcomeDayKey),
   }
 }
 
@@ -119,13 +143,20 @@ export function adoptStorageEvent(
       || next.collapsed !== current.collapsed
       || next.reducedMotion !== current.reducedMotion
       || next.size !== current.size
-      || next.characterId !== current.characterId) {
+      || next.characterId !== current.characterId
+      || next.lastSeenAt !== current.lastSeenAt
+      || ritualMarkerKey(next.rituals) !== ritualMarkerKey(current.rituals)) {
       return next
     }
     return null
   } catch {
     return null
   }
+}
+
+/** Stable comparison key for the tolerant ritual markers. */
+function ritualMarkerKey(markers: RitualMarkers | undefined): string {
+  return `${markers?.dayKey ?? ''}|${markers?.firstCompletionDone === true}|${markers?.lateNightDone === true}|${markers?.welcomeDayKey ?? ''}`
 }
 
 /**
