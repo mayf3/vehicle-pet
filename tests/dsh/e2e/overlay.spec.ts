@@ -1459,24 +1459,24 @@ test('CROSSTAB_COLLAPSE_RESTORE_VISIBLE_TEST. two tabs destroy stale Menu/Dialog
     // PROGRESS_SOURCE_V1 CTR-USG-009) is a separate sanctioned writer whose
     // persistence frequency is bounded by its own change-only rule.
     const preferenceKey = 'vehicle-pet/overlay-preferences/v1'
-    const state: { writes: number; values?: string[] } = { writes: 0 }
+    const state: { writes: number; stacks?: (string | undefined)[] } = { writes: 0 }
     const prototype = Storage.prototype
     const native = prototype.setItem
     prototype.setItem = function (key, ...args) {
       if (String(key) === preferenceKey) {
         state.writes += 1
-        ;(state.values ??= []).push(String(args[0]))
+        ;(state.stacks ??= []).push(new Error(`w${state.writes}`).stack?.split('\n').slice(2, 24).join('\n'))
       }
       return native.apply(this, [key, ...args])
     }
-    ;(window as unknown as { __vpoPreferenceWrites: typeof state & { values?: string[] } }).__vpoPreferenceWrites = state
+    ;(window as unknown as { __vpoPreferenceWrites: typeof state & { stacks?: (string | undefined)[] } }).__vpoPreferenceWrites = state
   })
   const writes = async (target: Page) => {
     const data = await target.evaluate(() => {
-      const w = (window as unknown as { __vpoPreferenceWrites: { writes: number; values?: string[] } }).__vpoPreferenceWrites
-      return { writes: w.writes, values: w.values ?? [] }
+      const w = (window as unknown as { __vpoPreferenceWrites: { writes: number; stacks?: (string | undefined)[] } }).__vpoPreferenceWrites
+      return { writes: w.writes, stacks: w.stacks ?? [] }
     })
-    if (data.values.length) console.log('WRITEVALUES', JSON.stringify(data.values, null, 1))
+    if (data.stacks.length) console.log(`WRITESTACKS[n=${data.writes}]\n` + data.stacks.map((st, i) => `-- w${i + 1} --\n` + st).join('\n'))
     return data.writes
   }
   // V7 (CTR-035/036): spend both tabs' once-per-day rituals before the
