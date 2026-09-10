@@ -136,6 +136,23 @@ export function reduceGesture(
   }
 }
 
+/**
+ * Remount-resilient double-click chain memory. The overlay is a single
+ * document-level instance (CTR-002), so the chain lives beside it rather than
+ * in component state: a session-state remount between the two clicks of a
+ * double-click must not orphan the chain (the native dblclick it replaces was
+ * remount-resilient). reduceGesture stays pure; only the overlay touches this.
+ */
+let clickChainAt: number | null = null
+
+export function readClickChainAt(): number | null {
+  return clickChainAt
+}
+
+export function storeClickChainAt(at: number | null): void {
+  clickChainAt = at
+}
+
 /** True when a press that began at `pressedAt` has held long enough to pet. */
 export function isPettingHoldDue(state: GestureState, now: number): boolean {
   return state.phase === 'pressed' && state.pressedAt !== null
