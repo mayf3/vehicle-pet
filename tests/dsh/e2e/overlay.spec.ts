@@ -281,9 +281,19 @@ async function sendPrompt(page: Page, text: string): Promise<void> {
  */
 async function openMenu(page: Page): Promise<void> {
   const trigger = page.locator(MENU_TRIGGER)
-  await page.locator(PET).focus()
-  await page.locator(PET).dblclick()
-  await page.locator(MENU).waitFor({ state: 'visible' })
+  // The synthetic double-click needs both clicks inside the arbiter window:
+  // a lost first attempt (rare timing race) retries once — the contract under
+  // test is the menu interaction, not Playwright click timing.
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    await page.locator(PET).focus()
+    await page.locator(PET).dblclick()
+    try {
+      await page.locator(MENU).waitFor({ state: 'visible', timeout: 3_000 })
+      return
+    } catch {
+      if (attempt === 1) throw new Error('menu did not open after double-click retry')
+    }
+  }
 }
 
 /** Escape closes the menu (CTR-OVERLAY-004); focus rests inside the menu or its trigger. */
@@ -294,9 +304,28 @@ async function closeMenu(page: Page): Promise<void> {
 }
 
 async function seedPreferences(page: Page, record: Record<string, unknown>): Promise<void> {
+  // V7 (CTR-035/036): storage-pinned flows seed the ritual fields as already
+  // spent for the local day, so ritual persistence never writes mid-test and
+  // the byte-equality pins keep judging only the user-action fields.
+  const now = new Date()
+  // The late-night ritual day rolls over at 05:00 (V7 lateNightRitualDayKey):
+  // between 00:00 and 05:00 the runtime attributes the night to the previous
+  // evening, so the seed must stamp the same key or the ritual fires once.
+  const evening = now.getHours() < 5 ? new Date(now.getTime() - 24 * 60 * 60 * 1000) : now
+  const eveningKey = evening.toLocaleDateString('sv')
+  const seeded = {
+    lastSeenAt: now.getTime(),
+    rituals: {
+      dayKey: eveningKey,
+      firstCompletionDone: true,
+      lateNightDone: true,
+      welcomeDayKey: eveningKey,
+    },
+    ...record,
+  }
   await page.evaluate(({ key, value }) => {
     window.localStorage.setItem(key, JSON.stringify(value))
-  }, { key: PREF_KEY, value: record })
+  }, { key: PREF_KEY, value: seeded })
 }
 
 async function petBox(page: Page) {
@@ -968,6 +997,8 @@ test('MENU_OPEN_OPEN_CLOSE_WITHOUT_INPUT_PRESERVES_ANCHOR_TEST + MENU_OPEN_MOVEM
   await page.setViewportSize({ width: 390, height: 844 })
   await page.reload()
   await expect.poll(() => page.locator(PET).count(), { timeout: 30_000 }).toBe(1)
+  // Let the mount-time lastSeenAt refresh flush before the byte capture.
+  await page.waitForTimeout(500)
   const closedBefore = await shellBox(page)
   const storedBeforeOpen = await page.evaluate(() => localStorage.getItem('vehicle-pet/overlay-preferences/v1'))
   await openMenu(page)
@@ -1135,12 +1166,26 @@ test('EXPRESSION_VARIANTS_TEST. the resident pet shows a distinct expression att
   expect(idleSrc ?? '').toContain('data:image')
   await page.screenshot({ path: `${ARTIFACTS}/expression-idle-large.png` })
 
-  // Clicks cycle the friendly idle pool without repeating back-to-back.
+  // Clicks cycle the friendly idle pool without repeating back-to-back. An
+  // Escape before each click arms the payload-ignored input-recency gate
+  // (CTR-OVERLAY-019(3)): within the 5 s window no recurring line can fire,
+  // so no piggyback can interleave the pool rotation — the reaction id
+  // sequence is deterministic. Variants ride the reaction (CTR-028).
+  const reactionId = () => page.locator('.vpo-characterArea').getAttribute('data-vehicle-pet-reaction-id')
+  const settleGap = () => page.waitForTimeout(550) // clears the double-click window
+  await page.keyboard.press('Escape')
   await expr.click()
+  await expect.poll(reactionId).toBe('wave')
   await expect(expr).toHaveAttribute('data-vehicle-pet-expression', 'idle-happy')
+  await settleGap()
+  await page.keyboard.press('Escape')
   await expr.click()
+  await expect.poll(reactionId).toBe('wink')
   await expect(expr).toHaveAttribute('data-vehicle-pet-expression', 'completed-proud')
+  await settleGap()
+  await page.keyboard.press('Escape')
   await expr.click()
+  await expect.poll(reactionId).toBe('bounce')
   await expect(expr).toHaveAttribute('data-vehicle-pet-expression', 'completed')
   await expect(page.locator('.vpo-characterArea')).not.toHaveAttribute('data-gesture', /.+/, { timeout: 4000 })
   await expect(expr).toHaveAttribute('data-vehicle-pet-expression', 'idle')
@@ -1424,16 +1469,36 @@ test('CROSSTAB_COLLAPSE_RESTORE_VISIBLE_TEST. two tabs destroy stale Menu/Dialog
     // PROGRESS_SOURCE_V1 CTR-USG-009) is a separate sanctioned writer whose
     // persistence frequency is bounded by its own change-only rule.
     const preferenceKey = 'vehicle-pet/overlay-preferences/v1'
-    const state = { writes: 0 }
+    const state: { writes: number; stacks?: (string | undefined)[] } = { writes: 0 }
     const prototype = Storage.prototype
     const native = prototype.setItem
     prototype.setItem = function (key, ...args) {
-      if (String(key) === preferenceKey) state.writes += 1
+      if (String(key) === preferenceKey) {
+        state.writes += 1
+        ;(state.stacks ??= []).push(new Error(`w${state.writes}`).stack?.split('\n').slice(2, 24).join('\n'))
+      }
       return native.apply(this, [key, ...args])
     }
-    ;(window as unknown as { __vpoPreferenceWrites: typeof state }).__vpoPreferenceWrites = state
+    ;(window as unknown as { __vpoPreferenceWrites: typeof state & { stacks?: (string | undefined)[] } }).__vpoPreferenceWrites = state
   })
-  const writes = async (target: Page) => target.evaluate(() => (window as unknown as { __vpoPreferenceWrites: { writes: number } }).__vpoPreferenceWrites.writes)
+  const writes = async (target: Page) => {
+    const data = await target.evaluate(() => {
+      const w = (window as unknown as { __vpoPreferenceWrites: { writes: number; stacks?: (string | undefined)[] } }).__vpoPreferenceWrites
+      return { writes: w.writes, stacks: w.stacks ?? [] }
+    })
+    if (data.stacks.length) console.log(`WRITESTACKS[n=${data.writes}]\n` + data.stacks.map((st, i) => `-- w${i + 1} --\n` + st).join('\n'))
+    return data.writes
+  }
+  // V7 (CTR-035/036): spend both tabs' once-per-day rituals before the
+  // instrumented window, so a stray completed turn cannot insert a ritual
+  // persistence write into the loop-freedom counts.
+  for (const target of [page, second]) {
+    await seedPreferences(target, {})
+    await target.reload()
+    await expect.poll(() => target.locator(PET).count(), { timeout: 30_000 }).toBe(1)
+    // Let the mount-time lastSeenAt refresh flush before the write instrument.
+    await target.waitForTimeout(500)
+  }
   await instrumentWrites(page)
   await instrumentWrites(second)
 
@@ -2264,4 +2329,109 @@ test('V6_COMPACT_PLAYFUL: real alpha gap all levels and eight reactions for both
     buildClientGeneration('production')
     await expect(page.locator(ROOT)).toHaveAttribute('data-client-generation', 'production', { timeout:60000 })
   }
+})
+
+// ===========================================================================
+// V7 lifelike interaction layer (DSH_PET_OVERLAY_ADAPTER_V7 ACC-127..133):
+// the narrowest real-browser proofs for the gesture/gaze seams that jsdom
+// cannot observe. One case per risk seam; ambient actions stay covered by
+// the deterministic unit matrix (CTR-033).
+// ===========================================================================
+
+test('LIFELIKE_LONG_PRESS_VS_CLICK. a stationary hold pets; it never opens a surface', async ({ page }) => {
+  await openOverlay(page)
+  const pet = page.locator(PET)
+  const area = page.locator('.vpo-characterArea')
+  const box = await pet.boundingBox()
+  await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2)
+  await page.mouse.down()
+  await page.waitForTimeout(700) // inside the 550ms hold band, past jitter
+  await expect(area).toHaveAttribute('data-vehicle-pet-petting', 'true')
+  await expect(area).toHaveAttribute('data-vehicle-pet-reaction-id', 'petting')
+  await expect(page.locator(MENU)).toHaveCount(0)
+  await page.mouse.up()
+  await expect(area).toHaveAttribute('data-vehicle-pet-petting', 'false')
+  await expect(page.locator(MENU)).toHaveCount(0)
+  await expect(page.locator(DIALOG)).toHaveCount(0)
+})
+
+test('LIFELIKE_DOUBLE_CLICK_SYNTHESIS. two rapid clicks open settings, not two reactions', async ({ page }) => {
+  await openOverlay(page)
+  const pet = page.locator(PET)
+  const box = await pet.boundingBox()
+  const cx = box!.x + box!.width / 2
+  const cy = box!.y + box!.height / 2
+  await page.mouse.move(cx, cy)
+  await page.mouse.down()
+  await page.mouse.up()
+  await page.mouse.down()
+  await page.mouse.up()
+  await page.locator(MENU).waitFor({ state: 'visible', timeout: 5_000 })
+  // The second click of the sequence is consumed by the settings open: no
+  // trailing bubble may stack on top of the menu.
+  await expect(page.locator('.vpo-bubble')).toHaveCount(0)
+  await page.keyboard.press('Escape')
+  await expect(page.locator(MENU)).toHaveCount(0)
+})
+
+test('LIFELIKE_DRAG_DOES_NOT_CLICK. drag lifts, settles, persists, never clicks', async ({ page }) => {
+  await openOverlay(page)
+  await waitForIdleBaseline(page)
+  const pet = page.locator(PET)
+  const area = page.locator('.vpo-characterArea')
+  const box = await pet.boundingBox()
+  const startX = box!.x + box!.width / 2
+  const startY = box!.y + box!.height / 2
+  await page.mouse.move(startX, startY)
+  await page.mouse.down()
+  await page.mouse.move(startX - 60, startY - 10, { steps: 8 })
+  await expect(area).toHaveAttribute('data-vehicle-pet-reaction-id', 'drag-lift')
+  await page.mouse.up()
+  await expect(area).toHaveAttribute('data-vehicle-pet-reaction-id', 'settle')
+  await expect(page.locator(MENU)).toHaveCount(0)
+  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('vehicle-pet/overlay-preferences/v1') ?? '{}') as { positionCustomized: boolean })
+  expect(stored.positionCustomized).toBe(true)
+  await expect(area).toHaveAttribute('data-vehicle-pet-petting', 'false')
+})
+
+test('LIFELIKE_CURSOR_GAZE_RESET. gaze engages near, rests to neutral, static under reduced motion', async ({ page }) => {
+  await openOverlay(page)
+  await waitForIdleBaseline(page)
+  const area = page.locator('.vpo-characterArea')
+  const box = await page.locator(PET).boundingBox()
+  const cx = box!.x + box!.width / 2
+  const cy = box!.y + box!.height / 2
+  const gazeVars = () => page.evaluate(() => {
+    const area = document.querySelector('.vpo-characterArea') as HTMLElement
+    return {
+      x: area.style.getPropertyValue('--vp-gaze-x'),
+      y: area.style.getPropertyValue('--vp-gaze-y'),
+      active: area.getAttribute('data-gaze-active'),
+    }
+  })
+  await page.mouse.move(cx + 60, cy - 20)
+  await page.waitForTimeout(150)
+  let gaze = await gazeVars()
+  expect(gaze.active).toBe('true')
+  expect(gaze.x).not.toBe('0px')
+  // Stillness: after the recorded rest window the glance returns to neutral.
+  await page.waitForTimeout(1_800)
+  gaze = await gazeVars()
+  expect(gaze).toEqual({ x: '0px', y: '0px', active: null })
+  // Reduced motion: the gaze never engages at all.
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.mouse.move(cx + 20, cy + 30)
+  await page.waitForTimeout(200)
+  gaze = await gazeVars()
+  expect(gaze.x).toBe('0px')
+  expect(gaze.active).toBeNull()
+})
+
+test('LIFELIKE_MENU_ESCAPE_ANY_FOCUS. Escape closes the menu with focus on body', async ({ page }) => {
+  await openOverlay(page)
+  await openMenu(page)
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
+  expect(await page.evaluate(() => document.activeElement?.tagName)).toBe('BODY')
+  await page.keyboard.press('Escape')
+  await expect(page.locator(MENU)).toHaveCount(0)
 })

@@ -51,6 +51,11 @@ export interface ExpressionSelectionContext {
     readonly idleBucket: 0 | 1 | 2;
     /** The most recently rendered variant for the same state (no-immediate-repeat). */
     readonly lastVariantForState: VehiclePetExpressionVariant | undefined;
+    /**
+     * V7 CTR-034: device-local late-night bucket raises the sleepy tendency at
+     * mid-idle; pure weight input, never gates a mapped state.
+     */
+    readonly daypartSleepy?: boolean;
 }
 /**
  * Pure variant selection (V3 CTR-OVERLAY-014): deterministic over structured

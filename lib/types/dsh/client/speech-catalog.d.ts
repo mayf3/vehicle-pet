@@ -7,14 +7,14 @@
  * codes, percentages, or token counts.
  */
 import type { CharacterId } from './types';
-export type SpeechCategory = 'idle' | 'working' | 'needs-input' | 'completed' | 'failed' | 'milestone';
+export type SpeechCategory = 'idle' | 'working' | 'needs-input' | 'completed' | 'failed' | 'milestone' | 'petting' | 'welcome' | 'ritual';
 export interface SpeechCatalogEntry {
     readonly category: SpeechCategory;
     readonly text: string;
 }
 /** The bundled catalog for a locale; unknown locales fall back to zh-CN. */
 export declare function speechCatalog(locale: string | undefined): readonly SpeechCatalogEntry[];
-/** Catalog floors (V3 CTR-OVERLAY-018): ≥30 lines per locale, ≥5 per category. */
+/** Catalog floors (V3 CTR-OVERLAY-018; V7 adds petting/welcome/ritual ≥3). */
 export declare function assertCatalogFloors(): void;
 /** Both catalogs use the existing category selector and scheduler. */
 export declare function characterSpeechCatalog(id: CharacterId, locale: string | undefined): readonly SpeechCatalogEntry[];

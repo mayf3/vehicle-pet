@@ -35,6 +35,13 @@ export type SpeechTriggerSource =
   | { readonly kind: 'milestone'; readonly category: 'milestone' }
   | { readonly kind: 'ambient' }
   | { readonly kind: 'click'; readonly category: SpeechCategory }
+  /**
+   * V7 explicit path (CTR-030/033/035/036): petting, welcome-back, and
+   * once-per-day ritual lines. Event-driven like milestone edges — callers
+   * schedule after the load-quiet period; the single scheduler stays the
+   * only bubble source.
+   */
+  | { readonly kind: 'explicit'; readonly category: SpeechCategory }
 
 export interface SpeechCadenceState {
   /** Epoch ms of surface mount. */
@@ -173,4 +180,15 @@ export function idleBucketFor(lastActivityAt: number | null, now: number): 0 | 1
 /** Injected random sample keeps deadline selection pure and reproducible. */
 export function nextRecurringDelayMs(sample: number): number {
   return 20000+Math.floor(Math.max(0,Math.min(1,Number.isFinite(sample)?sample:0))*20000)
+}
+
+/**
+ * V7 CTR-034: the recurring deadline stays inside the CTR-019 sampled 20–40 s
+ * band; the daypart only slides the sample toward the quiet end late at night.
+ */
+export function nextDaypartRecurringDelayMs(bucket: 'morning' | 'daytime' | 'evening' | 'late-night', sample: number): number {
+  const clamped = Math.max(0, Math.min(1, Number.isFinite(sample) ? sample : 0))
+  const low = bucket === 'late-night' ? 30000 : bucket === 'morning' ? 20000 : 24000
+  const high = bucket === 'late-night' ? 40000 : bucket === 'morning' ? 30000 : 36000
+  return low + Math.floor(clamped * (high - low))
 }

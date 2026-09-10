@@ -67,6 +67,9 @@ describe('normalizeOverlayPreferences', () => {
       positionCustomized: true,
       collapsed: true,
       reducedMotion: true,
+      // V7 CTR-035/036: tolerant ritual fields normalize on every record.
+      lastSeenAt: undefined,
+      rituals: { dayKey: undefined, firstCompletionDone: false, lateNightDone: false, welcomeDayKey: undefined },
     })
     expect(normalizeOverlayPreferences({ schemaVersion: 1 }).reducedMotion).toBeUndefined()
   })
@@ -343,6 +346,8 @@ describe('saveOverlayPreferences', () => {
       collapsed: false,
       reducedMotion: undefined,
       size: 'small',
+      lastSeenAt: undefined,
+      rituals: { firstCompletionDone: false, lateNightDone: false },
     })
   })
 
@@ -372,7 +377,7 @@ describe('adoptStorageEvent', () => {
     const current = copyOverlayDefaults()
     const next = JSON.stringify({ schemaVersion: 1, position: { xRatio: 0.2, yRatio: 0.4 }, collapsed: true, reducedMotion: false })
     expect(adoptStorageEvent({ key: OVERLAY_PREFERENCES_KEY, newValue: next }, current))
-      .toEqual({ characterId: 'vehicle', schemaVersion: 1, position: { xRatio: 0.2, yRatio: 0.4 }, positionCustomized: true, collapsed: true, reducedMotion: false })
+      .toEqual({ characterId: 'vehicle', schemaVersion: 1, position: { xRatio: 0.2, yRatio: 0.4 }, positionCustomized: true, collapsed: true, reducedMotion: false, lastSeenAt: undefined, rituals: { firstCompletionDone: false, lateNightDone: false } })
     const nonDefault = normalizeOverlayPreferences(JSON.parse(next))
     expect(adoptStorageEvent({ key: OVERLAY_PREFERENCES_KEY, newValue: null }, nonDefault))
       .toEqual(copyOverlayDefaults())

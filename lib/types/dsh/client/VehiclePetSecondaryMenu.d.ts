@@ -15,6 +15,11 @@ export interface VehiclePetSecondaryMenuProps {
     readonly onCollapse: () => void;
     readonly onOpenJourney: () => void;
     readonly onRequestClose: () => void;
+    /** V7 CTR-029: fired by the outside-press close only (never by Escape), so
+     * the pet can drop the closing interaction's double-click chain. */
+    readonly onOutsidePress?: () => void;
+    /** While true, Escape belongs to the journey dialog, not the menu. */
+    readonly dialogOpen?: boolean;
     readonly journeyTriggerRef: RefObject<HTMLButtonElement | null>;
 }
 export declare function VehiclePetSecondaryMenu(props: VehiclePetSecondaryMenuProps): ReactElement;
