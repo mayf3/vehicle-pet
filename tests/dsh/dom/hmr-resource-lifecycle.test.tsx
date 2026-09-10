@@ -280,9 +280,11 @@ describe('client HMR generation and complete resource disposal inventory', () =>
       // (payload-ignored keydown+pointerdown, V3 CTR-OVERLAY-019(3)), the
       // open menu's outside-press pointerdown and V6 visibilitychange, and
       // the V7 pair (coordinate-only gaze pointermove+pointerleave,
-      // CTR-OVERLAY-031) — all disposed with the mount. (The V7 lastSeen
-      // refresh is mount-time only: no visibilitychange listener exists.)
-      keyboardDocumentListeners: 11,
+      // CTR-OVERLAY-031) plus the V7 open-menu document-level Escape keydown
+      // (CTR-005/029, closes the menu from any focus rest) — all disposed
+      // with the mount. (The V7 lastSeen refresh is mount-time only: no
+      // visibilitychange listener exists.)
+      keyboardDocumentListeners: 12,
       pointerCaptureListeners: 4,
       // Root viewport + open Panel measurement; both must dispose at HMR.
       observers: 2,

@@ -60,6 +60,8 @@ export declare function reduceGesture(state: GestureState, event: GestureInputEv
     readonly state: GestureState;
     readonly verdict: GestureVerdict;
 };
+export declare function readClickChainAt(): number | null;
+export declare function storeClickChainAt(at: number | null): void;
 /** True when a press that began at `pressedAt` has held long enough to pet. */
 export declare function isPettingHoldDue(state: GestureState, now: number): boolean;
 /** Promotion of a pressed session into the petting phase. */
