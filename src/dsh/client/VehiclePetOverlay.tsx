@@ -452,6 +452,7 @@ function OverlaySurface({
             onCollapse={collapse}
             onRequestClose={closeMenu}
             onOutsidePress={armOutsidePressReset}
+            dialogOpen={dialogOpen}
             onOpenJourney={() => {
               setDialogOpen(true)
             }}
