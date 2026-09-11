@@ -17,7 +17,17 @@ import { execFileSync } from 'node:child_process'
 import { mkdirSync, readFileSync } from 'node:fs'
 import { expect, test, type BrowserContext, type Page, type Request } from '@playwright/test'
 import sharp from 'sharp'
-import { speechCatalog } from '../../../src/dsh/client/speech-catalog'
+// Read the default pet's catalog directly: the e2e spec must not import the
+// client graph, whose generated asset modules use static asset imports that
+// Playwright's loader cannot handle (V8 CTR-038).
+const vehicleSpeechData = JSON.parse(
+  readFileSync(new URL('../../../src/dsh/client/pets/vehicle/speech.json', import.meta.url), 'utf8'),
+) as Record<string, readonly { readonly 'zh-CN': string; readonly en: string }[]>
+function speechCatalog(locale: string | undefined) {
+  const language = locale === 'en' ? 'en' : 'zh-CN'
+  return Object.entries(vehicleSpeechData).flatMap(([category, lines]) =>
+    lines.map(line => ({ category, text: line[language] })))
+}
 
 interface MatrixManifest {
   readonly levels: readonly { levelId: string; threshold: number }[]
@@ -2101,7 +2111,7 @@ test('CHARACTER_V4_PERSISTENCE_AND_GEOMETRY. selection keeps Engine records and 
   const records=await readPetRecords()
   const level=await page.locator(PET).getAttribute('data-vehicle-pet-level')
   await openMenu(page)
-  await expect(page.locator('[data-vehicle-pet-character-option]')).toHaveCount(2)
+  await expect(page.locator('[data-vehicle-pet-character-option]')).toHaveCount(3)
   await page.locator('[data-vehicle-pet-character-option="companion"]').click()
   await closeMenu(page)
   await expect(page.locator(PET)).toHaveAttribute('data-vehicle-pet-character','companion')
@@ -2115,7 +2125,12 @@ test('CHARACTER_V4_PERSISTENCE_AND_GEOMETRY. selection keeps Engine records and 
     await closeMenu(page)
     await page.waitForTimeout(300)
     const label=page.locator('[data-vehicle-pet-grade]')
-    expect((await label.textContent())!.length).toBeGreaterThan(12)
+    // V8 CTR-039/040: the resident caption shows the localized description
+    // per pet policy — no third-party brand, no mandated exact numeral; the
+    // exact grade stays in data-vehicle-pet-grade (asserted via level above).
+    const labelText=(await label.textContent())!
+    expect(labelText.length).toBeGreaterThan(4)
+    expect(labelText).not.toMatch(/pony/i)
     const shell=await shellBox(page), box=await label.boundingBox()
     const greeting=page.locator('[data-pet-greeting]')
     if(await greeting.count()) {

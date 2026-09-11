@@ -11,7 +11,7 @@ import {
   AMBIENT_LOAD_QUIET_MS, AMBIENT_TYPING_SUPPRESSION_MS, evaluateAmbient,
   nextAmbientDelayMs, selectAmbientAction,
 } from '../../../src/dsh/client/ambient-rules'
-import { BEHAVIOR_PROFILES } from '../../../src/dsh/client/characters'
+import { petBehavior } from '../../../src/dsh/client/pets/bundled'
 import { bucketEnergyBias, daypartFromHour } from '../../../src/dsh/client/daypart'
 import { nextDaypartRecurringDelayMs } from '../../../src/dsh/client/speech-rules'
 
@@ -88,14 +88,14 @@ describe('AMBIENT_NO_REPEAT + CHARACTER_BEHAVIOR_PROFILE (V7 CTR-033/037)', () =
   })
 
   it('the two characters carry disjoint, declarative repertoires (observable personality difference)', () => {
-    const vehicle = new Set(BEHAVIOR_PROFILES.vehicle.ambientPool)
-    const companion = new Set(BEHAVIOR_PROFILES.companion.ambientPool)
+    const vehicle = new Set(petBehavior('vehicle').ambientPool)
+    const companion = new Set(petBehavior('companion').ambientPool)
     expect(vehicle.size).toBeGreaterThanOrEqual(3)
     expect(companion.size).toBeGreaterThanOrEqual(3)
     for (const id of vehicle) expect(companion.has(id)).toBe(false)
     // Same underlying success edge, different presentation tendency.
-    expect(BEHAVIOR_PROFILES.vehicle.stateReactions.completed).not.toBe(BEHAVIOR_PROFILES.companion.stateReactions.completed)
-    expect(BEHAVIOR_PROFILES.vehicle.petting).not.toEqual(BEHAVIOR_PROFILES.companion.petting)
+    expect(petBehavior('vehicle').stateReactions.completed).not.toBe(petBehavior('companion').stateReactions.completed)
+    expect(petBehavior('vehicle').petting).not.toEqual(petBehavior('companion').petting)
   })
 
   it('daypart re-weights the same pool without changing its membership', () => {

@@ -12,9 +12,8 @@ import { createHash } from 'node:crypto'
 import { describe, expect, it } from 'vitest'
 import autonomousFleetManifest from '../../../src/packs/autonomous-fleet/manifest.json'
 import seedlingFixtureManifest from '../../../src/packs/seedling-fixture/manifest.json'
-import { dshPackBundles, dshDefaultPackId, resolveDshProductPackId } from '../../../src/dsh/client/engine-bundles'
+import { dshPackBundles, dshDefaultPackId, resolvePetPackId } from '../../../src/dsh/client/engine-bundles'
 import {
-  EXPRESSION_LEVEL_ANCHORS,
   expressionAnchor,
   expressionAsset,
   expressionStateFromSession,
@@ -23,6 +22,9 @@ import {
   type VehiclePetExpressionVariant,
 } from '../../../src/dsh/client/expressions'
 import type { VehiclePetSessionView } from '../../../src/dsh/client/types'
+import { petDefinition } from '../../../src/dsh/client/pets/bundled'
+
+const EXPRESSION_LEVEL_ANCHORS = petDefinition('vehicle').engineScene!.expressionAnchors
 
 const PROVENANCE = JSON.parse(readFileSync(
   new URL('../../../src/dsh/client/assets/expressions/PROVENANCE.json', import.meta.url),
@@ -42,7 +44,7 @@ describe('expression anchors (CTR-OVERLAY-014)', () => {
     const levelIds = autonomousFleetManifest.levels.map(level => level.levelId)
     expect(levelIds.length).toBeGreaterThanOrEqual(12)
     for (const levelId of levelIds) {
-      const anchor = expressionAnchor(levelId)
+      const anchor = expressionAnchor(EXPRESSION_LEVEL_ANCHORS, levelId)
       expect(anchor, `missing anchor for ${levelId}`).not.toBeNull()
       const [left, top, size] = anchor as readonly [number, number, number]
       expect(left).toBeGreaterThanOrEqual(0)
@@ -150,18 +152,21 @@ describe('bundled expression assets (CTR-OVERLAY-014, CTR-OVERLAY-008)', () => {
   })
 })
 
-describe('second-Pack conformance preserved with a product-only DSH surface (CTR-OVERLAY-006)', () => {
-  it('still bundles exactly the two Pack manifests with the product Pack as default', () => {
-    expect(dshPackBundles).toHaveLength(2)
+describe('bundled multi-Pack surface (V8 DEC-OVERLAY-028)', () => {
+  it('discovers every bundled Pack manifest with the default journey present', () => {
     const packIds = dshPackBundles.map(bundle => (bundle.manifestCandidate as { packId: string }).packId).sort()
-    expect(packIds).toEqual(['autonomous-fleet', 'seedling-fixture'])
+    expect(packIds).toContain('autonomous-fleet')
+    expect(packIds).toContain('seedling-fixture')
+    expect(packIds).toContain('orb-fixture')
     expect(dshDefaultPackId).toBe('autonomous-fleet')
     expect(seedlingFixtureManifest.packId).toBe('seedling-fixture')
   })
 
-  it('resolves a legacy non-product activePackId to the product Pack without touching stored records', () => {
-    expect(resolveDshProductPackId('autonomous-fleet')).toBe('autonomous-fleet')
-    expect(resolveDshProductPackId('seedling-fixture')).toBe('autonomous-fleet')
-    expect(resolveDshProductPackId(undefined)).toBe('autonomous-fleet')
+  it('resolves a pet journey by its declarative binding and falls soft to the default (CTR-041)', () => {
+    expect(resolvePetPackId('vehicle')).toBe('autonomous-fleet')
+    expect(resolvePetPackId('companion')).toBe('autonomous-fleet')
+    expect(resolvePetPackId('orb')).toBe('orb-fixture')
+    expect(resolvePetPackId('removed-pet')).toBe('autonomous-fleet')
+    expect(resolvePetPackId(undefined)).toBe('autonomous-fleet')
   })
 })

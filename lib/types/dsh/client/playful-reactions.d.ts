@@ -1,6 +1,6 @@
 import type { VehiclePetExpressionState, VehiclePetExpressionVariant } from './expressions';
 import type { AmbientActionDefinition } from './ambient-rules';
-import type { CharacterId } from './types';
+import type { PetId } from './types';
 export declare const PLAYFUL_REACTIONS: readonly [{
     readonly id: "wave";
     readonly variant: "idle-happy";
@@ -54,7 +54,7 @@ export interface RenderedReaction {
 interface Context {
     state: VehiclePetExpressionState;
     terminalIdentity: string | null;
-    characterId: CharacterId;
+    petId: PetId;
     menuOpen: boolean;
     dragging: boolean;
     ambientKey: number | null;

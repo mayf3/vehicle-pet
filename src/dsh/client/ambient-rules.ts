@@ -9,8 +9,8 @@
  * the single CTR-019 scheduler.
  */
 
-import { BEHAVIOR_PROFILES } from './characters'
-import type { CharacterId } from './types'
+import { petBehavior } from './pets/bundled'
+import type { PetId } from './types'
 import { bucketEnergyBias, type DaypartBucket } from './daypart'
 
 /** Minutes-level randomized gap; V7 band floor 90 s, frozen 90–240 s. */
@@ -103,12 +103,12 @@ export function nextAmbientDelayMs(sample: number): number {
  * bias; the immediately previous action is excluded (no back-to-back).
  */
 export function selectAmbientAction(
-  characterId: CharacterId,
+  petId: PetId,
   bucket: DaypartBucket,
   lastActionId: string | null,
   randomSample: number,
 ): AmbientActionDefinition {
-  const pool = BEHAVIOR_PROFILES[characterId].ambientPool
+  const pool = petBehavior(petId).ambientPool
   const bias = bucketEnergyBias(bucket)
   const candidates = pool.filter(id => id !== lastActionId)
   const eligible = candidates.length > 0 ? candidates : [...pool]

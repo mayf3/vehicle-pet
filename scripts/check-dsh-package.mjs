@@ -62,6 +62,22 @@ for (const file of paths) {
   }
 }
 
+// PACKAGE_PUBLIC_HYGIENE_CHECK (V8 CTR-039/041): the shipped projection must
+// be brand-neutral and free of personal paths and credential-shaped strings.
+const shippedText = []
+for (const file of paths) {
+  if (file === 'README.md' || /^lib\/.*(\.js$|\.d\.ts$)/.test(file)) {
+    shippedText.push([file, await readFile(path.join(repoRoot, file), 'utf8')])
+  }
+}
+for (const [file, content] of shippedText) {
+  for (const brand of ['Pony.ai', 'pony.ai']) {
+    if (content.includes(brand)) failures.push(`shipped file ${file} contains third-party brand "${brand}"`)
+  }
+  if (content.includes('/Users/')) failures.push(`shipped file ${file} contains a personal absolute path`)
+  if (/-----BEGIN [A-Z ]*PRIVATE KEY-----/.test(content)) failures.push(`shipped file ${file} contains private key material`)
+}
+
 if (failures.length > 0) {
   console.error(failures.map(message => `- ${message}`).join('\n'))
   process.exit(1)

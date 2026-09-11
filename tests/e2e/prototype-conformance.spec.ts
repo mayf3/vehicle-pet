@@ -80,10 +80,13 @@ test('max level has capped state and no fabricated next target', async ({ page }
   await expect(page.getByText(/12\./)).toBeVisible()
 })
 
-test('showcase contains required fleet and seedling states', async ({ page }) => {
+test('showcase contains required fleet, seedling, and orb states', async ({ page }) => {
   await page.goto('/?showcase=1')
   await expect(page.locator('[data-pet-showcase="true"]')).toBeVisible()
-  await expect(page.locator('figure')).toHaveCount(12)
+  // The showcase is a generic grid over every discovered bundled Pack:
+  // fleet 12 levels + seedling 4 + orb fixture 4 = 16 figures (V8 DEC-028).
+  await expect(page.locator('figure')).toHaveCount(16)
   await expect(page.getByText(/autonomous-fleet · 12\/12/)).toBeVisible()
   await expect(page.getByText(/seedling-fixture · 4\/4/)).toBeVisible()
+  await expect(page.getByText(/orb-fixture · 4\/4/)).toBeVisible()
 })

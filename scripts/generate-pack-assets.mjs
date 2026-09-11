@@ -561,6 +561,14 @@ async function run() {
     const packId = manifest.packId
     const rendered = new Map()
 
+    if (RECIPES[packId] === undefined && packId !== 'autonomous-fleet') {
+      // Declarative admission (V8 CTR-038): packs whose assets come from their
+      // own deterministic pipeline (provenance in the pack directory) are not
+      // re-rendered here — adding a pack never edits this script.
+      console.log(`note: ${packId}: no shared recipe table; assets verified by the pack's own pipeline`)
+      continue
+    }
+
     for (const asset of manifest.assets) {
       const stem = path.basename(asset.path).replace(/\.(webp|png)$/, '')
       const buffers = await renderAsset(stem, packId)

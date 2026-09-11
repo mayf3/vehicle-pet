@@ -17,6 +17,7 @@
  */
 
 import { readFile, stat, mkdtemp, rm } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -86,12 +87,36 @@ if (/import\.meta/.test(codeOnly)) {
 
 // 6. Data URL coverage matches the generated maps exactly: the Pack asset map
 //    plus the V2 expression-asset map (CTR-OVERLAY-014 bundled presentation).
-const generated = await readFile(path.join(repoRoot, 'src/dsh/client/asset-bundles.generated.ts'), 'utf8')
-const expressionGenerated = await readFile(path.join(repoRoot, 'src/dsh/client/expression-assets.generated.ts'), 'utf8')
-const characterGenerated = await readFile(path.join(repoRoot, 'src/dsh/client/character-assets.generated.ts'), 'utf8')
-const generatedCount = (generated.match(/^import /gm) ?? []).length
-  + (expressionGenerated.match(/^import /gm) ?? []).length
-  + (characterGenerated.match(/^import /gm) ?? []).length
+// V8 CTR-038: every bundled asset import under the DSH client — shared
+// generated maps AND per-pet pose imports (generated modules or a creator
+// definition.ts's direct asset imports alike) — is discovered by scan, so a
+// newly bundled pet's assets are gated by the same data-URL completeness
+// rule without editing this script.
+const { readdir } = await import('node:fs/promises')
+async function listFilesRecursive(root) {
+  const out = []
+  for (const entry of await readdir(root, { withFileTypes: true })) {
+    const full = path.join(root, entry.name)
+    if (entry.isDirectory()) out.push(...(await listFilesRecursive(full)))
+    else if (/\.(ts|tsx)$/.test(entry.name)) out.push(full)
+  }
+  return out
+}
+const imageImportPattern = /^import .+ from '[^']+\.(png|webp|svg|jpg)'/gm
+let generatedCount = 0
+for (const modulePath of [
+  'src/dsh/client/asset-bundles.generated.ts',
+  'src/dsh/client/expression-assets.generated.ts',
+  'src/dsh/client/character-assets.generated.ts',
+]) {
+  const module = await readFile(path.join(repoRoot, modulePath), 'utf8')
+  generatedCount += (module.match(imageImportPattern) ?? []).length
+}
+const petsDir = path.join(repoRoot, 'src/dsh/client/pets')
+for (const file of await listFilesRecursive(petsDir)) {
+  const module = await readFile(file, 'utf8')
+  generatedCount += (module.match(imageImportPattern) ?? []).length
+}
 const dataUrlCount = (bundle.match(/data:image\/(?:webp|png);base64,|data:image\/svg\+xml[;,]/g) ?? []).length
 if (generatedCount === 0) {
   failures.push('generated asset map is empty')
@@ -111,6 +136,17 @@ if (/iframe/.test(codeOnly)) {
 }
 if (/5199/.test(codeOnly)) {
   failures.push('port 5199 reference found in the client bundle')
+}
+
+// 7b. PUBLIC_BRAND_BUNDLE_CHECK (V8 CTR-039): the distributed client bundle
+// must not carry a third-party company brand as product identity. Data URLs
+// are excluded from the scan here; master rasters are gated separately by the
+// asset pipeline review (CTR-042).
+const brandSafeBundle = bundle.replace(/data:[a-z]+\/[a-z0-9.+-]+;base64,[A-Za-z0-9+/=]+/g, '')
+for (const brand of ['Pony.ai', 'pony.ai']) {
+  if (brandSafeBundle.includes(brand)) {
+    failures.push(`third-party brand "${brand}" found in the client bundle (PUBLIC_BRAND_BUNDLE_CHECK, V8 CTR-039)`)
+  }
 }
 
 // 8. Byte determinism: rebuild both entries into a temp dir and compare.

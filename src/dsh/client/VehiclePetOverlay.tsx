@@ -24,7 +24,7 @@ import { IndexedDbPetStorage, MemoryPetStorageAdapter, type Locale, type PetStor
 import {
   DailyGreeting, HostActivityFeedback, PetEngineProvider, UpgradeCeremony, usePetEngine,
 } from '../../react'
-import { dshPackBundles, dshDefaultPackId, resolveDshProductPackId } from './engine-bundles'
+import { dshPackBundles, dshDefaultPackId, resolvePetPackId } from './engine-bundles'
 import type { VehiclePetLocaleKey } from './locales'
 import { createOverlayProgressSource } from './OverlayProgressSource'
 import type { VehiclePetBindingInfo } from './session-state-adapter'
@@ -55,9 +55,10 @@ import {
 } from './ritual-rules'
 import {activeSessionsFromList, type ActiveSession} from './active-sessions'
 import {ActiveSessionFooter} from './ActiveSessionFooter'
-import { CharacterVisual, companionHitStyle } from './CharacterVisual'
-import { CHARACTER_DEFINITIONS, characterLevel } from './characters'
-import type { CharacterId, RitualMarkers } from './types'
+import { CharacterVisual } from './CharacterVisual'
+import { petDefinition, petDisplayName, petGrade, resolvePetId, userSelectablePets } from './pets/bundled'
+import { petHitStyle } from './CharacterVisual'
+import type { PetId, RitualMarkers } from './types'
 import { VehiclePetDialog } from './VehiclePetDialog'
 import { VehiclePetSecondaryMenu } from './VehiclePetSecondaryMenu'
 import { useVehiclePetSpeech, VehiclePetBubble } from './VehiclePetSpeech'
@@ -294,21 +295,24 @@ function OverlaySurface({
   const [menuOpen, setMenuOpen] = useState(false)
   const [petInteractionCount, setPetInteractionCount] = useState(0)
   const collapsed = preferences.collapsed
-  const { t, commitPreferences } = useOverlayChrome()
+  const { t, commitPreferences, engineLocale } = useOverlayChrome()
   const { snapshot, switchPack } = usePetEngine()
   const journeyTriggerRef = useRef<HTMLButtonElement | null>(null)
 
-  // CTR-OVERLAY-006: the DSH surface presents `autonomous-fleet` as the only
-  // user-selectable product Pack; legacy non-product stored state resolves
-  // through the ordinary Engine `activePackId` mechanism without data loss.
+  // V8 DEC-OVERLAY-028/CTR-OVERLAY-041: the presenting pet declares its
+  // journey Pack. Selection switches Engine `activePackId` by declaration;
+  // points, ledger, receipts, keepsakes and every journey's growth state are
+  // preserved. Legacy stored packs resolve through the same declaration
+  // (an unknown stored pack resolves to the default pet's pack) without data
+  // loss.
   const activePackId = snapshot.activePack?.manifest.packId
+  const petPackId = resolvePetPackId(resolvePetId(preferences.characterId))
   useEffect(() => {
     if (!snapshot.initialized) return
-    const resolved = resolveDshProductPackId(activePackId)
-    if (activePackId !== undefined && activePackId !== resolved) {
-      switchPack(resolved)
+    if (activePackId !== undefined && activePackId !== petPackId) {
+      switchPack(petPackId)
     }
-  }, [snapshot.initialized, activePackId, switchPack])
+  }, [snapshot.initialized, activePackId, petPackId, switchPack])
   const drag = useOverlayDrag({
     preferences,
     menuOpen,
@@ -445,7 +449,7 @@ function OverlaySurface({
           </button>
         ) : (
           <ResidentPet
-            characterId={preferences.characterId ?? 'vehicle'}
+            petId={resolvePetId(preferences.characterId)}
             sessionView={sessionView}
             surfaceSize={residentSurfaceSizePx(false, effectiveSize(preferences))}
             menuOpen={menuOpen}
@@ -465,6 +469,10 @@ function OverlaySurface({
             menuRef={drag.menuRef}
             placement={drag.panelPlacement}
             preferences={preferences}
+            pets={userSelectablePets().map(pet => ({
+              id: pet.id,
+              label: petDisplayName(pet.id, engineLocale),
+            }))}
             onCommitSize={next => {
               commitPreferences(current => ({ ...current, size: next }))
             }}
@@ -544,7 +552,7 @@ const LATE_NIGHT_INPUT_RECENCY_MS = 30 * 60 * 1000
 const LASTSEEN_TOUCH_STALE_MS = 60 * 1000
 
 function ResidentPet({
-  characterId,
+  petId,
   menuOpen,
   sessionView,
   surfaceSize,
@@ -557,7 +565,7 @@ function ResidentPet({
   rituals,
   gestureResetRef,
 }: {
-  characterId: CharacterId
+  petId: PetId
   sessionView: VehiclePetSessionView
   surfaceSize: number
   menuOpen: boolean
@@ -616,7 +624,7 @@ function ResidentPet({
     sessionView,
     locale: engineLocale,
     enabled: true,
-    characterId,
+    petId,
     daypartBucket: daypart,
     pettingActive: gesture.petting,
     rituals: {
@@ -655,7 +663,7 @@ function ResidentPet({
   // pointer: petting holds present while isDragging (pointer-down) is true.
   const realDragging = dragHandlers.isDragging && gesture.phase === 'dragged'
   const playful = usePlayfulReaction({ state, terminalIdentity: sessionView.terminal?.identity ?? null,
-    characterId, menuOpen, dragging: realDragging,
+    petId, menuOpen, dragging: realDragging,
     ambientKey: speech.bubble?.source === 'ambient' ? speech.bubble.key : null })
   const baselineForSelection = baselineVariant
   const variant = state === 'idle' && playful.reaction ? playful.reaction.definition.variant : baselineForSelection
@@ -671,7 +679,7 @@ function ResidentPet({
 
   // V7 CTR-033: the one ambient behavior timer; verdicts pure in ambient-rules.
   useAmbientBehavior({
-    characterId,
+    petId,
     daypartBucket: daypart,
     readCadence: speech.readCadence,
     readLastInteractionAt: () => lastInteractionRef.current,
@@ -809,11 +817,12 @@ function ResidentPet({
     ? `state.${sessionView.terminal.status}`
     : `state.${sessionView.live}`
 
-  const hitStyle = CHARACTER_DEFINITIONS[characterId].recipe === 'engine-scene'
+  const pet = petDefinition(petId)
+  const hitStyle = pet.recipe === 'engine-scene'
     ? visibleHitStyle(snapshot, surfaceSize, levelId)
-    : companionHitStyle(variant, surfaceSize)
-  const grade = characterLevel(levelId, engineLocale)
-  const alpha = characterId === 'vehicle' ? visibleHitStyle(snapshot, surfaceSize, levelId, false) : null
+    : (petHitStyle(pet, variant, surfaceSize) ?? visibleHitStyle(snapshot, surfaceSize, levelId))
+  const grade = petGrade(petId, levelId, engineLocale)
+  const alpha = pet.recipe === 'engine-scene' ? visibleHitStyle(snapshot, surfaceSize, levelId, false) : null
   const scale = surfaceSize <= 112 ? .72 : .8
   const gradeHeight = surfaceSize <= 112 ? 22 : 26
   const captionTop = alpha && typeof alpha.top === 'number' && typeof alpha.height === 'number'
@@ -828,8 +837,8 @@ function ResidentPet({
         data-gaze-active={undefined}
         data-motion={playful.reduced ? 'reduced' : 'allowed'}>
       <span className="vpo-scene vpo-characterScene" aria-hidden="true">
-        <CharacterVisual character={CHARACTER_DEFINITIONS[characterId]} variant={variant}
-          levelId={levelId} interactionCount={petInteractionCount} />
+        <CharacterVisual pet={pet} variant={variant}
+          levelId={levelId} locale={engineLocale} interactionCount={petInteractionCount} />
       </span>
       {playful.reaction ? <ReactionDecoration kind={playful.reaction.definition.decoration} /> : null}
       <button
@@ -837,9 +846,9 @@ function ResidentPet({
         className="vpo-surface vpo-petHit"
         style={hitStyle}
         aria-label={t('overlay.label', { state: t(stateKey) })}
-        aria-description={`${engineLocale==='en'?'Double-click or Shift+Enter for settings. Hold to pet. ':'双击或 Shift+Enter 打开设置。长按可以摸摸。'}${t('menu.character.' + characterId as VehiclePetLocaleKey)}${grade === null ? '' : ` · ${grade.grade} ${grade.description}`}`}
+        aria-description={`${engineLocale==='en'?'Double-click or Shift+Enter for settings. Hold to pet. ':'双击或 Shift+Enter 打开设置。长按可以摸摸。'}${petDisplayName(petId, engineLocale)}${grade === null ? '' : ` · ${grade.grade} ${grade.description}`}`}
         data-vehicle-pet-pet="true"
-        data-vehicle-pet-character={characterId}
+        data-vehicle-pet-character={petId}
         data-vehicle-pet-expression={variant}
         data-vehicle-pet-pack={snapshot.activePack?.manifest.packId}
         data-vehicle-pet-level={levelId}
@@ -891,15 +900,30 @@ function ResidentPet({
       />
       </span>
       <div className={captionTop === undefined ? undefined : 'vpo-captionGroup'} style={captionTop === undefined ? { display: 'contents' } : { top: captionTop }}>
-      {grade === null ? null : <span className="vpo-grade" data-vehicle-pet-grade={grade.grade}>
-        <span className="vpo-gradeBrand">Pony.ai · {grade.grade}</span>
-        <span>{grade.description}</span>
-      </span>}
+      {grade === null ? null : <GradeCaption grade={grade} policy={pet.gradePolicy} />}
       <ActiveSessionFooter sessions={activeSessions} locale={engineLocale} />
       </div>
       {sessionView.live === 'needs-input' ? <span className="vpo-badge" aria-hidden="true" /> : null}
       <VehiclePetBubble bubble={speech.bubble} placement={bubblePlacement} />
     </>
+  )
+}
+
+/**
+ * Grade caption (V8 DEC-OVERLAY-029/CTR-OVERLAY-040): per-pet policy decides
+ * whether the exact level numeral and the localized description appear on the
+ * resident surface; machine-readable identity (data attribute + aria) always
+ * keeps the exact grade. No brand text, no gauge, no within-level substitute.
+ */
+function GradeCaption({ grade, policy }: {
+  grade: { grade: string; description: string }
+  policy: { showExactLevelNumber: boolean; showDescription: boolean }
+}): ReactElement {
+  return (
+    <span className="vpo-grade" data-vehicle-pet-grade={grade.grade}>
+      {policy.showExactLevelNumber ? <span className="vpo-gradeBrand">{grade.grade}</span> : null}
+      {policy.showDescription ? <span>{grade.description}</span> : null}
+    </span>
   )
 }
 

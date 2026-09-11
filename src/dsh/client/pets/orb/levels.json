@@ -1,0 +1,22 @@
+[
+  {
+    "id": "l1",
+    "zh-CN": "微光",
+    "en": "Spark"
+  },
+  {
+    "id": "l2",
+    "zh-CN": "晕光",
+    "en": "Glow"
+  },
+  {
+    "id": "l3",
+    "zh-CN": "辉光",
+    "en": "Shine"
+  },
+  {
+    "id": "l4",
+    "zh-CN": "光辉",
+    "en": "Radiance"
+  }
+]

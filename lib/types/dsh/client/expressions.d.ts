@@ -19,8 +19,11 @@ import type { VehiclePetSessionView } from './types';
  * member. Ten statically distinguishable masters exceed the eight floor.
  */
 export type VehiclePetExpressionVariant = 'idle' | 'idle-happy' | 'idle-curious' | 'idle-sleepy' | 'working' | 'needs-input' | 'completed' | 'completed-proud' | 'failed' | 'cancelled';
-/** Face anchor rects `[left, top, size]` in % of the 480x480 level sprite canvas. */
-export declare const EXPRESSION_LEVEL_ANCHORS: Readonly<Record<string, readonly [number, number, number]>>;
+/**
+ * Face anchor rects `[left, top, size]` in % of the 480x480 level sprite
+ * canvas are per-pet presentation data (V8 CTR-OVERLAY-038): the bundled
+ * vehicle reference carries them in `pets/vehicle/definition.ts`.
+ */
 /** The five user-perceivable session states (mapping core, unchanged from V2). */
 export type VehiclePetExpressionState = 'idle' | 'working' | 'needs-input' | 'completed' | 'failed';
 /**
@@ -29,7 +32,8 @@ export type VehiclePetExpressionState = 'idle' | 'working' | 'needs-input' | 'co
  * map one-to-one; idle is the calm baseline.
  */
 export declare function expressionStateFromSession(session: VehiclePetSessionView): VehiclePetExpressionState;
-export declare function expressionAnchor(levelId: string | undefined): readonly [number, number, number] | null;
+/** Anchor lookup over a pet's own expression anchor table (generic). */
+export declare function expressionAnchor(anchors: Readonly<Record<string, readonly [number, number, number]>>, levelId: string | undefined): readonly [number, number, number] | null;
 export declare function expressionAsset(variant: VehiclePetExpressionVariant): {
     webp: string;
     png: string;

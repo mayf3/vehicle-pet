@@ -9,6 +9,7 @@
  * another tab without write loops; every listener is returned as a disposer.
  */
 
+import { resolvePetId } from './pets/bundled'
 import type { RitualMarkers, VehiclePetOverlayPreferences, VehiclePetSize } from './types'
 
 export const OVERLAY_PREFERENCES_KEY = 'vehicle-pet/overlay-preferences/v1'
@@ -58,7 +59,9 @@ export function normalizeOverlayPreferences(value: unknown): VehiclePetOverlayPr
     collapsed: typeof candidate.collapsed === 'boolean' ? candidate.collapsed : false,
     reducedMotion: typeof candidate.reducedMotion === 'boolean' ? candidate.reducedMotion : undefined,
     size: normalizeSize(candidate.size),
-    characterId: candidate.characterId === 'companion' ? 'companion' : 'vehicle',
+    // V8 CTR-OVERLAY-041: open pet id; unknown/removed ids fail soft to the
+    // documented default without mutating growth data.
+    characterId: resolvePetId(candidate.characterId),
     // V7 ritual fields (CTR-035/036): tolerant optional additions. Invalid
     // values silently disable the ritual instead of blocking the pet.
     lastSeenAt: typeof candidate.lastSeenAt === 'number' && Number.isFinite(candidate.lastSeenAt) && candidate.lastSeenAt > 0

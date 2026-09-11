@@ -968,7 +968,7 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 95778,
+      "byteSizeCompressed": 93948,
       "altText": {
         "zh-CN": "L1 车宠历史插画。阶段含义：主驾有人，副驾无人，有后方保护车，1 辆车。",
         "en": "Historical car illustration for L1. Operational stage: One car: driver occupied, copilot empty, rear escort present."
@@ -981,7 +981,7 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 151494,
+      "byteSizeCompressed": 150319,
       "altText": {
         "zh-CN": "L1 车宠历史插画。阶段含义：主驾有人，副驾无人，有后方保护车，1 辆车。",
         "en": "Historical car illustration for L1. Operational stage: One car: driver occupied, copilot empty, rear escort present."
@@ -994,7 +994,7 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 114652,
+      "byteSizeCompressed": 112862,
       "altText": {
         "zh-CN": "L2 车宠历史插画。阶段含义：主驾有人，副驾无人，无后方保护车，1 辆车。",
         "en": "Historical car illustration for L2. Operational stage: One car: driver occupied, copilot empty, no rear escort."
@@ -1007,7 +1007,7 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 184932,
+      "byteSizeCompressed": 183390,
       "altText": {
         "zh-CN": "L2 车宠历史插画。阶段含义：主驾有人，副驾无人，无后方保护车，1 辆车。",
         "en": "Historical car illustration for L2. Operational stage: One car: driver occupied, copilot empty, no rear escort."
@@ -1020,7 +1020,7 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 98898,
+      "byteSizeCompressed": 97780,
       "altText": {
         "zh-CN": "L3 车宠历史插画。阶段含义：主驾无人，副驾有安全员，有后方保护车，1 辆车。",
         "en": "Historical car illustration for L3. Operational stage: One car: driver empty, safety operator in the copilot seat, rear escort present."
@@ -1033,7 +1033,7 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 152287,
+      "byteSizeCompressed": 151230,
       "altText": {
         "zh-CN": "L3 车宠历史插画。阶段含义：主驾无人，副驾有安全员，有后方保护车，1 辆车。",
         "en": "Historical car illustration for L3. Operational stage: One car: driver empty, safety operator in the copilot seat, rear escort present."
@@ -1046,7 +1046,7 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 123736,
+      "byteSizeCompressed": 123288,
       "altText": {
         "zh-CN": "L4 车宠历史插画。阶段含义：主驾无人，副驾有安全员，无后方保护车，1 辆车。",
         "en": "Historical car illustration for L4. Operational stage: One car: driver empty, safety operator in the copilot seat, no rear escort."
@@ -1059,7 +1059,7 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 197966,
+      "byteSizeCompressed": 196565,
       "altText": {
         "zh-CN": "L4 车宠历史插画。阶段含义：主驾无人，副驾有安全员，无后方保护车，1 辆车。",
         "en": "Historical car illustration for L4. Operational stage: One car: driver empty, safety operator in the copilot seat, no rear escort."
@@ -1098,7 +1098,7 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 117084,
+      "byteSizeCompressed": 115922,
       "altText": {
         "zh-CN": "L5 车宠历史插画。阶段含义：主驾、副驾均无人，无保护车，1 名远程人员监管 1 辆车。",
         "en": "Historical car illustration for L5. Operational stage: Both seats empty, no escort; one remote operator supervises one car."
@@ -1111,7 +1111,7 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 185267,
+      "byteSizeCompressed": 183843,
       "altText": {
         "zh-CN": "L5 车宠历史插画。阶段含义：主驾、副驾均无人，无保护车，1 名远程人员监管 1 辆车。",
         "en": "Historical car illustration for L5. Operational stage: Both seats empty, no escort; one remote operator supervises one car."
@@ -1124,7 +1124,7 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 111866,
+      "byteSizeCompressed": 102124,
       "altText": {
         "zh-CN": "你的 Pet：三车小队（L6 阶段），1 名远程人员监管 3 辆无人车",
         "en": "Your pet: the three-car squad at level 6; one remote operator supervises 3 autonomous vehicles"
@@ -1137,7 +1137,7 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 164503,
+      "byteSizeCompressed": 153879,
       "altText": {
         "zh-CN": "你的 Pet：三车小队（L6 阶段），1 名远程人员监管 3 辆无人车",
         "en": "Your pet: the three-car squad at level 6; one remote operator supervises 3 autonomous vehicles"
@@ -1150,7 +1150,7 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 126684,
+      "byteSizeCompressed": 117594,
       "altText": {
         "zh-CN": "你的 Pet：十车阵列（L7 阶段），1 名远程人员监管 10 辆无人车",
         "en": "Your pet: the ten-car array at level 7; one remote operator supervises 10 autonomous vehicles"
@@ -1163,7 +1163,7 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 178379,
+      "byteSizeCompressed": 168209,
       "altText": {
         "zh-CN": "你的 Pet：十车阵列（L7 阶段），1 名远程人员监管 10 辆无人车",
         "en": "Your pet: the ten-car array at level 7; one remote operator supervises 10 autonomous vehicles"
@@ -1176,7 +1176,7 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 164466,
+      "byteSizeCompressed": 154200,
       "altText": {
         "zh-CN": "你的 Pet：百车车队（L8 阶段），1 名远程人员监管 100 辆无人车",
         "en": "Your pet: the 100-car fleet at level 8; one remote operator supervises 100 autonomous vehicles"
@@ -1189,7 +1189,7 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 212350,
+      "byteSizeCompressed": 200842,
       "altText": {
         "zh-CN": "你的 Pet：百车车队（L8 阶段），1 名远程人员监管 100 辆无人车",
         "en": "Your pet: the 100-car fleet at level 8; one remote operator supervises 100 autonomous vehicles"
@@ -1202,7 +1202,7 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 131034,
+      "byteSizeCompressed": 118340,
       "altText": {
         "zh-CN": "你的 Pet：城市规模的领航车（L9 阶段），1 名远程人员监管 1,000 辆无人车",
         "en": "Your pet: the lead car at city scale, level 9; one remote operator supervises 1,000 autonomous vehicles"
@@ -1215,7 +1215,7 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 185203,
+      "byteSizeCompressed": 171608,
       "altText": {
         "zh-CN": "你的 Pet：城市规模的领航车（L9 阶段），1 名远程人员监管 1,000 辆无人车",
         "en": "Your pet: the lead car at city scale, level 9; one remote operator supervises 1,000 autonomous vehicles"
@@ -1228,7 +1228,7 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 112234,
+      "byteSizeCompressed": 102788,
       "altText": {
         "zh-CN": "你的 Pet：多城规模的天际线（L10 阶段），1 名远程人员监管 10,000 辆无人车",
         "en": "Your pet: multi-city skylines at level 10; one remote operator supervises 10,000 autonomous vehicles"
@@ -1241,7 +1241,7 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 154770,
+      "byteSizeCompressed": 143958,
       "altText": {
         "zh-CN": "你的 Pet：多城规模的天际线（L10 阶段），1 名远程人员监管 10,000 辆无人车",
         "en": "Your pet: multi-city skylines at level 10; one remote operator supervises 10,000 autonomous vehicles"
@@ -1254,7 +1254,7 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 152306,
+      "byteSizeCompressed": 141250,
       "altText": {
         "zh-CN": "你的 Pet：多区域地标网络（L11 阶段），1 名远程人员监管 100,000 辆无人车",
         "en": "Your pet: the multi-region landmark network at level 11; one remote operator supervises 100,000 autonomous vehicles"
@@ -1267,7 +1267,7 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 202084,
+      "byteSizeCompressed": 189977,
       "altText": {
         "zh-CN": "你的 Pet：多区域地标网络（L11 阶段），1 名远程人员监管 100,000 辆无人车",
         "en": "Your pet: the multi-region landmark network at level 11; one remote operator supervises 100,000 autonomous vehicles"
@@ -1280,7 +1280,7 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 110440,
+      "byteSizeCompressed": 97388,
       "altText": {
         "zh-CN": "你的 Pet：全球规模的领航车（L12 阶段），1 名远程人员监管 1,000,000 辆无人车",
         "en": "Your pet: the lead car at global scale, level 12; one remote operator supervises 1,000,000 autonomous vehicles"
@@ -1293,7 +1293,7 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 147038,
+      "byteSizeCompressed": 132912,
       "altText": {
         "zh-CN": "你的 Pet：全球规模的领航车（L12 阶段），1 名远程人员监管 1,000,000 辆无人车",
         "en": "Your pet: the lead car at global scale, level 12; one remote operator supervises 1,000,000 autonomous vehicles"
