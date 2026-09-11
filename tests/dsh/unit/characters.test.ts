@@ -4,10 +4,14 @@ import { characterSpeechCatalog } from '../../../src/dsh/client/speech-catalog'
 import { normalizeOverlayPreferences, adoptStorageEvent, OVERLAY_PREFERENCES_KEY } from '../../../src/dsh/client/preferences'
 
 describe('V8 declarative pet presentation registry', () => {
-  it('offers the two bundled reference pets; companion pose mapping stays injective over ten poses', () => {
-    expect(userSelectablePets().map(pet => pet.id)).toEqual(['vehicle', 'companion'])
-    const poseMapping = petDefinition('companion').poseSprite?.variantPose ?? {}
-    expect(new Set(Object.values(poseMapping)).size).toBe(10)
+  it('offers the bundled pets with both references first; pose mappings stay injective (CTR-041)', () => {
+    const ids = userSelectablePets().map(pet => pet.id)
+    expect(ids.slice(0, 2)).toEqual(['vehicle', 'companion'])
+    expect(ids).toContain('orb')
+    const companionPoses = petDefinition('companion').poseSprite?.variantPose ?? {}
+    expect(new Set(Object.values(companionPoses)).size).toBe(10)
+    const orbPoses = petDefinition('orb').poseSprite?.variantPose ?? {}
+    expect(new Set(Object.values(orbPoses)).size).toBe(10)
   })
   it('maps operational meanings and preserves exact grades without inventing unknown levels', () => {
     expect(petGrade('vehicle', 'l2', 'zh-CN')).toMatchObject({grade:'L2',description:'有人驾驶，无保护车'})

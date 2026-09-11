@@ -17,6 +17,7 @@
  */
 
 import { readFile, stat, mkdtemp, rm } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -86,12 +87,25 @@ if (/import\.meta/.test(codeOnly)) {
 
 // 6. Data URL coverage matches the generated maps exactly: the Pack asset map
 //    plus the V2 expression-asset map (CTR-OVERLAY-014 bundled presentation).
-const generated = await readFile(path.join(repoRoot, 'src/dsh/client/asset-bundles.generated.ts'), 'utf8')
-const expressionGenerated = await readFile(path.join(repoRoot, 'src/dsh/client/expression-assets.generated.ts'), 'utf8')
-const characterGenerated = await readFile(path.join(repoRoot, 'src/dsh/client/character-assets.generated.ts'), 'utf8')
-const generatedCount = (generated.match(/^import /gm) ?? []).length
-  + (expressionGenerated.match(/^import /gm) ?? []).length
-  + (characterGenerated.match(/^import /gm) ?? []).length
+// V8 CTR-038: per-pet generated asset modules are discovered by scan, so a
+// newly bundled pet's assets are gated by the same data-URL completeness rule
+// without editing this script.
+const { readdir } = await import('node:fs/promises')
+const petsDir = path.join(repoRoot, 'src/dsh/client/pets')
+const generatedAssetModules = [
+  'src/dsh/client/asset-bundles.generated.ts',
+  'src/dsh/client/expression-assets.generated.ts',
+  'src/dsh/client/character-assets.generated.ts',
+]
+for (const petId of await readdir(petsDir)) {
+  const candidate = path.join(petsDir, petId, `${petId}-assets.generated.ts`)
+  if (existsSync(candidate)) generatedAssetModules.push(path.relative(repoRoot, candidate))
+}
+let generatedCount = 0
+for (const modulePath of generatedAssetModules) {
+  const module = await readFile(path.join(repoRoot, modulePath), 'utf8')
+  generatedCount += (module.match(/^import /gm) ?? []).length
+}
 const dataUrlCount = (bundle.match(/data:image\/(?:webp|png);base64,|data:image\/svg\+xml[;,]/g) ?? []).length
 if (generatedCount === 0) {
   failures.push('generated asset map is empty')

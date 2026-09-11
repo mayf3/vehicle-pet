@@ -1,0 +1,88 @@
+{
+  "idle": [
+    {
+      "zh-CN": "安静地悬浮着，陪你待一会儿。",
+      "en": "Floating quietly, keeping you company."
+    },
+    {
+      "zh-CN": "星光很静，我也很静。",
+      "en": "The stars are quiet, and so am I."
+    },
+    {
+      "zh-CN": "在呢。",
+      "en": "Right here."
+    }
+  ],
+  "working": [
+    {
+      "zh-CN": "轨道已校准，开始运转。",
+      "en": "Orbit calibrated, spinning up."
+    },
+    {
+      "zh-CN": "光晕全开，专注运转中。",
+      "en": "Full halo, focused."
+    }
+  ],
+  "needs-input": [
+    {
+      "zh-CN": "轨道上有个问号在等你。",
+      "en": "A question mark is waiting in your orbit."
+    },
+    {
+      "zh-CN": "需要你帮个小忙。",
+      "en": "Could use a small hand here."
+    }
+  ],
+  "completed": [
+    {
+      "zh-CN": "亮了一下，为了你。",
+      "en": "That one glowed, just for you."
+    },
+    {
+      "zh-CN": "稳稳入轨，完成。",
+      "en": "Smooth orbit. Done."
+    }
+  ],
+  "failed": [
+    {
+      "zh-CN": "光环晃了一下，没关系。",
+      "en": "The halo wobbled a little. It's okay."
+    },
+    {
+      "zh-CN": "暗一会儿，再亮起来。",
+      "en": "Dim for a moment, then bright again."
+    }
+  ],
+  "milestone": [
+    {
+      "zh-CN": "又亮了一圈！",
+      "en": "Another ring of light!"
+    },
+    {
+      "zh-CN": "轨道更远了，光更稳了。",
+      "en": "The orbit widens; the light holds."
+    }
+  ],
+  "petting": [
+    {
+      "zh-CN": "光球开心地转了半圈。",
+      "en": "The orb spins a happy half-turn."
+    },
+    {
+      "zh-CN": "暖暖的。",
+      "en": "Warm."
+    }
+  ],
+  "welcome": [
+    {
+      "zh-CN": "你回来啦，星域都亮了。",
+      "en": "You're back — the whole sector lit up."
+    }
+  ],
+  "ritual": [
+    {
+      "zh-CN": "夜深了，光球调成了小夜灯模式。",
+      "en": "Late night; the orb dimmed to night-light mode."
+    }
+  ]
+}

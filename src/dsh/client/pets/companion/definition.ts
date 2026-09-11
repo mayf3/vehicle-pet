@@ -29,6 +29,8 @@ const VARIANT_POSE: Record<VehiclePetExpressionVariant, number> = {
  */
 const poseSprite: PoseSpriteRecipeData = {
   variantPose: VARIANT_POSE,
+  poses: companionAssets,
+  alphaBounds: poseAlphaBounds,
   insignia: {
     mode: 'wearable',
     /** Index-aligned with journey levels (l1..l12). */

@@ -1,0 +1,434 @@
+{
+  "schemaVersion": 1,
+  "packId": "orb-fixture",
+  "packVersion": "1.0.0",
+  "name": {
+    "zh-CN": "光球伙伴",
+    "en": "Orb Companion"
+  },
+  "displayConversion": {
+    "unitLabel": {
+      "zh-CN": "点",
+      "en": "pts"
+    },
+    "pointsPerUnit": 1
+  },
+  "levels": [
+    {
+      "levelId": "l1",
+      "threshold": 0,
+      "stageName": {
+        "zh-CN": "微光",
+        "en": "Spark"
+      },
+      "summary": {
+        "zh-CN": "一颗安静悬浮的光球。",
+        "en": "A quiet orb floating in the dark."
+      },
+      "milestone": {
+        "zh-CN": "旅程从一点微光开始。",
+        "en": "The journey begins with a single spark."
+      },
+      "sceneId": "s-l1",
+      "presentation": {
+        "scale": "individual",
+        "camera": "close",
+        "milestone": "inline"
+      }
+    },
+    {
+      "levelId": "l2",
+      "threshold": 40,
+      "stageName": {
+        "zh-CN": "晕光",
+        "en": "Glow"
+      },
+      "summary": {
+        "zh-CN": "光球学会了稳定自己的光晕。",
+        "en": "The orb steadies its own halo."
+      },
+      "milestone": {
+        "zh-CN": "第一圈光晕稳定下来了。",
+        "en": "The first halo holds steady."
+      },
+      "sceneId": "s-l2",
+      "keepsakeId": "ks-l2",
+      "presentation": {
+        "scale": "individual",
+        "camera": "close",
+        "milestone": "inline"
+      }
+    },
+    {
+      "levelId": "l3",
+      "threshold": 160,
+      "stageName": {
+        "zh-CN": "辉光",
+        "en": "Shine"
+      },
+      "summary": {
+        "zh-CN": "两颗小卫星加入了光球的轨道。",
+        "en": "Two small moons join the orbit."
+      },
+      "milestone": {
+        "zh-CN": "轨道上有了第一批同伴。",
+        "en": "The orbit gains its first company."
+      },
+      "sceneId": "s-l3",
+      "keepsakeId": "ks-l3",
+      "presentation": {
+        "scale": "group",
+        "camera": "district",
+        "milestone": "inline"
+      }
+    },
+    {
+      "levelId": "l4",
+      "threshold": 400,
+      "stageName": {
+        "zh-CN": "光辉",
+        "en": "Radiance"
+      },
+      "summary": {
+        "zh-CN": "三颗卫星与双环，光球照亮了整个星域。",
+        "en": "Three moons and twin rings light up the whole sector."
+      },
+      "milestone": {
+        "zh-CN": "光球成为一片星域的中心。",
+        "en": "The orb becomes the center of a sector."
+      },
+      "sceneId": "s-l4",
+      "keepsakeId": "ks-l4",
+      "presentation": {
+        "scale": "cluster",
+        "camera": "district",
+        "milestone": "inline"
+      }
+    }
+  ],
+  "scenes": [
+    {
+      "sceneId": "s-l1",
+      "backgroundAssetId": "bg-s-l1-webp",
+      "layers": [
+        {
+          "layerId": "orb-subject-l1",
+          "kind": "subject",
+          "assetId": "sprite-subject-l1-webp",
+          "placement": "center",
+          "zOrder": 10
+        }
+      ],
+      "transition": "instant",
+      "sceneLabel": {
+        "zh-CN": "微光星域中的光球",
+        "en": "The orb in its Spark sector"
+      }
+    },
+    {
+      "sceneId": "s-l2",
+      "backgroundAssetId": "bg-s-l2-webp",
+      "layers": [
+        {
+          "layerId": "orb-subject-l2",
+          "kind": "subject",
+          "assetId": "sprite-subject-l2-webp",
+          "placement": "center",
+          "zOrder": 10
+        }
+      ],
+      "transition": "crossfade",
+      "sceneLabel": {
+        "zh-CN": "晕光星域中的光球",
+        "en": "The orb in its Glow sector"
+      }
+    },
+    {
+      "sceneId": "s-l3",
+      "backgroundAssetId": "bg-s-l3-webp",
+      "layers": [
+        {
+          "layerId": "orb-subject-l3",
+          "kind": "subject",
+          "assetId": "sprite-subject-l3-webp",
+          "placement": "center",
+          "zOrder": 10
+        }
+      ],
+      "transition": "crossfade",
+      "sceneLabel": {
+        "zh-CN": "辉光星域中的光球",
+        "en": "The orb in its Shine sector"
+      }
+    },
+    {
+      "sceneId": "s-l4",
+      "backgroundAssetId": "bg-s-l4-webp",
+      "layers": [
+        {
+          "layerId": "orb-subject-l4",
+          "kind": "subject",
+          "assetId": "sprite-subject-l4-webp",
+          "placement": "center",
+          "zOrder": 10
+        }
+      ],
+      "transition": "crossfade",
+      "sceneLabel": {
+        "zh-CN": "光辉星域中的光球",
+        "en": "The orb in its Radiance sector"
+      }
+    }
+  ],
+  "assets": [
+    {
+      "assetId": "bg-s-l1-webp",
+      "path": "assets/orb-fixture/bg-s-l1.webp",
+      "format": "webp",
+      "role": "background",
+      "width": 800,
+      "height": 450,
+      "byteSizeCompressed": 1842,
+      "altText": {
+        "zh-CN": "星域背景（微光）",
+        "en": "Sector background (Spark)"
+      }
+    },
+    {
+      "assetId": "bg-s-l1-png",
+      "path": "assets/orb-fixture/bg-s-l1.png",
+      "format": "png",
+      "role": "background",
+      "width": 800,
+      "height": 450,
+      "byteSizeCompressed": 10793,
+      "altText": {
+        "zh-CN": "星域背景（微光）",
+        "en": "Sector background (Spark)"
+      }
+    },
+    {
+      "assetId": "sprite-subject-l1-webp",
+      "path": "assets/orb-fixture/sprite-subject-l1.webp",
+      "format": "webp",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 3030,
+      "altText": {
+        "zh-CN": "微光形态的光球",
+        "en": "The orb in its Spark form"
+      }
+    },
+    {
+      "assetId": "sprite-subject-l1-png",
+      "path": "assets/orb-fixture/sprite-subject-l1.png",
+      "format": "png",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 5445,
+      "altText": {
+        "zh-CN": "微光形态的光球",
+        "en": "The orb in its Spark form"
+      }
+    },
+    {
+      "assetId": "bg-s-l2-webp",
+      "path": "assets/orb-fixture/bg-s-l2.webp",
+      "format": "webp",
+      "role": "background",
+      "width": 800,
+      "height": 450,
+      "byteSizeCompressed": 1854,
+      "altText": {
+        "zh-CN": "星域背景（晕光）",
+        "en": "Sector background (Glow)"
+      }
+    },
+    {
+      "assetId": "bg-s-l2-png",
+      "path": "assets/orb-fixture/bg-s-l2.png",
+      "format": "png",
+      "role": "background",
+      "width": 800,
+      "height": 450,
+      "byteSizeCompressed": 10933,
+      "altText": {
+        "zh-CN": "星域背景（晕光）",
+        "en": "Sector background (Glow)"
+      }
+    },
+    {
+      "assetId": "sprite-subject-l2-webp",
+      "path": "assets/orb-fixture/sprite-subject-l2.webp",
+      "format": "webp",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 4796,
+      "altText": {
+        "zh-CN": "晕光形态的光球",
+        "en": "The orb in its Glow form"
+      }
+    },
+    {
+      "assetId": "sprite-subject-l2-png",
+      "path": "assets/orb-fixture/sprite-subject-l2.png",
+      "format": "png",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 9116,
+      "altText": {
+        "zh-CN": "晕光形态的光球",
+        "en": "The orb in its Glow form"
+      }
+    },
+    {
+      "assetId": "bg-s-l3-webp",
+      "path": "assets/orb-fixture/bg-s-l3.webp",
+      "format": "webp",
+      "role": "background",
+      "width": 800,
+      "height": 450,
+      "byteSizeCompressed": 1886,
+      "altText": {
+        "zh-CN": "星域背景（辉光）",
+        "en": "Sector background (Shine)"
+      }
+    },
+    {
+      "assetId": "bg-s-l3-png",
+      "path": "assets/orb-fixture/bg-s-l3.png",
+      "format": "png",
+      "role": "background",
+      "width": 800,
+      "height": 450,
+      "byteSizeCompressed": 10773,
+      "altText": {
+        "zh-CN": "星域背景（辉光）",
+        "en": "Sector background (Shine)"
+      }
+    },
+    {
+      "assetId": "sprite-subject-l3-webp",
+      "path": "assets/orb-fixture/sprite-subject-l3.webp",
+      "format": "webp",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 5308,
+      "altText": {
+        "zh-CN": "辉光形态的光球",
+        "en": "The orb in its Shine form"
+      }
+    },
+    {
+      "assetId": "sprite-subject-l3-png",
+      "path": "assets/orb-fixture/sprite-subject-l3.png",
+      "format": "png",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 10215,
+      "altText": {
+        "zh-CN": "辉光形态的光球",
+        "en": "The orb in its Shine form"
+      }
+    },
+    {
+      "assetId": "bg-s-l4-webp",
+      "path": "assets/orb-fixture/bg-s-l4.webp",
+      "format": "webp",
+      "role": "background",
+      "width": 800,
+      "height": 450,
+      "byteSizeCompressed": 1854,
+      "altText": {
+        "zh-CN": "星域背景（光辉）",
+        "en": "Sector background (Radiance)"
+      }
+    },
+    {
+      "assetId": "bg-s-l4-png",
+      "path": "assets/orb-fixture/bg-s-l4.png",
+      "format": "png",
+      "role": "background",
+      "width": 800,
+      "height": 450,
+      "byteSizeCompressed": 10764,
+      "altText": {
+        "zh-CN": "星域背景（光辉）",
+        "en": "Sector background (Radiance)"
+      }
+    },
+    {
+      "assetId": "sprite-subject-l4-webp",
+      "path": "assets/orb-fixture/sprite-subject-l4.webp",
+      "format": "webp",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 6890,
+      "altText": {
+        "zh-CN": "光辉形态的光球",
+        "en": "The orb in its Radiance form"
+      }
+    },
+    {
+      "assetId": "sprite-subject-l4-png",
+      "path": "assets/orb-fixture/sprite-subject-l4.png",
+      "format": "png",
+      "role": "sprite",
+      "width": 480,
+      "height": 480,
+      "byteSizeCompressed": 13856,
+      "altText": {
+        "zh-CN": "光辉形态的光球",
+        "en": "The orb in its Radiance form"
+      }
+    }
+  ],
+  "keepsakes": [
+    {
+      "keepsakeId": "ks-l2",
+      "levelId": "l2",
+      "title": {
+        "zh-CN": "第一圈光晕",
+        "en": "First Halo"
+      },
+      "accessDescription": {
+        "zh-CN": "纪念光晕第一次稳定下来。",
+        "en": "Marks the first steady halo."
+      },
+      "assetId": "sprite-subject-l2-webp"
+    },
+    {
+      "keepsakeId": "ks-l3",
+      "levelId": "l3",
+      "title": {
+        "zh-CN": "两颗小卫星",
+        "en": "Two Moons"
+      },
+      "accessDescription": {
+        "zh-CN": "纪念轨道上的第一批同伴。",
+        "en": "Marks the first company in orbit."
+      },
+      "assetId": "sprite-subject-l3-webp"
+    },
+    {
+      "keepsakeId": "ks-l4",
+      "levelId": "l4",
+      "title": {
+        "zh-CN": "双环星域",
+        "en": "Twin Rings"
+      },
+      "accessDescription": {
+        "zh-CN": "纪念照亮整片星域的时刻。",
+        "en": "Marks the moment the whole sector lit up."
+      },
+      "assetId": "sprite-subject-l4-webp"
+    }
+  ]
+}

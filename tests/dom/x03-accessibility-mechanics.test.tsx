@@ -1,7 +1,9 @@
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
 import { MemoryPetStorageAdapter } from '../../src/engine'
-import { autonomousFleetBundle } from '../../src/packs/autonomous-fleet'
+import { discoverPackBundles } from '../../src/packs/bundledRegistry'
+
+const autonomousFleetBundle = discoverPackBundles().find(bundle => (bundle.manifestCandidate as { packId?: string }).packId === 'autonomous-fleet')!
 import { MockProgressSource } from '../../src/prototype/MockProgressSource'
 import { EngineStyles } from '../../src/react/styles'
 import { PetEngineProvider } from '../../src/react/PetEngineProvider'
