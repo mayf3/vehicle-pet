@@ -37,7 +37,9 @@ function EngineScene(props: Props): ReactElement {
 function PoseSprite(props: Props): ReactElement | null {
   const poseIndex = props.pet.poseSprite?.variantPose[props.variant]
   if (poseIndex === undefined) return null
-  return <PoseImage pet={props.pet} pose={poseIndex} levelId={props.levelId} locale={props.locale} />
+  // Image failure state must reset when the visible asset identity changes
+  // (pet or pose); otherwise one pose's double failure sticks to the next.
+  return <PoseImage key={`${props.pet.id}:${poseIndex}`} pet={props.pet} pose={poseIndex} levelId={props.levelId} locale={props.locale} />
 }
 
 function PoseImage({ pet, pose, levelId, locale }: { pet: PetPresentation; pose: number; levelId: string | undefined; locale: string | undefined }): ReactElement | null {

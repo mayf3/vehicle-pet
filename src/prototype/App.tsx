@@ -21,6 +21,7 @@ import {
 } from '../react'
 import { MockProgressSource } from './MockProgressSource'
 import { ShowcaseView } from './showcase'
+import { PetPreviewView } from './PetPreview'
 import { bundledPackBundles, defaultPackId } from '../packs/bundledRegistry'
 
 export interface AppProps {
@@ -29,6 +30,7 @@ export interface AppProps {
   initialReducedMotion?: boolean
   dev?: boolean
   showcase?: boolean
+  petPreview?: boolean
 }
 
 export function App(props: AppProps) {
@@ -37,6 +39,10 @@ export function App(props: AppProps) {
 
   if (props.showcase === true) {
     return <ShowcaseView bundles={bundles} locale="zh-CN" />
+  }
+
+  if (props.petPreview === true) {
+    return <PetPreviewView />
   }
 
   return (

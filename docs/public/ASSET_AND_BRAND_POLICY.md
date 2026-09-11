@@ -55,7 +55,7 @@ The Owner selected the packet's recommended OPTION_B:
 The decision packet (options, trade-offs) remains in
 `docs/investigations/GOAL_OPEN_LICENSE_PACKET.md` for the record. Third-party
 creators keep ownership of their own pet data and set their pet's
-license/attribution metadata in their `definition.ts` and `LICENSE`.
+license/attribution metadata in their `pet/pet.json` and `LICENSE`.
 
 This policy is an IP-hygiene / release-readiness statement, **not** a legal opinion.
 

@@ -37,6 +37,7 @@ async function bootstrap() {
       initialReducedMotion={params.get('reducedMotion') === '1'}
       dev={params.get('dev') === '1'}
       showcase={params.get('showcase') === '1'}
+      petPreview={params.get('petPreview') === '1'}
     />,
   )
 }
