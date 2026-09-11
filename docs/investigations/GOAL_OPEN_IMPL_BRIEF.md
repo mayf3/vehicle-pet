@@ -5,7 +5,7 @@ ROUTE_STAGE = IMPLEMENTATION (V8 accepted in base d77008a, implementation_author
 AUTHORITY_ACTION = REUSE (DSH_PET_OVERLAY_ADAPTER_V8@d77008a; ENGINE_V4, PD_V1, USAGE_PROGRESS_SOURCE_V2 carried)
 PLAN_LEVEL = EXEC_PLAN
 ASSURANCE_LEVEL = DURABLE
-WRITE_SURFACE = /Users/yanfenma/workspace/project/vehicle-pet-open-impl (branch open/impl-v8, fresh from d77008a)
+WRITE_SURFACE = $HOME/workspace/project/vehicle-pet-open-impl (branch open/impl-v8, fresh from d77008a)
 ```
 
 ## Goal

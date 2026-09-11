@@ -87,24 +87,35 @@ if (/import\.meta/.test(codeOnly)) {
 
 // 6. Data URL coverage matches the generated maps exactly: the Pack asset map
 //    plus the V2 expression-asset map (CTR-OVERLAY-014 bundled presentation).
-// V8 CTR-038: per-pet generated asset modules are discovered by scan, so a
-// newly bundled pet's assets are gated by the same data-URL completeness rule
-// without editing this script.
+// V8 CTR-038: every bundled asset import under the DSH client — shared
+// generated maps AND per-pet pose imports (generated modules or a creator
+// definition.ts's direct asset imports alike) — is discovered by scan, so a
+// newly bundled pet's assets are gated by the same data-URL completeness
+// rule without editing this script.
 const { readdir } = await import('node:fs/promises')
-const petsDir = path.join(repoRoot, 'src/dsh/client/pets')
-const generatedAssetModules = [
+async function listFilesRecursive(root) {
+  const out = []
+  for (const entry of await readdir(root, { withFileTypes: true })) {
+    const full = path.join(root, entry.name)
+    if (entry.isDirectory()) out.push(...(await listFilesRecursive(full)))
+    else if (/\.(ts|tsx)$/.test(entry.name)) out.push(full)
+  }
+  return out
+}
+const imageImportPattern = /^import .+ from '[^']+\.(png|webp|svg|jpg)'/gm
+let generatedCount = 0
+for (const modulePath of [
   'src/dsh/client/asset-bundles.generated.ts',
   'src/dsh/client/expression-assets.generated.ts',
   'src/dsh/client/character-assets.generated.ts',
-]
-for (const petId of await readdir(petsDir)) {
-  const candidate = path.join(petsDir, petId, `${petId}-assets.generated.ts`)
-  if (existsSync(candidate)) generatedAssetModules.push(path.relative(repoRoot, candidate))
-}
-let generatedCount = 0
-for (const modulePath of generatedAssetModules) {
+]) {
   const module = await readFile(path.join(repoRoot, modulePath), 'utf8')
-  generatedCount += (module.match(/^import /gm) ?? []).length
+  generatedCount += (module.match(imageImportPattern) ?? []).length
+}
+const petsDir = path.join(repoRoot, 'src/dsh/client/pets')
+for (const file of await listFilesRecursive(petsDir)) {
+  const module = await readFile(file, 'utf8')
+  generatedCount += (module.match(imageImportPattern) ?? []).length
 }
 const dataUrlCount = (bundle.match(/data:image\/(?:webp|png);base64,|data:image\/svg\+xml[;,]/g) ?? []).length
 if (generatedCount === 0) {

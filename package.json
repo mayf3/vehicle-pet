@@ -52,7 +52,7 @@
     "assets:dsh-check": "node scripts/generate-pet-wiring.mjs --check && node scripts/generate-dsh-assets.mjs --check",
     "assets:expression-generate": "node scripts/generate-expression-assets.mjs",
     "assets:expression-check": "node scripts/generate-expression-assets.mjs --check",
-    "build:dsh": "node scripts/generate-pet-wiring.mjs && node scripts/build-dsh-plugin.mjs",
+    "build:dsh": "node scripts/generate-pet-wiring.mjs && node scripts/generate-dsh-assets.mjs && node scripts/build-dsh-plugin.mjs",
     "check:dsh-bundle": "node scripts/check-dsh-bundle.mjs",
     "check:dsh-package": "node scripts/check-dsh-package.mjs",
     "check:dsh-lifecycle": "node scripts/check-dsh-lifecycle.mjs",
