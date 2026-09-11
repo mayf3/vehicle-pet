@@ -13,16 +13,10 @@ import type {
   PetPresentation,
   PetRecipe,
 } from './types'
-import { vehiclePresentation } from './vehicle/definition'
-import { companionPresentation } from './companion/definition'
-import { orbPresentation } from './orb/definition'
+import { wiredPetPresentations } from './wired.generated'
 
-/** Every bundled pet presentation, in menu order. */
-export const petPresentations: readonly PetPresentation[] = [
-  vehiclePresentation,
-  companionPresentation,
-  orbPresentation,
-]
+/** Every bundled pet presentation, in generated wiring order (default first). */
+export const petPresentations: readonly PetPresentation[] = wiredPetPresentations
 
 /** Documented default pet for absent/unknown preference values (CTR-041). */
 export const DEFAULT_PET_ID = 'vehicle'

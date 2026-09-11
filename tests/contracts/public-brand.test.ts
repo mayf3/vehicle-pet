@@ -80,7 +80,10 @@ describe('LEVEL_PRESENTATION_POLICY_CHECK (V8 CTR-040)', () => {
       expect(['none', 'overlay', 'wearable']).toContain(pet.gradePolicy.insigniaMode)
       expect(typeof pet.gradePolicy.showExactLevelNumber).toBe('boolean')
       expect(typeof pet.gradePolicy.showDescription).toBe('boolean')
-      expect(pet.gradeLevels.length).toBeGreaterThanOrEqual(12)
+      // Reference pets on the shared fleet journey keep the full 12-level
+      // ladder; pets on their own journeys size their ladder to their pack.
+      const referenceOnFleet = pet.packId === 'autonomous-fleet'
+      expect(pet.gradeLevels.length).toBeGreaterThanOrEqual(referenceOnFleet ? 12 : 1)
       for (const level of pet.gradeLevels) {
         expect(level.id).toMatch(/^l\d+$/)
         expect(level['zh-CN'].length).toBeGreaterThan(0)
