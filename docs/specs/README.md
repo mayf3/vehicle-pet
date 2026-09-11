@@ -24,29 +24,19 @@ Before non-mechanical implementation, governance adoption must be accepted, the 
 
 ## Current authority inventory
 
-[Vehicle Pet Development Governance Adoption V1](VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V1.md), [Vehicle Pet Product Direction V1](VEHICLE_PET_PRODUCT_DIRECTION_V1.md), and [Configurable Pet Engine V1](CONFIGURABLE_PET_ENGINE_V1.md) have lifecycle status `accepted` and are present on the designated authority branch at base `25b56b3b8540031e9d6e320d22872d86a136c7ad`. The Configurable Pet Engine V1 implementation and conformance record are also present on that base.
-
-[DSH Pet Overlay Adapter V1](DSH_PET_OVERLAY_ADAPTER_V1.md) is an `accepted` docs-only implementation Spec with `implementation_authority: contracts`. `mayf3` accepted it at the exact reviewed coordinates after the independent review of its exact proposed Head returned `ACCEPT` with zero blockers. It is an accepted candidate on its acceptance branch; it becomes active repository authority only when the exact accepted revision is reachable from `mayf3/vehicle-pet:main` or an implementation base derived from it.
-
-Current repository state:
+All Specs below are `accepted` and active on `mayf3/vehicle-pet:main` (the designated authority branch) unless their row says otherwise. Current generation:
 
 ```text
-PRODUCT_DIRECTION = ACCEPTED_ACTIVE
-ENGINE_ARCHITECTURE = ACCEPTED_ACTIVE
-CONFIGURABLE_PET_ENGINE_V1_IMPLEMENTATION = PRESENT_AT_25b56b3b8540031e9d6e320d22872d86a136c7ad
-DSH_PET_OVERLAY_ADAPTER_V1 = ACCEPTED_CANDIDATE
-DSH_PET_OVERLAY_ADAPTER_V1_IMPLEMENTATION_AUTHORITY = contracts
-DSH_OVERLAY_ADAPTER_ACTIVATION_RULE = active only when the exact accepted revision is reachable from mayf3/vehicle-pet:main or an implementation base derived from it
-DSH_OVERLAY_IMPLEMENTATION_AUTHORIZED = NO_UNTIL_EXACT_ACCEPTED_HEAD_ENTERS_MAIN
-NEXT_AUTHORITY_ACTION = Owner merge decision for the exact accepted overlay revision
+PRODUCT_DIRECTION = VEHICLE_PET_PRODUCT_DIRECTION_V1 (accepted, active)
+ENGINE_ARCHITECTURE = CONFIGURABLE_PET_ENGINE_V4 (accepted, active, implementation_authority: contracts)
+DSH_OVERLAY_ADAPTER = DSH_PET_OVERLAY_ADAPTER_V8 (accepted, active, implementation_authority: contracts)
+PROGRESS_SOURCE = VEHICLE_PET_PROGRESS_SOURCE_V2 (accepted, active)
+USAGE_SOURCE = DSH_USAGE_PROGRESS_SOURCE_V2 (accepted, active, implementation_authority: contracts)
+GOVERNANCE = VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V2 (accepted, active; upstream agent-development-governance v1.0.3)
 ```
 
-`DSH_OVERLAY_IMPLEMENTATION_AUTHORIZED = NO_UNTIL_EXACT_ACCEPTED_HEAD_ENTERS_MAIN` because an accepted revision on an unmerged PR branch is an accepted candidate, not yet active authority. No DSH adapter implementation may begin until the exact accepted revision of `DSH_PET_OVERLAY_ADAPTER_V1` is reachable from `mayf3/vehicle-pet:main` or an implementation base derived from it. The PR is not merged and merge remains a separate Owner decision; this index does not claim otherwise.
+Activation rule: an accepted Spec is active repository authority when its accepted revision is reachable from `mayf3/vehicle-pet:main` or an implementation base derived from it. Historical note: the DSH adapter chain V1→V7 and the Engine chain V1→V4 are superseded in the index below; the V8 acceptance round (PR #40) also repaired the missing V6 backlink left by the V7 acceptance round.
 
-## Repository Spec index
-
-| Spec ID | Status | Active authority | Kind | Implementation authority | Scope | Supersedes |
-|---|---|---|---|---|---|---|
 | `VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V1` | superseded | no (superseded by `VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V2`) | invariant | none | `mayf3/vehicle-pet` | none |
 | `VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V2` | accepted | yes once the exact accepted revision is reachable from `mayf3/vehicle-pet:main` (accepted candidate on its adoption branch until merge) | invariant | none | `mayf3/vehicle-pet` | `VEHICLE_PET_DEVELOPMENT_GOVERNANCE_ADOPTION_V1` |
 | `VEHICLE_PET_PRODUCT_DIRECTION_V1` | accepted | yes on designated branch/base | invariant | none | `mayf3/vehicle-pet` | none |
@@ -60,10 +50,11 @@ NEXT_AUTHORITY_ACTION = Owner merge decision for the exact accepted overlay revi
 | `DSH_PET_OVERLAY_ADAPTER_V4` | superseded | no (superseded by DSH_PET_OVERLAY_ADAPTER_V5) | implementation | contracts | exclusive characters, descriptive grade labels, wearable insignia, shared speech/prefs; whole V3 carry-forward | DSH_PET_OVERLAY_ADAPTER_V3 |
 | `DSH_PET_OVERLAY_ADAPTER_V5` | superseded | no (superseded by DSH_PET_OVERLAY_ADAPTER_V6) | implementation | contracts | transparent resident, static motion, double-click menu, recurring speech, active-session footer | DSH_PET_OVERLAY_ADAPTER_V4 |
 | `DSH_PET_OVERLAY_ADAPTER_V6` | superseded | no (superseded by DSH_PET_OVERLAY_ADAPTER_V7) | implementation | contracts | alpha-anchored vehicle caption, quiet baseline with eight bounded playful reactions | DSH_PET_OVERLAY_ADAPTER_V5 |
-| `DSH_PET_OVERLAY_ADAPTER_V7` | accepted | active when the accepted revision is reachable from main | implementation | contracts | lifelike interaction layer: gesture arbitration, petting, cursor awareness, drag body reaction, ambient behavior, daypart weighting, welcome-back/rituals, character behavior profiles; whole V6 carry-forward | DSH_PET_OVERLAY_ADAPTER_V6 |
-| `VEHICLE_PET_PROGRESS_SOURCE_V2` | accepted | not yet; accepted candidate until the exact accepted revision is reachable from `mayf3/vehicle-pet:main` or a main-derived implementation base | implementation | none | `progress-source-registration`, `post-v1-external-progress-sources`, `token-usage-consumption-boundary` | none |
+| `DSH_PET_OVERLAY_ADAPTER_V7` | superseded | no (superseded by DSH_PET_OVERLAY_ADAPTER_V8) | implementation | contracts | lifelike interaction layer: gesture arbitration, petting, cursor awareness, drag body reaction, ambient behavior, daypart weighting, welcome-back/rituals, character behavior profiles; whole V6 carry-forward | DSH_PET_OVERLAY_ADAPTER_V6 |
+| `DSH_PET_OVERLAY_ADAPTER_V8` | accepted | active when reachable from main (PR #40) | implementation | contracts | Goal「开放」public-preview layer: brand-neutral identity, declarative pet presentations over declarative journeys, decoupled grade presentation, open pet preference with fail-soft; whole V7 carry-forward | DSH_PET_OVERLAY_ADAPTER_V7 |
+| `VEHICLE_PET_PROGRESS_SOURCE_V2` | accepted | yes on main | implementation | none | `progress-source-registration`, `post-v1-external-progress-sources`, `token-usage-consumption-boundary` | none |
 | `DSH_USAGE_PROGRESS_SOURCE_V1` | superseded | no (superseded by `DSH_USAGE_PROGRESS_SOURCE_V2`) | implementation | contracts | `dsh-usage-progress-source`, `counts-only-token-economy`, `usage-ledger-persistence` | none |
-| `DSH_USAGE_PROGRESS_SOURCE_V2` | accepted | yes once the exact accepted revision is reachable from `mayf3/vehicle-pet:main` (accepted candidate on its branch until merge) | implementation | contracts | `dsh-usage-progress-source`, `counts-only-token-economy`, `usage-ledger-persistence` | `DSH_USAGE_PROGRESS_SOURCE_V1` |
+| `DSH_USAGE_PROGRESS_SOURCE_V2` | accepted | yes on main | implementation | contracts | `dsh-usage-progress-source`, `counts-only-token-economy`, `usage-ledger-persistence` | `DSH_USAGE_PROGRESS_SOURCE_V1` |
 
 `CONFIGURABLE_PET_ENGINE_V1` and `DSH_PET_OVERLAY_ADAPTER_V1` are governed by `VEHICLE_PET_PRODUCT_DIRECTION_V1`; the adapter Spec is additionally governed by the accepted Engine Spec and Governance Adoption Spec.
 
