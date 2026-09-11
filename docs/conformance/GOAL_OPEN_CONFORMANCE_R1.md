@@ -135,3 +135,29 @@ FINAL_STATUS = READY_FOR_PUBLIC_PREVIEW
 SHIP_BLOCKERS = 0
 STOP WORK ON THIS GOAL
 ```
+
+## Fix round 2 — independent review closures + final clean-room (2026-09-12)
+
+```text
+TRIGGER = independent review of ad87e6b reporting 4 P1 + 4 P2 findings (R1-R8), with isolated counterexamples for R2/R3/R4
+FIX_REF = d6ee645 (PR #45, squash of open/preview-fix-round)
+CLEAN_ROOM_ACCEPTANCE = PASS (fresh GitHub clone at d6ee645: frozen-lockfile install, pet:validate PASS, pnpm verify exit 0, bundle + package gates PASS, disposable-DSH pinned-browser e2e 46/46)
+SHIP_BLOCKERS = 0
+```
+
+Per-item disposition (all verified at d6ee645):
+
+| Item | Closure |
+|---|---|
+| R1 (P1) L8/L9 brand residue in shipped sprites | CLOSED — surroundedness letter-fill (≥5/8 light-ground compass rays) + eye-pair face protection; wordmarks not legible on any master; sprites/maps/bundle regenerated and determinism-locked; inventory updated with occlusion-smudge disclosure |
+| R2 (P1) validator false-greens | CLOSED — creator validator v2: pet.json ajv schema (unknown fields rejected), structural checks for levels/speech/LICENSE/provenance, journey validated by the REAL engine validatePack (esbuild bridge) + detailed schema errors; 11-case negative matrix fixed as tests/contracts/creator-validation.test.ts (every review counterexample now a named regression) |
+| R3 (P1) executable definition.ts | CLOSED — creator flow is data-only: definition.ts removed; pets declare pet.json (+levels/speech/assets); per-pet wiring modules are generator output (files kind scans assets and measures alpha bounds; module kind reserved for repo-owned generators). No creator-authored TypeScript exists in the flow |
+| R4 (P1) evidence out-of-tree write | CLOSED — destination containment (resolve + prefix) enforced before any mkdir/copy; traversal rejected as EVIDENCE_DEST_ESCAPES with zero side effects (negative-tested) |
+| R5 (P2) preview gap | CLOSED — `?petPreview=1` mounts the real CharacterVisual with pet/expression/level/size selectors; template README commands run from repo root |
+| R6 (P2) failure-state leak | CLOSED — PoseImage keyed by pet+pose (slice-1 regression restored) |
+| R7 (P2) overlay mode unimplemented | CLOSED — validation rejects `insigniaMode: 'overlay'` with a named alternative until a renderer implements it |
+| R8 (P2) privacy/scan gaps | CLOSED — privacy doc lists active-session title metadata (local display only); package scan covers source maps + NOTICE/LICENSE; brand scan scoped to identity-bearing files |
+
+Additional: THIRD_PARTY_NOTICES.md ships ajv 8.20.0 (MIT), ajv-formats 3.0.1 (MIT), idb 8.0.3 (ISC) attribution for the bundled dependencies (notices stripped by `legalComments: 'none'`). Test infrastructure: deterministic-daytime pin for night-window runs (23:00-05:00 local) — the V7 daypart layer and ritual day keys made several suites time-dependent; the pin shifts the page Date to 14:30 only inside that window.
+
+Executed at d6ee645: full verify chain exit 0 (contracts 50/50 incl. the negative matrix; unit+dom 160/160; dsh 167/167; asset determinism byte-identical; bundle 12,330,790 bytes/156 assets; package 191 files); disposable-DSH pinned-browser e2e 46/46 (fresh clone).
