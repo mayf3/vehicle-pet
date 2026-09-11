@@ -530,7 +530,12 @@ async function renderMasterSprite(levelIndex) {
 // Rendering and sync
 // ---------------------------------------------------------------------------
 
+// Packs whose assets come from their own deterministic pipeline (provenance
+// in the pack directory) rather than the shared RECIPES tables.
+const EXTERNALLY_GENERATED_PACKS = new Set(['orb-fixture'])
+
 async function renderAsset(stem, packId) {
+  if (EXTERNALLY_GENERATED_PACKS.has(packId)) return null
   if (packId === 'autonomous-fleet') {
     const levelIndex = MASTER_SPRITE_STEMS.indexOf(stem)
     if (levelIndex >= 0) return renderMasterSprite(levelIndex)
@@ -560,6 +565,8 @@ async function run() {
     const manifest = JSON.parse(await readFile(manifestPath, 'utf8'))
     const packId = manifest.packId
     const rendered = new Map()
+
+    if (EXTERNALLY_GENERATED_PACKS.has(packId)) continue
 
     for (const asset of manifest.assets) {
       const stem = path.basename(asset.path).replace(/\.(webp|png)$/, '')
