@@ -16,7 +16,7 @@
  */
 
 import { readdir, readFile, writeFile } from 'node:fs/promises'
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import sharp from 'sharp'
@@ -53,6 +53,48 @@ async function listPoseFiles(dir) {
   return { pngs, webps }
 }
 
+/**
+ * Module-route allowlist (R3 boundary, mechanical): pet.json's
+ * `assetSource.kind: 'module'` may ONLY point at a repository-owned
+ * generated asset module — a real file under `src/dsh/client/` (outside the
+ * creator-owned `pets/` surface), named `*.generated.ts`, whose text
+ * contains every referenced export. Anything else — arbitrary paths,
+ * creator-directory modules, non-generated files, missing exports — is
+ * rejected before any wiring is emitted, so the build can never import
+ * creator-supplied modules.
+ */
+function assertModuleSourceAllowed(petDir, src, petId) {
+  if (src.kind !== 'module') return
+  const referenced = [src.poses, src.alphaBounds, src.insigniaAssets, src.insigniaAnchors].filter(Boolean)
+  if (referenced.length === 0) {
+    throw new Error(`pet ${petId}: assetSource module must reference at least one export (poses/alphaBounds/insigniaAssets/insigniaAnchors)`)
+  }
+  const resolved = path.resolve(petDir, src.path)
+  const seamRoot = path.join(repoRoot, 'src', 'dsh', 'client')
+  const petsRoot = path.join(seamRoot, 'pets')
+  if (!resolved.startsWith(seamRoot + path.sep) || resolved.startsWith(petsRoot + path.sep)) {
+    throw new Error(`pet ${petId}: assetSource module path '${src.path}' is outside the repository-generated asset seam (src/dsh/client, excluding pets/)`)
+  }
+  // Extensionless import specifier (e.g. '../../character-assets.generated')
+  // resolves to a *.generated.ts file; both spellings must land on a
+  // generated tool-output module.
+  const moduleFile = resolved.endsWith('.ts') ? resolved : `${resolved}.ts`
+  if (!moduleFile.endsWith('.generated.ts')) {
+    throw new Error(`pet ${petId}: assetSource module '${src.path}' must be a *.generated.ts file (tool output, never hand-authored)`)
+  }
+  if (!existsSync(moduleFile)) {
+    throw new Error(`pet ${petId}: assetSource module '${src.path}' does not exist (resolved ${moduleFile})`)
+  }
+  const text = readFileSync(moduleFile, 'utf8')
+  for (const name of referenced) {
+    if (!new RegExp('export (const|function) ' + name + '\\b').test(text)) {
+      throw new Error(`pet ${petId}: assetSource module '${src.path}' has no export '${name}'`)
+    }
+  }
+}
+
+export { assertModuleSourceAllowed }
+
 async function emitPetWiring(petId) {
   const petDir = path.join(petsDir, petId)
   const pet = JSON.parse(await readFile(path.join(petDir, 'pet.json'), 'utf8'))
@@ -74,6 +116,10 @@ async function emitPetWiring(petId) {
   const poseSprite = pet.poseSprite
   if (poseSprite !== undefined) {
     const src = poseSprite.poseSource
+    assertModuleSourceAllowed(petDir, src, petId)
+    if (poseSprite.insignia !== undefined) {
+      assertModuleSourceAllowed(petDir, poseSprite.insignia.assetSource, petId)
+    }
     if (src.kind === 'module') {
       const names = [src.poses, src.alphaBounds, src.insigniaAssets, src.insigniaAnchors].filter(Boolean)
       lines.push(`import { ${names.join(', ')} } from '${src.path}'`)
@@ -157,60 +203,65 @@ async function emitPetWiring(petId) {
   return { outputPath, content: lines.join('\n'), binding, petId }
 }
 
-const entries = (await readdir(petsDir, { withFileTypes: true }))
-  .filter((entry) => entry.isDirectory() && existsSync(path.join(petsDir, entry.name, 'pet.json')))
-  .map((entry) => entry.name)
-if (!entries.includes(DEFAULT_PET_ID)) {
-  throw new Error(`bundled pet wiring: default pet '${DEFAULT_PET_ID}' is missing`)
-}
-const ordered = [DEFAULT_PET_ID, ...entries.filter((id) => id !== DEFAULT_PET_ID).sort()]
+const executedDirectly = process.argv[1] !== undefined && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
 
-const modules = []
-for (const petId of ordered) {
-  modules.push(await emitPetWiring(petId))
-}
-const indexLines = [
-  '/**',
-  ' * GENERATED FILE — do not edit. Run `node scripts/generate-pet-wiring.mjs`.',
-  ' * Bundled pet wiring discovered from pets/<petId>/pet.json.',
-  ' * Order: the documented default pet first, then ids alphabetically.',
-  ' */',
-  '',
-  ...modules.map((m) => `import { ${m.binding} } from './${m.petId}/${m.petId}-wiring.generated'`),
-  '',
-  `import type { PetPresentation } from './types'`,
-  '',
-  `export const wiredPetPresentations: readonly PetPresentation[] = [`,
-  ...modules.map((m) => `  ${m.binding},`),
-  `]`,
-  '',
-]
+async function run() {
+  const entries = (await readdir(petsDir, { withFileTypes: true }))
+    .filter((entry) => entry.isDirectory() && existsSync(path.join(petsDir, entry.name, 'pet.json')))
+    .map((entry) => entry.name)
+  if (!entries.includes(DEFAULT_PET_ID)) {
+    throw new Error(`bundled pet wiring: default pet '${DEFAULT_PET_ID}' is missing`)
+  }
+  const ordered = [DEFAULT_PET_ID, ...entries.filter((id) => id !== DEFAULT_PET_ID).sort()]
+  const modules = []
+  for (const petId of ordered) {
+    modules.push(await emitPetWiring(petId))
+  }
+  const indexLines = [
+    '/**',
+    ' * GENERATED FILE — do not edit. Run `node scripts/generate-pet-wiring.mjs`.',
+    ' * Bundled pet wiring discovered from pets/<petId>/pet.json.',
+    ' * Order: the documented default pet first, then ids alphabetically.',
+    ' */',
+    '',
+    ...modules.map((m) => `import { ${m.binding} } from './${m.petId}/${m.petId}-wiring.generated'`),
+    '',
+    `import type { PetPresentation } from './types'`,
+    '',
+    `export const wiredPetPresentations: readonly PetPresentation[] = [`,
+    ...modules.map((m) => `  ${m.binding},`),
+    `]`,
+    '',
+  ]
 
-async function byteEqual(target, content) {
-  if (!existsSync(target)) return false
-  return (await readFile(target, 'utf8')) === content
-}
+  async function byteEqual(target, content) {
+    if (!existsSync(target)) return false
+    return (await readFile(target, 'utf8')) === content
+  }
 
-if (check) {
-  let mismatch = false
-  for (const m of modules) {
-    if (!(await byteEqual(m.outputPath, m.content))) {
-      console.error(`byte-mismatch: ${path.relative(repoRoot, m.outputPath)}`)
+  if (check) {
+    let mismatch = false
+    for (const m of modules) {
+      if (!(await byteEqual(m.outputPath, m.content))) {
+        console.error(`byte-mismatch: ${path.relative(repoRoot, m.outputPath)}`)
+        mismatch = true
+      }
+    }
+    const indexPath = path.join(petsDir, 'wired.generated.ts')
+    if (!(await byteEqual(indexPath, indexLines.join('\n')))) {
+      console.error('byte-mismatch: pets/wired.generated.ts')
       mismatch = true
     }
+    if (mismatch) {
+      console.error('pet wiring drift: run `node scripts/generate-pet-wiring.mjs`')
+      process.exit(1)
+    }
+    console.log('pet wiring check: OK (byte-identical)')
+  } else {
+    for (const m of modules) await writeFile(m.outputPath, m.content)
+    await writeFile(path.join(petsDir, 'wired.generated.ts'), indexLines.join('\n'))
+    console.log(`generated pet wiring for: ${ordered.join(', ')}`)
   }
-  const indexPath = path.join(petsDir, 'wired.generated.ts')
-  if (!(await byteEqual(indexPath, indexLines.join('\n')))) {
-    console.error('byte-mismatch: pets/wired.generated.ts')
-    mismatch = true
-  }
-  if (mismatch) {
-    console.error('pet wiring drift: run `node scripts/generate-pet-wiring.mjs`')
-    process.exit(1)
-  }
-  console.log('pet wiring check: OK (byte-identical)')
-} else {
-  for (const m of modules) await writeFile(m.outputPath, m.content)
-  await writeFile(path.join(petsDir, 'wired.generated.ts'), indexLines.join('\n'))
-  console.log(`generated pet wiring for: ${ordered.join(', ')}`)
 }
+
+if (executedDirectly) await run()
