@@ -1,0 +1,56 @@
+{
+  "idle": [
+    {
+      "zh-CN": "一句待机台词。",
+      "en": "Auditing the workspace, one byte at a time."
+    }
+  ],
+  "working": [
+    {
+      "zh-CN": "一句工作台词。",
+      "en": "A working line."
+    }
+  ],
+  "needs-input": [
+    {
+      "zh-CN": "一句等待输入台词。",
+      "en": "A needs-input line."
+    }
+  ],
+  "completed": [
+    {
+      "zh-CN": "一句完成台词。",
+      "en": "A completed line."
+    }
+  ],
+  "failed": [
+    {
+      "zh-CN": "一句失败台词。",
+      "en": "A failed line."
+    }
+  ],
+  "milestone": [
+    {
+      "zh-CN": "一句升级纪念台词。",
+      "en": "A milestone line."
+    }
+  ],
+  "petting": [
+    {
+      "zh-CN": "一句被摸台词。",
+      "en": "A petting line."
+    }
+  ],
+  "welcome": [
+    {
+      "zh-CN": "一句欢迎回来台词。",
+      "en": "A welcome-back line."
+    }
+  ],
+  "ritual": [
+    {
+      "zh-CN": "一句每日仪式台词。",
+      "en": "A daily ritual line."
+    }
+  ]
+}

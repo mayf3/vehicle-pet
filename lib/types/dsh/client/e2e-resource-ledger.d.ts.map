@@ -1,1 +1,0 @@
-{"version":3,"file":"e2e-resource-ledger.d.ts","sourceRoot":"","sources":["../../../../src/dsh/client/e2e-resource-ledger.ts"],"names":[],"mappings":"AAAA,kFAAkF;AAclF,MAAM,WAAW,iBAAiB;IAChC,QAAQ,CAAC,OAAO,EAAE,OAAO,CAAA;IACzB,KAAK,CAAC,QAAQ,EAAE,MAAM,GAAG,MAAM,IAAI,CAAA;CACpC;AAED,wBAAgB,uBAAuB,CAAC,UAAU,EAAE,MAAM,GAAG,iBAAiB,CAsB7E"}
