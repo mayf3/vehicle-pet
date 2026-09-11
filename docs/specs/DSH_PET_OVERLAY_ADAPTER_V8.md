@@ -1,6 +1,6 @@
 ---
 spec_id: DSH_PET_OVERLAY_ADAPTER_V8
-status: proposed
+status: accepted
 spec_kind: implementation
 authority_level: governing_spec
 implementation_authority: contracts
@@ -2131,7 +2131,7 @@ sizes wherever presentation is affected.
 SPEC_GOVERNANCE_MODE = AUTHOR
 AUTHORITY_ACTION = SUPERSEDE
 SPEC_ID = DSH_PET_OVERLAY_ADAPTER_V8
-STATUS = proposed
+STATUS = accepted
 IMPLEMENTATION_AUTHORITY = contracts
 PLAN_LEVEL = EXEC_PLAN
 ASSURANCE_LEVEL = DURABLE
@@ -2142,11 +2142,18 @@ PARTIAL_SUPERSESSION = NONE
 CONTRACT_COUNT = 42
 CONTRACTS_WITH_ACCEPTANCE = 42
 AUTHORING_READY_FOR_REVIEW = YES
-NEXT_ACTION = INDEPENDENT_REVIEW
+NEXT_ACTION = MERGE_AUTHORITY
 ```
 
 V7's §16 authorization block above is the historical record of V7's own
-acceptance; this V8 block is the current authoring state. No implementation
-begins before V8 acceptance is merged into its implementation base.
+acceptance; this V8 block is the current acceptance state. Independent
+Spec REVIEW of the exact proposed Head `1b144af` (BASE `ece4d4d`) returned
+`ACCEPT` with zero blockers; the reviewer-prescribed closures (F3 art-echo
+supersession naming, F4 ACC-122 selector residue, F5 ACC-118/ACC-123 grade
+residue, F6 per-set variant floors) were applied at `3d76915`. Owner `mayf3`
+accepted V8 under the Goal「开放」dispatch §16 pre-authorization (semantics
+within Goal bounds; no license choice made; no history rewrite; no DSH Core,
+Engine schema, progress, threshold, or token-economy change). Active only
+after merge into main. No implementation begins before that.
 PRODUCTION_APPLY_ALLOWED = NO and PUBLICATION_APPLY_ALLOWED = NO for every
 round of this Goal.
