@@ -2070,11 +2070,15 @@ V8 replacements supersede conflicting prior wording, narrowly:
    instance, and shared-progress guarantees are unchanged.
 6. CTR-OVERLAY-014 and CTR-OVERLAY-018: "the two characters" floors
    generalize to the open pet set: the two bundled reference characters keep
-   their existing variant and catalog floors (including the 30-line per
-   locale catalog floor and the `petting`/`welcome`/`ritual` categories); a
-   new pet MUST declare per-locale catalogs covering at least the six
-   session states and idle (at least one line each) under the same content
-   boundary and the same single scheduler.
+   their existing variant and catalog floors (including the >=10 statically
+   distinguishable expression variants and the 30-line per locale catalog
+   floor with the `petting`/`welcome`/`ritual` categories); a new pet MUST
+   declare per-locale catalogs covering at least the six session states and
+   idle (at least one line each) and MUST statically distinguish all six
+   session states with failed/cancelled distinct under the same content
+   boundary and the same single scheduler; the >=10-variant floor is a
+   bundled-reference-character quality bar, not a new-pet admission
+   requirement.
 7. CTR-OVERLAY-024: "All 12×10 companion grade/expression combinations"
    generalizes to pets whose policy declares insignia (CTR-040); the
    companion reference combination matrix is unchanged. The offline
@@ -2085,11 +2089,27 @@ V8 replacements supersede conflicting prior wording, narrowly:
    superseded by CTR-042: brand-neutral regeneration of BOTH characters'
    shipping masters is in scope, through the Owner-designated offline route,
    preserving each character's original visual identity minus baked brand
-   marks. The remaining Engine/progress/Pack-trust exclusions are unchanged
-   (new pack data is not a Pack schema or trust change).
+   marks. The same supersession applies to the carried echoes of the
+   art-preservation wording — CTR-014's "Art V2 level base art MUST NOT be
+   regenerated", §8's `ART_V2_LEVEL_BASE = PRESERVED (no L1-L12
+   regeneration)`, and DEC-007's "Vehicle Art V2 is preserved" — each now
+   reads as "preserved in original visual identity, except as required by
+   CTR-039/CTR-042 brand-neutral correction". The remaining
+   Engine/progress/Pack-trust exclusions are unchanged (new pack data is not
+   a Pack schema or trust change).
 9. DEC-OVERLAY-014/CTR-OVERLAY-010: "Unknown stored IDs resolve to vehicle"
    generalizes to CTR-041's fail-soft rule over the open pet set with the
    same no-growth-mutation guarantee.
+10. Carried acceptance residue: ACC-122's failure condition "more than two
+   choices", ACC-118's "the CTR-023 descriptive grade label and insignia
+   remain visible", and ACC-123's "readable exact grade / visible insignia
+   silhouette / failure on bare grade" enforce the superseded CTR-023/DEC-013
+   two-pet mandates and are evaluated under their Contracts columns as
+   re-scoped by items 1, 3, and 4 — the selector over the open pet set
+   (CTR-041), grade presentation per declared policy with accessibility
+   parity (CTR-040, governed on the current surface by ACC-137), and
+   insignia visibility only for pets whose policy declares it. The two
+   bundled reference characters remain bound by their own declared policies.
 
 Everything else in V7 — the two-size surface, settings menu, footer,
 captions, gesture arbitration, petting, cursor awareness, ambient layer,
