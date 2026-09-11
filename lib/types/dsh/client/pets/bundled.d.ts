@@ -8,7 +8,7 @@
  */
 import type { CharacterBehaviorProfile } from '../behavior';
 import type { PetPresentation, PetRecipe } from './types';
-/** Every bundled pet presentation, in menu order. */
+/** Every bundled pet presentation, in generated wiring order (default first). */
 export declare const petPresentations: readonly PetPresentation[];
 /** Documented default pet for absent/unknown preference values (CTR-041). */
 export declare const DEFAULT_PET_ID = "vehicle";
