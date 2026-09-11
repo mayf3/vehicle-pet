@@ -1,7 +1,6 @@
 import { useState, type ReactElement } from 'react'
 import { PetSceneRenderer } from '../../react'
 import { ExpressionLayer } from './ExpressionLayer'
-import { companionAssets, poseAlphaBounds } from './character-assets.generated'
 import { petDisplayName, petGrade } from './pets/bundled'
 import type { PetPresentation } from './pets/types'
 import type { VehiclePetExpressionVariant } from './expressions'
@@ -44,7 +43,7 @@ function PoseSprite(props: Props): ReactElement | null {
 function PoseImage({ pet, pose, levelId, locale }: { pet: PetPresentation; pose: number; levelId: string | undefined; locale: string | undefined }): ReactElement | null {
   const [failure, setFailure] = useState(0)
   const recipe = pet.poseSprite
-  const asset = companionAssets[pose]
+  const asset = recipe?.poses[pose]
   const insignia = recipe?.insignia
   const level = petGrade(pet.id, levelId, 'en')
   const insigniaAsset = pet.gradePolicy.insigniaMode === 'wearable' && insignia !== undefined && level !== null
@@ -75,9 +74,7 @@ export function CharacterVisual(props: Props): ReactElement {
 /** Hit-style helper resolved from a pet's own recipe data (generic). */
 export function petHitStyle(pet: PetPresentation, variant: VehiclePetExpressionVariant, surfaceSize: number) {
   const poseIndex = pet.poseSprite?.variantPose[variant]
-  if (pet.recipe === 'pose-sprite' && poseIndex !== undefined) {
-    const bounds = poseAlphaBounds[poseIndex]
-    if (bounds !== undefined) return poseHitStyle(bounds, surfaceSize)
-  }
+  const bounds = pet.poseSprite?.alphaBounds[poseIndex as number]
+  if (pet.recipe === 'pose-sprite' && bounds !== undefined) return poseHitStyle(bounds, surfaceSize)
   return undefined
 }

@@ -24,7 +24,7 @@ import { IndexedDbPetStorage, MemoryPetStorageAdapter, type Locale, type PetStor
 import {
   DailyGreeting, HostActivityFeedback, PetEngineProvider, UpgradeCeremony, usePetEngine,
 } from '../../react'
-import { dshPackBundles, dshDefaultPackId, resolveDshProductPackId } from './engine-bundles'
+import { dshPackBundles, dshDefaultPackId, resolvePetPackId } from './engine-bundles'
 import type { VehiclePetLocaleKey } from './locales'
 import { createOverlayProgressSource } from './OverlayProgressSource'
 import type { VehiclePetBindingInfo } from './session-state-adapter'
@@ -299,17 +299,20 @@ function OverlaySurface({
   const { snapshot, switchPack } = usePetEngine()
   const journeyTriggerRef = useRef<HTMLButtonElement | null>(null)
 
-  // CTR-OVERLAY-006: the DSH surface presents `autonomous-fleet` as the only
-  // user-selectable product Pack; legacy non-product stored state resolves
-  // through the ordinary Engine `activePackId` mechanism without data loss.
+  // V8 DEC-OVERLAY-028/CTR-OVERLAY-041: the presenting pet declares its
+  // journey Pack. Selection switches Engine `activePackId` by declaration;
+  // points, ledger, receipts, keepsakes and every journey's growth state are
+  // preserved. Legacy stored packs resolve through the same declaration
+  // (an unknown stored pack resolves to the default pet's pack) without data
+  // loss.
   const activePackId = snapshot.activePack?.manifest.packId
+  const petPackId = resolvePetPackId(resolvePetId(preferences.characterId))
   useEffect(() => {
     if (!snapshot.initialized) return
-    const resolved = resolveDshProductPackId(activePackId)
-    if (activePackId !== undefined && activePackId !== resolved) {
-      switchPack(resolved)
+    if (activePackId !== undefined && activePackId !== petPackId) {
+      switchPack(petPackId)
     }
-  }, [snapshot.initialized, activePackId, switchPack])
+  }, [snapshot.initialized, activePackId, petPackId, switchPack])
   const drag = useOverlayDrag({
     preferences,
     menuOpen,

@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { buildSceneRenderPlan, derivePetViewModel, validatePack } from '../../src/engine'
-import { autonomousFleetBundle } from '../../src/packs/autonomous-fleet'
-import { seedlingFixtureBundle } from '../../src/packs/seedling-fixture'
+import { discoverPackBundles } from '../../src/packs/bundledRegistry'
+
+const bundlesById = new Map(discoverPackBundles().map(bundle => [(bundle.manifestCandidate as { packId: string }).packId, bundle]))
+const autonomousFleetBundle = bundlesById.get('autonomous-fleet')!
+const seedlingFixtureBundle = bundlesById.get('seedling-fixture')!
 
 describe('seedling-fixture same-engine conformance (CTR-PET-011)', () => {
   const validatedFleet = validatePack(autonomousFleetBundle.manifestCandidate, {

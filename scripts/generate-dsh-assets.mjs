@@ -24,7 +24,15 @@ import sharp from 'sharp'
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const outputPath = path.join(repoRoot, 'src/dsh/client/asset-bundles.generated.ts')
 const bboxOutputPath = path.join(repoRoot, 'src/dsh/client/level-bbox.generated.ts')
-const packs = ['autonomous-fleet', 'seedling-fixture']
+const manifestsOutputPath = path.join(repoRoot, 'src/dsh/client/pack-manifests.generated.ts')
+
+// V8 CTR-038: packs are discovered by directory scan — adding a bundled Pack
+// never requires editing this build script.
+const { readdirSync } = await import('node:fs')
+const packs = readdirSync(path.join(repoRoot, 'src/packs'), { withFileTypes: true })
+  .filter(entry => entry.isDirectory() && existsSync(path.join(repoRoot, 'src/packs', entry.name, 'manifest.json')))
+  .map(entry => entry.name)
+  .sort()
 
 /** Level ids referenced by subject asset ids, keyed per pack: levelId → png repo path. */
 async function collectSubjectBboxes() {
@@ -115,12 +123,33 @@ async function generate() {
     }
   }
   const bboxLines = await collectSubjectBboxes()
+  const manifestImports = []
+  const manifestEntries = []
+  for (const [index, packId] of packs.entries()) {
+    const name = `manifest${index}`
+    manifestImports.push(`import ${name} from '../../packs/${packId}/manifest.json'`)
+    manifestEntries.push(`  ${JSON.stringify(packId)}: ${name},`)
+  }
+  const manifestsModule = [
+    '/**',
+    ' * GENERATED FILE — do not edit. Run `pnpm assets:dsh-generate`.',
+    ' * Discovered bundled Pack manifests (directory scan over src/packs/*).',
+    ' */',
+    '',
+    ...manifestImports,
+    '',
+    'export const dshPackManifests: Readonly<Record<string, unknown>> = {',
+    ...manifestEntries,
+    '}',
+    '',
+  ].join('\n')
   return {
+    manifestsModule,
     assetModule: [
       '/**',
       ' * GENERATED FILE — do not edit. Run `pnpm assets:dsh-generate`.',
-      ' * Deterministic DSH build-time asset map over the two bundled Pack',
-      ' * manifests (same manifests and same asset files as the standalone',
+      ' * Deterministic DSH build-time asset map over every bundled Pack',
+      ' * manifest (same manifests and same asset files as the standalone',
       ' * prototype; the DSH client build inlines the bytes as data URLs).',
       ' * Gate: `pnpm assets:dsh-check` rejects missing and unreferenced assets.',
       ' */',
@@ -143,12 +172,16 @@ async function byteEqual(aPath, content) {
   return current.equals(Buffer.from(content, 'utf8'))
 }
 
-const { assetModule, bboxModuleContent, assetCount } = await generate()
+const { assetModule, manifestsModule, bboxModuleContent, assetCount } = await generate()
 if (process.argv.includes('--check')) {
   const tmp = await mkdtemp(path.join(tmpdir(), 'vehicle-pet-dsh-assets-'))
   try {
     let mismatch = !(await byteEqual(outputPath, assetModule))
     if (mismatch) console.error('byte-mismatch: asset-bundles.generated.ts')
+    if (!(await byteEqual(manifestsOutputPath, manifestsModule))) {
+      console.error('byte-mismatch: pack-manifests.generated.ts')
+      mismatch = true
+    }
     if (!(await byteEqual(bboxOutputPath, bboxModuleContent))) {
       console.error('byte-mismatch: level-bbox.generated.ts')
       mismatch = true
@@ -160,6 +193,7 @@ if (process.argv.includes('--check')) {
   }
 } else {
   await writeFile(outputPath, assetModule)
+  await writeFile(manifestsOutputPath, manifestsModule)
   await writeFile(bboxOutputPath, bboxModuleContent)
   console.log(`generated ${assetCount} asset imports + level bbox map`)
 }

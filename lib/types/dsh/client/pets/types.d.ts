@@ -33,6 +33,13 @@ export interface GradeLevelDescription {
 export interface PoseSpriteRecipeData {
     /** Expression variant → pose index (mapping is pet data, not core). */
     readonly variantPose: Readonly<Record<VehiclePetExpressionVariant, number>>;
+    /** Bundled pose images (WebP primary with PNG fallback), index-aligned. */
+    readonly poses: readonly {
+        readonly png: string;
+        readonly webp: string;
+    }[];
+    /** Per-pose visible-alpha bounds `[x0, y0, x1, y1]` on the pose canvas. */
+    readonly alphaBounds: readonly (readonly [number, number, number, number])[];
     /** Wearable symbolic insignia; absent when the grade policy declares none. */
     readonly insignia: {
         readonly mode: 'wearable';

@@ -15,11 +15,13 @@ import type {
 } from './types'
 import { vehiclePresentation } from './vehicle/definition'
 import { companionPresentation } from './companion/definition'
+import { orbPresentation } from './orb/definition'
 
 /** Every bundled pet presentation, in menu order. */
 export const petPresentations: readonly PetPresentation[] = [
   vehiclePresentation,
   companionPresentation,
+  orbPresentation,
 ]
 
 /** Documented default pet for absent/unknown preference values (CTR-041). */
