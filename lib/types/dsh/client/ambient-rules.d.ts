@@ -8,7 +8,7 @@
  * weights. No speech scheduling happens here — any line still flows through
  * the single CTR-019 scheduler.
  */
-import type { CharacterId } from './types';
+import type { PetId } from './types';
 import { type DaypartBucket } from './daypart';
 /** Minutes-level randomized gap; V7 band floor 90 s, frozen 90–240 s. */
 export declare const AMBIENT_GAP_MIN_MS = 90000;
@@ -57,5 +57,5 @@ export declare function nextAmbientDelayMs(sample: number): number;
  * injected random sample). Weight = base energy affinity × daypart energy
  * bias; the immediately previous action is excluded (no back-to-back).
  */
-export declare function selectAmbientAction(characterId: CharacterId, bucket: DaypartBucket, lastActionId: string | null, randomSample: number): AmbientActionDefinition;
+export declare function selectAmbientAction(petId: PetId, bucket: DaypartBucket, lastActionId: string | null, randomSample: number): AmbientActionDefinition;
 //# sourceMappingURL=ambient-rules.d.ts.map

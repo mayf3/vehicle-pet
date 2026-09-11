@@ -113,6 +113,17 @@ if (/5199/.test(codeOnly)) {
   failures.push('port 5199 reference found in the client bundle')
 }
 
+// 7b. PUBLIC_BRAND_BUNDLE_CHECK (V8 CTR-039): the distributed client bundle
+// must not carry a third-party company brand as product identity. Data URLs
+// are excluded from the scan here; master rasters are gated separately by the
+// asset pipeline review (CTR-042).
+const brandSafeBundle = bundle.replace(/data:[a-z]+\/[a-z0-9.+-]+;base64,[A-Za-z0-9+/=]+/g, '')
+for (const brand of ['Pony.ai', 'pony.ai']) {
+  if (brandSafeBundle.includes(brand)) {
+    failures.push(`third-party brand "${brand}" found in the client bundle (PUBLIC_BRAND_BUNDLE_CHECK, V8 CTR-039)`)
+  }
+}
+
 // 8. Byte determinism: rebuild both entries into a temp dir and compare.
 const tempDir = await mkdtemp(path.join(tmpdir(), 'vehicle-pet-dsh-check-'))
 try {
