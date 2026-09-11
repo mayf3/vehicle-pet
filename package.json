@@ -47,7 +47,7 @@
     "lint": "oxlint src tests scripts",
     "check:contracts": "vitest run --project contracts",
     "assets:generate": "node scripts/generate-pack-assets.mjs",
-    "assets:check": "node scripts/generate-pack-assets.mjs --check",
+    "assets:check": "node scripts/generate-orb-fixture-assets.mjs --check && node scripts/generate-pack-assets.mjs --check",
     "assets:dsh-generate": "node scripts/generate-pet-wiring.mjs && node scripts/generate-dsh-assets.mjs",
     "assets:dsh-check": "node scripts/generate-pet-wiring.mjs --check && node scripts/generate-dsh-assets.mjs --check",
     "assets:expression-generate": "node scripts/generate-expression-assets.mjs",
