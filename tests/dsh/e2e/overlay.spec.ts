@@ -1557,11 +1557,11 @@ test('CROSSTAB_COLLAPSE_RESTORE_VISIBLE_TEST. two tabs destroy stale Menu/Dialog
     await expect(target.locator(DIALOG)).toHaveCount(0)
     await expect(target.locator(ROOT)).toHaveAttribute('data-vehicle-pet', 'COLLAPSED')
   }
-  // The once-per-ritual-day late-night write is sanctioned product behavior
-  // when the window runs inside 00:00-05:00 (daypart late-night, ritual day
-  // already rolled); a WRITE LOOP would still surface as many writes.
-  const sanctionedLateNightWrites = new Date().getHours() < 5 ? 1 : 0
-  expect(await writes(page)).toBe(sanctionedLateNightWrites)
+  // The spec-wide daytime pin (PIN_DAYTIME_SCRIPT) keeps the page clock out
+  // of the late-night daypart even during night runs, so the sanctioned
+  // once-per-ritual-day write cannot fire here; a WRITE LOOP would still
+  // surface as many writes.
+  expect(await writes(page)).toBe(0)
   expect(await writes(second)).toBe(1)
 
   await page.reload()
