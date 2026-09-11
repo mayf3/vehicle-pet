@@ -42,16 +42,22 @@ build, public README/docs screenshots, and bundle-inlined assets — each
 classified for visible brand, visible numeral, provenance, and
 runtime-vs-historical shipping.
 
-## License status — OWNER DECISION REQUIRED
+## License — DECIDED (2026-09-11): Apache-2.0 (code) + CC BY 4.0 (assets)
 
-The final repository license has **not** been chosen. The decision packet
-(options, trade-offs, recommendation, exact files to land) is in
-`docs/investigations/GOAL_OPEN_LICENSE_PACKET.md`. Until the Owner decides:
+The Owner selected the packet's recommended OPTION_B:
 
-- no LICENSE file is committed for the repository as a whole;
-- all rights remain with the repository Owner;
-- third-party creators keep ownership of their own pet data and set their
-  pet's license/attribution metadata in their `definition.ts` and `LICENSE`.
+- **CODE** (source, build scripts, tests, code documentation): **Apache-2.0** — see `LICENSE` and the `license` field in `package.json`.
+- **ORIGINAL_PROJECT_ASSETS** (bundled pet data, artwork, insignia, copy that the owner owns or can license): **CC BY 4.0** — see `LICENSE.assets`.
+- **THIRD_PARTY / HISTORICAL EVIDENCE**: **not relicensed** by these notices. Third-party trademarks and logos (including DeepSeek and Pony.ai), third-party works and interfaces, third-party screenshots inside historical evidence, and any material cited in provenance records but not owned by the project keep their owners' rights; they are retained only for interoperability, historical record, or audit evidence.
+- **AI-assisted assets**: CC BY 4.0 is granted only to the extent of the owner's actual rights; the license statements make no broader or exclusive-rights claims. Provenance records disclose the production route.
+- `NOTICE` carries the attribution and third-party exclusions required by Apache-2.0 §4(d) distribution.
+
+The decision packet (options, trade-offs) remains in
+`docs/investigations/GOAL_OPEN_LICENSE_PACKET.md` for the record. Third-party
+creators keep ownership of their own pet data and set their pet's
+license/attribution metadata in their `definition.ts` and `LICENSE`.
+
+This policy is an IP-hygiene / release-readiness statement, **not** a legal opinion.
 
 ## Third-party pet contributions
 

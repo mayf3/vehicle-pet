@@ -1,6 +1,6 @@
 # GOAL_OPEN_LICENSE_PACKET — code/asset licensing decision packet
 
-Status: investigation (non-authoritative). `LICENSE_SELECTION = OWNER_DECISION_REQUIRED`. This packet makes NO decision; it exists so the Owner can close `OWNER_LICENSE_DECISION_GATE` with one reply. Nothing in this Goal depends on the choice: all technical work proceeds and the Goal may pause only at this gate.
+Status: investigation record (non-authoritative). **DECIDED 2026-09-11: OPTION_B (Apache-2.0 + CC BY 4.0) — landed via `LICENSE`, `LICENSE.assets`, `NOTICE`, `package.json`, README, and the asset policy update.** The gate record below is preserved for provenance. Nothing in this Goal depends on the choice: all technical work proceeds and the Goal may pause only at this gate.
 
 ## OPTION_A — MIT (code) + CC BY 4.0 (assets), split licensing
 
