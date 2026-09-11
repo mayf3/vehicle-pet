@@ -18,6 +18,8 @@ generic and discovered by directory scan.
 
 1. **Copy** `examples/minimal-pet` to `examples/my-pet`.
 2. **Replace** configuration, textures, and copy (all inside your directory).
+   Keep the export name convention: `export const <CamelCaseId>Presentation`
+   (e.g. id `audit-pet` -> `auditPetPresentation`) — `pet:validate` checks it.
 3. **Validate**: `pnpm pet:validate examples/my-pet`. Failures name the exact
    file and field.
 4. **Preview**: copy `pet/` → `src/dsh/client/pets/<id>/` and `journey/` →
