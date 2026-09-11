@@ -458,6 +458,35 @@ async function openOverlay(page: Page): Promise<void> {
   await expect.poll(() => page.locator(PET).count(), { timeout: 30_000 }).toBe(1)
 }
 
+/**
+ * Deterministic-daypart pin (fix round 2): the V7 daypart layer (CTR-034)
+ * and the ritual day keys make several suites time-sensitive — between
+ * 23:00 and 05:00 local, speech cadence drops (late-night weighting) and
+ * the ritual day keys roll, so byte-pins and cadence assertions fail for
+ * reasons unrelated to the code under test. When (and only when) the real
+ * local hour is inside that window, shift the page's Date to 14:30 of the
+ * same day. Daytime runs are bit-for-bit unaffected; timers are NOT faked.
+ */
+const PIN_DAYTIME_SCRIPT = `{
+  const now = new Date()
+  const hour = now.getHours()
+  if (hour >= 23 || hour < 5) {
+    const target = new Date(now); target.setHours(14, 30, 0, 0)
+    const shift = target.getTime() - now.getTime()
+    const RealDate = Date
+    class PinnedDate extends RealDate {
+      constructor(...args) { args.length === 0 ? super(RealDate.now() + shift) : super(...args) }
+      static now() { return RealDate.now() + shift }
+    }
+    window.Date = PinnedDate
+  }
+}`
+
+test.beforeEach(async ({ context, page }) => {
+  await context.addInitScript(PIN_DAYTIME_SCRIPT)
+  await page.addInitScript(PIN_DAYTIME_SCRIPT)
+})
+
 test('23. onboarding: fresh boot renders no pet, launcher, menu, or dialog DOM', async ({ page }) => {
   await page.goto('/')
   await dismissStartupDialogs(page)
