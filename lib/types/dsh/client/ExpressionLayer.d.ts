@@ -9,6 +9,8 @@ import { type VehiclePetExpressionVariant } from './expressions';
 export interface ExpressionLayerProps {
     readonly variant: VehiclePetExpressionVariant;
     readonly derivedLevelId: string | undefined;
+    /** The presenting pet's own per-level face anchor table (V8 CTR-038). */
+    readonly anchors: Readonly<Record<string, readonly [number, number, number]>>;
 }
 export declare function ExpressionLayer(props: ExpressionLayerProps): ReactElement | null;
 //# sourceMappingURL=ExpressionLayer.d.ts.map

@@ -38,7 +38,7 @@
     }
   },
   "scripts": {
-    "dev": "vite",
+    "dev": "node scripts/generate-pet-wiring.mjs && vite",
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run --project unit --project dom",
@@ -47,12 +47,12 @@
     "lint": "oxlint src tests scripts",
     "check:contracts": "vitest run --project contracts",
     "assets:generate": "node scripts/generate-pack-assets.mjs",
-    "assets:check": "node scripts/generate-pack-assets.mjs --check",
-    "assets:dsh-generate": "node scripts/generate-dsh-assets.mjs",
-    "assets:dsh-check": "node scripts/generate-dsh-assets.mjs --check",
+    "assets:check": "node scripts/generate-orb-fixture-assets.mjs --check && node scripts/generate-pack-assets.mjs --check",
+    "assets:dsh-generate": "node scripts/generate-pet-wiring.mjs && node scripts/generate-dsh-assets.mjs",
+    "assets:dsh-check": "node scripts/generate-pet-wiring.mjs --check && node scripts/generate-dsh-assets.mjs --check",
     "assets:expression-generate": "node scripts/generate-expression-assets.mjs",
     "assets:expression-check": "node scripts/generate-expression-assets.mjs --check",
-    "build:dsh": "node scripts/build-dsh-plugin.mjs",
+    "build:dsh": "node scripts/generate-pet-wiring.mjs && node scripts/generate-dsh-assets.mjs && node scripts/build-dsh-plugin.mjs",
     "check:dsh-bundle": "node scripts/check-dsh-bundle.mjs",
     "check:dsh-package": "node scripts/check-dsh-package.mjs",
     "check:dsh-lifecycle": "node scripts/check-dsh-lifecycle.mjs",
@@ -64,7 +64,9 @@
     "verify": "pnpm typecheck && pnpm lint && pnpm test && pnpm test:e2e && pnpm build && pnpm check:contracts && pnpm assets:check && pnpm assets:expression-check && pnpm assets:character-check",
     "verify:dsh": "pnpm typecheck && pnpm lint && pnpm check:contracts && pnpm assets:dsh-check && pnpm assets:expression-check && pnpm build:dsh && pnpm check:dsh-bundle && pnpm check:dsh-package && pnpm check:dsh-lifecycle && pnpm test:dsh && pnpm test:dsh:e2e && pnpm assets:character-check",
     "assets:character-generate": "node scripts/generate-character-assets.mjs",
-    "assets:character-check": "node scripts/generate-character-assets.mjs --check"
+    "assets:character-check": "node scripts/generate-character-assets.mjs --check",
+    "assets:pet-wire": "node scripts/generate-pet-wiring.mjs",
+    "pet:validate": "node scripts/creator/validate-pet.mjs"
   },
   "dependencies": {
     "ajv": "^8.17.1",

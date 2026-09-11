@@ -16,7 +16,7 @@ import type { VehiclePetSessionView } from './types';
 import type { RitualMarkers } from './types';
 import { type SpeechTriggerSource } from './speech-rules';
 import { type SpeechCategory } from './speech-catalog';
-import type { CharacterId } from './types';
+import type { PetId } from './types';
 type DaypartBucket = 'morning' | 'daytime' | 'evening' | 'late-night';
 export interface VehiclePetSpeechController {
     /** Current visible line, or null. Replacements reuse the same bubble. */
@@ -52,7 +52,7 @@ export interface VehiclePetRitualHooks {
     readonly onRitual: (kind: 'first-completion' | 'late-night' | 'welcome') => void;
 }
 interface SchedulerOptions {
-    readonly characterId?: CharacterId;
+    readonly petId?: PetId;
     readonly random?: () => number;
     readonly sessionView: VehiclePetSessionView;
     readonly locale: string | undefined;

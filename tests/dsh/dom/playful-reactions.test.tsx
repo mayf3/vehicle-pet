@@ -2,7 +2,7 @@ import { act, cleanup, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { PLAYFUL_REACTIONS, usePlayfulReaction } from '../../../src/dsh/client/playful-reactions'
 
-const idle = { state: 'idle' as const, terminalIdentity: null, characterId: 'vehicle' as const, menuOpen: false, dragging: false, ambientKey: null }
+const idle = { state: 'idle' as const, terminalIdentity: null, petId: 'vehicle', menuOpen: false, dragging: false, ambientKey: null }
 beforeEach(() => {
   vi.useFakeTimers()
   Object.defineProperty(document, 'hidden', { configurable: true, value: false })
@@ -39,7 +39,7 @@ it('prioritizes real task state and does not replay historical completion on mou
 })
 
 it('cancels on menu, drag, character switch and hide; never queues hidden interactions', () => {
-  const { result, rerender } = renderHook(usePlayfulReaction, { initialProps: { ...idle, characterId: 'vehicle' as 'vehicle' | 'companion' } })
+  const { result, rerender } = renderHook(usePlayfulReaction, { initialProps: { ...idle, petId: 'vehicle' } })
   for (const blocked of [{ menuOpen: true }, { dragging: true }]) {
     act(() => result.current.play())
     rerender({ ...idle, ...blocked })
@@ -49,7 +49,7 @@ it('cancels on menu, drag, character switch and hide; never queues hidden intera
     rerender(idle)
   }
   act(() => result.current.play())
-  rerender({ ...idle, characterId: 'companion' })
+  rerender({ ...idle, petId: 'companion' })
   expect(result.current.reaction).toBeNull()
   act(() => result.current.play())
   act(() => {

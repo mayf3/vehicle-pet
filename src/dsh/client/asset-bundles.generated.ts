@@ -1,7 +1,7 @@
 /**
  * GENERATED FILE — do not edit. Run `pnpm assets:dsh-generate`.
- * Deterministic DSH build-time asset map over the two bundled Pack
- * manifests (same manifests and same asset files as the standalone
+ * Deterministic DSH build-time asset map over every bundled Pack
+ * manifest (same manifests and same asset files as the standalone
  * prototype; the DSH client build inlines the bytes as data URLs).
  * Gate: `pnpm assets:dsh-check` rejects missing and unreferenced assets.
  */
@@ -56,24 +56,40 @@ import asset46 from '../../packs/autonomous-fleet/assets/autonomous-fleet/overla
 import asset47 from '../../packs/autonomous-fleet/assets/autonomous-fleet/overlay-glow-veil.png'
 import asset48 from '../../packs/autonomous-fleet/assets/autonomous-fleet/overlay-terminal-frame.webp'
 import asset49 from '../../packs/autonomous-fleet/assets/autonomous-fleet/overlay-terminal-frame.png'
-import asset50 from '../../packs/seedling-fixture/assets/seedling-fixture/bg-s-seed.webp'
-import asset51 from '../../packs/seedling-fixture/assets/seedling-fixture/bg-s-seed.png'
-import asset52 from '../../packs/seedling-fixture/assets/seedling-fixture/bg-s-sprout.webp'
-import asset53 from '../../packs/seedling-fixture/assets/seedling-fixture/bg-s-sprout.png'
-import asset54 from '../../packs/seedling-fixture/assets/seedling-fixture/bg-s-tree.webp'
-import asset55 from '../../packs/seedling-fixture/assets/seedling-fixture/bg-s-tree.png'
-import asset56 from '../../packs/seedling-fixture/assets/seedling-fixture/bg-s-forest.webp'
-import asset57 from '../../packs/seedling-fixture/assets/seedling-fixture/bg-s-forest.png'
-import asset58 from '../../packs/seedling-fixture/assets/seedling-fixture/sprite-subject-seed.webp'
-import asset59 from '../../packs/seedling-fixture/assets/seedling-fixture/sprite-subject-seed.png'
-import asset60 from '../../packs/seedling-fixture/assets/seedling-fixture/sprite-subject-sprout.webp'
-import asset61 from '../../packs/seedling-fixture/assets/seedling-fixture/sprite-subject-sprout.png'
-import asset62 from '../../packs/seedling-fixture/assets/seedling-fixture/sprite-subject-tree.webp'
-import asset63 from '../../packs/seedling-fixture/assets/seedling-fixture/sprite-subject-tree.png'
-import asset64 from '../../packs/seedling-fixture/assets/seedling-fixture/sprite-unit-tree.webp'
-import asset65 from '../../packs/seedling-fixture/assets/seedling-fixture/sprite-unit-tree.png'
-import asset66 from '../../packs/seedling-fixture/assets/seedling-fixture/overlay-root-network.webp'
-import asset67 from '../../packs/seedling-fixture/assets/seedling-fixture/overlay-root-network.png'
+import asset50 from '../../packs/orb-fixture/assets/orb-fixture/bg-s-l1.webp'
+import asset51 from '../../packs/orb-fixture/assets/orb-fixture/bg-s-l1.png'
+import asset52 from '../../packs/orb-fixture/assets/orb-fixture/sprite-subject-l1.webp'
+import asset53 from '../../packs/orb-fixture/assets/orb-fixture/sprite-subject-l1.png'
+import asset54 from '../../packs/orb-fixture/assets/orb-fixture/bg-s-l2.webp'
+import asset55 from '../../packs/orb-fixture/assets/orb-fixture/bg-s-l2.png'
+import asset56 from '../../packs/orb-fixture/assets/orb-fixture/sprite-subject-l2.webp'
+import asset57 from '../../packs/orb-fixture/assets/orb-fixture/sprite-subject-l2.png'
+import asset58 from '../../packs/orb-fixture/assets/orb-fixture/bg-s-l3.webp'
+import asset59 from '../../packs/orb-fixture/assets/orb-fixture/bg-s-l3.png'
+import asset60 from '../../packs/orb-fixture/assets/orb-fixture/sprite-subject-l3.webp'
+import asset61 from '../../packs/orb-fixture/assets/orb-fixture/sprite-subject-l3.png'
+import asset62 from '../../packs/orb-fixture/assets/orb-fixture/bg-s-l4.webp'
+import asset63 from '../../packs/orb-fixture/assets/orb-fixture/bg-s-l4.png'
+import asset64 from '../../packs/orb-fixture/assets/orb-fixture/sprite-subject-l4.webp'
+import asset65 from '../../packs/orb-fixture/assets/orb-fixture/sprite-subject-l4.png'
+import asset66 from '../../packs/seedling-fixture/assets/seedling-fixture/bg-s-seed.webp'
+import asset67 from '../../packs/seedling-fixture/assets/seedling-fixture/bg-s-seed.png'
+import asset68 from '../../packs/seedling-fixture/assets/seedling-fixture/bg-s-sprout.webp'
+import asset69 from '../../packs/seedling-fixture/assets/seedling-fixture/bg-s-sprout.png'
+import asset70 from '../../packs/seedling-fixture/assets/seedling-fixture/bg-s-tree.webp'
+import asset71 from '../../packs/seedling-fixture/assets/seedling-fixture/bg-s-tree.png'
+import asset72 from '../../packs/seedling-fixture/assets/seedling-fixture/bg-s-forest.webp'
+import asset73 from '../../packs/seedling-fixture/assets/seedling-fixture/bg-s-forest.png'
+import asset74 from '../../packs/seedling-fixture/assets/seedling-fixture/sprite-subject-seed.webp'
+import asset75 from '../../packs/seedling-fixture/assets/seedling-fixture/sprite-subject-seed.png'
+import asset76 from '../../packs/seedling-fixture/assets/seedling-fixture/sprite-subject-sprout.webp'
+import asset77 from '../../packs/seedling-fixture/assets/seedling-fixture/sprite-subject-sprout.png'
+import asset78 from '../../packs/seedling-fixture/assets/seedling-fixture/sprite-subject-tree.webp'
+import asset79 from '../../packs/seedling-fixture/assets/seedling-fixture/sprite-subject-tree.png'
+import asset80 from '../../packs/seedling-fixture/assets/seedling-fixture/sprite-unit-tree.webp'
+import asset81 from '../../packs/seedling-fixture/assets/seedling-fixture/sprite-unit-tree.png'
+import asset82 from '../../packs/seedling-fixture/assets/seedling-fixture/overlay-root-network.webp'
+import asset83 from '../../packs/seedling-fixture/assets/seedling-fixture/overlay-root-network.png'
 
 export const dshAssetUrls: Readonly<Record<string, string>> = {
   "autonomous-fleet/assets/autonomous-fleet/bg-road-test.webp": asset0,
@@ -126,22 +142,38 @@ export const dshAssetUrls: Readonly<Record<string, string>> = {
   "autonomous-fleet/assets/autonomous-fleet/overlay-glow-veil.png": asset47,
   "autonomous-fleet/assets/autonomous-fleet/overlay-terminal-frame.webp": asset48,
   "autonomous-fleet/assets/autonomous-fleet/overlay-terminal-frame.png": asset49,
-  "seedling-fixture/assets/seedling-fixture/bg-s-seed.webp": asset50,
-  "seedling-fixture/assets/seedling-fixture/bg-s-seed.png": asset51,
-  "seedling-fixture/assets/seedling-fixture/bg-s-sprout.webp": asset52,
-  "seedling-fixture/assets/seedling-fixture/bg-s-sprout.png": asset53,
-  "seedling-fixture/assets/seedling-fixture/bg-s-tree.webp": asset54,
-  "seedling-fixture/assets/seedling-fixture/bg-s-tree.png": asset55,
-  "seedling-fixture/assets/seedling-fixture/bg-s-forest.webp": asset56,
-  "seedling-fixture/assets/seedling-fixture/bg-s-forest.png": asset57,
-  "seedling-fixture/assets/seedling-fixture/sprite-subject-seed.webp": asset58,
-  "seedling-fixture/assets/seedling-fixture/sprite-subject-seed.png": asset59,
-  "seedling-fixture/assets/seedling-fixture/sprite-subject-sprout.webp": asset60,
-  "seedling-fixture/assets/seedling-fixture/sprite-subject-sprout.png": asset61,
-  "seedling-fixture/assets/seedling-fixture/sprite-subject-tree.webp": asset62,
-  "seedling-fixture/assets/seedling-fixture/sprite-subject-tree.png": asset63,
-  "seedling-fixture/assets/seedling-fixture/sprite-unit-tree.webp": asset64,
-  "seedling-fixture/assets/seedling-fixture/sprite-unit-tree.png": asset65,
-  "seedling-fixture/assets/seedling-fixture/overlay-root-network.webp": asset66,
-  "seedling-fixture/assets/seedling-fixture/overlay-root-network.png": asset67,
+  "orb-fixture/assets/orb-fixture/bg-s-l1.webp": asset50,
+  "orb-fixture/assets/orb-fixture/bg-s-l1.png": asset51,
+  "orb-fixture/assets/orb-fixture/sprite-subject-l1.webp": asset52,
+  "orb-fixture/assets/orb-fixture/sprite-subject-l1.png": asset53,
+  "orb-fixture/assets/orb-fixture/bg-s-l2.webp": asset54,
+  "orb-fixture/assets/orb-fixture/bg-s-l2.png": asset55,
+  "orb-fixture/assets/orb-fixture/sprite-subject-l2.webp": asset56,
+  "orb-fixture/assets/orb-fixture/sprite-subject-l2.png": asset57,
+  "orb-fixture/assets/orb-fixture/bg-s-l3.webp": asset58,
+  "orb-fixture/assets/orb-fixture/bg-s-l3.png": asset59,
+  "orb-fixture/assets/orb-fixture/sprite-subject-l3.webp": asset60,
+  "orb-fixture/assets/orb-fixture/sprite-subject-l3.png": asset61,
+  "orb-fixture/assets/orb-fixture/bg-s-l4.webp": asset62,
+  "orb-fixture/assets/orb-fixture/bg-s-l4.png": asset63,
+  "orb-fixture/assets/orb-fixture/sprite-subject-l4.webp": asset64,
+  "orb-fixture/assets/orb-fixture/sprite-subject-l4.png": asset65,
+  "seedling-fixture/assets/seedling-fixture/bg-s-seed.webp": asset66,
+  "seedling-fixture/assets/seedling-fixture/bg-s-seed.png": asset67,
+  "seedling-fixture/assets/seedling-fixture/bg-s-sprout.webp": asset68,
+  "seedling-fixture/assets/seedling-fixture/bg-s-sprout.png": asset69,
+  "seedling-fixture/assets/seedling-fixture/bg-s-tree.webp": asset70,
+  "seedling-fixture/assets/seedling-fixture/bg-s-tree.png": asset71,
+  "seedling-fixture/assets/seedling-fixture/bg-s-forest.webp": asset72,
+  "seedling-fixture/assets/seedling-fixture/bg-s-forest.png": asset73,
+  "seedling-fixture/assets/seedling-fixture/sprite-subject-seed.webp": asset74,
+  "seedling-fixture/assets/seedling-fixture/sprite-subject-seed.png": asset75,
+  "seedling-fixture/assets/seedling-fixture/sprite-subject-sprout.webp": asset76,
+  "seedling-fixture/assets/seedling-fixture/sprite-subject-sprout.png": asset77,
+  "seedling-fixture/assets/seedling-fixture/sprite-subject-tree.webp": asset78,
+  "seedling-fixture/assets/seedling-fixture/sprite-subject-tree.png": asset79,
+  "seedling-fixture/assets/seedling-fixture/sprite-unit-tree.webp": asset80,
+  "seedling-fixture/assets/seedling-fixture/sprite-unit-tree.png": asset81,
+  "seedling-fixture/assets/seedling-fixture/overlay-root-network.webp": asset82,
+  "seedling-fixture/assets/seedling-fixture/overlay-root-network.png": asset83,
 }
