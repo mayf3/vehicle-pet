@@ -318,18 +318,21 @@ async function seedPreferences(page: Page, record: Record<string, unknown>): Pro
   // spent for the local day, so ritual persistence never writes mid-test and
   // the byte-equality pins keep judging only the user-action fields.
   const now = new Date()
-  // The late-night ritual day rolls over at 05:00 (V7 lateNightRitualDayKey):
-  // between 00:00 and 05:00 the runtime attributes the night to the previous
-  // evening, so the seed must stamp the same key or the ritual fires once.
-  const evening = now.getHours() < 5 ? new Date(now.getTime() - 24 * 60 * 60 * 1000) : now
-  const eveningKey = evening.toLocaleDateString('sv')
+  // Ritual seeding across the two V7 day keys (R2 fix-round): the
+  // first-completion marker keys on the LOCAL day, while the late-night
+  // ritual day rolls over at 05:00 (belongs to the previous evening). A
+  // single record cannot pre-spend both when they differ (00:00-05:00), so
+  // this seed spends first-completion + welcome for the local day; in that
+  // window the once-per-ritual-day late-night write may still legitimately
+  // fire and the crosstab assertion tolerates exactly it.
+  const todayKey = now.toLocaleDateString('sv')
   const seeded = {
     lastSeenAt: now.getTime(),
     rituals: {
-      dayKey: eveningKey,
+      dayKey: todayKey,
       firstCompletionDone: true,
       lateNightDone: true,
-      welcomeDayKey: eveningKey,
+      welcomeDayKey: todayKey,
     },
     ...record,
   }
@@ -454,6 +457,35 @@ async function openOverlay(page: Page): Promise<void> {
   }
   await expect.poll(() => page.locator(PET).count(), { timeout: 30_000 }).toBe(1)
 }
+
+/**
+ * Deterministic-daypart pin (fix round 2): the V7 daypart layer (CTR-034)
+ * and the ritual day keys make several suites time-sensitive — between
+ * 23:00 and 05:00 local, speech cadence drops (late-night weighting) and
+ * the ritual day keys roll, so byte-pins and cadence assertions fail for
+ * reasons unrelated to the code under test. When (and only when) the real
+ * local hour is inside that window, shift the page's Date to 14:30 of the
+ * same day. Daytime runs are bit-for-bit unaffected; timers are NOT faked.
+ */
+const PIN_DAYTIME_SCRIPT = `{
+  const now = new Date()
+  const hour = now.getHours()
+  if (hour >= 23 || hour < 5) {
+    const target = new Date(now); target.setHours(14, 30, 0, 0)
+    const shift = target.getTime() - now.getTime()
+    const RealDate = Date
+    class PinnedDate extends RealDate {
+      constructor(...args) { args.length === 0 ? super(RealDate.now() + shift) : super(...args) }
+      static now() { return RealDate.now() + shift }
+    }
+    window.Date = PinnedDate
+  }
+}`
+
+test.beforeEach(async ({ context, page }) => {
+  await context.addInitScript(PIN_DAYTIME_SCRIPT)
+  await page.addInitScript(PIN_DAYTIME_SCRIPT)
+})
 
 test('23. onboarding: fresh boot renders no pet, launcher, menu, or dialog DOM', async ({ page }) => {
   await page.goto('/')
@@ -1525,6 +1557,10 @@ test('CROSSTAB_COLLAPSE_RESTORE_VISIBLE_TEST. two tabs destroy stale Menu/Dialog
     await expect(target.locator(DIALOG)).toHaveCount(0)
     await expect(target.locator(ROOT)).toHaveAttribute('data-vehicle-pet', 'COLLAPSED')
   }
+  // The spec-wide daytime pin (PIN_DAYTIME_SCRIPT) keeps the page clock out
+  // of the late-night daypart even during night runs, so the sanctioned
+  // once-per-ritual-day write cannot fire here; a WRITE LOOP would still
+  // surface as many writes.
   expect(await writes(page)).toBe(0)
   expect(await writes(second)).toBe(1)
 

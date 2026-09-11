@@ -1176,7 +1176,7 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 154200,
+      "byteSizeCompressed": 154418,
       "altText": {
         "zh-CN": "你的 Pet：百车车队（L8 阶段），1 名远程人员监管 100 辆无人车",
         "en": "Your pet: the 100-car fleet at level 8; one remote operator supervises 100 autonomous vehicles"
@@ -1189,7 +1189,7 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 200842,
+      "byteSizeCompressed": 202509,
       "altText": {
         "zh-CN": "你的 Pet：百车车队（L8 阶段），1 名远程人员监管 100 辆无人车",
         "en": "Your pet: the 100-car fleet at level 8; one remote operator supervises 100 autonomous vehicles"
@@ -1202,7 +1202,7 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 118340,
+      "byteSizeCompressed": 118344,
       "altText": {
         "zh-CN": "你的 Pet：城市规模的领航车（L9 阶段），1 名远程人员监管 1,000 辆无人车",
         "en": "Your pet: the lead car at city scale, level 9; one remote operator supervises 1,000 autonomous vehicles"
@@ -1215,7 +1215,7 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 171608,
+      "byteSizeCompressed": 171564,
       "altText": {
         "zh-CN": "你的 Pet：城市规模的领航车（L9 阶段），1 名远程人员监管 1,000 辆无人车",
         "en": "Your pet: the lead car at city scale, level 9; one remote operator supervises 1,000 autonomous vehicles"

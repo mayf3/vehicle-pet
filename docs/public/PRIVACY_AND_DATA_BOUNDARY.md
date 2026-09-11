@@ -9,6 +9,7 @@ Status: Public Preview documentation, current as of the DSH_PET_OVERLAY_ADAPTER_
 | Live session state (idle / running / needs-input) | Harness structured session events | transient visual presentation only |
 | Terminal turn status (completed / failed / cancelled) + a deterministic identity (`sessionId#turn#seq`) | Harness structured turn-end events | one edge-deduplicated visual reaction per turn; a HostActivityEvent dispatch back to the host |
 | Counts-only token usage | the host's counts-only usage seam | growth points (the single progress economy) |
+| Active session **titles** (`title` / `displayTitle`) | Harness structured session-list metadata | sanitized, length-bounded label in the resident footer only — local display; never fed into speech selection, never persisted, never uploaded |
 | Browser-local preferences (pet, size, position, reduced motion, ritual day markers) | the browser's own localStorage under a namespaced key | remembering your settings |
 
 ## What it never reads

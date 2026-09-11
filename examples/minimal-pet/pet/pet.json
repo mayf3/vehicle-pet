@@ -1,0 +1,56 @@
+{
+  "id": "my-pet",
+  "displayName": {
+    "zh-CN": "我的宠物",
+    "en": "My Pet"
+  },
+  "recipe": "pose-sprite",
+  "packId": "my-pet-journey",
+  "userSelectable": true,
+  "gradePolicy": {
+    "showExactLevelNumber": false,
+    "showDescription": true,
+    "insigniaMode": "none"
+  },
+  "behavior": {
+    "ambientPool": [
+      "look-left",
+      "look-right",
+      "rest",
+      "look-around"
+    ],
+    "stateReactions": {
+      "completed": "nod",
+      "failed": "shy",
+      "working": "nod",
+      "needs-input": "peek"
+    },
+    "petting": {
+      "variant": "idle-happy",
+      "decoration": "sparkles"
+    }
+  },
+  "license": {
+    "license": "Replace with YOUR asset license — your pet data stays your property (e.g. \"CC-BY-4.0\"). Repository code is Apache-2.0; see NOTICE.",
+    "attribution": "Replace with your attribution line.",
+    "provenance": "PROVENANCE.json"
+  },
+  "poseSprite": {
+    "variantPose": {
+      "idle": 0,
+      "idle-happy": 1,
+      "idle-curious": 2,
+      "idle-sleepy": 3,
+      "working": 4,
+      "needs-input": 5,
+      "completed": 6,
+      "completed-proud": 7,
+      "failed": 8,
+      "cancelled": 9
+    },
+    "poseSource": {
+      "kind": "files",
+      "dir": "./assets"
+    }
+  }
+}

@@ -9,7 +9,7 @@
  */
 
 import { mkdir, readdir, copyFile, stat, rm } from 'node:fs/promises'
-import { join, basename, extname, isAbsolute, sep } from 'node:path'
+import { join, basename, extname, isAbsolute, sep, resolve } from 'node:path'
 import { run, runOk, timestampTag } from './util.mjs'
 
 const ALLOWED_EXTENSIONS = new Set(['.md', '.png', '.jpg', '.jpeg', '.json', '.txt', '.sha256', '.log'])
@@ -24,6 +24,18 @@ export async function createEvidenceBranch(input) {
   const { sources, dest, message, repo, timeoutMs = 120_000 } = input
   if (!dest.startsWith('docs/evidence/')) {
     return { ok: false, reason: 'EVIDENCE_DEST_INVALID', detail: `destination must start with docs/evidence/ (got ${dest})` }
+  }
+  // Containment must hold BEFORE any filesystem write: normalize the path
+  // and require it to stay inside <worktree>/docs/evidence. A string prefix
+  // alone lets `docs/evidence/../../..` escape and would only be caught
+  // after files had already been copied (R4 fix).
+  {
+    const worktreeRoot = `${repo}-evidence-wt-${timestampTag()}`
+    const resolvedDest = resolve(worktreeRoot, dest)
+    const allowedRoot = resolve(worktreeRoot, 'docs', 'evidence') + sep
+    if (resolvedDest !== resolve(worktreeRoot, 'docs', 'evidence') && !resolvedDest.startsWith(allowedRoot)) {
+      return { ok: false, reason: 'EVIDENCE_DEST_ESCAPES', detail: `destination resolves outside docs/evidence (got ${dest} -> ${resolvedDest})` }
+    }
   }
   if (sources.length === 0) {
     return { ok: false, reason: 'EVIDENCE_SOURCES_EMPTY', detail: 'at least one --src file or directory is required' }
