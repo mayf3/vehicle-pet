@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { ActiveSessionFooter } from '../../../src/dsh/client/ActiveSessionFooter'
 import { activeSessionsFromList } from '../../../src/dsh/client/active-sessions'
 import { useVehiclePetSpeech } from '../../../src/dsh/client/VehiclePetSpeech'
-import type { VehiclePetSessionView, CharacterId } from '../../../src/dsh/client/types'
+import type { VehiclePetSessionView, PetId } from '../../../src/dsh/client/types'
 
 const idle: VehiclePetSessionView = { live: 'idle', terminal: null }
 afterEach(() => { cleanup(); vi.useRealTimers(); vi.restoreAllMocks() })
@@ -52,12 +52,12 @@ describe('V5 continuous shared random speech', () => {
   it('preserves deadlines on character switch and skips typing/background attempts without catchup', () => {
     vi.useFakeTimers(); vi.setSystemTime(100000)
     const hidden = vi.spyOn(document, 'hidden', 'get').mockReturnValue(false)
-    const hook = renderHook(({ characterId }: { characterId: CharacterId }) => useVehiclePetSpeech({ sessionView: idle, locale: 'zh', enabled: true, characterId, random: () => 0 }), { initialProps: { characterId: 'vehicle' as CharacterId } })
+    const hook = renderHook(({ petId }: { petId: PetId }) => useVehiclePetSpeech({ sessionView: idle, locale: 'zh', enabled: true, petId, random: () => 0 }), { initialProps: { petId: 'vehicle' as PetId } })
     act(() => vi.advanceTimersByTime(19000))
     act(() => document.dispatchEvent(new KeyboardEvent('keydown')))
     act(() => vi.advanceTimersByTime(1000))
     expect(hook.result.current.bubble).toBeNull()
-    hook.rerender({ characterId: 'companion' })
+    hook.rerender({ petId: 'companion' })
     act(() => vi.advanceTimersByTime(19000))
     expect(hook.result.current.bubble).toBeNull()
     act(() => vi.advanceTimersByTime(1000))

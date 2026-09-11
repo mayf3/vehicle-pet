@@ -25,7 +25,7 @@ import {
 } from './speech-rules'
 import { characterSpeechCatalog, type SpeechCategory } from './speech-catalog'
 import { isFirstCompletionToday, localDayKey } from './ritual-rules'
-import type { CharacterId } from './types'
+import type { PetId } from './types'
 
 type DaypartBucket = 'morning' | 'daytime' | 'evening' | 'late-night'
 
@@ -61,7 +61,7 @@ export interface VehiclePetRitualHooks {
 }
 
 interface SchedulerOptions {
-  readonly characterId?: CharacterId
+  readonly petId?: PetId
   readonly random?: () => number
   readonly sessionView: VehiclePetSessionView
   readonly locale: string | undefined
@@ -97,8 +97,8 @@ export function useVehiclePetSpeech(options: SchedulerOptions): VehiclePetSpeech
   const { sessionView, locale, enabled } = options
   const randomRef = useRef(options.random ?? Math.random)
   randomRef.current = options.random ?? Math.random
-  const presentationRef = useRef({ characterId: options.characterId ?? 'vehicle', locale })
-  presentationRef.current = { characterId: options.characterId ?? 'vehicle', locale }
+  const presentationRef = useRef({ petId: options.petId ?? 'vehicle', locale })
+  presentationRef.current = { petId: options.petId ?? 'vehicle', locale }
   const bucketRef = useRef<DaypartBucket | undefined>(options.daypartBucket)
   bucketRef.current = options.daypartBucket
   const ritualsRef = useRef<VehiclePetRitualHooks | undefined>(options.rituals)
@@ -156,7 +156,7 @@ export function useVehiclePetSpeech(options: SchedulerOptions): VehiclePetSpeech
       lastIndexInCategory: refs.lastIndexInCategory.get(category) ?? null,
       rotationCounter: refs.rotationCounter,
       randomSample: randomRef.current(),
-    }, characterSpeechCatalog(presentationRef.current.characterId, presentationRef.current.locale))
+    }, characterSpeechCatalog(presentationRef.current.petId, presentationRef.current.locale))
     if (selection.index < 0) return
     refs.lastIndexInCategory.set(category, selection.index)
     refs.rotationCounter = selection.nextRotationCounter

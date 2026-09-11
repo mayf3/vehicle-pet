@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { VehiclePetExpressionState, VehiclePetExpressionVariant } from './expressions'
-import { BEHAVIOR_PROFILES } from './characters'
+import { petBehavior } from './pets/bundled'
 import type { AmbientActionDefinition } from './ambient-rules'
-import type { CharacterId } from './types'
+import type { PetId } from './types'
 
 export const PLAYFUL_REACTIONS = [
   { id: 'wave', variant: 'idle-happy', decoration: 'hello' },
@@ -34,8 +34,8 @@ export interface RenderedReaction {
 }
 
 /** Personality mapping from structured state edges to pool reactions (CTR-037). */
-function stateReactionId(characterId: CharacterId, state: VehiclePetExpressionState): string {
-  const tendencies = BEHAVIOR_PROFILES[characterId].stateReactions
+function stateReactionId(petId: PetId, state: VehiclePetExpressionState): string {
+  const tendencies = petBehavior(petId).stateReactions
   switch (state) {
     case 'completed': return tendencies.completed
     case 'failed': return tendencies.failed
@@ -48,7 +48,7 @@ function stateReactionId(characterId: CharacterId, state: VehiclePetExpressionSt
 interface Context {
   state: VehiclePetExpressionState
   terminalIdentity: string | null
-  characterId: CharacterId
+  petId: PetId
   menuOpen: boolean
   dragging: boolean
   ambientKey: number | null
@@ -62,7 +62,7 @@ export function usePlayfulReaction(context: Context) {
   const next = useRef(0)
   const serial = useRef(0)
   const timer = useRef<ReturnType<typeof setTimeout>>()
-  const previous = useRef({ signature: `${context.state}:${context.terminalIdentity ?? ''}`, character: context.characterId })
+  const previous = useRef({ signature: `${context.state}:${context.terminalIdentity ?? ''}`, character: context.petId })
   const previousAmbient = useRef(context.ambientKey)
   const cancel = useCallback(() => {
     clearTimeout(timer.current)
@@ -88,7 +88,7 @@ export function usePlayfulReaction(context: Context) {
 
   /** V7 CTR-030: petting episode — held affectionate presentation. */
   const playPetting = useCallback(() => {
-    const petting = BEHAVIOR_PROFILES[latest.current.characterId].petting
+    const petting = petBehavior(latest.current.petId).petting
     start({ id: 'petting', anim: 'melt', variant: petting.variant, decoration: petting.decoration }, true)
   }, [start])
 
@@ -140,8 +140,8 @@ export function usePlayfulReaction(context: Context) {
   useEffect(() => {
     const signature = `${context.state}:${context.terminalIdentity ?? ''}`
     const changed = previous.current.signature !== signature
-    const switched = previous.current.character !== context.characterId
-    previous.current = { signature, character: context.characterId }
+    const switched = previous.current.character !== context.petId
+    previous.current = { signature, character: context.petId }
     if (changed || switched || context.menuOpen) cancel()
     else if (context.dragging) {
       // A drag keeps its own held lift presentation (CTR-032) and clears
@@ -149,11 +149,11 @@ export function usePlayfulReaction(context: Context) {
       setReaction(current => (current?.definition.id === 'drag-lift' ? current : null))
     }
     if (changed && !switched && context.state !== 'idle') {
-      const id = stateReactionId(context.characterId, context.state)
+      const id = stateReactionId(context.petId, context.state)
       const picked = PLAYFUL_REACTIONS.find(entry => entry.id === id) ?? PLAYFUL_REACTIONS[4]!
       start({ id: picked.id, anim: picked.id, variant: picked.variant, decoration: picked.decoration })
     }
-  }, [context.state, context.terminalIdentity, context.characterId, context.menuOpen, context.dragging, cancel, start])
+  }, [context.state, context.terminalIdentity, context.petId, context.menuOpen, context.dragging, cancel, start])
   useEffect(() => {
     const changed = previousAmbient.current !== context.ambientKey
     previousAmbient.current = context.ambientKey

@@ -14,7 +14,6 @@ import autonomousFleetManifest from '../../../src/packs/autonomous-fleet/manifes
 import seedlingFixtureManifest from '../../../src/packs/seedling-fixture/manifest.json'
 import { dshPackBundles, dshDefaultPackId, resolveDshProductPackId } from '../../../src/dsh/client/engine-bundles'
 import {
-  EXPRESSION_LEVEL_ANCHORS,
   expressionAnchor,
   expressionAsset,
   expressionStateFromSession,
@@ -23,6 +22,9 @@ import {
   type VehiclePetExpressionVariant,
 } from '../../../src/dsh/client/expressions'
 import type { VehiclePetSessionView } from '../../../src/dsh/client/types'
+import { petDefinition } from '../../../src/dsh/client/pets/bundled'
+
+const EXPRESSION_LEVEL_ANCHORS = petDefinition('vehicle').engineScene!.expressionAnchors
 
 const PROVENANCE = JSON.parse(readFileSync(
   new URL('../../../src/dsh/client/assets/expressions/PROVENANCE.json', import.meta.url),
@@ -42,7 +44,7 @@ describe('expression anchors (CTR-OVERLAY-014)', () => {
     const levelIds = autonomousFleetManifest.levels.map(level => level.levelId)
     expect(levelIds.length).toBeGreaterThanOrEqual(12)
     for (const levelId of levelIds) {
-      const anchor = expressionAnchor(levelId)
+      const anchor = expressionAnchor(EXPRESSION_LEVEL_ANCHORS, levelId)
       expect(anchor, `missing anchor for ${levelId}`).not.toBeNull()
       const [left, top, size] = anchor as readonly [number, number, number]
       expect(left).toBeGreaterThanOrEqual(0)

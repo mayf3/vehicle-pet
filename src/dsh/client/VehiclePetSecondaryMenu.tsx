@@ -13,6 +13,8 @@ import { useOverlayChrome } from './VehiclePetOverlay'
 export interface VehiclePetSecondaryMenuProps {
   readonly menuRef: RefObject<HTMLElement | null>
   readonly preferences: VehiclePetOverlayPreferences
+  /** User-selectable pets with localized labels (V8 CTR-OVERLAY-041). */
+  readonly pets: readonly { readonly id: string; readonly label: string }[]
   readonly placement: { horizontal: 'left' | 'right'; vertical: 'above' | 'below' }
   readonly onCommitSize: (size: VehiclePetSize) => void
   readonly onCollapse: () => void
@@ -76,12 +78,12 @@ export function VehiclePetSecondaryMenu(props: VehiclePetSecondaryMenuProps): Re
     >
       <div className="vpo-menuRow" role="group" aria-label={t('menu.character')}>
         <span className="vpo-menuLabel">{t('menu.character')}</span>
-        {(['vehicle', 'companion'] as const).map(id => <button
-          key={id} type="button" className="vpo-control"
-          data-vehicle-pet-character-option={id}
-          aria-pressed={(props.preferences.characterId ?? 'vehicle') === id}
-          onClick={() => commitPreferences(current => ({ ...current, characterId: id }))}
-        >{t(`menu.character.${id}`)}</button>)}
+        {props.pets.map(pet => <button
+          key={pet.id} type="button" className="vpo-control"
+          data-vehicle-pet-character-option={pet.id}
+          aria-pressed={props.preferences.characterId === pet.id}
+          onClick={() => commitPreferences(current => ({ ...current, characterId: pet.id }))}
+        >{pet.label}</button>)}
       </div>
       <div className="vpo-menuRow" role="group" aria-label={t('menu.size')} data-vehicle-pet-size-control="true">
         <span className="vpo-menuLabel">{t('menu.size')}</span>

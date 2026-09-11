@@ -2,13 +2,13 @@ import { act, cleanup, renderHook } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
 import { useVehiclePetSpeech } from '../../../src/dsh/client/VehiclePetSpeech'
 import { characterSpeechCatalog } from '../../../src/dsh/client/speech-catalog'
-import type { CharacterId, VehiclePetSessionView } from '../../../src/dsh/client/types'
+import type { PetId, VehiclePetSessionView } from '../../../src/dsh/client/types'
 
 afterEach(()=>{cleanup();vi.useRealTimers()})
 it('switches catalogs without resetting quiet, click cooldown, or replaying terminal edges',()=>{
   vi.useFakeTimers()
   const idle: VehiclePetSessionView={live:'idle',terminal:null}
-  const {result,rerender}=renderHook(({id,view}:{id:CharacterId;view:VehiclePetSessionView})=>useVehiclePetSpeech({characterId:id,sessionView:view,locale:'zh-CN',enabled:true}),{initialProps:{id:'vehicle',view:idle}})
+  const {result,rerender}=renderHook(({id,view}:{id:PetId;view:VehiclePetSessionView})=>useVehiclePetSpeech({petId:id,sessionView:view,locale:'zh-CN',enabled:true}),{initialProps:{id:'vehicle',view:idle}})
   act(()=>vi.advanceTimersByTime(31000))
   act(()=>result.current.speakForClick('idle'))
   const first=result.current.bubble

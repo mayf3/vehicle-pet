@@ -1,0 +1,62 @@
+[
+  {
+    "id": "l1",
+    "zh-CN": "有人驾驶，有保护车",
+    "en": "Driver aboard, escort"
+  },
+  {
+    "id": "l2",
+    "zh-CN": "有人驾驶，无保护车",
+    "en": "Driver aboard, no escort"
+  },
+  {
+    "id": "l3",
+    "zh-CN": "副驾安全员，有保护车",
+    "en": "Safety copilot + escort"
+  },
+  {
+    "id": "l4",
+    "zh-CN": "副驾安全员，无保护车",
+    "en": "Safety copilot, no escort"
+  },
+  {
+    "id": "l5",
+    "zh-CN": "全无人，一对一远程监管",
+    "en": "Unoccupied · Remote 1:1"
+  },
+  {
+    "id": "l6",
+    "zh-CN": "一人监管三辆车",
+    "en": "One operator · 3 cars"
+  },
+  {
+    "id": "l7",
+    "zh-CN": "一人监管十辆车",
+    "en": "One operator · 10 cars"
+  },
+  {
+    "id": "l8",
+    "zh-CN": "一人监管百辆车",
+    "en": "One operator · 100 cars"
+  },
+  {
+    "id": "l9",
+    "zh-CN": "千辆车，城市规模",
+    "en": "1K cars · City"
+  },
+  {
+    "id": "l10",
+    "zh-CN": "万辆车，跨城市",
+    "en": "10K cars · Multiple cities"
+  },
+  {
+    "id": "l11",
+    "zh-CN": "十万辆车，跨区域",
+    "en": "100K cars · Regions"
+  },
+  {
+    "id": "l12",
+    "zh-CN": "百万辆车，全球规模",
+    "en": "1M cars · Worldwide"
+  }
+]
