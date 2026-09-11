@@ -107,3 +107,31 @@ Executed in the clean clone:
 | disposable DSH install → select → interactions → reload/restart → uninstall matrix | **46/46 PASS** (16.0m pinned-browser run) |
 
 This is the Goal's final verification step. FINAL_STATUS = paused at OWNER_LICENSE_DECISION_GATE (dispatch §23: all technical DONE_WHEN items green; the label READY_FOR_PUBLIC_PREVIEW is withheld until the Owner lands the license decision from docs/investigations/GOAL_OPEN_LICENSE_PACKET.md). STOP WORK on this Goal.
+
+## License landing + final clean-room (post OWNER_LICENSE_DECISION_GATE, 2026-09-11)
+
+```text
+OWNER_DECISION = OPTION_B: CODE = Apache-2.0; ORIGINAL_PROJECT_ASSETS = CC BY 4.0
+LANDED_AT = 6faf764 (PR #43, squash on mayf3/vehicle-pet:main)
+LICENSE_FILES = LICENSE (Apache-2.0 full text), LICENSE.assets (CC BY 4.0 notice + scope + exclusions + AI-assistance honesty statement), NOTICE (attribution, provenance pointers, third-party exclusions)
+THIRD_PARTY_EXCLUSIONS = third-party trademarks/logos (DeepSeek, Pony.ai, and others), third-party works and interfaces, historical-evidence screenshots, provenance-cited non-owned material — explicitly NOT relicensed; retained only for interoperability, historical record, or audit evidence
+RELICENSE_GUARANTEE = none beyond the owner's actual rights; no all-jurisdictions/exclusive-rights claims; AI-assisted production disclosed in provenance records
+```
+
+Executed at the merged fixed ref `6faf764`, from a fresh GitHub clone
+(`/tmp/vp-cleanroom-final`, no Owner checkout involvement):
+
+| Step | Result |
+|---|---|
+| `pnpm install --frozen-lockfile` | PASS |
+| `pnpm pet:validate examples/minimal-pet` | PASS |
+| `pnpm verify` full chain | exit 0 (types/lint/unit+dom/e2e/build/contracts/asset determinism) |
+| `pnpm build:dsh` + `check:dsh-bundle` | PASS (12,328,445 bytes, 156 inlined assets, license strings in bundle are the pet license metadata) |
+| `pnpm check:dsh-package` | PASS — 190 files including LICENSE, LICENSE.assets, NOTICE, hygiene-scanned |
+| disposable-DSH pinned-browser e2e | **46/46 PASS** (16.2m) |
+
+```text
+FINAL_STATUS = READY_FOR_PUBLIC_PREVIEW
+SHIP_BLOCKERS = 0
+STOP WORK ON THIS GOAL
+```
