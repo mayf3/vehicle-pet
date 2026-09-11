@@ -27,8 +27,13 @@ if (!entries.includes(DEFAULT_PET_ID)) {
 }
 const ordered = [DEFAULT_PET_ID, ...entries.filter(id => id !== DEFAULT_PET_ID).sort()]
 
-const imports = ordered.map(id => `import { ${id}Presentation } from './${id}/definition'`)
-const list = ordered.map(id => `  ${id}Presentation,`)
+// Identifier-safe binding: directory names may be hyphenated ids ("audit-pet")
+// while the import binding must be a valid JS identifier ("auditPet").
+const camelize = (id) => id.replace(/-([a-z])/g, (_, c) => c.toUpperCase())
+const bindingFor = (id) => `${camelize(id)}Presentation`
+
+const imports = ordered.map(id => `import { ${bindingFor(id)} } from './${id}/definition'`)
+const list = ordered.map(id => `  ${bindingFor(id)},`)
 const module = [
   '/**',
   ' * GENERATED FILE — do not edit. Run `node scripts/generate-pet-wiring.mjs`.',

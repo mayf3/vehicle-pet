@@ -22,8 +22,13 @@ generic and discovered by directory scan.
    file and field.
 4. **Preview**: copy `pet/` → `src/dsh/client/pets/<id>/` and `journey/` →
    `src/packs/<pack-id>/`, run `pnpm dev`, pick your pack in the prototype UI.
-5. **Build**: `pnpm build:dsh && pnpm check:dsh-bundle` — the resident menu
-   lists your pet automatically (wiring is a generated file; never edit it).
+5. **Build**: `pnpm build:dsh && pnpm check:dsh-bundle` — build:dsh
+   regenerates the wiring and the DSH asset maps from a directory scan
+   automatically, so your pet and its journey appear in the resident menu
+   with no registry edits. (The generated files under `src/dsh/client/`
+   carry a "do not edit" header on purpose: re-running the build is the only
+   supported way to change them.) Note `pet/definition.ts` imports resolve
+   only after step 4's install — validation in step 3 works in place.
 
 ## Pet id and pack id
 

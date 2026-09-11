@@ -159,6 +159,18 @@ const MANIFEST = {
   ],
   'master-l7.png': [
     { box: [15, 15, 340, 250], mode: 'clear' },
+    // per-car door wordmarks, hand-cataloged on gridded 2x tiles
+    { box: [250, 601, 292, 633], mode: 'navy-on-light' },
+    { box: [395, 610, 431, 638], mode: 'navy-on-light' },
+    { box: [546, 624, 586, 653], mode: 'navy-on-light' },
+    { box: [690, 646, 737, 666], mode: 'navy-on-light' },
+    { box: [844, 660, 898, 686], mode: 'navy-on-light' },
+    { box: [55, 839, 103, 873], mode: 'navy-on-light' },
+    { box: [204, 864, 246, 898], mode: 'navy-on-light' },
+    { box: [386, 826, 431, 858], mode: 'navy-on-light' },
+    { box: [542, 845, 584, 871], mode: 'navy-on-light' },
+    { box: [686, 871, 726, 903], mode: 'navy-on-light' },
+    { box: [834, 886, 882, 923], mode: 'navy-on-light' },
   ],
   'master-l8.png': [
     { box: [15, 15, 400, 250], mode: 'clear' },
@@ -190,6 +202,7 @@ const MANIFEST = {
     { box: [757, 765, 835, 828], mode: 'navy-on-light' },
     { box: [1067, 758, 1140, 820], mode: 'navy-on-light' },
     { box: [1375, 993, 1436, 1022], mode: 'navy-on-light' },
+    { box: [1398, 757, 1448, 792], mode: 'navy-on-light' },
   ],
 }
 
@@ -205,74 +218,108 @@ function isLightPixel(r, g, b) {
   return r > 175 && g > 180 && b > 190
 }
 
+function fillRegions(data, info, regions) {
+  const { width: w, height: h, channels: ch } = info
+  const idx = (x, y) => (y * w + x) * ch
+  const mask = new Uint8Array(w * h)
+  for (const { box, mode } of regions) {
+    const [x0, y0, x1, y1] = box
+    if (mode === 'clear') {
+      for (let y = Math.max(0, y0); y <= Math.min(y1, h - 1); y++) {
+        for (let x = Math.max(0, x0); x <= Math.min(x1, w - 1); x++) {
+          const i = idx(x, y)
+          data[i] = 0; data[i + 1] = 0; data[i + 2] = 0; data[i + 3] = 0
+        }
+      }
+      continue
+    }
+    const probe = mode === 'navy-on-light' ? isTextPixel : isLightPixel
+    for (let y = Math.max(0, y0); y <= Math.min(y1, h - 1); y++) {
+      for (let x = Math.max(0, x0); x <= Math.min(x1, w - 1); x++) {
+        const i = idx(x, y)
+        if (data[i + 3] > 150 && probe(data[i], data[i + 1], data[i + 2])) mask[y * w + x] = 1
+      }
+    }
+  }
+  // dilate mask by 2px to catch anti-aliased edges
+  const dilated = new Uint8Array(mask)
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      if (mask[y * w + x]) continue
+      for (let dy = -2; dy <= 2 && !dilated[y * w + x]; dy++) {
+        for (let dx = -2; dx <= 2; dx++) {
+          const nx = x + dx, ny = y + dy
+          if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue
+          if (mask[ny * w + nx]) { dilated[y * w + x] = 1; break }
+        }
+      }
+    }
+  }
+  // horizontal interpolation per row across masked runs (RGBA lerp)
+  for (let y = 0; y < h; y++) {
+    let x = 0
+    while (x < w) {
+      if (!dilated[y * w + x]) { x++; continue }
+      let end = x
+      while (end < w && dilated[y * w + end]) end++
+      const leftX = x - 1, rightX = end
+      for (let cx = x; cx < end; cx++) {
+        const t = (cx - leftX) / (rightX - leftX + 1)
+        const li = idx(Math.max(0, leftX), y)
+        const ri = idx(Math.min(w - 1, rightX), y)
+        const i = idx(cx, y)
+        for (let c = 0; c < 4; c++) {
+          const lv = data[li + c], rv = data[ri + c]
+          data[i + c] = Math.round(lv + (rv - lv) * t)
+        }
+      }
+      x = end
+    }
+  }
+}
+
+const ARRAY_AUTOFILL = new Set() // disabled: face-cluster false merges damage art; per-car boxes are hand-cataloged instead
+
 async function apply() {
   for (const [name, regions] of Object.entries(MANIFEST)) {
     const src = `${dirFor(name)}/${name}`
     const { data, info } = await rawOf(src)
-    const { width: w, height: h, channels: ch } = info
-    const idx = (x, y) => (y * w + x) * ch
-    const mask = new Uint8Array(w * h)
-    for (const { box, mode } of regions) {
-      const [x0, y0, x1, y1] = box
-      if (mode === 'clear') {
-        for (let y = y0; y <= Math.min(y1, h - 1); y++) {
-          for (let x = x0; x <= Math.min(x1, w - 1); x++) {
-            const i = idx(x, y)
-            data[i] = 0; data[i + 1] = 0; data[i + 2] = 0; data[i + 3] = 0
-          }
-        }
-        continue
-      }
-      const probe = mode === 'navy-on-light' ? isTextPixel : isLightPixel
-      for (let y = y0; y <= Math.min(y1, h - 1); y++) {
-        for (let x = x0; x <= Math.min(x1, w - 1); x++) {
-          const i = idx(x, y)
-          if (data[i + 3] > 150 && probe(data[i], data[i + 1], data[i + 2])) mask[y * w + x] = 1
-        }
-      }
+    const regionsAll = [...regions]
+    if (ARRAY_AUTOFILL.has(name)) {
+      const boxes = clusterText(data, info, { minH: 4 })
+        .filter(c => {
+          const cw = c.maxX - c.minX + 1, chh = c.maxY - c.minY + 1
+          return chh >= 5 && chh <= 30 && cw >= 10 && cw <= 150
+        })
+      console.log(name, 'autofill boxes:', boxes.length)
+      for (const b of boxes) regionsAll.push({ box: [b.minX - 2, b.minY - 2, b.maxX + 2, b.maxY + 2], mode: 'navy-on-light' })
     }
-    // dilate mask by 2px to catch anti-aliased edges
-    const dilated = new Uint8Array(mask)
-    for (let y = 0; y < h; y++) {
-      for (let x = 0; x < w; x++) {
-        if (mask[y * w + x]) continue
-        for (let dy = -2; dy <= 2 && !dilated[y * w + x]; dy++) {
-          for (let dx = -2; dx <= 2; dx++) {
-            const nx = x + dx, ny = y + dy
-            if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue
-            if (mask[ny * w + nx]) { dilated[y * w + x] = 1; break }
-          }
-        }
-      }
-    }
-    // horizontal interpolation per row across masked runs (RGBA lerp)
-    for (let y = 0; y < h; y++) {
-      let x = 0
-      while (x < w) {
-        if (!dilated[y * w + x]) { x++; continue }
-        let end = x
-        while (end < w && dilated[y * w + end]) end++
-        const leftX = x - 1, rightX = end
-        for (let cx = x; cx < end; cx++) {
-          const t = (cx - leftX) / (rightX - leftX + 1)
-          for (const bx of [leftX, rightX]) {
-            var _ = bx // bounds marker
-          }
-          const li = idx(Math.max(0, leftX), y)
-          const ri = idx(Math.min(w - 1, rightX), y)
-          const i = idx(cx, y)
-          for (let c = 0; c < 4; c++) {
-            const lv = data[li + c], rv = data[ri + c]
-            data[i + c] = Math.round(lv + (rv - lv) * t)
-          }
-        }
-        x = end
-      }
-    }
-    await sharp(data, { raw: { width: w, height: h, channels: ch } })
+    fillRegions(data, info, regionsAll)
+    await sharp(data, { raw: { width: info.width, height: info.height, channels: info.channels } })
       .png({ compressionLevel: 9 })
       .toFile(`${src.replace('.png', '.debranded.png')}`)
     console.log('applied:', name)
+  }
+}
+
+// --autofill <name...>: wordmark-scale auto detection + fill for array
+// compositions (many small cars). Wordmark filter: >=3 letter fragments,
+// word height 6..26px, width 12..140px — eyes/mouths are single blobs and
+// far larger at these scales, so faces survive.
+if (MODE === '--autofill') {
+  for (const name of process.argv.slice(3)) {
+    const src = `${dirFor(name)}/${name}`
+    const { data, info } = await rawOf(src)
+    const boxes = clusterText(data, info, { minH: 6 })
+      .filter(c => {
+        const cw = c.maxX - c.minX + 1, chh = c.maxY - c.minY + 1
+        return chh <= 26 && cw <= 140
+      })
+    console.log(name, 'autofill boxes:', boxes.map(b => `[${b.minX},${b.minY},${b.maxX},${b.maxY}]`).join(' '))
+    fillRegions(data, info, boxes.map(b => ({ box: [b.minX - 2, b.minY - 2, b.maxX + 2, b.maxY + 2], mode: 'navy-on-light' })))
+    await sharp(data, { raw: { width: info.width, height: info.height, channels: info.channels } })
+      .png({ compressionLevel: 9 })
+      .toFile(`${src.replace('.png', '.debranded.png')}`)
   }
 }
 
