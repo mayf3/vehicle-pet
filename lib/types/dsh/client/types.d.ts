@@ -16,12 +16,16 @@ export interface VehiclePetSessionView {
     readonly live: VehiclePetLiveState;
     readonly terminal: VehiclePetTerminalReaction | null;
 }
-/** The two resident sizes (V3 CTR-OVERLAY-020); absent choice resolves LARGE. */
-export type CharacterId = 'vehicle' | 'companion';
+/**
+ * Open pet id (V8 CTR-OVERLAY-041): any bundled pet presentation id; absent or
+ * unknown stored values fail soft to the documented default (`vehicle`) via
+ * `pets/bundled.ts resolvePetId`.
+ */
+export type PetId = string;
 export type VehiclePetSize = 'small' | 'large';
 /** Versioned browser-local overlay preference record (V3 CTR-OVERLAY-010). */
 export interface VehiclePetOverlayPreferences {
-    readonly characterId?: CharacterId;
+    readonly characterId?: PetId;
     readonly schemaVersion: 1;
     readonly position: {
         readonly xRatio: number;

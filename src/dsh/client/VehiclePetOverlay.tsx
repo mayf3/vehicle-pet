@@ -897,15 +897,30 @@ function ResidentPet({
       />
       </span>
       <div className={captionTop === undefined ? undefined : 'vpo-captionGroup'} style={captionTop === undefined ? { display: 'contents' } : { top: captionTop }}>
-      {grade === null ? null : <span className="vpo-grade" data-vehicle-pet-grade={grade.grade}>
-        <span className="vpo-gradeBrand">Pony.ai · {grade.grade}</span>
-        <span>{grade.description}</span>
-      </span>}
+      {grade === null ? null : <GradeCaption grade={grade} policy={pet.gradePolicy} />}
       <ActiveSessionFooter sessions={activeSessions} locale={engineLocale} />
       </div>
       {sessionView.live === 'needs-input' ? <span className="vpo-badge" aria-hidden="true" /> : null}
       <VehiclePetBubble bubble={speech.bubble} placement={bubblePlacement} />
     </>
+  )
+}
+
+/**
+ * Grade caption (V8 DEC-OVERLAY-029/CTR-OVERLAY-040): per-pet policy decides
+ * whether the exact level numeral and the localized description appear on the
+ * resident surface; machine-readable identity (data attribute + aria) always
+ * keeps the exact grade. No brand text, no gauge, no within-level substitute.
+ */
+function GradeCaption({ grade, policy }: {
+  grade: { grade: string; description: string }
+  policy: { showExactLevelNumber: boolean; showDescription: boolean }
+}): ReactElement {
+  return (
+    <span className="vpo-grade" data-vehicle-pet-grade={grade.grade}>
+      {policy.showExactLevelNumber ? <span className="vpo-gradeBrand">{grade.grade}</span> : null}
+      {policy.showDescription ? <span>{grade.description}</span> : null}
+    </span>
   )
 }
 

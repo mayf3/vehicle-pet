@@ -7,6 +7,11 @@ import { type VehiclePetOverlayPreferences, type VehiclePetSize } from './types'
 export interface VehiclePetSecondaryMenuProps {
     readonly menuRef: RefObject<HTMLElement | null>;
     readonly preferences: VehiclePetOverlayPreferences;
+    /** User-selectable pets with localized labels (V8 CTR-OVERLAY-041). */
+    readonly pets: readonly {
+        readonly id: string;
+        readonly label: string;
+    }[];
     readonly placement: {
         horizontal: 'left' | 'right';
         vertical: 'above' | 'below';
