@@ -1,0 +1,249 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "vehicle-pet-release",
+    "version": "1.0.1",
+    "nodeVersion": "v26.7.0",
+    "pnpmVersion": "10.28.1"
+  },
+  "receiptId": "2026-09-11T00-02-46-502Z-apply-c9e3ed69-87d434",
+  "host": {
+    "hostname": "MacBook-Pro.local",
+    "capturedAt": "2026-09-11T00:03:14.510Z"
+  },
+  "mode": "apply",
+  "targetRef": "c9e3ed69f0be91e3b8cbb3edfb65581d759f4877",
+  "gitTruth": {
+    "method": "REMOTE_BARE_FETCH_BY_SHA",
+    "originUrl": "https://github.com/mayf3/vehicle-pet.git",
+    "ref": "c9e3ed69f0be91e3b8cbb3edfb65581d759f4877"
+  },
+  "dshHome": "/Users/yanfenma/.dsh",
+  "profile": "web",
+  "preimage": {
+    "currentRef": "116824b18b93d67aa62f24d60abfc4a21b65d48a",
+    "currentSpec": "git+https://github.com/mayf3/vehicle-pet.git#116824b18b93d67aa62f24d60abfc4a21b65d48a",
+    "membership": [
+      "@deepseek-ai/dsh-base",
+      "@deepseek-ai/dsh-web-app",
+      "deepseek-pet",
+      "dsh-session-doctor",
+      "dsh-better-sidebar",
+      "@dsh-user/ui-side-panel",
+      "dsh-remote-plugin",
+      "rtor-v4",
+      "dsh-codex",
+      "@mayf3/vehicle-pet"
+    ]
+  },
+  "steps": [
+    {
+      "at": "2026-09-11T00:03:14.859Z",
+      "step": "CONCURRENCY_GATE",
+      "outcome": "PASS",
+      "holders": []
+    },
+    {
+      "at": "2026-09-11T00:03:14.860Z",
+      "step": "PRE_INSTALL_CONSISTENCY",
+      "outcome": "PASS",
+      "drift": []
+    },
+    {
+      "at": "2026-09-11T00:03:14.861Z",
+      "step": "PIN",
+      "outcome": "DONE",
+      "from": "git+https://github.com/mayf3/vehicle-pet.git#116824b18b93d67aa62f24d60abfc4a21b65d48a",
+      "to": "git+https://github.com/mayf3/vehicle-pet.git#c9e3ed69f0be91e3b8cbb3edfb65581d759f4877"
+    },
+    {
+      "at": "2026-09-11T00:03:35.293Z",
+      "step": "INSTALL",
+      "outcome": "DONE",
+      "exitCode": 0,
+      "tail": "  @deepseek-ai/schemastery@^3.18.1-rc.1\n  @earendil-works/pi-ai@^0.82.1\n\nPackages: +1\n+\nProgress: resolved 185, reused 3, downloaded 1, added 1, done\nDone in 20.1s using pnpm v10.28.1\n"
+    },
+    {
+      "at": "2026-09-11T00:03:35.294Z",
+      "step": "LOCK_DRIFT_GATE",
+      "outcome": "PASS",
+      "drift": []
+    },
+    {
+      "at": "2026-09-11T00:03:35.295Z",
+      "step": "MEMBERSHIP_GATE",
+      "outcome": "PASS",
+      "before": [
+        "@deepseek-ai/dsh-base",
+        "@deepseek-ai/dsh-web-app",
+        "deepseek-pet",
+        "dsh-session-doctor",
+        "dsh-better-sidebar",
+        "@dsh-user/ui-side-panel",
+        "dsh-remote-plugin",
+        "rtor-v4",
+        "dsh-codex",
+        "@mayf3/vehicle-pet"
+      ],
+      "after": [
+        "@deepseek-ai/dsh-base",
+        "@deepseek-ai/dsh-web-app",
+        "deepseek-pet",
+        "dsh-session-doctor",
+        "dsh-better-sidebar",
+        "@dsh-user/ui-side-panel",
+        "dsh-remote-plugin",
+        "rtor-v4",
+        "dsh-codex",
+        "@mayf3/vehicle-pet"
+      ]
+    },
+    {
+      "at": "2026-09-11T00:03:35.295Z",
+      "step": "RESTART",
+      "outcome": "STARTED",
+      "webPortBefore": 3080
+    },
+    {
+      "at": "2026-09-11T00:03:39.915Z",
+      "step": "RESTART",
+      "outcome": "DONE",
+      "webPortAfter": 3080,
+      "newLeafPid": 379,
+      "health": "PASS"
+    },
+    {
+      "at": "2026-09-11T00:03:40.595Z",
+      "step": "RUNTIME_PROOF",
+      "outcome": "PASS",
+      "install": {
+        "ok": true,
+        "layer": "INSTALL",
+        "detail": "lockfile resolution == c9e3ed69f0be91e3b8cbb3edfb65581d759f4877"
+      },
+      "content": {
+        "ok": true,
+        "layer": "CONTENT",
+        "detail": "installed tree == files-projection of git tree c9e3ed69f0be91e3b8cbb3edfb65581d759f4877 (175 files compared)",
+        "comparedFiles": 175
+      },
+      "served": {
+        "ok": true,
+        "layer": "SERVED",
+        "detail": "served == installed (183c9ae847f7…, 12139087 bytes)",
+        "servedSha256": "183c9ae847f72785e5b2af66d210c0b9a234e3059e3f1c5d6b77728ebe72f0f2",
+        "installedSha256": "183c9ae847f72785e5b2af66d210c0b9a234e3059e3f1c5d6b77728ebe72f0f2"
+      }
+    },
+    {
+      "at": "2026-09-11T00:03:40.623Z",
+      "step": "STATE_POSTFLIGHT",
+      "outcome": "DONE",
+      "verdicts": {
+        "POSITION_PREFERENCE_PRESERVED": {
+          "verdict": "PASS"
+        },
+        "REDUCED_MOTION_PREFERENCE_PRESERVED": {
+          "verdict": "PASS",
+          "detail": "before=null after=null"
+        },
+        "SIZE_PREFERENCE_PRESERVED": {
+          "verdict": "PASS",
+          "detail": "before=\"large\" after=\"large\""
+        },
+        "PREFERENCE_BYTES_PRESERVED": {
+          "verdict": "PASS",
+          "detail": "before={\"schemaVersion\":1,\"position\":{\"xRatio\":0.7236745365973253,\"yRatio\":0.6020287296807217},\"positionCustomized\":true,\"collapsed\":false,\"size\":\"large\"} after={\"schemaVersion\":1,\"position\":{\"xRatio\":0.7236745365973253,\"yRatio\":0.6020287296807217},\"positionCustomized\":true,\"collapsed\":false,\"size\":\"large\"}"
+        },
+        "USAGE_LEDGER_PRESERVED": {
+          "verdict": "PASS",
+          "detail": "cumulativePoints 0 → 0, revision 0 → 0 (natural usage may advance)"
+        },
+        "PROGRESS_PRESERVED": {
+          "verdict": "PASS",
+          "detail": "progressPoints 0 → 0"
+        },
+        "OTHER_CLIENT_STATE_PRESERVED": {
+          "verdict": "PASS",
+          "detail": "deepseek-pet:scale before=null after=null"
+        },
+        "ENGINE_IDB_PRESERVED": {
+          "verdict": "PASS",
+          "detail": "pet-engine-v1 summary preserved (counts non-regressing)"
+        }
+      }
+    }
+  ],
+  "verdicts": {
+    "GIT_TRUTH": {
+      "verdict": "PASS",
+      "detail": "REMOTE_BARE_FETCH_BY_SHA from https://github.com/mayf3/vehicle-pet.git"
+    },
+    "CURRENT_REF_DISCOVERY": {
+      "verdict": "PASS",
+      "detail": "116824b18b93d67aa62f24d60abfc4a21b65d48a"
+    },
+    "SERVICE_DISCOVERY": {
+      "verdict": "PASS",
+      "detail": "pid 14299 port 3080 (/opt/homebrew/Cellar/node/26.7.0/bin/node --import tsx/esm apps/cli/src/bin.ts web --trusted-host macbook-pro.tail84dd3d.ts.net)"
+    },
+    "WEB_HEALTH": {
+      "verdict": "PASS",
+      "detail": "{\"status\":200,\"ok\":true,\"ms\":17}"
+    },
+    "OTHER_PLUGINS_PRESERVED": {
+      "verdict": "PASS",
+      "detail": "enforced by lock drift + membership gates during mutation; preimage resolutions recorded"
+    },
+    "STATE_PROBE_PRE": {
+      "verdict": "PASS",
+      "detail": "1 matching browser target(s)"
+    },
+    "RUNTIME_PROOF": {
+      "verdict": "PASS",
+      "detail": {
+        "install": "lockfile resolution == c9e3ed69f0be91e3b8cbb3edfb65581d759f4877",
+        "content": "installed tree == files-projection of git tree c9e3ed69f0be91e3b8cbb3edfb65581d759f4877 (175 files compared)",
+        "served": "served == installed (183c9ae847f7…, 12139087 bytes)"
+      }
+    },
+    "CONTROLLED_RESTART": {
+      "verdict": "PASS",
+      "detail": "port 3080 → 3080, health PASS"
+    },
+    "POSITION_PREFERENCE_PRESERVED": {
+      "verdict": "PASS"
+    },
+    "REDUCED_MOTION_PREFERENCE_PRESERVED": {
+      "verdict": "PASS",
+      "detail": "before=null after=null"
+    },
+    "SIZE_PREFERENCE_PRESERVED": {
+      "verdict": "PASS",
+      "detail": "before=\"large\" after=\"large\""
+    },
+    "PREFERENCE_BYTES_PRESERVED": {
+      "verdict": "PASS",
+      "detail": "before={\"schemaVersion\":1,\"position\":{\"xRatio\":0.7236745365973253,\"yRatio\":0.6020287296807217},\"positionCustomized\":true,\"collapsed\":false,\"size\":\"large\"} after={\"schemaVersion\":1,\"position\":{\"xRatio\":0.7236745365973253,\"yRatio\":0.6020287296807217},\"positionCustomized\":true,\"collapsed\":false,\"size\":\"large\"}"
+    },
+    "USAGE_LEDGER_PRESERVED": {
+      "verdict": "PASS",
+      "detail": "cumulativePoints 0 → 0, revision 0 → 0 (natural usage may advance)"
+    },
+    "PROGRESS_PRESERVED": {
+      "verdict": "PASS",
+      "detail": "progressPoints 0 → 0"
+    },
+    "OTHER_CLIENT_STATE_PRESERVED": {
+      "verdict": "PASS",
+      "detail": "deepseek-pet:scale before=null after=null"
+    },
+    "ENGINE_IDB_PRESERVED": {
+      "verdict": "PASS",
+      "detail": "pet-engine-v1 summary preserved (counts non-regressing)"
+    }
+  },
+  "result": "APPLY_COMPLETE",
+  "exitCode": 0,
+  "finishedAt": "2026-09-11T00:03:40.623Z"
+}
