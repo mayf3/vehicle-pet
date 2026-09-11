@@ -1,6 +1,6 @@
 ---
-spec_id: DSH_PET_OVERLAY_ADAPTER_V7
-status: superseded
+spec_id: DSH_PET_OVERLAY_ADAPTER_V8
+status: accepted
 spec_kind: implementation
 authority_level: governing_spec
 implementation_authority: contracts
@@ -11,6 +11,8 @@ scope:
   - session-visual-reactions
   - pet-speech-presentation
   - resident-lifelike-interaction
+  - declarative-pet-presentations
+  - public-preview-identity
 governed_by:
   - VEHICLE_PET_PRODUCT_DIRECTION_V1
   - CONFIGURABLE_PET_ENGINE_V4
@@ -21,26 +23,26 @@ external_authorities:
     revision: f77b5a2fcebc2d9138f6608a60636f2294868d42
     relation: interoperates_with
 supersedes:
-  - DSH_PET_OVERLAY_ADAPTER_V6
-superseded_by: DSH_PET_OVERLAY_ADAPTER_V8
+  - DSH_PET_OVERLAY_ADAPTER_V7
+superseded_by: null
 owners:
   - mayf3
 ---
 
-# DSH_PET_OVERLAY_ADAPTER_V7
+# DSH_PET_OVERLAY_ADAPTER_V8
 
 ## 1. Goal
 
-This V7 wholly supersedes `DSH_PET_OVERLAY_ADAPTER_V6`. It preserves all unchanged Engine, grade, asset, privacy, speech, footer, caption, settings and coexistence contracts, and adds the Goal「生命感」lifelike layer: long-press petting, deterministic gesture arbitration, bounded cursor awareness, drag body reaction, a quiet per-character ambient behavior layer, device-local daypart weighting, a guilt-free welcome-back ritual, bounded daily rituals, and declarative character behavior profiles. Historical observations and earlier delivery mandates below remain historical. Current V7 replacements govern interaction and ambient behavior (§15); V6 replacements continue to govern motion bounds and layout.
+This V8 wholly supersedes `DSH_PET_OVERLAY_ADAPTER_V7`. It preserves the entire V7 lifelike layer (long-press petting, deterministic gesture arbitration, bounded cursor awareness, drag body reaction, the quiet per-character ambient behavior layer, device-local daypart weighting, the guilt-free welcome-back ritual, bounded daily rituals, and declarative character behavior profiles) together with all unchanged Engine, grade-data, asset-pipeline, privacy, speech, footer, caption, settings and coexistence contracts, and adds the Goal「开放」public-preview layer: a brand-neutral default product identity, declarative bundled pet presentations so a third party can add a complete pet with configuration, textures, copy and license metadata only (zero core TypeScript edits), and a decoupled per-pet grade presentation policy. Historical observations and earlier delivery mandates below remain historical. Current V8 replacements govern identity, declarative pet presentations, and grade presentation (§17); V7 replacements continue to govern interaction and ambient behavior (§15); V6 replacements continue to govern motion bounds and layout.
 
 ```text
-GOAL = MORE_PET / LESS_UI: the resident pet behaves like a long-term companion, not a plugin button.
-SUCCESS_OUTCOME = SMALL and LARGE resident modes with pet-click reactions, no resident progress bar, no daily panel, >=10 expression variants, and a restrained original speech bubble system, verified in an isolated fixed-ref DSH acceptance.
+GOAL = MORE_PET / LESS_UI carried forward, plus OPEN_PREVIEW: the resident pet behaves like a long-term companion, the framework is brand-safe, and a third party can add a complete pet declaratively.
+SUCCESS_OUTCOME = SMALL and LARGE resident modes with pet-click reactions, no resident progress bar, no daily panel, >=10 expression variants per bundled reference character, and a restrained original speech bubble system; PLUS a brand-neutral default identity across runtime, fallbacks, menu, and current public surfaces, AND a third fixture pet installed end-to-end with zero manual core TypeScript edits, verified in an isolated fixed-ref DSH acceptance.
 DELIVERY_FORM = DSH_BUNDLE_PLUGIN (unchanged)
 OWNING_REPOSITORY = mayf3/vehicle-pet (unchanged)
 RUNTIME = Harness Web profile (unchanged)
 SURFACE = shell.overlay (unchanged)
-BOUNDARY = READY_FOR_PRODUCTION_APPLY; production profile application is a separate Owner gate outside this Spec's rounds.
+BOUNDARY = READY_FOR_PUBLIC_PREVIEW; production profile application, the final license selection, npm publication, GitHub Release, and public announcement each remain a separate Owner gate outside this Spec's rounds.
 ```
 
 This proposal is docs-only. It creates no plugin files and grants no authority
@@ -1764,3 +1766,394 @@ AUTHORING_READY_FOR_REVIEW = YES
 NEXT_ACTION = MERGE_AUTHORITY
 
 Acceptance recorded for Owner mayf3 after independent REVIEW ACCEPT at 831006a7e482e6346cbcc14e320874bce477e3ac (BASE 116824b, zero blockers) with the reviewer-prescribed closures applied at c4cc9c2. Active only after merge into main.
+
+## 17. V8 public-preview open layer
+
+Owner mayf3's Goal「开放」dispatch (2026-09-11) directs that `vehicle-pet`
+become a generic, brand-safe, publicly previewable configurable pet framework
+in which a third party can produce a complete pet by modifying configuration,
+textures, copy, and license metadata only — never core TypeScript — while
+preserving existing progress data, thresholds, token economy, the two bundled
+reference characters, and every unchanged V7 contract. This section adds that
+layer. It is docs-first authority: no implementation begins before this V8
+candidate is independently reviewed, accepted by `mayf3`, and merged into the
+implementation base. Historical observations and earlier delivery mandates
+below remain historical.
+
+Boundaries carried from the Goal dispatch: no final license selection is made
+by this Spec (LICENSE_SELECTION = OWNER_DECISION_REQUIRED); no production
+profile application, npm publication, GitHub Release, public announcement, or
+repository visibility change; no DSH Core change; no Engine schema, progress,
+threshold, or token-economy semantics change; no history rewrite; no
+marketplace, remote pack installation, runtime untrusted code, or arbitrary
+JavaScript in pet data.
+
+### 17.1 Decisions
+
+### DEC-OVERLAY-027 — Brand-neutral default product identity
+
+- Decision owner: `mayf3` (Goal「开放」dispatch direction).
+- Decision: the default product identity of the bundled reference pets and of
+  every shipped current surface MUST NOT bind any third-party company brand
+  (including Pony.ai) as its own product identity. Pony.ai text, logo, and
+  brand visuals are ABSENT from the default runtime identity, fallbacks, menu
+  naming, current README screenshots, and the built client bundle, unless the
+  Owner later explicitly permits otherwise. Historical truth is preserved:
+  provenance records, historical Specs, investigations, evidence, and factual
+  interoperability descriptions keep their real content
+  (`HISTORICAL_REFERENCE != CURRENT_PRODUCT_IDENTITY`); nothing is erased or
+  falsified to look brand-neutral. The reference characters keep their
+  established original visual identities (blue-white SUV lineage; gray-teal
+  companion) minus baked third-party brand marks.
+- Rejected alternatives: erasing historical records, hiding brand marks with
+  CSS overlays while shipping branded masters, renaming the product to imply
+  an official third-party affiliation.
+- Reason: the repository is public; a personal prototype identity must not be
+  the framework's default identity, and active V7 wording still mandates the
+  opposite.
+- Owner decision remaining: NONE for the default state; re-adding any
+  third-party brand remains a separate explicit Owner decision.
+
+### DEC-OVERLAY-028 — Declarative bundled pet packs over declarative journeys
+
+- Decision owner: `mayf3` (Goal「开放」dispatch direction).
+- Decision: the DSH surface presents every build-time registered pet that its
+  pack declares user-selectable. A pet binds one Engine Pack (its journey:
+  thresholds, stage names, scenes, keepsakes — all pack data under Engine V4)
+  and one declarative presentation definition (CTR-038). `vehicle` and
+  `companion` remain two presentations sharing the `autonomous-fleet` journey
+  with shared progress, exactly as today. A new pet MAY ship its own pack with
+  its own journey and levels; usage progress points, the counts-only source
+  seam, and the token economy remain the single unchanged economy from which
+  every pet's level is purely derived. Adding a pet is data plus standard
+  tooling; it MUST NOT require editing Engine source, overlay rendering
+  cores, gesture/speech schedulers, persistence or progress cores, character
+  ID unions, per-pet crop tables, or build scripts. `seedling-fixture` stays
+  bundled and internal to conformance (not user-selectable).
+- Rejected alternatives: a second parallel pet system, dynamic script
+  loading, a runtime pack installer or marketplace, forcing every pet onto
+  the fleet journey's labels, per-pet token economies.
+- Reason: the Engine PackRegistry, manifest validation, and storage keying
+  (`journalRecordKey(sourceId, subjectId)`, receipts/keepsakes keyed with
+  packId) already support multiple declarative packs and journeys; only the
+  adapter layer hard-codes pets.
+- Owner decision remaining: NONE.
+
+### DEC-OVERLAY-029 — Grade presentation is per-pet declarative policy
+
+- Decision owner: `mayf3` (Goal「开放」dispatch direction).
+- Decision: level presentation decouples into per-pet declarative policy:
+  whether the exact level number is visible on the resident surface, whether
+  a localized description shows, whether a symbolic insignia exists and how
+  it attaches (`none | overlay | wearable`), and compact behavior. The
+  underlying level data, thresholds, and Engine derivation are untouched.
+  Default public experience: the resident surface presents the pet first —
+  no mandatory `L1/L2` numeral and no mandatory body-worn badge; grade details
+  live in the Full Journey detail surface; exact level identity remains
+  available to accessibility (DOM data) and the Full Journey. The companion
+  reference keeps its insignia as decorative identity continuity (symbolic,
+  no numeric text); the vehicle reference keeps its environmental scale
+  expression. Decorative art and policy data MUST NOT invent level meanings;
+  Engine V4 §11.1 remains the only level-meaning authority for
+  `autonomous-fleet`.
+- Rejected alternatives: removing numeric grade from the Full Journey,
+  deleting level data, mandating insignia for every pet, baking numbers into
+  base art.
+- Reason: Owner direction `VISIBLE_LEVEL_NUMBER_IS_MANDATORY = NO`,
+  `BODY_WORN_INSIGNIA_IS_MANDATORY_FOR_EVERY_CHARACTER = NO`; growth systems
+  stay intact.
+- Owner decision remaining: NONE.
+
+### 17.2 Additional contracts
+
+### CTR-OVERLAY-038 — Declarative pet presentation packs and build-time registry
+
+A pet presentation MUST be declared entirely as bundled build-time data:
+visual recipe chosen from the fixed generic vocabulary
+(`scene | pose-sprite | static-image | layered-expression`), state-to-
+pose/expression mapping, level-to-visual mapping, optional insignia data with
+anchors, per-locale speech catalogs, localized strings, license, attribution,
+and provenance metadata, and its grade presentation policy (CTR-040). The
+recipe vocabulary, validator, and registry are generic and MAY be hard-coded;
+individual pet IDs, pose mappings, crop geometry, insignia sets, asset lists,
+and catalogs MUST NOT be hard-coded in runtime or overlay core TypeScript.
+Pet data MUST NOT contain or execute arbitrary JavaScript; there is no remote
+code execution, no runtime untrusted pack installer, and no marketplace;
+registration happens only through the build-time bundled registry. Repository
+tooling MUST provide validate, local preview, and deterministic
+build/package steps that operate on the declarative data plus assets alone,
+and validation failures MUST identify the exact invalid field. The bundled
+`vehicle` and `companion` MUST be expressed through this same declarative
+path as reference implementations, keeping their current art, speech, and
+behavior data except as re-identified by CTR-039/CTR-042. Adding a complete
+pet MUST be possible with configuration, assets, copy, and license metadata
+only (`CORE_SOURCE_EDITS_FOR_NEW_PET = 0`); tooling may generate indexes,
+manifests, and import/bundle files, but the author must not hand-edit engine
+or overlay core sources.
+
+### CTR-OVERLAY-039 — Brand-neutral identity across current user-facing and distributed surfaces
+
+For every current user-facing and distributed surface — default vehicle
+presentation, default companion presentation, resident grade/caption,
+normal runtime, WebP path, PNG fallback, total asset failure fallback,
+collapsed state, menu character naming, current README and quickstart
+screenshots, and the built client bundle plus package projection — the
+default product identity MUST be brand-neutral per DEC-027: no third-party
+brand text or logo, no claim of affiliation. Asset-failure fallback MUST show
+the selected pet's own name or accessible description, never a third-party
+brand and never a different pet. Character switching, persistence, and
+failure behavior keep DEC-014/CTR-022 semantics for the now open set of
+pets.
+
+### CTR-OVERLAY-040 — Decoupled grade presentation policy
+
+Each pet declares its grade presentation policy: `showExactLevelNumber`,
+`showDescription`, `insigniaMode` (`none | overlay | wearable`) with optional
+asset and anchor, and compact behavior. Exact level identity MUST remain
+exposed to accessibility (DOM data attributes) and rendered in the Full
+Journey regardless of resident-surface policy. When the exact number is not
+shown on the resident surface, no placeholder, gauge, or within-level
+progress readout may appear in its place (CTR-016 preserved). Pets whose
+policy declares insignia MUST render all level × expression combinations
+without identity switch or insignia detachment (CTR-024 generalized); pets
+with `insigniaMode: none` impose no insignia requirement. Localized
+descriptions, when shown, are meaningful text, not a bare number.
+
+### CTR-OVERLAY-041 — Open pet preference, migration, and fail-soft
+
+The overlay preference character field generalizes from the fixed two-value
+union to an open string pet ID. Stored `vehicle` and `companion` values MUST
+continue to resolve exactly as before (migration tolerant). An unknown,
+removed, or undeclared pet ID MUST fail soft to the documented default pet
+(`vehicle`) without mutating growth data, preferences, or scheduler state.
+The secondary selector MUST list all bundled pets declared user-selectable,
+localized and keyboard operable, with selected state exposed; selection MUST
+remain exclusive (exactly one resident subject) and preserve the DEC-014
+no-reset, no-remount guarantees within a shared journey. Selecting a pet
+bound to a different pack switches Engine `activePackId` by declaration;
+points, ledger, receipts, keepsakes, and each journey's growth state MUST be
+preserved across switches, reloads, and restarts.
+
+### CTR-OVERLAY-042 — Shipping base art carries no third-party brand or baked UI numerals
+
+Current shipping base character art MUST NOT contain baked third-party brand
+text or logos, and MUST NOT contain baked UI-style level numerals or level
+labels. Fleet-scale meaning MAY be expressed through representative
+population, spatial scale, environment, silhouette, or declarative metadata
+instead of on-art text. Insignia SVG accessibility titles are metadata, not
+visible marks, and are not affected. Brand-neutral corrections MUST replace
+the shipped masters through the Owner-designated offline art production route
+with recorded provenance and deterministic conversion — CSS-only masking of
+branded masters is forbidden. A current-art inventory (path, consumer,
+source, provenance, visible brand YES/NO, visible numeral YES/NO, ships to
+runtime vs historical evidence only) MUST be maintained with regenerable
+contact sheets for independent review.
+
+### 17.3 Acceptance for new contracts
+
+### ACC-OVERLAY-134 — Brand-neutral runtime and fallback matrix
+
+- Contracts: `CTR-OVERLAY-039`, `CTR-OVERLAY-042`, `CTR-OVERLAY-014`
+- Method: in the isolated pinned DSH and the built bundle, exercise both
+  reference pets and the fixture pet across normal runtime, WebP path, PNG
+  fallback (asset blocked), total-failure fallback, collapsed state, menu,
+  and grade caption; assert current-identity surfaces contain no third-party
+  brand text/mark; assert fallback shows the pet's own name/description;
+  grep the built client bundle and package projection; separately confirm
+  historical evidence and provenance records retain their factual content.
+- Expected result: zero unauthorized brand bindings in current identity
+  surfaces; historical records untouched.
+- Failure condition: any current user-facing surface binding a third-party
+  brand, a CSS-masked branded master, or an erased/falsified historical
+  record.
+
+### ACC-OVERLAY-135 — Third-pet zero-core-edit creator acceptance
+
+- Contracts: `CTR-OVERLAY-038`, `CTR-OVERLAY-041`, `CTR-OVERLAY-040`
+- Method: starting only from the Creator Kit template and documentation,
+  produce a fixture pet (ID and visual identity distinct from `vehicle` and
+  `companion`, original art, own journey pack) using configuration, assets,
+  copy, and license metadata only; run validate, preview, and deterministic
+  build; install into a disposable DSH; select it; reload and restart;
+  exercise session reactions, petting, cursor gaze where the recipe supports
+  it, drag, speech, and reduced motion; uninstall. Record every file the
+  author touched and mechanically verify zero manual edits to `src/engine/**`,
+  overlay rendering/scheduler/persistence cores, ID unions, per-pet tables,
+  and build scripts.
+- Expected result: every step passes; `CORE_SOURCE_EDITS_FOR_NEW_PET = 0`;
+  existing pets and progress unchanged throughout.
+- Failure condition: any step requiring a core TypeScript edit, a broken
+  validate/preview/build loop, growth mutation, or a duplicate resident
+  subject.
+
+### ACC-OVERLAY-136 — Preference migration and growth preservation across pets
+
+- Contracts: `CTR-OVERLAY-041`, `CTR-OVERLAY-010`, `CTR-OVERLAY-006`
+- Method: with real stored growth and a pre-V8 preference record, exercise
+  `vehicle`/`companion` switches (shared journey), switch to the fixture pet
+  (own journey) and back, reload, change session, restart, deliver storage
+  events, and inject unknown/removed pet IDs; compare Engine, ledger, and
+  receipt snapshots before/after; verify token-economy seams untouched.
+- Expected result: old IDs resolve as before; unknown IDs fail soft to the
+  documented default; no reset or fork of any journey's growth; usage source
+  and economy unchanged.
+- Failure condition: reset/forked growth, lost valid preference fields,
+  storage write loops, or any change to usage seam semantics.
+
+### ACC-OVERLAY-137 — Grade presentation decoupling and accessibility parity
+
+- Contracts: `CTR-OVERLAY-040`, `CTR-OVERLAY-016`, `CTR-OVERLAY-020`
+- Method: contact sheets and SMALL/LARGE screenshots for each reference pet
+  and the fixture across all levels under their declared policies; assert
+  resident surfaces show no mandatory numeral or brand, companion insignia
+  remain symbolic without numeric text, DOM data exposes exact level identity,
+  Full Journey renders grade details; exercise a policy variant that opts
+  into showing the exact number.
+- Expected result: per-policy presentation with accessibility parity and no
+  gauge or within-level progress substitute.
+- Failure condition: a mandatory number/badge imposed on any pet, missing
+  accessibility level identity, invented level meanings, or a CTR-016
+  regression.
+
+### ACC-OVERLAY-138 — Current shipping asset visual inventory and hygiene
+
+- Contracts: `CTR-OVERLAY-042`, `CTR-OVERLAY-039`
+- Method: regenerate the current-art inventory and contact sheets covering
+  runtime vehicle assets, runtime companion assets, insignia, expression
+  layers, generated PNG/WebP, masters consumed by build, public README/docs
+  screenshots, and bundle-inlined assets; classify each asset's visible
+  brand, visible numeral, provenance, and runtime-vs-historical shipping;
+  independent visual review confirms current identity is brand-neutral and
+  free of baked UI numerals.
+- Expected result: complete inventory with zero current-identity violations;
+  historical evidence clearly separated.
+- Failure condition: a shipping current-identity asset with baked brand or
+  UI numeral, missing provenance for regenerated art, or contact sheets that
+  cannot be reproduced deterministically.
+
+### Reconciliation with carried contracts
+
+V8 replacements supersede conflicting prior wording, narrowly:
+
+1. CTR-OVERLAY-023: the sentences "Both characters MUST visibly show
+   Pony.ai" and "Label and insignia MUST neither obscure the face/brand …"
+   are superseded by DEC-027/CTR-039 (brand-neutral identity; the face
+   non-obstruction clause survives with "brand" moot). The mandates "Every
+   level MUST have a declarative clothing-attached insignia … and both
+   characters MUST show a localized descriptive grade label" become per-pet
+   policy under CTR-040: the companion reference retains its insignia
+   (symbolic, no numeric text) and a brand-free localized description by
+   policy; no pet is required to wear a badge or show a numeral. All other
+   CTR-023 clauses (sizing bands, clamping, hit-area inclusion, no extra
+   focus target) carry forward.
+2. DEC-OVERLAY-012: "Exactly two presentations of one journey", "Both show
+   Pony.ai", and "No new Pack, Engine, ledger, thresholds, receipts or
+   journey is created" are superseded by DEC-028 (an open set of declarative
+   pets; new packs with their own journeys are pack data under Engine V4).
+   The exclusive single-subject rule and the driver/escort semantics of the
+   vehicle presentation are unchanged for the vehicle reference.
+3. DEC-OVERLAY-013: "The exact grade remains accessible and visually
+   legible at SMALL" is superseded by CTR-040: exact grade MUST remain
+   accessible (DOM data, Full Journey); resident-surface visibility is
+   per-pet policy. Level meanings remain exclusively Engine V4 §11.1 for
+   `autonomous-fleet`.
+4. CTR-OVERLAY-022: "The secondary selector MUST offer exactly `vehicle`
+   and `companion`" is superseded by CTR-041 (dynamic menu over bundled
+   user-selectable pets). Every other CTR-022 clause — declarative bundled
+   mappings, no Engine character semantics, exactly one resident subject,
+   zero subjects when collapsed or suppressed, one bubble, journey dialog
+   not a second pet — carries forward over the open pet set.
+5. DEC-OVERLAY-003 and CTR-OVERLAY-006: the DSH user-surface Pack boundary
+   "autonomous-fleet only" is superseded by DEC-028: the surface presents
+   the packs of bundled user-selectable pets; `seedling-fixture` remains
+   bundled, internal, and not user-selectable; Engine reuse, one engine
+   instance, and shared-progress guarantees are unchanged.
+6. CTR-OVERLAY-014 and CTR-OVERLAY-018: "the two characters" floors
+   generalize to the open pet set: the two bundled reference characters keep
+   their existing variant and catalog floors (including the >=10 statically
+   distinguishable expression variants and the 30-line per locale catalog
+   floor with the `petting`/`welcome`/`ritual` categories); a new pet MUST
+   declare per-locale catalogs covering at least the six session states and
+   idle (at least one line each) and MUST statically distinguish all six
+   session states with failed/cancelled distinct under the same content
+   boundary and the same single scheduler; the >=10-variant floor is a
+   bundled-reference-character quality bar, not a new-pet admission
+   requirement.
+7. CTR-OVERLAY-024: "All 12×10 companion grade/expression combinations"
+   generalizes to pets whose policy declares insignia (CTR-040); the
+   companion reference combination matrix is unchanged. The offline
+   Owner-designated art route and no-runtime/build-model-call rules now also
+   bind brand-neutral regeneration (CTR-042).
+8. §2 Out of scope: "re-deriving the existing vehicle Art V2 identity or
+   regenerating its L1–L12 art; original companion art is in scope" is
+   superseded by CTR-042: brand-neutral regeneration of BOTH characters'
+   shipping masters is in scope, through the Owner-designated offline route,
+   preserving each character's original visual identity minus baked brand
+   marks. The same supersession applies to the carried echoes of the
+   art-preservation wording — CTR-014's "Art V2 level base art MUST NOT be
+   regenerated", §8's `ART_V2_LEVEL_BASE = PRESERVED (no L1-L12
+   regeneration)`, and DEC-007's "Vehicle Art V2 is preserved" — each now
+   reads as "preserved in original visual identity, except as required by
+   CTR-039/CTR-042 brand-neutral correction". The remaining
+   Engine/progress/Pack-trust exclusions are unchanged (new pack data is not
+   a Pack schema or trust change).
+9. DEC-OVERLAY-014/CTR-OVERLAY-010: "Unknown stored IDs resolve to vehicle"
+   generalizes to CTR-041's fail-soft rule over the open pet set with the
+   same no-growth-mutation guarantee.
+10. Carried acceptance residue: ACC-122's failure condition "more than two
+   choices", ACC-118's "the CTR-023 descriptive grade label and insignia
+   remain visible", and ACC-123's "readable exact grade / visible insignia
+   silhouette / failure on bare grade" enforce the superseded CTR-023/DEC-013
+   two-pet mandates and are evaluated under their Contracts columns as
+   re-scoped by items 1, 3, and 4 — the selector over the open pet set
+   (CTR-041), grade presentation per declared policy with accessibility
+   parity (CTR-040, governed on the current surface by ACC-137), and
+   insignia visibility only for pets whose policy declares it. The two
+   bundled reference characters remain bound by their own declared policies.
+
+Everything else in V7 — the two-size surface, settings menu, footer,
+captions, gesture arbitration, petting, cursor awareness, ambient layer,
+daypart weighting, rituals, behavior profiles, hit honesty, coexistence,
+disposal, privacy boundary (CTR-008), no-panel machine, Engine/progress/
+token-economy reuse — carries forward unchanged and remains binding.
+
+### Coverage extension
+
+CTR-038 → ACC-135; CTR-039 → ACC-134; CTR-040 → ACC-137; CTR-041 → ACC-136;
+CTR-042 → ACC-138. Every prior V7 contract/acceptance pair remains binding
+wherever V8 did not replace its wording, evaluated over the open pet set
+wherever presentation is affected and with both reference characters and both
+sizes wherever presentation is affected.
+
+### V8 authorization state
+
+```text
+SPEC_GOVERNANCE_MODE = AUTHOR
+AUTHORITY_ACTION = SUPERSEDE
+SPEC_ID = DSH_PET_OVERLAY_ADAPTER_V8
+STATUS = accepted
+IMPLEMENTATION_AUTHORITY = contracts
+PLAN_LEVEL = EXEC_PLAN
+ASSURANCE_LEVEL = DURABLE
+DOCS_FIRST_REQUIRED = YES
+OPEN_OWNER_DECISIONS = final license selection only (outside this Spec; LICENSE_SELECTION = OWNER_DECISION_REQUIRED)
+NORMATIVE_TBD = NONE
+PARTIAL_SUPERSESSION = NONE
+CONTRACT_COUNT = 42
+CONTRACTS_WITH_ACCEPTANCE = 42
+AUTHORING_READY_FOR_REVIEW = YES
+NEXT_ACTION = MERGE_AUTHORITY
+```
+
+V7's §16 authorization block above is the historical record of V7's own
+acceptance; this V8 block is the current acceptance state. Independent
+Spec REVIEW of the exact proposed Head `1b144af` (BASE `ece4d4d`) returned
+`ACCEPT` with zero blockers; the reviewer-prescribed closures (F3 art-echo
+supersession naming, F4 ACC-122 selector residue, F5 ACC-118/ACC-123 grade
+residue, F6 per-set variant floors) were applied at `3d76915`. Owner `mayf3`
+accepted V8 under the Goal「开放」dispatch §16 pre-authorization (semantics
+within Goal bounds; no license choice made; no history rewrite; no DSH Core,
+Engine schema, progress, threshold, or token-economy change). Active only
+after merge into main. No implementation begins before that.
+PRODUCTION_APPLY_ALLOWED = NO and PUBLICATION_APPLY_ALLOWED = NO for every
+round of this Goal.
