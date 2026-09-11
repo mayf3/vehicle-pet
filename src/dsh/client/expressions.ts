@@ -33,14 +33,11 @@ export type VehiclePetExpressionVariant =
   | 'failed'
   | 'cancelled'
 
-/** Face anchor rects `[left, top, size]` in % of the 480x480 level sprite canvas. */
-export const EXPRESSION_LEVEL_ANCHORS: Readonly<
-  Record<string, readonly [number, number, number]>
-> = {
-  l1: [8, 37, 45], l2: [8, 37, 45], l3: [8, 37, 45], l4: [7, 45, 40],
-  l5: [8, 38, 45], l6: [32, 61, 22], l7: [36, 70, 13], l8: [36, 66, 14],
-  l9: [36, 67, 14], l10: [41, 68, 11], l11: [35, 63, 15], l12: [16, 65, 22],
-}
+/**
+ * Face anchor rects `[left, top, size]` in % of the 480x480 level sprite
+ * canvas are per-pet presentation data (V8 CTR-OVERLAY-038): the bundled
+ * vehicle reference carries them in `pets/vehicle/definition.ts`.
+ */
 
 /** The five user-perceivable session states (mapping core, unchanged from V2). */
 export type VehiclePetExpressionState =
@@ -66,11 +63,13 @@ export function expressionStateFromSession(
   return 'idle'
 }
 
+/** Anchor lookup over a pet's own expression anchor table (generic). */
 export function expressionAnchor(
+  anchors: Readonly<Record<string, readonly [number, number, number]>>,
   levelId: string | undefined,
 ): readonly [number, number, number] | null {
   if (levelId === undefined) return null
-  return EXPRESSION_LEVEL_ANCHORS[levelId] ?? null
+  return anchors[levelId] ?? null
 }
 
 export function expressionAsset(

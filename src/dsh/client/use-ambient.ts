@@ -13,10 +13,10 @@ import {
   type AmbientActionDefinition,
 } from './ambient-rules'
 import type { DaypartBucket } from './daypart'
-import type { CharacterId } from './types'
+import type { PetId } from './types'
 
 export interface AmbientSchedulerOptions {
-  readonly characterId: CharacterId
+  readonly petId: PetId
   readonly daypartBucket: DaypartBucket
   /** Payload-ignored cadence snapshot from the speech controller. */
   readonly readCadence: () => {
@@ -68,7 +68,7 @@ export function useAmbientBehavior(options: AmbientSchedulerOptions): void {
       })
       if (!verdict.allowed) return
       const action = selectAmbientAction(
-        current.characterId,
+        current.petId,
         current.daypartBucket,
         lastActionIdRef.current,
         (current.random ?? Math.random)(),

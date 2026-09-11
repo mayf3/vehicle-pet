@@ -15,10 +15,12 @@ import {
 export interface ExpressionLayerProps {
   readonly variant: VehiclePetExpressionVariant
   readonly derivedLevelId: string | undefined
+  /** The presenting pet's own per-level face anchor table (V8 CTR-038). */
+  readonly anchors: Readonly<Record<string, readonly [number, number, number]>>
 }
 
 export function ExpressionLayer(props: ExpressionLayerProps): ReactElement | null {
-  const anchor = expressionAnchor(props.derivedLevelId)
+  const anchor = expressionAnchor(props.anchors, props.derivedLevelId)
   const asset = expressionAsset(props.variant)
   if (anchor === null || asset === null) return null
   const [left, top, size] = anchor
