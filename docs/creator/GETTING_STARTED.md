@@ -41,6 +41,14 @@ supported way to change them.
   (their growth data is not lost).
 - Pack id: the journey identity, also used in storage receipts. Stable, unique.
 
+## Data only (no code)
+
+A creator pet is configuration + images + copy — never code. The
+`assetSource.kind: 'module'` option in the schema is a repository-internal
+seam for the bundled reference pets' generated asset modules; creator pets
+are **files-only** (`{ kind: 'files', dir: './assets' }`), and both the
+validator and the wiring generator reject anything else.
+
 ## Art rules (short version)
 
 - Original art only; no third-party characters, logos, or brand text; no

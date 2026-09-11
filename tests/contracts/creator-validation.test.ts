@@ -12,6 +12,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { validateCreatorPet } from '../../scripts/creator/lib/validate-pet-core.mjs'
+import { assertModuleSourceAllowed } from '../../scripts/generate-pet-wiring.mjs'
 
 const REPO_ROOT = path.resolve(import.meta.dirname, '../..')
 let workDir: string
@@ -113,8 +114,48 @@ describe('CREATOR_VALIDATION_NEGATIVE_MATRIX (R2 fix round)', () => {
     }, 'strictly increasing')
   })
 
+  it("rejects assetSource kind 'module' — creator pets are files-only (R3 boundary)", async () => {
+    await expectRejected(async () => {
+      const pet = await J('pet/pet.json') as unknown as { poseSprite: { poseSource: { kind: string; path: string } } }
+      pet.poseSprite.poseSource = { kind: 'module', path: '../../some-creator-module' } as typeof pet.poseSprite.poseSource & Record<string, string>
+      await W('pet/pet.json', JSON.stringify(pet))
+    }, "'module' is repository-internal")
+    await expectRejected(async () => {
+      const pet = await J('pet/pet.json') as unknown as { poseSprite: { insignia: { assetSource: { kind: string; path: string } } } }
+      pet.poseSprite.insignia = { assetSource: { kind: 'module', path: '../../insignia.generated' } } as typeof pet.poseSprite.insignia & Record<string, unknown>
+      await W('pet/pet.json', JSON.stringify(pet))
+    }, "'module' is repository-internal")
+  })
+
   it('accepts the pristine template (control)', async () => {
     const result = await runCase(async () => {})
     expect(result.ok, result.errors.join(' | ')).toBe(true)
+  })
+})
+
+describe('WIRING_GENERATOR_MODULE_ALLOWLIST (R3 boundary, mechanical second layer)', () => {
+  const companionDir = path.join(REPO_ROOT, 'src/dsh/client/pets/companion')
+  const companionSource = { kind: 'module' as const, path: '../../character-assets.generated', poses: 'companionAssets', alphaBounds: 'poseAlphaBounds', insigniaAssets: 'insigniaAssets', insigniaAnchors: 'poseAnchors' }
+
+  it('allows the repository-owned generated asset seam (companion path)', () => {
+    expect(() => assertModuleSourceAllowed(companionDir, companionSource, 'companion')).not.toThrow()
+  })
+
+  it('rejects module paths inside the creator surface (pets/)', () => {
+    expect(() => assertModuleSourceAllowed(companionDir, { ...companionSource, path: '../orb/orb-wiring.generated' }, 'orb'))
+      .toThrow(/outside the repository-generated asset seam/)
+  })
+
+  it('rejects non-generated and missing modules', () => {
+    expect(() => assertModuleSourceAllowed(companionDir, { ...companionSource, path: '../../characters' }, 'companion')).toThrow(/\*\.generated\.ts/)
+    expect(() => assertModuleSourceAllowed(companionDir, { ...companionSource, path: '../../no-such.generated' }, 'companion')).toThrow(/does not exist/)
+  })
+
+  it('rejects missing referenced exports', () => {
+    expect(() => assertModuleSourceAllowed(companionDir, { ...companionSource, poses: 'notAnExport' }, 'companion')).toThrow(/no export 'notAnExport'/)
+  })
+
+  it('rejects module sources with no referenced exports', () => {
+    expect(() => assertModuleSourceAllowed(companionDir, { kind: 'module', path: '../../character-assets.generated' }, 'companion')).toThrow(/at least one export/)
   })
 })

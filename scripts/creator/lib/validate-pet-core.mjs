@@ -116,6 +116,17 @@ export async function validateCreatorPet(petDir, options = {}) {
       if (pet.poseSprite?.insignia !== undefined && pet.gradePolicy.insigniaMode !== 'wearable') {
         errors.push("pet/pet.json poseSprite.insignia is only used when gradePolicy.insigniaMode is 'wearable'")
       }
+      // Creator V1 is files-only (R3/R7 boundary): assetSource kind 'module'
+      // is a repository-internal generated-asset seam (the bundled companion
+      // uses it) and is refused here so a creator pet.json can never make the
+      // build import arbitrary modules.
+      for (const sourcePath of ['poseSprite.poseSource', 'poseSprite.insignia.assetSource']) {
+        const seg = sourcePath.split('.')
+          .reduce((node, key) => (isPlainObject(node) ? node[key] : undefined), pet)
+        if (isPlainObject(seg) && seg.kind === 'module') {
+          errors.push(`pet/pet.json ${sourcePath}.kind 'module' is repository-internal (generated asset seam) and not available to creator pets; use { kind: 'files', dir: './assets' }`)
+        }
+      }
       for (const field of ['license', 'attribution', 'provenance']) {
         if (typeof pet.license?.[field] !== 'string' || pet.license[field].trim().length === 0) {
           errors.push(`pet/pet.json license.${field} must be a non-empty string`)
