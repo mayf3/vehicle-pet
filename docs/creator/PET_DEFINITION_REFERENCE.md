@@ -33,6 +33,9 @@ Unknown fields are rejected by schema — extra data has nowhere to hide.
   may share one pose. Out-of-range indices are rejected.
 - `poseSource: { kind: 'files', dir: './assets' }`: transparent PNG+WebP
   pairs named `pose-0.png/.webp`, `pose-1.png/.webp`, … (320×540 canvas).
+  Creator pets are files-only — `kind: 'module'` is a repository-internal
+  generated-asset seam (bundled reference pets only) and is rejected by
+  validation for creator pets.
   The generator measures per-pose visible-alpha bounds `[x0, y0, x1, y1]`
   automatically — the resident hitbox hugs them (V3 CTR-OVERLAY-003 hit
   honesty) and no hand-measured numbers exist to drift.

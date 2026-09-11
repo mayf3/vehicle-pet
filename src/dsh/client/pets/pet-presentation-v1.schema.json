@@ -101,6 +101,7 @@
     },
     "assetSource": {
       "type": "object", "additionalProperties": false, "required": ["kind"],
+      "description": "kind module is a repository-internal generated-asset seam (bundled reference pets only). Creator pets are files-only: the creator validator rejects module and the wiring generator allows only repo-owned *.generated.ts modules.",
       "properties": {
         "kind": { "enum": ["files", "module"] },
         "dir": { "type": "string", "pattern": "^(\\./|\\.\\./)[^:*?\"<>|]*$", "description": "files kind: directory of pose-N.png/.webp pairs, relative to the pet directory" },
