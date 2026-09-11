@@ -63,9 +63,15 @@ describe('PUBLIC_DOCS_PRESENCE_CHECK (Goal「开放」§10)', () => {
     }
   })
 
-  it('keeps the license decision explicitly open (no silent license choice)', async () => {
+  it('records the landed split-license decision (Owner OPTION_B, 2026-09-11)', async () => {
     const policy = await readFile(path.join(REPO_ROOT, 'docs/public/ASSET_AND_BRAND_POLICY.md'), 'utf8')
-    expect(policy).toContain('OWNER DECISION REQUIRED')
-    expect(existsSync(path.join(REPO_ROOT, 'LICENSE'))).toBe(false)
+    expect(policy).toContain('DECIDED (2026-09-11): Apache-2.0 (code) + CC BY 4.0 (assets)')
+    expect(policy).toContain('not relicensed')
+    expect(policy).toContain('not** a legal opinion')
+    expect(existsSync(path.join(REPO_ROOT, 'LICENSE'))).toBe(true)
+    expect(existsSync(path.join(REPO_ROOT, 'LICENSE.assets'))).toBe(true)
+    expect(existsSync(path.join(REPO_ROOT, 'NOTICE'))).toBe(true)
+    const pkg = JSON.parse(await readFile(path.join(REPO_ROOT, 'package.json'), 'utf8'))
+    expect(pkg.license).toBe('Apache-2.0')
   })
 })

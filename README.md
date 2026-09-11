@@ -8,9 +8,10 @@ growth journey) and the **Orb** fixture pet (its own journey), which doubles
 as the third-pet proof that a complete pet needs configuration, textures,
 copy, and license metadata only.
 
-> **Status: Public Preview candidate.** The framework is feature-complete for
-> the preview scope and passing its full verification suite. The final open
-> license decision is an explicit Owner gate (`docs/public/ASSET_AND_BRAND_POLICY.md`).
+> **Status: Public Preview.** The framework is feature-complete for the
+> preview scope, passing its full verification suite, and licensed under a
+> code/assets split (Apache-2.0 / CC BY 4.0 — see below). Production
+> deployment and release announcements remain separate project-owner actions.
 
 ## What it is
 
@@ -130,11 +131,18 @@ deterministic recipes and byte-compare the checked-in outputs. Contract
 checks enforce dependency direction, domain neutrality, brand-neutral current
 identity, and the third-pet zero-core-edit path.
 
-## License, security, limitations
+## License (split: code vs assets)
 
-- License: the final repository license is an open Owner decision
-  ([ASSET_AND_BRAND_POLICY.md](docs/public/ASSET_AND_BRAND_POLICY.md) records
-  the packet); bundled pet data carries its own license/attribution metadata.
+- **Code, build scripts, tests, and code documentation:** Apache-2.0 (`LICENSE`).
+- **Original project assets** — bundled pet data, artwork, insignia, and copy:
+  **CC BY 4.0** (`LICENSE.assets`). Art provenance ships with each pet and in
+  `NOTICE`; parts were produced with recorded AI assistance, and the license
+  is granted only to the extent of the owner's actual rights.
+- **Third-party brands, works, and historical evidence are NOT relicensed**
+  and remain the property of their owners (named in `NOTICE`; see
+  [ASSET_AND_BRAND_POLICY.md](docs/public/ASSET_AND_BRAND_POLICY.md)).
+- Creator pets keep their own license/attribution metadata — your pet stays
+  your property.
 - Security/privacy boundary and classification rules:
   [PRIVACY_AND_DATA_BOUNDARY.md](docs/public/PRIVACY_AND_DATA_BOUNDARY.md).
 - Not supported (by design): marketplace/remote pack installation, runtime
