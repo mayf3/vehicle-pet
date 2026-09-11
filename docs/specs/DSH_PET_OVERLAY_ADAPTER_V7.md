@@ -1,6 +1,6 @@
 ---
 spec_id: DSH_PET_OVERLAY_ADAPTER_V7
-status: accepted
+status: superseded
 spec_kind: implementation
 authority_level: governing_spec
 implementation_authority: contracts
@@ -22,7 +22,7 @@ external_authorities:
     relation: interoperates_with
 supersedes:
   - DSH_PET_OVERLAY_ADAPTER_V6
-superseded_by: null
+superseded_by: DSH_PET_OVERLAY_ADAPTER_V8
 owners:
   - mayf3
 ---
