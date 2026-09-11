@@ -1,118 +1,142 @@
-# Configurable Pet Engine V1
+# vehicle-pet — a configurable desktop pet framework
 
-A generic, passive, non-coercive pet growth engine driven by an external progress snapshot and declarative first-party Pet Packs.
+A generic, passive, non-coercive pet growth framework: declarative Pet Packs
+drive everything visible, an external progress source drives growth, and a
+DeepSeek Harness Web overlay plugin renders the resident pet. Three pets ship
+bundled — the **Vehicle** and **Companion** reference characters (one shared
+growth journey) and the **Orb** fixture pet (its own journey), which doubles
+as the third-pet proof that a complete pet needs configuration, textures,
+copy, and license metadata only.
 
-## Included
+> **Status: Public Preview candidate.** The framework is feature-complete for
+> the preview scope and passing its full verification suite. The final open
+> license decision is an explicit Owner gate (`docs/public/ASSET_AND_BRAND_POLICY.md`).
 
-- framework-neutral TypeScript engine with strict snapshot ordering and pure level derivation;
-- strict `PetPackManifestV1` JSON Schema and atomic validator;
-- deterministic bounded `SceneRenderPlan` renderer;
-- IndexedDB atomic Presentation Journal, upgrade receipts, daily greeting, and keepsakes;
-- generic React presentation layer with reduced motion and asset fallback;
-- `autonomous-fleet` production Pack and `seedling-fixture` conformance Pack;
-- local `MockProgressSource` prototype and ten-state showcase.
+## What it is
 
-V1 has no real Token integration, model calls, remote Pack support, audio, multi-pet, or external network dependency. Real Token statistics remain a separate future Progress Source Spec.
+- a framework-neutral TypeScript pet engine with strict snapshot ordering and
+  pure level derivation (`src/engine/`), fed by an external progress snapshot
+  it can never influence;
+- a declarative Pet Pack format (JSON manifest + assets) with an atomic
+  validator: levels, thresholds, scenes, keepsakes, and localized copy are
+  all pack data (`src/packs/`);
+- a generic React presentation layer with reduced-motion and asset fallback
+  (`src/react/`);
+- a DSH bundle/client adapter that mounts a bottom-right resident pet inside
+  Harness Web (`src/dsh/`): two sizes, click/double-click/long-press-petting/
+  drag interactions, deterministic gesture arbitration, bounded cursor
+  awareness, a quiet ambient behavior layer, daypart weighting, a guilt-free
+  welcome-back ritual, and a restrained original speech bubble system;
+- a Creator Kit (`examples/minimal-pet/` + `pnpm pet:validate`) so a third
+  party can add a complete pet with **zero** edits to engine or overlay code.
 
-## Requirements
+## What it reads — and what it never reads
 
-- Node.js 22+
-- pnpm 10.28.1
-- Chrome for Playwright E2E
+The DSH adapter consumes **structured session metadata only**: live state
+(idle / running / needs-input) and terminal turn status (completed / failed /
+cancelled), edge-deduplicated. It reads token counts from the host's
+counts-only usage seam for growth math.
 
-## Run
+It never reads prompt bodies, completion bodies, user message content,
+reasoning text, credentials, or clipboard, and it never writes to the host
+profile. Session activity produces temporary visual reactions only — a turn
+is never converted into growth points. See
+[PRIVACY_AND_DATA_BOUNDARY.md](docs/public/PRIVACY_AND_DATA_BOUNDARY.md).
 
-```sh
-pnpm install --frozen-lockfile
-pnpm dev
-```
+## Pets and growth
 
-Useful prototype parameters:
+- Every pet declares its own journey pack: thresholds, stage names, scenes,
+  and keepsakes are pack data. Switching pets switches journey by
+  declaration; points, ledger, receipts, and each journey's growth state are
+  preserved.
+- Grade presentation is per-pet policy: whether the exact level number and a
+  localized description appear on the resident surface, and whether a
+  symbolic insignia is worn. Exact level identity is always available to
+  accessibility and in the Full Journey view.
+- Bundled pets are brand-neutral by policy; historical provenance records are
+  kept intact. See [ASSET_AND_BRAND_POLICY.md](docs/public/ASSET_AND_BRAND_POLICY.md).
 
-```text
-?showcase=1
-?pack=autonomous-fleet
-?pack=seedling-fixture
-?points=<safe integer>
-?reducedMotion=1
-```
+## Install (DeepSeek Harness Web)
 
-## Verification
-
-```sh
-pnpm typecheck
-pnpm lint
-pnpm test
-pnpm test:e2e
-pnpm build
-pnpm check:contracts
-pnpm assets:check
-pnpm verify
-```
-
-`pnpm assets:check` recreates every Pack raster from deterministic local recipes and compares the checked-in WebP/PNG outputs. The contract and architecture checks enforce dependency direction, domain neutrality, and the absence of remote/model/Host integration surfaces.
-
-## DeepSeek Harness Web overlay plugin
-
-The same Engine, React product layer, and both bundled Packs also ship as an
-external DSH bundle/client plugin that mounts a bottom-right floating pet
-inside Harness Web (`shell.overlay`, 112px pet / 320px compact panel / 36px
-collapsed launcher, in-Harness full-journey dialog, structured session
-reactions that never touch progression). The client bundle uses the
-host-provided React 18 identity, inlines every Pack asset as data URLs, and
-runs without any dev server. Only `src/dsh/**` imports Harness contracts.
-
-### Build the plugin
+Requirements: see [SUPPORTED_ENVIRONMENTS.md](docs/public/SUPPORTED_ENVIRONMENTS.md).
 
 ```sh
-pnpm build:dsh          # emits lib/index.js, lib/client.js, lib/types
-pnpm check:dsh-bundle   # React-singleton / no-createRoot / data-URL / determinism gate
-pnpm check:dsh-package    # npm pack allowlist gate
-pnpm check:dsh-lifecycle  # disposable add/update/remove/reinstall gate
-pnpm verify:dsh           # type/lint/contracts/build/package/lifecycle/unit/DOM/pinned-browser E2E
-```
-
-### Install into a Harness Web profile
-
-```sh
-dsh plugin --profile web add <path-to-this-checkout>   # local checkout
-dsh plugin --profile web add github:mayf3/vehicle-pet#<ref>  # fixed remote ref
-# restart the Web profile after add / update / remove:
-dsh web
+dsh plugin --profile web add github:mayf3/vehicle-pet#<ref>   # fixed remote ref
+# or, from a local checkout:
+dsh plugin --profile web add <path-to-this-checkout>
+dsh web    # restart the Web profile after add / update / remove
 ```
 
 Remove with `dsh plugin --profile web remove @mayf3/vehicle-pet` and restart;
-after removal no overlay DOM, styles, listeners, or subscriptions remain.
-Harness session activity (running / needs-input / completed / failed /
-cancelled) produces temporary visual reactions only — a turn, tool call, or
-task is never converted into growth points, and real token usage is not read.
-Pinned compatibility: `mayf3/deepseek-harness@f77b5a2fcebc2d9138f6608a60636f2294868d42`
+after removal no overlay DOM, styles, listeners, or subscriptions remain. To
+roll back, pin the previous ref the same way — growth data survives both
+directions.
+
+The overlay offers three pets in its settings menu (double-click the pet),
+`SMALL`/`LARGE` sizes, reduced-motion (explicit or follow-system), the Full
+Journey dialog, and a collapse launcher. Pinned compatibility:
+`mayf3/deepseek-harness@f77b5a2fcebc2d9138f6608a60636f2294868d42`
 (DeepSeek Harness Web `0.1.0-rc.8`, React 18).
 
-### DSH browser acceptance
+## Make your own pet
 
-`pnpm test:dsh:e2e` launches the pinned Harness Web in a disposable
-`$DSH_HOME` with the local plugin installed and a scripted mock LLM, then
-drives the full overlay acceptance matrix in a real browser.
+```sh
+cp -r examples/minimal-pet examples/my-pet     # configuration + textures + copy
+pnpm pet:validate examples/my-pet              # errors name the exact field
+# follow examples/minimal-pet/README.md for preview + build
+```
+
+No engine or overlay code changes are required — that is a verified contract
+(`THIRD_PARTY_NO_CORE_EDIT_ACCEPTANCE`). Guides:
+[GETTING_STARTED.md](docs/creator/GETTING_STARTED.md) ·
+[PET_DEFINITION_REFERENCE.md](docs/creator/PET_DEFINITION_REFERENCE.md).
 
 ## Architecture
 
 ```text
-Progress Source → Pet Engine → Pet Pack → Prototype Shell (standalone)
-                                 └─ DSH bundle/client adapter → Harness Web shell.overlay
+Progress Source → Pet Engine → Pet Pack (journey)      ← declarative data
+                                  ↓
+        Pet Presentation (per-pet visuals, speech, policy) ← declarative data
+                                  ↓
+     Prototype Shell (standalone)   DSH bundle/client adapter → Harness Web
 ```
 
 ```text
-src/engine/       domain-neutral engine and frozen schema
-src/react/        generic React presentation
-src/packs/        first-party bundled declarative Packs
-src/prototype/    MockProgressSource browser shell
+src/engine/     domain-neutral engine, frozen schema, validation
+src/react/      generic React presentation
+src/packs/      bundled declarative Packs (discovered by directory scan)
+src/dsh/        DSH adapter: resident surface + declarative pet presentations
+src/prototype/  MockProgressSource browser shell
+examples/       Creator Kit template
 ```
 
-The Engine does not import React, the prototype, or a concrete Pack. The bundled application registry supplies Packs at assembly time.
+The Engine does not import React, the prototype, or a concrete Pack. Adding a
+bundled Pack or pet means adding a data directory — registries are generated
+by directory scan.
 
-## Conformance
+## Development and verification
 
-See the Engine record [`CONFIGURABLE_PET_ENGINE_V1_CONFORMANCE.md`](docs/conformance/CONFIGURABLE_PET_ENGINE_V1_CONFORMANCE.md) and the DSH adapter record [`DSH_PET_OVERLAY_ADAPTER_V1_CONFORMANCE.md`](docs/conformance/DSH_PET_OVERLAY_ADAPTER_V1_CONFORMANCE.md), with their linked visual evidence.
+```sh
+pnpm install --frozen-lockfile
+pnpm dev                 # standalone prototype (?showcase=1 ?pack=… ?points=… ?reducedMotion=1)
+pnpm verify              # typecheck + lint + unit/dom + e2e + build + contracts + asset determinism
+pnpm verify:dsh          # type/lint/contracts/build/bundle/package/lifecycle/unit/dom/pinned-browser e2e
+pnpm pet:validate examples/minimal-pet
+```
 
-DSH overlay author conformance evidence is complete. Independent overlay code/contract and experience audits have not yet run; the Draft PR is not ready to merge.
+`pnpm assets:check`, `assets:dsh-check`, `assets:expression-check`, and
+`assets:character-check` regenerate every generated raster from their
+deterministic recipes and byte-compare the checked-in outputs. Contract
+checks enforce dependency direction, domain neutrality, brand-neutral current
+identity, and the third-pet zero-core-edit path.
+
+## License, security, limitations
+
+- License: the final repository license is an open Owner decision
+  ([ASSET_AND_BRAND_POLICY.md](docs/public/ASSET_AND_BRAND_POLICY.md) records
+  the packet); bundled pet data carries its own license/attribution metadata.
+- Security/privacy boundary and classification rules:
+  [PRIVACY_AND_DATA_BOUNDARY.md](docs/public/PRIVACY_AND_DATA_BOUNDARY.md).
+- Not supported (by design): marketplace/remote pack installation, runtime
+  untrusted code, arbitrary JavaScript in pet data, multi-pet on one
+  resident, audio/TTS, Live2D/model-driven animation, mobile, telemetry.
