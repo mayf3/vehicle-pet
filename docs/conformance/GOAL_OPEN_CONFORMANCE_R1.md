@@ -65,7 +65,7 @@ STATE = implementation complete on branch; merge to main and clean-room fixed-re
 | SHIP_BLOCKERS = 0 | YES | blocker union (8 items) all closed; no new blockers introduced (auditor-verified) |
 | CONFORMANCE_RECORD = VERIFIED | YES | this record, bound to the tuple above |
 | MERGED_TO_MAIN | at merge | squash merge of open/impl-v8 (final gate before merge: green verify at quiet tree) |
-| CLEAN_ROOM fixed-ref verification | at merge | fresh clone at merged ref: install --frozen-lockfile, pet:validate, verify, build:dsh + gates, disposable DSH install/select/uninstall |
+| CLEAN_ROOM fixed-ref verification | DONE | see §Clean-room below |
 
 ## Blocker union and fix round (Goal §20 discipline)
 
@@ -83,3 +83,27 @@ FOLLOW_UP_DEBT (carried, non-blocking): third-pet zero-edit scan could extend to
 1. LICENSE decision (packet ready; nothing landed under its name).
 2. Production apply to ~/.dsh profile (PRODUCTION_APPLY_ALLOWED = NO this Goal).
 3. npm publish / GitHub Release / announcement / visibility change / any history rewrite.
+
+## Clean-room fixed-ref verification (post-merge, DONE_WHEN CLEAN_ROOM_ACCEPTANCE)
+
+```text
+CLEAN_ROOM_ACCEPTANCE = PASS
+MERGED_REF = f5f3b70 (mayf3/vehicle-pet:main, squash of PR #41)
+CLEAN_CLONE = /tmp/vp-cleanroom (fresh clone from github.com/mayf3/vehicle-pet, checkout f5f3b70; no Owner checkout involvement)
+OWNER_LOCAL_WIP_TOUCHED = NO
+OWNER_PRODUCTION_PROFILE_TOUCHED = NO (disposable DSH_HOME under /tmp only)
+ABSOLUTE_OWNER_PATH_REQUIRED = NO for the repository flow itself; the DSH browser e2e takes its pinned-harness checkout via the documented DSH_REFERENCE_WORKTREE env (a third-party dependency the tester must provide), never a silent default
+```
+
+Executed in the clean clone:
+
+| Step | Result |
+|---|---|
+| `pnpm install --frozen-lockfile` | PASS |
+| `pnpm pet:validate examples/minimal-pet` | PASS |
+| `pnpm verify` (types/lint/unit+dom/e2e/build/contracts/asset determinism) | exit 0 |
+| `pnpm build:dsh` | wiring + asset maps regenerate; plugin built |
+| `pnpm check:dsh-bundle` (implicitly via verify; rerun in impl tip audits) | PASS |
+| disposable DSH install → select → interactions → reload/restart → uninstall matrix | **46/46 PASS** (16.0m pinned-browser run) |
+
+This is the Goal's final verification step. FINAL_STATUS = paused at OWNER_LICENSE_DECISION_GATE (dispatch §23: all technical DONE_WHEN items green; the label READY_FOR_PUBLIC_PREVIEW is withheld until the Owner lands the license decision from docs/investigations/GOAL_OPEN_LICENSE_PACKET.md). STOP WORK on this Goal.
