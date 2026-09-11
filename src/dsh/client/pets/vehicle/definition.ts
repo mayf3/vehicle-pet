@@ -42,7 +42,7 @@ export const vehiclePresentation: PetPresentation = {
   behavior,
   speech: vehicleSpeech as PetSpeechCatalogData,
   license: {
-    license: 'SEE REPOSITORY LICENSE GATE (docs/public/ASSET_AND_BRAND_POLICY.md)',
+    license: 'Apache-2.0 (code) / CC-BY-4.0 (assets) — see NOTICE and LICENSE.assets',
     attribution: 'Original character art produced by mayf3 via the Owner-designated offline art route.',
     provenance: 'src/packs/autonomous-fleet/assets/masters/PROVENANCE-v2-identity.json',
   },

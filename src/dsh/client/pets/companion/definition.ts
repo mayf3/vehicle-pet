@@ -63,7 +63,7 @@ export const companionPresentation: PetPresentation = {
   behavior,
   speech: companionSpeech as PetSpeechCatalogData,
   license: {
-    license: 'SEE REPOSITORY LICENSE GATE (docs/public/ASSET_AND_BRAND_POLICY.md)',
+    license: 'Apache-2.0 (code) / CC-BY-4.0 (assets) — see NOTICE and LICENSE.assets',
     attribution: 'Original character art produced by mayf3 via the Owner-designated offline art route.',
     provenance: 'assets/character-source/PROVENANCE.json',
   },
