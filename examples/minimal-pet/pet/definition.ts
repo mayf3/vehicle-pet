@@ -82,7 +82,7 @@ export const myPetPresentation: PetPresentation = {
   behavior,
   speech: petSpeech as PetSpeechCatalogData,
   license: {
-    license: 'Replace with your code-free asset license, e.g. "CC-BY-4.0" (Owner gate pending repository-wide).',
+    license: 'Replace with YOUR asset license — your pet data stays your property (e.g. "CC-BY-4.0"). Repository code is Apache-2.0; see NOTICE.',
     attribution: 'Replace with your attribution line.',
     provenance: 'Replace with a pointer to your provenance record.',
   },

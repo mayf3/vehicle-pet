@@ -1,0 +1,36 @@
+vehicle-pet
+Copyright 2026 mayf3
+
+This product includes software (code, build scripts, tests, and code
+documentation) licensed under the Apache License, Version 2.0 (see LICENSE),
+and original non-code content (bundled pet data, artwork, and copy) licensed
+under CC BY 4.0 (see LICENSE.assets).
+
+The bundled original art was produced by the project owner, in part with
+the assistance of generative AI tools through the owner's recorded offline
+production route. Provenance records with source hashes and route
+descriptions ship with each pet:
+  - src/packs/autonomous-fleet/assets/masters/PROVENANCE.json
+  - src/packs/autonomous-fleet/assets/masters/PROVENANCE-v2-identity.json
+  - src/packs/autonomous-fleet/assets/masters/PROVENANCE-l6-l12-evolution.json
+  - src/dsh/client/pets/orb/PROVENANCE-orb.json
+  - assets/character-source/PROVENANCE.json
+  - src/dsh/client/assets/expressions/PROVENANCE.json
+
+Third-party names and works
+---------------------------
+
+DeepSeek, Harness, Pony.ai, and all other third-party names, trademarks,
+logos, and works that appear in this repository (including inside
+historical evidence and interoperability records) remain the property of
+their respective owners. Their presence is for interoperability, historical
+record, or audit evidence only; no affiliation, endorsement, or license
+under this project's licenses is claimed or implied.
+
+Third-party pet contributions
+-----------------------------
+
+Each creator-supplied pet declares its own license, attribution, and
+provenance in its pet definition (`license` fields) and accompanying
+LICENSE file. Those declarations travel with the pet and are the
+contributor's own.

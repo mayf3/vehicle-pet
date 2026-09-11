@@ -1,0 +1,71 @@
+LICENSE.assets — original non-code content of vehicle-pet
+=========================================================
+
+Applied since 2026-09-11 by mayf3 (the project owner).
+
+License
+-------
+
+The ORIGINAL_PROJECT_ASSETS of this repository (see "Scope" below) are
+licensed under the Creative Commons Attribution 4.0 International Public
+License (CC BY 4.0).
+
+  License text: https://creativecommons.org/licenses/by/4.0/legalcode.txt
+  Summary:      https://creativecommons.org/licenses/by/4.0/
+
+  Copyright (c) 2026 mayf3
+
+You are free to share and adapt these assets for any purpose, including
+commercially, provided you give appropriate credit, provide a link to the
+license, and indicate if changes were made. No additional restrictions may
+be applied. The license text at the URL above is the binding legal code.
+
+Scope — what this license covers (ORIGINAL_PROJECT_ASSETS)
+----------------------------------------------------------
+
+Only content the project owner actually owns or has the right to license:
+
+- the bundled pet presentation data under `src/dsh/client/pets/` (mapping
+  tables, grade descriptions, speech copy, localized strings) and the
+  journey pack data under `src/packs/*/manifest.json`;
+- the bundled original artwork and derived art generated from it: pet pose
+  sprites, journey scenes/subjects, insignia symbols, expression layers,
+  keepsake images, and their build inputs (masters and provenance-tracked
+  sources);
+- the bundled original written copy (pet speech lines, documentation
+  authored for this repository where no other license is stated).
+
+Scope — what this license does NOT cover (THIRD_PARTY / HISTORICAL)
+-------------------------------------------------------------------
+
+Nothing in this repository is relicensed by the mere presence of the
+Apache-2.0 or CC BY 4.0 notices. In particular, the following retain all
+rights of their respective owners and are included only for interoperability,
+historical record, or audit evidence:
+
+- third-party trademarks, logos, and brands (including any references to
+  "DeepSeek", "Pony.ai", or other companies) — no affiliation is claimed;
+- third-party works and external interfaces referenced for interoperation
+  (for example the DeepSeek Harness and its host-provided UI, including the
+  whale/deepseek-pet reference);
+- third-party screenshots or interface captures kept inside
+  `docs/evidence/**` and historical investigation records;
+- materials cited inside provenance records (`PROVENANCE*.json`) that the
+  project does not own.
+
+Honesty note on AI-assisted assets
+----------------------------------
+
+Parts of the bundled original art were produced with the assistance of
+generative AI tools through the owner's recorded offline production route
+(see the `PROVENANCE*.json` records and each pet's `license.provenance`
+pointer). CC BY 4.0 is granted only to the extent of the rights the project
+owner actually holds or can license in these works; no broader or exclusive
+rights are claimed.
+
+Split-licensing summary
+-----------------------
+
+- Code, build scripts, tests, and code documentation: Apache-2.0 (see `LICENSE`).
+- Original project assets (this file): CC BY 4.0.
+- Third-party / historical content: NOT relicensed; rights reserved by their owners.
