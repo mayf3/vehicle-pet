@@ -22,7 +22,7 @@ export type VehiclePetExpressionVariant = 'idle' | 'idle-happy' | 'idle-curious'
 /**
  * Face anchor rects `[left, top, size]` in % of the 480x480 level sprite
  * canvas are per-pet presentation data (V8 CTR-OVERLAY-038): the bundled
- * vehicle reference carries them in `pets/vehicle/definition.ts`.
+ * vehicle reference carries them in `pets/vehicle/pet.json`.
  */
 /** The five user-perceivable session states (mapping core, unchanged from V2). */
 export type VehiclePetExpressionState = 'idle' | 'working' | 'needs-input' | 'completed' | 'failed';

@@ -23,7 +23,8 @@
     "cordis.patch.yml",
     "README.md",
     "LICENSE.assets",
-    "NOTICE"
+    "NOTICE",
+    "THIRD_PARTY_NOTICES.md"
   ],
   "dsh": {
     "bundle": {

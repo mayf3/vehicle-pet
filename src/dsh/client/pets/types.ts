@@ -11,7 +11,7 @@ import type { CharacterBehaviorProfile } from '../behavior'
 
 /** Compact bilingual speech catalog data shape (category → lines). */
 export type PetSpeechCatalogData = Readonly<
-  Record<string, readonly { readonly 'zh-CN': string; readonly en: string }[]>
+  Record<string, readonly { readonly 'zh-CN': string; readonly en: string; readonly id?: string }[]>
 >
 
 /** Fixed generic recipe vocabulary (CTR-OVERLAY-038); pet ids are open. */

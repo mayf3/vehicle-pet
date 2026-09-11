@@ -1,0 +1,103 @@
+{
+  "id": "vehicle",
+  "displayName": {
+    "zh-CN": "小车",
+    "en": "Vehicle"
+  },
+  "recipe": "engine-scene",
+  "packId": "autonomous-fleet",
+  "userSelectable": true,
+  "gradePolicy": {
+    "showExactLevelNumber": false,
+    "showDescription": true,
+    "insigniaMode": "none"
+  },
+  "behavior": {
+    "ambientPool": [
+      "look-left",
+      "look-right",
+      "sensor-check",
+      "wheel-blink",
+      "small-shuffle"
+    ],
+    "stateReactions": {
+      "completed": "bounce",
+      "failed": "shy",
+      "working": "nod",
+      "needs-input": "peek"
+    },
+    "petting": {
+      "variant": "idle-happy",
+      "decoration": "sparkles"
+    }
+  },
+  "license": {
+    "license": "Apache-2.0 (code) / CC-BY-4.0 (assets) — see NOTICE and LICENSE.assets",
+    "attribution": "Original character art produced by mayf3 via the Owner-designated offline art route.",
+    "provenance": "src/packs/autonomous-fleet/assets/masters/PROVENANCE-v2-identity.json"
+  },
+  "engineScene": {
+    "expressionAnchors": {
+      "l1": [
+        8,
+        37,
+        45
+      ],
+      "l2": [
+        8,
+        37,
+        45
+      ],
+      "l3": [
+        8,
+        37,
+        45
+      ],
+      "l4": [
+        7,
+        45,
+        40
+      ],
+      "l5": [
+        8,
+        38,
+        45
+      ],
+      "l6": [
+        32,
+        61,
+        22
+      ],
+      "l7": [
+        36,
+        70,
+        13
+      ],
+      "l8": [
+        36,
+        66,
+        14
+      ],
+      "l9": [
+        36,
+        67,
+        14
+      ],
+      "l10": [
+        41,
+        68,
+        11
+      ],
+      "l11": [
+        35,
+        63,
+        15
+      ],
+      "l12": [
+        16,
+        65,
+        22
+      ]
+    }
+  }
+}
