@@ -13,7 +13,7 @@ TERMINAL_TARGET = READY_FOR_PUBLIC_PREVIEW
 ```text
 FRESH_READ_BASE = mayf3/vehicle-pet origin/main ece4d4d (Merge PR#39, evidence/release-2026-09-11T00-15-40-115Z)
 EXPECTED_STARTING_MAIN = ece4d4d561a42f2c272a637e2b2697bb616fe9c0 (exact match; no base movement)
-GOAL_WORKTREE = /Users/yanfenma/workspace/project/vehicle-pet-open-20260911 (branch open/preflight-20260911, fresh from ece4d4d)
+GOAL_WORKTREE = $HOME/workspace/project/vehicle-pet-open-20260911 (branch open/preflight-20260911, fresh from ece4d4d)
 OBSERVED_AT = 2026-09-11
 METHOD = git fetch + rev-parse; frontmatter census of docs/specs/*.md; targeted reads of OVERLAY_V7/ENGINE_V4/PD_V1 contract text; grep census of src/scripts/docs; visual inspection of shipping masters, both character contact sheets, and insignia SVG sources; bounded secret/.env scan; no mutation of any other checkout
 ```

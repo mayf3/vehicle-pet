@@ -177,6 +177,15 @@ export async function validateCreatorPet(petDir, options = {}) {
   if (!/showExactLevelNumber/.test(definition) || !/insigniaMode/.test(definition)) {
     errors.push('pet/definition.ts gradePolicy must declare showExactLevelNumber, showDescription, and insigniaMode (V8 CTR-040)')
   }
+  // The wiring generator derives the import binding as camelize(<id>) + 
+  // 'Presentation'; a mismatched export fails at build pointing at a
+  // generated file, so name the convention here instead.
+  if (idMatch !== null) {
+    const expectedExport = `${idMatch[1].replace(/-([a-z])/g, (_, c) => c.toUpperCase())}Presentation`
+    if (!definition.includes(`export const ${expectedExport}`)) {
+      errors.push(`pet/definition.ts must export const ${expectedExport} (camelCase of id '${idMatch[1]}', consumed by the generated wiring)`)
+    }
+  }
 
   // 5. Brand / baked-numeral hygiene on the creator's own files (CTR-039/042).
   const dataFiles = ['pet/definition.ts', 'pet/levels.json', 'pet/speech.json', 'journey/manifest.json', 'LICENSE']

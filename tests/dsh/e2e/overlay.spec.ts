@@ -2125,7 +2125,12 @@ test('CHARACTER_V4_PERSISTENCE_AND_GEOMETRY. selection keeps Engine records and 
     await closeMenu(page)
     await page.waitForTimeout(300)
     const label=page.locator('[data-vehicle-pet-grade]')
-    expect((await label.textContent())!.length).toBeGreaterThan(12)
+    // V8 CTR-039/040: the resident caption shows the localized description
+    // per pet policy — no third-party brand, no mandated exact numeral; the
+    // exact grade stays in data-vehicle-pet-grade (asserted via level above).
+    const labelText=(await label.textContent())!
+    expect(labelText.length).toBeGreaterThan(4)
+    expect(labelText).not.toMatch(/pony/i)
     const shell=await shellBox(page), box=await label.boundingBox()
     const greeting=page.locator('[data-pet-greeting]')
     if(await greeting.count()) {
