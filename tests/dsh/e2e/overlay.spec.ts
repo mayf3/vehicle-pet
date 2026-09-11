@@ -318,18 +318,21 @@ async function seedPreferences(page: Page, record: Record<string, unknown>): Pro
   // spent for the local day, so ritual persistence never writes mid-test and
   // the byte-equality pins keep judging only the user-action fields.
   const now = new Date()
-  // The late-night ritual day rolls over at 05:00 (V7 lateNightRitualDayKey):
-  // between 00:00 and 05:00 the runtime attributes the night to the previous
-  // evening, so the seed must stamp the same key or the ritual fires once.
-  const evening = now.getHours() < 5 ? new Date(now.getTime() - 24 * 60 * 60 * 1000) : now
-  const eveningKey = evening.toLocaleDateString('sv')
+  // Ritual seeding across the two V7 day keys (R2 fix-round): the
+  // first-completion marker keys on the LOCAL day, while the late-night
+  // ritual day rolls over at 05:00 (belongs to the previous evening). A
+  // single record cannot pre-spend both when they differ (00:00-05:00), so
+  // this seed spends first-completion + welcome for the local day; in that
+  // window the once-per-ritual-day late-night write may still legitimately
+  // fire and the crosstab assertion tolerates exactly it.
+  const todayKey = now.toLocaleDateString('sv')
   const seeded = {
     lastSeenAt: now.getTime(),
     rituals: {
-      dayKey: eveningKey,
+      dayKey: todayKey,
       firstCompletionDone: true,
       lateNightDone: true,
-      welcomeDayKey: eveningKey,
+      welcomeDayKey: todayKey,
     },
     ...record,
   }
@@ -1525,7 +1528,11 @@ test('CROSSTAB_COLLAPSE_RESTORE_VISIBLE_TEST. two tabs destroy stale Menu/Dialog
     await expect(target.locator(DIALOG)).toHaveCount(0)
     await expect(target.locator(ROOT)).toHaveAttribute('data-vehicle-pet', 'COLLAPSED')
   }
-  expect(await writes(page)).toBe(0)
+  // The once-per-ritual-day late-night write is sanctioned product behavior
+  // when the window runs inside 00:00-05:00 (daypart late-night, ritual day
+  // already rolled); a WRITE LOOP would still surface as many writes.
+  const sanctionedLateNightWrites = new Date().getHours() < 5 ? 1 : 0
+  expect(await writes(page)).toBe(sanctionedLateNightWrites)
   expect(await writes(second)).toBe(1)
 
   await page.reload()
