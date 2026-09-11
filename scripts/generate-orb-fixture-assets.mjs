@@ -255,56 +255,17 @@ async function altTextPatch(manifest, levelArt) {
 }
 
 async function buildPoseAssets() {
-  const imports = []
-  const rows = []
-  const anchors = []
-  const bounds = []
-  const outputs = {}
+  const emitted = {}
   let index = 0
-  const variants = Object.keys(POSE_EXPRESSIONS)
-  for (const variant of variants) {
+  for (const variant of Object.keys(POSE_EXPRESSIONS)) {
     const png = await rasterize(poseSvg(variant), POSE_CANVAS.width, POSE_CANVAS.height)
     const webp = await sharp(png).webp({ lossless: true, effort: 6 }).toBuffer()
-    const poseFile = `pose-${index}`
-    await emit(path.join(petDir, `assets/${poseFile}.png`), png)
-    await emit(path.join(petDir, `assets/${poseFile}.webp`), webp)
-    const { data, info } = await sharp(png).ensureAlpha().raw().toBuffer({ resolveWithObject: true })
-    let x0 = info.width, y0 = info.height, x1 = 0, y1 = 0
-    for (let y = 0; y < info.height; y += 1) {
-      for (let x = 0; x < info.width; x += 1) {
-        if (data[(y * info.width + x) * 4 + 3] > 0) {
-          x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x + 1); y1 = Math.max(y1, y + 1)
-        }
-      }
-    }
-    bounds.push([x0, y0, x1, y1])
-    anchors.push([50, 46, 0])
-    const p = `p${index}`, w = `w${index}`
-    imports.push(`import ${p} from './assets/${poseFile}.png'`)
-    imports.push(`import ${w} from './assets/${poseFile}.webp'`)
-    rows.push(`  { png: ${p}, webp: ${w} },`)
-    outputs[variant] = index
+    await emit(path.join(petDir, `assets/pose-${index}.png`), png)
+    await emit(path.join(petDir, `assets/pose-${index}.webp`), webp)
     index += 1
   }
-  const module = [
-    '/**',
-    ' * GENERATED FILE — do not edit. Run `node scripts/generate-orb-fixture-assets.mjs`.',
-    ' * Deterministic pose assets for the orb fixture pet (V8 CTR-038 data; the',
-    ' * generator and its inputs are the provenance record).',
-    ' */',
-    '',
-    ...imports,
-    '',
-    'export const orbPoseAnchors = ' + JSON.stringify(anchors) + ' as const',
-    'export const orbPoseAlphaBounds = ' + JSON.stringify(bounds) + ' as const',
-    'export const orbAssets = [',
-    ...rows,
-    '] as const',
-    'export const orbVariantPose = ' + JSON.stringify(outputs) + ' as const',
-    '',
-  ].join('\n')
-  await emit(path.join(petDir, 'orb-assets.generated.ts'), module)
-  return { variants: outputs }
+  // The pet wiring generator scans these pose files and measures alpha
+  // bounds itself; no generated TS module is needed here (R3 fix round).
 }
 
 async function main() {

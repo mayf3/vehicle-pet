@@ -1,0 +1,70 @@
+{
+  "id": "companion",
+  "displayName": {
+    "zh-CN": "伙伴",
+    "en": "Companion"
+  },
+  "recipe": "pose-sprite",
+  "packId": "autonomous-fleet",
+  "userSelectable": true,
+  "gradePolicy": {
+    "showExactLevelNumber": false,
+    "showDescription": true,
+    "insigniaMode": "wearable"
+  },
+  "behavior": {
+    "ambientPool": [
+      "stretch",
+      "yawn",
+      "glance-terminal",
+      "rest",
+      "tidy-cuff",
+      "look-around"
+    ],
+    "stateReactions": {
+      "completed": "nod",
+      "failed": "shy",
+      "working": "wave",
+      "needs-input": "peek"
+    },
+    "petting": {
+      "variant": "idle-happy",
+      "decoration": "heart"
+    }
+  },
+  "license": {
+    "license": "Apache-2.0 (code) / CC-BY-4.0 (assets) — see NOTICE and LICENSE.assets",
+    "attribution": "Original character art produced by mayf3 via the Owner-designated offline art route.",
+    "provenance": "assets/character-source/PROVENANCE.json"
+  },
+  "poseSprite": {
+    "variantPose": {
+      "idle": 0,
+      "idle-happy": 6,
+      "idle-curious": 7,
+      "idle-sleepy": 5,
+      "working": 2,
+      "needs-input": 1,
+      "completed": 3,
+      "completed-proud": 8,
+      "failed": 4,
+      "cancelled": 9
+    },
+    "poseSource": {
+      "kind": "module",
+      "path": "../../character-assets.generated",
+      "poses": "companionAssets",
+      "alphaBounds": "poseAlphaBounds",
+      "insigniaAssets": "insigniaAssets",
+      "insigniaAnchors": "poseAnchors"
+    },
+    "insignia": {
+      "assetSource": {
+        "kind": "module",
+        "path": "../../character-assets.generated",
+        "insigniaAssets": "insigniaAssets",
+        "insigniaAnchors": "poseAnchors"
+      }
+    }
+  }
+}
