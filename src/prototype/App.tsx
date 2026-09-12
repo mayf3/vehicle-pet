@@ -20,6 +20,7 @@ import {
   usePetEngine,
 } from '../react'
 import { MockProgressSource } from './MockProgressSource'
+import { PreviewErrorBoundary } from './PreviewErrorBoundary'
 import { ShowcaseView } from './showcase'
 import { PetPreviewView } from './PetPreview'
 import { bundledPackBundles, defaultPackId } from '../packs/bundledRegistry'
@@ -42,7 +43,24 @@ export function App(props: AppProps) {
   }
 
   if (props.petPreview === true) {
-    return <PetPreviewView />
+    // CTR-OVERLAY-038 local preview: the real resident renderer requires the
+    // real Engine context, so the preview mounts the same provider as the
+    // shell. The boundary keeps creator-facing failures readable instead of
+    // collapsing the page into a blank screen.
+    return (
+      <PreviewErrorBoundary>
+        <PetEngineProvider
+          keepsakeVersionAliases={keepsakeVersionAliases}
+          bundles={bundles}
+          defaultPackId={defaultPackId}
+          storage={storage}
+          source={source}
+          reducedMotion={props.initialReducedMotion}
+        >
+          <PetPreviewView />
+        </PetEngineProvider>
+      </PreviewErrorBoundary>
+    )
   }
 
   return (
