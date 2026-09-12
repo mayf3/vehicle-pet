@@ -4,6 +4,13 @@ Audience: a developer who can run `pnpm` and copy files. You do **not** need
 to read the governing Specs or any engine code to ship a pet — and the flow
 is **data only**: you never author TypeScript.
 
+## Prerequisites
+
+- Node.js 22.19+ (or 24+) and pnpm (both repos pin their version via
+  `packageManager`; Corepack picks them up automatically).
+- Commands are run from the repository root of your `vehicle-pet` checkout
+  — never from inside the template or pet directories.
+
 ## What a pet is made of
 
 | Piece | Lives in | You provide |
@@ -17,7 +24,7 @@ Everything else — wiring, registry, menu, schedulers, rendering, persistence
 "do not edit" header on purpose: re-running the tooling is the only
 supported way to change them.
 
-## The five steps
+## The six steps
 
 1. **Copy** `examples/minimal-pet` to `examples/my-pet`.
 2. **Replace** configuration, textures, and copy (all inside your directory).
@@ -26,12 +33,46 @@ supported way to change them.
 4. **Install + preview**: copy `pet/` → `src/dsh/client/pets/<id>/` and
    `journey/` → `src/packs/<pack-id>/`, run
    `node scripts/generate-pet-wiring.mjs`, then `pnpm dev` and open
-   **`?petPreview=1`** — the REAL resident renderer with pet/expression/
-   level/size selectors, so what you approve is what ships.
+   **`?petPreview=1`** — this is the official Creator preview entry: the
+   REAL resident renderer with pet/expression/level/size selectors, so what
+   you approve is what ships. Both recipes (`engine-scene` and
+   `pose-sprite`) preview through the same component the DSH overlay mounts.
+   If a broken pet crashes the render, the page shows a readable error panel
+   (with the error message) instead of a blank screen — fix the reported
+   problem and reload.
 5. **Build**: `pnpm build:dsh && pnpm check:dsh-bundle` — build:dsh
    regenerates the wiring and the DSH asset maps from a directory scan
    automatically, so your pet and its journey appear in the resident menu
    with no registry edits.
+6. **Run it in a supported disposable DSH host**: the only supported host is
+   the pinned Harness Web source checkout. Set it up once, then install your
+   built plugin — all host commands run from inside the host clone via its
+   own `pnpm dsh`:
+
+   ```sh
+   # one-time host setup (outside the vehicle-pet checkout):
+   git clone https://github.com/mayf3/deepseek-harness
+   cd deepseek-harness
+   git checkout f77b5a2fcebc2d9138f6608a60636f2294868d42   # pinned interop ref
+   pnpm install && pnpm build
+
+   # per preview/acceptance run — keep DSH_HOME disposable, never ~/.dsh:
+   export DSH_HOME=/tmp/my-pet-dsh-home && mkdir -p "$DSH_HOME"
+   pnpm dsh plugin --profile web add <path-to-your-vehicle-pet-checkout>
+   pnpm dsh web --port 3081    # prints the URL; open it in a browser
+   ```
+
+   In the page: the resident pet appears bottom-right; double-click it for
+   the settings menu, where your pet is selectable. Reload the page and the
+   selection persists. Uninstall with `pnpm dsh plugin --profile web remove
+   @mayf3/vehicle-pet` and restart the profile.
+
+   **Host version mismatch**: a globally installed `dsh` CLI (npm
+   `@deepseek-ai/dsh`) is not supported. If `plugin add` succeeds but the
+   web boot dies with `Cannot find the native Koffi module` or `Cannot find
+   package '@mayf3/vehicle-pet'`, you are running the wrong binary — repeat
+   the step above from inside the pinned `deepseek-harness` checkout. See
+   [SUPPORTED_ENVIRONMENTS.md](../public/SUPPORTED_ENVIRONMENTS.md).
 
 ## Pet id and pack id
 

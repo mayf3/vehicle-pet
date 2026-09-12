@@ -3,10 +3,13 @@
  * renderer (CharacterVisual) for every bundled pet — the same component the
  * DSH overlay mounts — with pet / expression / level / size selectors.
  * Closes the creator-preview gap (R5): "the journey shows" is not "my pet
- * shows". No engine, no scheduler, no persistence: pure presentation.
+ * shows". The engine context supplies the scene/asset data path only (zero
+ * points from the mock source); no scheduler runs here — the engine's own
+ * dev-local preference writes (e.g. active pack in IndexedDB) still apply.
  */
 
-import { useState, type ReactElement } from 'react'
+import { useEffect, useState, type ReactElement } from 'react'
+import { usePetEngine } from '../react'
 import { CharacterVisual } from '../dsh/client/CharacterVisual'
 import { userSelectablePets } from '../dsh/client/pets/bundled'
 import type { VehiclePetExpressionVariant } from '../dsh/client/expressions'
@@ -20,6 +23,7 @@ const SIZES = [112, 216] as const
 
 export function PetPreviewView(): ReactElement {
   const pets = userSelectablePets()
+  const { switchPack } = usePetEngine()
   const [petId, setPetId] = useState(pets[0]?.id ?? 'vehicle')
   const [variant, setVariant] = useState<VehiclePetExpressionVariant>('idle')
   const [levelIndex, setLevelIndex] = useState(0)
@@ -27,6 +31,13 @@ export function PetPreviewView(): ReactElement {
 
   const pet = pets.find((candidate) => candidate.id === petId) ?? pets[0]!
   const level = pet.gradeLevels[levelIndex]
+
+  // Same pack-switch path the resident menu uses (CTR-OVERLAY-041): the
+  // engine-scene recipe renders the active pack's declarative scene, so the
+  // preview must point the engine at the selected pet's own journey.
+  useEffect(() => {
+    switchPack(pet.packId)
+  }, [switchPack, pet.packId])
 
   const rowStyle: React.CSSProperties = { display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center', margin: '8px 0' }
 
