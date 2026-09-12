@@ -4,7 +4,8 @@
  * DSH overlay mounts — with pet / expression / level / size selectors.
  * Closes the creator-preview gap (R5): "the journey shows" is not "my pet
  * shows". The engine context supplies the scene/asset data path only (zero
- * points from the mock source); no scheduler or persistence runs here.
+ * points from the mock source); no scheduler runs here — the engine's own
+ * dev-local preference writes (e.g. active pack in IndexedDB) still apply.
  */
 
 import { useEffect, useState, type ReactElement } from 'react'
