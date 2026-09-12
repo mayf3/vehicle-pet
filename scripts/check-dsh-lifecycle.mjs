@@ -1,5 +1,6 @@
 import { execFileSync } from 'node:child_process'
 import { readFile, rm } from 'node:fs/promises'
+import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -10,7 +11,67 @@ const dshHome = process.env.DISPOSABLE_DSH_LIFECYCLE_HOME
   ?? '/tmp/vehicle-pet-overlay-dsh-home-lifecycle-r1'
 const packageName = '@mayf3/vehicle-pet'
 
-if (!dshHome.startsWith('/tmp/')) throw new Error(`refusing non-disposable DSH_HOME: ${dshHome}`)
+// Disposable-only safety contract (T59): the guard decides on the
+// canonical/resolved filesystem target, not the raw string. Rejects the tmp
+// root itself, anything resolving outside the real tmp root, and any symlink
+// component (dedicated real directories only).
+function assertDisposableTmpHome(home) {
+  const tmpRoot = fs.realpathSync('/tmp') // e.g. /private/tmp on macOS
+  const resolved = path.resolve(home)
+  if (resolved === '/tmp') throw new Error(`refusing non-disposable DSH_HOME: ${home}`)
+  if (!resolved.startsWith('/tmp/') && !resolved.startsWith(tmpRoot + '/')) {
+    throw new Error(`refusing non-disposable DSH_HOME: ${home}`)
+  }
+  // the deepest existing ancestor must live inside the real tmp root
+  let cur = resolved
+  for (;;) {
+    let real
+    try {
+      real = fs.realpathSync(cur)
+    } catch (e) {
+      if (e.code === 'ENOENT') {
+        const parent = path.dirname(cur)
+        if (parent === cur) throw new Error(`refusing non-disposable DSH_HOME: ${home}`)
+        cur = parent
+        continue
+      }
+      throw new Error(`refusing non-disposable DSH_HOME: ${home} (${e.message})`)
+    }
+    if (real === tmpRoot) {
+      // acceptable only for a not-yet-created direct child of the textual /tmp
+      if (cur !== tmpRoot || path.dirname(resolved) !== '/tmp') {
+        throw new Error(`refusing non-disposable DSH_HOME: ${home}`)
+      }
+      break
+    }
+    if (!real.startsWith(tmpRoot + '/')) {
+      throw new Error(`refusing non-disposable DSH_HOME: ${home} (resolves to ${real})`)
+    }
+    break
+  }
+  // no symlink games: textual leaf lstat + every real component between the
+  // tmp root and the deepest existing ancestor
+  try {
+    const st = fs.lstatSync(resolved)
+    if (st.isSymbolicLink()) {
+      throw new Error(`refusing non-disposable DSH_HOME: ${home} (symlink ${resolved})`)
+    }
+  } catch (e) {
+    if (e.code !== 'ENOENT') throw new Error(`refusing non-disposable DSH_HOME: ${home} (${e.message})`)
+  }
+  const rel = path.relative(tmpRoot, cur)
+  if (rel && !rel.startsWith('..') && !path.isAbsolute(rel)) {
+    let acc = tmpRoot
+    for (const seg of rel.split(path.sep)) {
+      acc = path.join(acc, seg)
+      const st = fs.lstatSync(acc)
+      if (st.isSymbolicLink()) {
+        throw new Error(`refusing non-disposable DSH_HOME: ${home} (symlink component ${acc})`)
+      }
+    }
+  }
+}
+assertDisposableTmpHome(dshHome)
 
 const run = (...args) => execFileSync('pnpm', ['dsh', 'plugin', '--profile', 'web', ...args], {
   cwd: dshRoot,
