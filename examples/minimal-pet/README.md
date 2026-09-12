@@ -39,6 +39,9 @@ pnpm dev        # open the printed URL with ?petPreview=1 — the REAL resident
 # 5. build the DSH plugin (wiring and asset maps regenerate by scan —
 #    your pet appears in the resident menu automatically)
 pnpm build:dsh && pnpm check:dsh-bundle
+
+# 6. run it in the supported disposable DSH host — see
+#    docs/creator/GETTING_STARTED.md ("The six steps", step 6)
 ```
 
 All commands above are run from the repository root — never `cd` into the

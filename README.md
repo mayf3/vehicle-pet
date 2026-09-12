@@ -61,17 +61,38 @@ is never converted into growth points. See
 
 Requirements: see [SUPPORTED_ENVIRONMENTS.md](docs/public/SUPPORTED_ENVIRONMENTS.md).
 
+The **only supported host** is the pinned Harness Web source checkout — the
+same coordinate the verification suite itself uses. Set it up once:
+
 ```sh
-dsh plugin --profile web add github:mayf3/vehicle-pet#<ref>   # fixed remote ref
-# or, from a local checkout:
-dsh plugin --profile web add <path-to-this-checkout>
-dsh web    # restart the Web profile after add / update / remove
+git clone https://github.com/mayf3/deepseek-harness
+cd deepseek-harness
+git checkout f77b5a2fcebc2d9138f6608a60636f2294868d42   # pinned interop ref
+pnpm install && pnpm build                              # builds apps/web/dist
 ```
 
-Remove with `dsh plugin --profile web remove @mayf3/vehicle-pet` and restart;
-after removal no overlay DOM, styles, listeners, or subscriptions remain. To
-roll back, pin the previous ref the same way — growth data survives both
-directions.
+Then add the plugin from that host checkout (use a disposable `DSH_HOME`
+directory for previews and acceptance; keep your real profile personal):
+
+```sh
+export DSH_HOME=/tmp/my-dsh-home   # any empty directory; created if missing
+pnpm dsh plugin --profile web add github:mayf3/vehicle-pet#<ref>   # fixed remote ref
+# or, from a local checkout:
+pnpm dsh plugin --profile web add <path-to-this-checkout>
+pnpm dsh web --port 3081    # restart the Web profile after add / update / remove
+```
+
+Remove with `pnpm dsh plugin --profile web remove @mayf3/vehicle-pet` (from
+the host checkout) and restart; after removal no overlay DOM, styles,
+listeners, or subscriptions remain. To roll back, pin the previous ref the
+same way — growth data survives both directions.
+
+> **Do not use a globally installed `dsh` CLI** (the npm `@deepseek-ai/dsh`
+> binary, e.g. `0.1.0-rc.6`): it is unverified against this plugin and fails
+> after a seemingly successful `plugin add` with loader errors such as
+> `Cannot find the native Koffi module` or `Cannot find package
+> '@mayf3/vehicle-pet'`. That is the wrong-binary symptom, not a plugin bug —
+> run everything through the pinned checkout's own `pnpm dsh` as above.
 
 The overlay offers three pets in its settings menu (double-click the pet),
 `SMALL`/`LARGE` sizes, reduced-motion (explicit or follow-system), the Full
