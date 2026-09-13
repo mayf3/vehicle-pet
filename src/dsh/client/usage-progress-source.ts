@@ -182,17 +182,28 @@ function mergeLedgers(a: UsageLedgerV1, b: UsageLedgerV1): UsageLedgerV1 {
   return merged
 }
 
-/** Keep `byDay` bounded at 90 local days; drop `lastSeen` for absent sessions (CTR-USG-011). */
-function pruneLedger(ledger: UsageLedgerV1, day: string, presentSessionIds: ReadonlySet<string>): void {
+/** Keep `byDay` bounded at 90 local days (CTR-USG-011). Local-day arithmetic:
+ * toISOString() would shift the cutoff a day early in UTC+ timezones. */
+function pruneByDay(ledger: UsageLedgerV1, day: string): void {
   const cutoff = new Date(`${day}T00:00:00`)
   cutoff.setDate(cutoff.getDate() - BYDAY_RETENTION_DAYS)
-  const cutoffDay = cutoff.toISOString().slice(0, 10)
+  const cutoffDay = `${cutoff.getFullYear()}-${String(cutoff.getMonth() + 1).padStart(2, '0')}-${String(cutoff.getDate()).padStart(2, '0')}`
   for (const key of Object.keys(ledger.byDay)) {
     if (key < cutoffDay || key > day) delete ledger.byDay[key]
   }
+}
+
+/** Drop `lastSeen` for absent sessions (CTR-USG-011; daily cadence). */
+function pruneLastSeen(ledger: UsageLedgerV1, presentSessionIds: ReadonlySet<string>): void {
   for (const sessionId of Object.keys(ledger.lastSeen)) {
     if (!presentSessionIds.has(sessionId)) delete ledger.lastSeen[sessionId]
   }
+}
+
+/** Keep `byDay` bounded at 90 local days; drop `lastSeen` for absent sessions (CTR-USG-011). */
+function pruneLedger(ledger: UsageLedgerV1, day: string, presentSessionIds: ReadonlySet<string>): void {
+  pruneByDay(ledger, day)
+  pruneLastSeen(ledger, presentSessionIds)
 }
 
 export interface DshUsageProgressSourceOptions {
@@ -288,13 +299,19 @@ export class DshUsageProgressSource implements ProgressSource {
   }
 
   #observe(list: UsageSessionListLike): void {
-    this.#mergeStored()
     const day = this.#clock.localDay()
     const byId = list.byId ?? {}
     const presentSessionIds = new Set(Object.keys(byId))
+    this.#mergeStored()
+    // RETENTION PRUNE IS AUTHORITATIVE AFTER CUTOFF (T60 owner decision):
+    // byDay is re-pruned after EVERY stored-state merge — a merge with stale
+    // stored state must never resurrect retention-expired days. lastSeen
+    // keeps its daily (first-of-day) cadence so per-session counted
+    // watermarks survive ordinary session churn.
+    pruneByDay(this.#ledger, day)
     const firstOfDay = this.#ledger.byDay[day] === undefined
     if (firstOfDay && (Object.keys(this.#ledger.byDay).length > 0 || Object.keys(this.#ledger.lastSeen).length > 0)) {
-      pruneLedger(this.#ledger, day, presentSessionIds)
+      pruneLastSeen(this.#ledger, presentSessionIds)
     }
     const dayEntry = this.#ledger.byDay[day] ?? { dailyTokens: 0, appliedPoints: 0 }
     let gainTotal = 0
