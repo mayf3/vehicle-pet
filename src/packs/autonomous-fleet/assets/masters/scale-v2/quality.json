@@ -1,0 +1,122 @@
+[
+  {
+    "level": 1,
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "transparent_fraction": 0.720550537109375,
+    "unchanged_from_previous": true,
+    "sha256": "41bce18f6584c4a7ebc92542b1c4c1aed3510a92e58e372224ceb774667b0464"
+  },
+  {
+    "level": 2,
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "transparent_fraction": 0.6025419235229492,
+    "unchanged_from_previous": true,
+    "sha256": "a1f71d853513c35cc23072b719bfd05e1890796ed9bf3fc3c2f2df664d728578"
+  },
+  {
+    "level": 3,
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "transparent_fraction": 0.7072629928588867,
+    "unchanged_from_previous": true,
+    "sha256": "e32e803667558096620e6cbe3aa64150a82cea576c5832bf6273fb888763b1f2"
+  },
+  {
+    "level": 4,
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "transparent_fraction": 0.5769281387329102,
+    "unchanged_from_previous": true,
+    "sha256": "6ffd60fd920931da3200e588dc78ac08cdb82abb037034bfd89c96ad157e676d"
+  },
+  {
+    "level": 5,
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "transparent_fraction": 0.6110048294067383,
+    "unchanged_from_previous": true,
+    "sha256": "7e9f4f2463f2b3ead75293f1f9781a7d1885d610049eb94c25cbd0ee7c65c875"
+  },
+  {
+    "level": 6,
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "transparent_fraction": 0.7151918411254883,
+    "unchanged_from_previous": false,
+    "sha256": "3304df2c5a971406d63cdb9931204d47d699600441928b85811fe2c62baf0d6f"
+  },
+  {
+    "level": 7,
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "transparent_fraction": 0.7160243988037109,
+    "unchanged_from_previous": false,
+    "sha256": "094f893d7da8e1c933679dde0547de28823e28436fcd22e07558442d3d150c48"
+  },
+  {
+    "level": 8,
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "transparent_fraction": 0.6974668502807617,
+    "unchanged_from_previous": false,
+    "sha256": "75a0b4ce1285e2ef657a47b70a3f66927688eecd3bba08832e90ac78f5f6db1e"
+  },
+  {
+    "level": 9,
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "transparent_fraction": 0.7264804840087891,
+    "unchanged_from_previous": false,
+    "sha256": "45bd6f5d28ffb38bdebf18fb3586955bbb2c36c71bfd5799d2da9eb1c256c2d5"
+  },
+  {
+    "level": 10,
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "transparent_fraction": 0.7767219543457031,
+    "unchanged_from_previous": false,
+    "sha256": "4e326d8b178b22a3e1f17a1568051fa3445f998070e413c85ff91df9f0f421c8"
+  },
+  {
+    "level": 11,
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "transparent_fraction": 0.7055168151855469,
+    "unchanged_from_previous": false,
+    "sha256": "7689b40aa08687c363cabfd14ce0159ac821f381950834ab42af986ee0736f38"
+  },
+  {
+    "level": 12,
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "transparent_fraction": 0.7711973190307617,
+    "unchanged_from_previous": false,
+    "sha256": "0ce66bef9501df0a5b131e0aa76adb0f532b5e6cfb53d814fd3d7003fc750d20"
+  }
+]
