@@ -3,6 +3,15 @@
  * (CTR-OVERLAY-003). Ratios always describe the user's pet/launcher anchor.
  * PANEL_OPEN temporarily projects that anchor through the complete active
  * Pet + gap + Panel surface, flips the Panel, and clamps the final union.
+ *
+ * Unified coordinate model: every movement input — keyboard step,
+ * Shift+keyboard step, or pointer drag — starts from `layout.point`, the pet
+ * position actually rendered after the complete-active-surface clamp, never
+ * from the latent preference anchor. The candidate point is re-resolved
+ * through the same clamp, and the resolved (visible) point is what gets
+ * persisted as normalized ratios. Without this, inputs on a clamped surface
+ * walk the invisible latent anchor first and no visible movement occurs
+ * until it re-enters the clamp window (movement dead zone).
  */
 
 import {
@@ -214,6 +223,7 @@ export function useOverlayDrag({
   onDragEndRef.current = onDragEnd
 
   const size = activeSurfaceSize(preferences.collapsed)
+  const panelActive = panelOpen && !preferences.collapsed
   const persistedAnchor = useMemo(() => pointFromRatios(preferences, bounds, size), [preferences, bounds, size])
   const anchor = dragAnchor ?? persistedAnchor
   const preferredPlacement = useMemo<PanelPlacement>(() => ({
@@ -224,10 +234,10 @@ export function useOverlayDrag({
     anchor,
     bounds,
     size,
-    panelOpen && !preferences.collapsed,
+    panelActive,
     panelSize,
     preferredPlacement,
-  ), [anchor, bounds, panelOpen, panelSize, preferences.collapsed, preferredPlacement, size])
+  ), [anchor, bounds, panelActive, panelSize, preferredPlacement, size])
 
   useEffect(() => {
     const element = rootRef.current
@@ -281,14 +291,13 @@ export function useOverlayDrag({
   }, [bounds, commitPreferences, size])
 
   const moveByKeyboard = useCallback((dx: number, dy: number): void => {
-    const margin = OVERLAY_GEOMETRY.viewportMarginPx
-    const next = {
-      x: clamp(persistedAnchor.x + dx, margin, Math.max(margin, bounds.width - size - margin)),
-      y: clamp(persistedAnchor.y + dy, margin, Math.max(margin, bounds.height - size - margin)),
-    }
-    const position = ratiosFromPoint(next, bounds, size)
+    const candidate = { x: layout.point.x + dx, y: layout.point.y + dy }
+    const resolved = resolveCompleteActiveSurfaceLayout(
+      candidate, bounds, size, panelActive, panelSize, preferredPlacement,
+    )
+    const position = ratiosFromPoint(resolved.point, bounds, size)
     commitPreferences(current => ({ ...current, position, positionCustomized: true }))
-  }, [bounds, commitPreferences, persistedAnchor, size])
+  }, [bounds, commitPreferences, layout, panelActive, panelSize, preferredPlacement, size])
 
   const onPointerDown = useCallback((event: ReactPointerEvent<HTMLElement>): void => {
     if (event.button !== 0) return
@@ -297,11 +306,11 @@ export function useOverlayDrag({
     dragRef.current = {
       pointerId: event.pointerId,
       start: { x: event.clientX, y: event.clientY },
-      origin: persistedAnchor,
-      current: persistedAnchor,
+      origin: layout.point,
+      current: layout.point,
       moved: false,
     }
-  }, [persistedAnchor])
+  }, [layout])
 
   const onPointerMove = useCallback((event: ReactPointerEvent<HTMLElement>): void => {
     const drag = dragRef.current
@@ -310,13 +319,12 @@ export function useOverlayDrag({
     const dy = event.clientY - drag.start.y
     if (!drag.moved && Math.hypot(dx, dy) > DRAG_THRESHOLD_PX) drag.moved = true
     if (!drag.moved) return
-    const margin = OVERLAY_GEOMETRY.viewportMarginPx
-    drag.current = {
-      x: clamp(drag.origin.x + dx, margin, Math.max(margin, bounds.width - size - margin)),
-      y: clamp(drag.origin.y + dy, margin, Math.max(margin, bounds.height - size - margin)),
-    }
+    const candidate = { x: drag.origin.x + dx, y: drag.origin.y + dy }
+    drag.current = resolveCompleteActiveSurfaceLayout(
+      candidate, bounds, size, panelActive, panelSize, preferredPlacement,
+    ).point
     setDragAnchor(drag.current)
-  }, [bounds, size])
+  }, [bounds, panelActive, panelSize, preferredPlacement, size])
 
   return {
     rootRef,

@@ -627,7 +627,6 @@ test('PANEL_COMPLETE_ACTIVE_SURFACE_CLAMP_TEST. resize and xRatio 0.49 clamp the
   await page.reload()
   await expect.poll(() => page.locator(PET).count(), { timeout: 30_000 }).toBe(1)
   await page.waitForTimeout(300)
-  const anchorBeforeOpen = await page.locator(PET).boundingBox()
   await page.locator(PET).click()
   await page.locator(PANEL).waitFor()
 
@@ -661,11 +660,16 @@ test('PANEL_COMPLETE_ACTIVE_SURFACE_CLAMP_TEST. resize and xRatio 0.49 clamp the
   await page.locator(PET).focus()
   await page.keyboard.press('Shift+ArrowRight')
   await assertCompleteSurface({ width: 390, height: 844 })
+  // Unified movement model: the persisted anchor is the last visible
+  // panel-open position, so closing the panel lands exactly on it (no
+  // latent-anchor jump). A boundary-direction input may resolve to zero
+  // visible movement, which still re-anchors the saved ratio there.
+  const visibleDuringOpen = await page.locator(PET).boundingBox()
   await page.locator(PET).click()
   await page.waitForTimeout(300)
   const anchorAfterClose = await page.locator(PET).boundingBox()
-  expect(Math.abs(anchorAfterClose!.x - anchorBeforeOpen!.x)).toBeLessThanOrEqual(33)
-  expect(Math.abs(anchorAfterClose!.y - anchorBeforeOpen!.y)).toBeLessThanOrEqual(1)
+  expect(Math.abs(anchorAfterClose!.x - visibleDuringOpen!.x)).toBeLessThanOrEqual(1)
+  expect(Math.abs(anchorAfterClose!.y - visibleDuringOpen!.y)).toBeLessThanOrEqual(1)
   const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('vehicle-pet/overlay-preferences/v1') ?? '{}')) as { position: { xRatio: number } }
   expect(stored.position.xRatio).toBeGreaterThanOrEqual(0)
   expect(stored.position.xRatio).toBeLessThanOrEqual(1)
@@ -932,6 +936,169 @@ test('CROSSTAB_COLLAPSE_RESTORE_VISIBLE_TEST. two tabs destroy stale Panel/Dialo
   expect(await writes(page)).toBe(2)
   expect(await writes(second)).toBe(4)
   await second.close()
+})
+
+test('PANEL_OPEN movement has no coordinate dead zone', async ({ context, page }) => {
+  // 1. default safe bottom-right placement
+  await openOverlay(page)
+  const initial = await petBox(page)
+  expect(initial!.x).toBeGreaterThan(VIEWPORT.width / 2)
+  expect(initial!.y).toBeGreaterThan(VIEWPORT.height / 2)
+
+  const unionInside = async (viewport: { width: number; height: number }) => {
+    const pet = await petBox(page)
+    const panel = await page.locator(PANEL).boundingBox()
+    expect(pet).not.toBeNull()
+    expect(panel).not.toBeNull()
+    const union = {
+      left: Math.min(pet!.x, panel!.x),
+      top: Math.min(pet!.y, panel!.y),
+      right: Math.max(pet!.x + pet!.width, panel!.x + panel!.width),
+      bottom: Math.max(pet!.y + pet!.height, panel!.y + panel!.height),
+    }
+    expect(union.left).toBeGreaterThanOrEqual(15.5)
+    expect(union.top).toBeGreaterThanOrEqual(15.5)
+    expect(union.right).toBeLessThanOrEqual(viewport.width - 15.5)
+    expect(union.bottom).toBeLessThanOrEqual(viewport.height - 15.5)
+  }
+
+  // 2. open the panel, 3. drag the pet toward the middle
+  await page.locator(PET).click()
+  await page.locator(PANEL).waitFor()
+  await page.mouse.move(initial!.x + initial!.width / 2, initial!.y + initial!.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(560, 380, { steps: 12 })
+  await page.mouse.up()
+  await expect(page.locator(PANEL)).toHaveCount(1)
+
+  // 4. narrow the viewport so the union clamp engages, then every first input
+  // from the clamped visible position must move immediately.
+  const narrow = { width: 390, height: 844 }
+  await page.setViewportSize(narrow)
+  await page.waitForTimeout(300)
+  await unionInside(narrow)
+
+  // 5. first Arrow
+  await page.locator(PET).focus()
+  const beforeArrow = await petBox(page)
+  await page.keyboard.press('ArrowLeft')
+  await expect.poll(async () => (await petBox(page))!.x, { timeout: 3_000 }).toBeLessThan(beforeArrow!.x - 4)
+  await unionInside(narrow)
+
+  // 6. first Shift+Arrow
+  const beforeShift = await petBox(page)
+  await page.keyboard.press('Shift+ArrowLeft')
+  await expect.poll(async () => (await petBox(page))!.x, { timeout: 3_000 }).toBeLessThan(beforeShift!.x - 16)
+  await unionInside(narrow)
+
+  // 7. first above-threshold pointer drag (vertical: space remains)
+  const beforeDrag = await petBox(page)
+  await page.mouse.move(beforeDrag!.x + beforeDrag!.width / 2, beforeDrag!.y + beforeDrag!.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(beforeDrag!.x + beforeDrag!.width / 2, beforeDrag!.y + beforeDrag!.height / 2 - 30, { steps: 6 })
+  await expect.poll(async () => (await petBox(page))!.y, { timeout: 3_000 }).toBeLessThan(beforeDrag!.y - 10)
+  await page.mouse.up()
+  await page.waitForTimeout(300)
+  await unionInside(narrow)
+
+  // 8. walk to the right boundary: toward-input stops, reverse moves at once
+  await page.locator(PET).focus()
+  let atBoundary = await petBox(page)
+  for (let guard = 0; guard < 60; guard += 1) {
+    const before = await petBox(page)
+    await page.keyboard.press('ArrowRight')
+    await page.waitForTimeout(120)
+    const after = await petBox(page)
+    if (after!.x - before!.x < 0.5) break
+    atBoundary = after
+  }
+  await page.keyboard.press('ArrowRight')
+  await page.waitForTimeout(120)
+  expect(Math.abs((await petBox(page))!.x - atBoundary!.x)).toBeLessThanOrEqual(2)
+  await page.keyboard.press('ArrowLeft')
+  await expect.poll(async () => (await petBox(page))!.x, { timeout: 3_000 }).toBeLessThan(atBoundary!.x - 4)
+  await unionInside(narrow)
+
+  // 9. close the panel: the pet keeps the last visible position
+  const lastVisible = await petBox(page)
+  await page.locator(PET).click()
+  await expect(page.locator(PANEL)).toHaveCount(0)
+  await page.waitForTimeout(200)
+  const afterClose = await petBox(page)
+  expect(Math.abs(afterClose!.x - lastVisible!.x)).toBeLessThanOrEqual(1)
+  expect(Math.abs(afterClose!.y - lastVisible!.y)).toBeLessThanOrEqual(1)
+
+  // 10. reopen: first input moves immediately again
+  await page.locator(PET).click()
+  await page.locator(PANEL).waitFor()
+  await page.locator(PET).focus()
+  const beforeReopen = await petBox(page)
+  await page.keyboard.press('ArrowLeft')
+  await expect.poll(async () => (await petBox(page))!.x, { timeout: 3_000 }).toBeLessThan(beforeReopen!.x - 4)
+
+  // 11. refresh restores the moved position without a dead zone
+  const movedNarrow = await petBox(page)
+  await page.reload()
+  await expect.poll(() => page.locator(PET).count(), { timeout: 30_000 }).toBe(1)
+  const restored = await petBox(page)
+  expect(Math.abs(restored!.x - movedNarrow!.x)).toBeLessThanOrEqual(4)
+  expect(Math.abs(restored!.y - movedNarrow!.y)).toBeLessThanOrEqual(4)
+  await page.locator(PET).click()
+  await page.locator(PANEL).waitFor()
+  await page.locator(PET).focus()
+  const beforeAfterReload = await petBox(page)
+  await page.keyboard.press('ArrowUp')
+  await expect.poll(async () => (await petBox(page))!.y, { timeout: 3_000 }).toBeLessThan(beforeAfterReload!.y - 4)
+
+  // 12. resize: clamp recomputes, first input still moves
+  const tall = { width: 768, height: 720 }
+  await page.setViewportSize(tall)
+  await page.waitForTimeout(300)
+  await unionInside(tall)
+  await page.locator(PET).focus()
+  const beforeResize = await petBox(page)
+  await page.keyboard.press('ArrowLeft')
+  await expect.poll(async () => (await petBox(page))!.x, { timeout: 3_000 }).toBeLessThan(beforeResize!.x - 4)
+
+  // 13. + 16. second tab: same position, storage-event sync, one pet each
+  const instrumentWrites = async (target: Page) => target.evaluate(() => {
+    const state = { writes: 0 }
+    const prototype = Storage.prototype
+    const native = prototype.setItem
+    prototype.setItem = function (...args) {
+      state.writes += 1
+      return native.apply(this, args)
+    }
+    ;(window as unknown as { __vpoMovementWrites: typeof state }).__vpoMovementWrites = state
+  })
+  const writes = async (target: Page) => target.evaluate(() => (window as unknown as { __vpoMovementWrites: { writes: number } }).__vpoMovementWrites.writes)
+  await instrumentWrites(page)
+
+  const second = await context.newPage()
+  await second.setViewportSize(tall)
+  await second.goto('/')
+  await expect.poll(() => second.locator(PET).count(), { timeout: 30_000 }).toBe(1)
+  const tabOne = await petBox(page)
+  const tabTwo = await second.locator(PET).boundingBox()
+  expect(Math.abs(tabTwo!.x - tabOne!.x)).toBeLessThanOrEqual(2)
+  expect(Math.abs(tabTwo!.y - tabOne!.y)).toBeLessThanOrEqual(2)
+
+  // 14. moving in tab two syncs tab one through the storage event; adoption
+  // in tab one performs no write (no loop).
+  await second.locator(PET).click()
+  await second.locator(PANEL).waitFor()
+  await second.locator(PET).focus()
+  const beforeSync = tabOne!.x
+  await second.keyboard.press('ArrowLeft')
+  await expect.poll(async () => (await petBox(page))!.x, { timeout: 10_000 }).toBeLessThan(beforeSync - 4)
+  expect(await writes(page)).toBe(0)
+
+  // 15. panel stayed inside the viewport everywhere along the way
+  await unionInside(tall)
+  await expect(page.locator(PET)).toHaveCount(1)
+  await expect(second.locator(PET)).toHaveCount(1)
+  await second.close()
+  await page.setViewportSize(VIEWPORT)
 })
 
 test('FULL_JOURNEY_LIGHT_THEME_CONTRAST_TEST + FULL_JOURNEY_DARK_THEME_CONTRAST_TEST', async ({ page }) => {
