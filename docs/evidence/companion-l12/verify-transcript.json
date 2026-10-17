@@ -1,0 +1,21 @@
+{
+  "at": "2026-09-06T04:12:06.440Z",
+  "fixedRef": "aa0a014",
+  "state1": {
+    "level": "l1",
+    "pack": "autonomous-fleet",
+    "spriteIsDataUrl": true,
+    "ledger": 0
+  },
+  "state2": {
+    "level": "l1",
+    "ledger": 0,
+    "today": [
+      {
+        "day": "2026-09-06",
+        "dailyTokens": 31,
+        "appliedPoints": 0
+      }
+    ]
+  }
+}
