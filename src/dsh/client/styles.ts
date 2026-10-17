@@ -8,7 +8,11 @@
 const STYLE_ID = 'vehicle-pet/overlay-styles'
 
 const css = `
-.vpo-root{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:1;font-family:var(--font-sans,ui-sans-serif,system-ui,-apple-system,sans-serif)}
+/* The host frame can scroll when another overlay expands or receives focus.
+   Anchor to the viewport, not that scrollable frame. Keep our active surface
+   above the installed peer's local z=60, within the host overlay stack;
+   the rest of this layer stays click-through. No host/peer styles are changed. */
+.vpo-root{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:61;font-family:var(--font-sans,ui-sans-serif,system-ui,-apple-system,sans-serif)}
 .vpo-shell{position:absolute;pointer-events:none;transition:left 200ms cubic-bezier(.22,1,.36,1),top 200ms cubic-bezier(.22,1,.36,1),width 200ms cubic-bezier(.22,1,.36,1),height 200ms cubic-bezier(.22,1,.36,1);contain:layout style}
 .vpo-shell[data-dragging="true"]{transition:none;z-index:2}
 .vpo-surface{position:relative;width:100%;height:100%;padding:0;border:1px solid transparent;background:transparent;display:grid;place-items:center;cursor:grab;touch-action:none;border-radius:20px;outline:none;pointer-events:auto;-webkit-tap-highlight-color:transparent}
