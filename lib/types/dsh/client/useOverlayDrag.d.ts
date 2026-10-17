@@ -3,6 +3,15 @@
  * (CTR-OVERLAY-003). Ratios always describe the user's pet/launcher anchor.
  * PANEL_OPEN temporarily projects that anchor through the complete active
  * Pet + gap + Panel surface, flips the Panel, and clamps the final union.
+ *
+ * Unified coordinate model: every movement input — keyboard step,
+ * Shift+keyboard step, or pointer drag — starts from `layout.point`, the pet
+ * position actually rendered after the complete-active-surface clamp, never
+ * from the latent preference anchor. The candidate point is re-resolved
+ * through the same clamp, and the resolved (visible) point is what gets
+ * persisted as normalized ratios. Without this, inputs on a clamped surface
+ * walk the invisible latent anchor first and no visible movement occurs
+ * until it re-enters the clamp window (movement dead zone).
  */
 import { type CSSProperties, type PointerEvent as ReactPointerEvent, type RefObject } from 'react';
 import { type VehiclePetOverlayPreferences } from './types';
