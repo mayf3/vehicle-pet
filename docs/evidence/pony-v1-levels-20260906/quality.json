@@ -1,0 +1,194 @@
+[
+  {
+    "level": 1,
+    "file": "l1.png",
+    "mode": "RGBA",
+    "size": [
+      1024,
+      1024
+    ],
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "transparent_fraction": 0.720550537109375,
+    "all_canvas_borders_transparent": true,
+    "sha256": "41bce18f6584c4a7ebc92542b1c4c1aed3510a92e58e372224ceb774667b0464"
+  },
+  {
+    "level": 2,
+    "file": "l2.png",
+    "mode": "RGBA",
+    "size": [
+      1024,
+      1024
+    ],
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "transparent_fraction": 0.6025419235229492,
+    "all_canvas_borders_transparent": true,
+    "sha256": "a1f71d853513c35cc23072b719bfd05e1890796ed9bf3fc3c2f2df664d728578"
+  },
+  {
+    "level": 3,
+    "file": "l3.png",
+    "mode": "RGBA",
+    "size": [
+      1024,
+      1024
+    ],
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "transparent_fraction": 0.7072629928588867,
+    "all_canvas_borders_transparent": true,
+    "sha256": "e32e803667558096620e6cbe3aa64150a82cea576c5832bf6273fb888763b1f2"
+  },
+  {
+    "level": 4,
+    "file": "l4.png",
+    "mode": "RGBA",
+    "size": [
+      1024,
+      1024
+    ],
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "transparent_fraction": 0.5769281387329102,
+    "all_canvas_borders_transparent": true,
+    "sha256": "6ffd60fd920931da3200e588dc78ac08cdb82abb037034bfd89c96ad157e676d"
+  },
+  {
+    "level": 5,
+    "file": "l5.png",
+    "mode": "RGBA",
+    "size": [
+      1024,
+      1024
+    ],
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "transparent_fraction": 0.6110048294067383,
+    "all_canvas_borders_transparent": true,
+    "sha256": "7e9f4f2463f2b3ead75293f1f9781a7d1885d610049eb94c25cbd0ee7c65c875"
+  },
+  {
+    "level": 6,
+    "file": "l6.png",
+    "mode": "RGBA",
+    "size": [
+      1024,
+      1024
+    ],
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "transparent_fraction": 0.6983261108398438,
+    "all_canvas_borders_transparent": true,
+    "sha256": "c86a06eaebeaaaf286f5fdba32c5dcea94868945a1ca280057e4dc3f4eb1fad7"
+  },
+  {
+    "level": 7,
+    "file": "l7.png",
+    "mode": "RGBA",
+    "size": [
+      1024,
+      1024
+    ],
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "transparent_fraction": 0.7223358154296875,
+    "all_canvas_borders_transparent": true,
+    "sha256": "c07669385a34af8765e76be52064c2ed7af0aa0f3cbfc05c3ef82441ab65a237"
+  },
+  {
+    "level": 8,
+    "file": "l8.png",
+    "mode": "RGBA",
+    "size": [
+      1024,
+      1024
+    ],
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "transparent_fraction": 0.5921525955200195,
+    "all_canvas_borders_transparent": true,
+    "sha256": "02a3827be44fec3ce560613aaafe5b06cbb9f7349c5ebf4fafd785988e6c71d1"
+  },
+  {
+    "level": 9,
+    "file": "l9.png",
+    "mode": "RGBA",
+    "size": [
+      1024,
+      1024
+    ],
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "transparent_fraction": 0.6236362457275391,
+    "all_canvas_borders_transparent": true,
+    "sha256": "49114479cebd932d8c7d9dcf7c84eeef28d812276399c1bff9e00186d933c60e"
+  },
+  {
+    "level": 10,
+    "file": "l10.png",
+    "mode": "RGBA",
+    "size": [
+      1024,
+      1024
+    ],
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "transparent_fraction": 0.6001691818237305,
+    "all_canvas_borders_transparent": true,
+    "sha256": "01327e44145ed73bf8893e5f0016b26256b846e7227029a79bbfbcd804813179"
+  },
+  {
+    "level": 11,
+    "file": "l11.png",
+    "mode": "RGBA",
+    "size": [
+      1024,
+      1024
+    ],
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "transparent_fraction": 0.6716785430908203,
+    "all_canvas_borders_transparent": true,
+    "sha256": "10826ca6f27d5d883c6473e4d5dde683edfd2621c948f31f2777170a1c5fce9c"
+  },
+  {
+    "level": 12,
+    "file": "l12.png",
+    "mode": "RGBA",
+    "size": [
+      1024,
+      1024
+    ],
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "transparent_fraction": 0.5979604721069336,
+    "all_canvas_borders_transparent": true,
+    "sha256": "0b4c8bab1fedfc25266a4d5981dc36b98b5d4e82d6224926ef12f08ea530ff09"
+  }
+]

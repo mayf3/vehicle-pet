@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Pony.ai · 十二级小车预览</title>
+<style>
+:root{font-family:system-ui,sans-serif;color:#17354e;background:#f6f9fc}body{margin:0;padding:32px;transition:background .2s}header{max-width:1200px;margin:auto}h1{font-size:26px;margin:0 0 12px}p{line-height:1.7}nav{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0}button{font:inherit;padding:9px 16px;border:1px solid #89a9c4;border-radius:8px;background:transparent;color:inherit;cursor:pointer}.grid{max-width:1400px;margin:auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px}figure{margin:0;padding:8px 0 20px;background:transparent}img{display:block;width:100%;aspect-ratio:1;object-fit:contain;background:transparent;box-shadow:none;filter:none}figcaption{font-size:16px;font-weight:600}small{display:block;font-weight:400;opacity:.75;margin-top:6px}.compact img{width:144px;height:144px;margin:50px auto}body.dark{background:#142437;color:#e8f1fa}
+</style>
+<header><h1>Pony.ai · 十二级小车</h1><p>蓝白车身 · 中央激光雷达 · 纯文字标识<br>素材预览，尚未接入运行中的插件。</p><nav><button onclick="document.body.classList.remove('dark')">浅色页面</button><button onclick="document.body.classList.add('dark')">深色页面</button><button onclick="document.body.classList.toggle('compact')">切换悬浮尺寸</button></nav><p id="quality">透明通道检测结果见 quality.json。</p></header><main class="grid" id="grid"></main>
+<script>
+const names=['轻巧首航','天线升级','侧边灯带','方形传感基座','环形传感器','宽体双灯带','宽幅传感环','侧面状态窗','加长传感塔','双层传感环','全灯带巡游','旗舰双跟班'];
+document.querySelector('#grid').innerHTML=names.map((name,i)=>`<figure><img src="l${i+1}.png" alt="L${i+1} ${name}"><figcaption>L${i+1} · ${name}<small>${i===11?'两辆迷你保护车':'一辆迷你保护车'}</small></figcaption></figure>`).join('');
+</script></html>
