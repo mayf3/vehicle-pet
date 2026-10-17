@@ -1124,10 +1124,10 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 115636,
+      "byteSizeCompressed": 123282,
       "altText": {
-        "zh-CN": "你的 Pet：无人驾驶小车（L6 阶段），后方跟着迷你保护车",
-        "en": "Your pet: the unmanned car at level 6, mini escort car in trail"
+        "zh-CN": "你的 Pet：无人车队（L6 阶段，三车小队），画面大字标注 1 人监管 3 辆",
+        "en": "Your pet: the driverless fleet at level 6 (three-car squad), labeled \"1 supervisor: 3 vehicles\""
       }
     },
     {
@@ -1137,10 +1137,10 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 194187,
+      "byteSizeCompressed": 182132,
       "altText": {
-        "zh-CN": "你的 Pet：无人驾驶小车（L6 阶段），后方跟着迷你保护车",
-        "en": "Your pet: the unmanned car at level 6, mini escort car in trail"
+        "zh-CN": "你的 Pet：无人车队（L6 阶段，三车小队），画面大字标注 1 人监管 3 辆",
+        "en": "Your pet: the driverless fleet at level 6 (three-car squad), labeled \"1 supervisor: 3 vehicles\""
       }
     },
     {
@@ -1150,10 +1150,10 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 121848,
+      "byteSizeCompressed": 140146,
       "altText": {
-        "zh-CN": "你的 Pet：无人驾驶小车（L7 阶段），后方跟着迷你保护车",
-        "en": "Your pet: the unmanned car at level 7, mini escort car in trail"
+        "zh-CN": "你的 Pet：无人车队（L7 阶段，十车阵列），画面大字标注 1 人监管 10 辆",
+        "en": "Your pet: the driverless fleet at level 7 (ten-vehicle array), labeled \"1 supervisor: 10 vehicles\""
       }
     },
     {
@@ -1163,10 +1163,10 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 214382,
+      "byteSizeCompressed": 197825,
       "altText": {
-        "zh-CN": "你的 Pet：无人驾驶小车（L7 阶段），后方跟着迷你保护车",
-        "en": "Your pet: the unmanned car at level 7, mini escort car in trail"
+        "zh-CN": "你的 Pet：无人车队（L7 阶段，十车阵列），画面大字标注 1 人监管 10 辆",
+        "en": "Your pet: the driverless fleet at level 7 (ten-vehicle array), labeled \"1 supervisor: 10 vehicles\""
       }
     },
     {
@@ -1176,10 +1176,10 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 126554,
+      "byteSizeCompressed": 181254,
       "altText": {
-        "zh-CN": "你的 Pet：无人驾驶小车（L8 阶段），后方跟着迷你保护车",
-        "en": "Your pet: the unmanned car at level 8, mini escort car in trail"
+        "zh-CN": "你的 Pet：无人车队（L8 阶段，百车车队），画面大字标注 1 人监管 100 辆",
+        "en": "Your pet: the driverless fleet at level 8 (hundred-vehicle fleet), labeled \"1 supervisor: 100 vehicles\""
       }
     },
     {
@@ -1189,10 +1189,10 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 225587,
+      "byteSizeCompressed": 235870,
       "altText": {
-        "zh-CN": "你的 Pet：无人驾驶小车（L8 阶段），后方跟着迷你保护车",
-        "en": "Your pet: the unmanned car at level 8, mini escort car in trail"
+        "zh-CN": "你的 Pet：无人车队（L8 阶段，百车车队），画面大字标注 1 人监管 100 辆",
+        "en": "Your pet: the driverless fleet at level 8 (hundred-vehicle fleet), labeled \"1 supervisor: 100 vehicles\""
       }
     },
     {
@@ -1202,10 +1202,10 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 125938,
+      "byteSizeCompressed": 145478,
       "altText": {
-        "zh-CN": "你的 Pet：无人驾驶小车（L9 阶段），后方跟着迷你保护车",
-        "en": "Your pet: the unmanned car at level 9, mini escort car in trail"
+        "zh-CN": "你的 Pet：无人车队（L9 阶段，城市规模），画面大字标注 1 人监管 1,000 辆",
+        "en": "Your pet: the driverless fleet at level 9 (city scale), labeled \"1 supervisor: 1,000 vehicles\""
       }
     },
     {
@@ -1215,10 +1215,10 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 222615,
+      "byteSizeCompressed": 205365,
       "altText": {
-        "zh-CN": "你的 Pet：无人驾驶小车（L9 阶段），后方跟着迷你保护车",
-        "en": "Your pet: the unmanned car at level 9, mini escort car in trail"
+        "zh-CN": "你的 Pet：无人车队（L9 阶段，城市规模），画面大字标注 1 人监管 1,000 辆",
+        "en": "Your pet: the driverless fleet at level 9 (city scale), labeled \"1 supervisor: 1,000 vehicles\""
       }
     },
     {
@@ -1228,10 +1228,10 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 118750,
+      "byteSizeCompressed": 123760,
       "altText": {
-        "zh-CN": "你的 Pet：无人驾驶小车（L10 阶段），后方跟着迷你保护车",
-        "en": "Your pet: the unmanned car at level 10, mini escort car in trail"
+        "zh-CN": "你的 Pet：无人车队（L10 阶段，多城规模），画面大字标注 1 人监管 10,000 辆",
+        "en": "Your pet: the driverless fleet at level 10 (multi-city scale), labeled \"1 supervisor: 10,000 vehicles\""
       }
     },
     {
@@ -1241,10 +1241,10 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 202678,
+      "byteSizeCompressed": 171345,
       "altText": {
-        "zh-CN": "你的 Pet：无人驾驶小车（L10 阶段），后方跟着迷你保护车",
-        "en": "Your pet: the unmanned car at level 10, mini escort car in trail"
+        "zh-CN": "你的 Pet：无人车队（L10 阶段，多城规模），画面大字标注 1 人监管 10,000 辆",
+        "en": "Your pet: the driverless fleet at level 10 (multi-city scale), labeled \"1 supervisor: 10,000 vehicles\""
       }
     },
     {
@@ -1254,10 +1254,10 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 124426,
+      "byteSizeCompressed": 168104,
       "altText": {
-        "zh-CN": "你的 Pet：无人驾驶小车（L11 阶段），后方跟着迷你保护车",
-        "en": "Your pet: the unmanned car at level 11, mini escort car in trail"
+        "zh-CN": "你的 Pet：无人车队（L11 阶段，多区域规模），画面大字标注 1 人监管 100,000 辆",
+        "en": "Your pet: the driverless fleet at level 11 (multi-region scale), labeled \"1 supervisor: 100,000 vehicles\""
       }
     },
     {
@@ -1267,10 +1267,10 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 214931,
+      "byteSizeCompressed": 224590,
       "altText": {
-        "zh-CN": "你的 Pet：无人驾驶小车（L11 阶段），后方跟着迷你保护车",
-        "en": "Your pet: the unmanned car at level 11, mini escort car in trail"
+        "zh-CN": "你的 Pet：无人车队（L11 阶段，多区域规模），画面大字标注 1 人监管 100,000 辆",
+        "en": "Your pet: the driverless fleet at level 11 (multi-region scale), labeled \"1 supervisor: 100,000 vehicles\""
       }
     },
     {
@@ -1280,10 +1280,10 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 112208,
+      "byteSizeCompressed": 121376,
       "altText": {
-        "zh-CN": "你的 Pet：无人驾驶小车（L12 阶段），后方跟着迷你保护车",
-        "en": "Your pet: the unmanned car at level 12, mini escort car in trail"
+        "zh-CN": "你的 Pet：无人车队（L12 阶段，全球规模），画面大字标注 1 人监管 1,000,000 辆",
+        "en": "Your pet: the driverless fleet at level 12 (global scale), labeled \"1 supervisor: 1,000,000 vehicles\""
       }
     },
     {
@@ -1293,10 +1293,10 @@
       "role": "sprite",
       "width": 480,
       "height": 480,
-      "byteSizeCompressed": 180513,
+      "byteSizeCompressed": 162481,
       "altText": {
-        "zh-CN": "你的 Pet：无人驾驶小车（L12 阶段），后方跟着迷你保护车",
-        "en": "Your pet: the unmanned car at level 12, mini escort car in trail"
+        "zh-CN": "你的 Pet：无人车队（L12 阶段，全球规模），画面大字标注 1 人监管 1,000,000 辆",
+        "en": "Your pet: the driverless fleet at level 12 (global scale), labeled \"1 supervisor: 1,000,000 vehicles\""
       }
     },
     {

@@ -1,21 +1,30 @@
 {
-  "master": "master-road-test-l1-l5.png",
-  "generatedWith": "ChatGPT image generation (Goal 陪伴 R1 art route; CHATGPT_BROWSER_ROUTE = CODEX_SIDEBAR_BROWSER)",
-  "date": "2026-09-04",
-  "rounds": [
-    "R1: three original candidate lineups generated from the sanitized ART_REQUEST_PACKET; independent blind review selected candidate A (cream/ivory + yellow, 62/80, 112px recognition PASS, no brand risk)",
-    "R2/R3: two focused revisions of candidate A per the frozen stage semantics (humans leave the cabin as autonomy grows; escorts trail behind; no ground shadows)"
-  ],
-  "deterministicPostProcess": [
-    "cell 5 windshield: driver silhouette removed via fixed-coordinate per-row glass fill (columns 1288-1318 sampled, region 1319-1371 x 442-500, script in generate-pack-assets.mjs history)",
-    "asset cells cut at fixed x boundaries [0,255,527,845,1192,1536]"
-  ],
-  "cells": {
-    "sprite-subject-pod--l1": 0,
-    "sprite-subject-pod--l2": 1,
-    "sprite-subject-pod--l3": 2,
-    "sprite-subject-pod--l4": 3,
-    "sprite-subject-pod": 4
+  "masters": {
+    "master-l1-l6-family.png": {
+      "usedFor": "sprite-subject-pod--l1..l5 (cells 0-4)",
+      "note": "L6 cell (cut 1743-2172) superseded by scale-v2/l6.png; family sheet retained byte-identical for L1-L5.",
+      "supersededCell": "sprite-subject-pod--l6"
+    }
   },
-  "selection": "blind review record in docs/reviews/; no Owner selection required (delegated)"
+  "scale-v2": {
+    "source": "Owner-approved local art 2026-09-06 (preview http://127.0.0.1:3088/ = vehicle-pet-wt-light-companion-spec-20260906/docs/evidence/pony-v1-scale-v2-20260906)",
+    "narrative": "L6 three-car squad, L7 ten-vehicle array, L8 hundred-vehicle fleet, L9 city, L10 multi-city, L11 multi-region, L12 global; big count labels '1 人监管 + N 辆' matching frozen fleet scale truth (x3..x1,000,000); transparent background",
+    "l1_l5": "unchanged (byte-copied from previously approved pony-v1-levels round; repo L1-L5 pipeline untouched)",
+    "generation": "image_gen per level (ChatGPT image generation, CODEX_SIDEBAR_BROWSER route) -> raw-l{n}.png; deterministic post-process by export-reference.py (alpha cleanup, 1024x1024 transparent canvas, local font labels)",
+    "files": {
+      "l6.png": "3304df2c5a971406d63cdb9931204d47d699600441928b85811fe2c62baf0d6f",
+      "l7.png": "094f893d7da8e1c933679dde0547de28823e28436fcd22e07558442d3d150c48",
+      "l8.png": "75a0b4ce1285e2ef657a47b70a3f66927688eecd3bba08832e90ac78f5f6db1e",
+      "l9.png": "45bd6f5d28ffb38bdebf18fb3586955bbb2c36c71bfd5799d2da9eb1c256c2d5",
+      "l10.png": "4e326d8b178b22a3e1f17a1568051fa3445f998070e413c85ff91df9f0f421c8",
+      "l11.png": "7689b40aa08687c363cabfd14ce0159ac821f381950834ab42af986ee0736f38",
+      "l12.png": "0ce66bef9501df0a5b131e0aa76adb0f532b5e6cfb53d814fd3d7003fc750d20"
+    },
+    "promptsJsonSha256": "67b8d8a3a5bc9dde50c8aa7884cf0f732c06432b821f50162c564205e23ead0e",
+    "qualityJsonSha256": "540dab459047ab2eb75d4aa8619415d07a7cbc537ee648b9863a00692fd365a4",
+    "exportReferenceSha256": "cf1a352c98782f24db7ea36cef5d4c8d7b47924e2e8653582dcffb04a583294f"
+  },
+  "removed": {
+    "master-l7-l12-family.png": "superseded by scale-v2 per-level masters for sprite-subject-pod--l7..l12"
+  }
 }
